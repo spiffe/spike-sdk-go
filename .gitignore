@@ -1,6 +1,7 @@
-# If you prefer the allow list template instead of the deny list, see community template:
-# https://github.com/github/gitignore/blob/main/community/Golang/Go.AllowList.gitignore
-#
+#    \\ SPIKE: Secure your secrets with SPIFFE.
+#  \\\\\ Copyright 2024-present SPIKE contributors.
+# \\\\\\\ SPDX-License-Identifier: Apache-2.0
+
 # Binaries for programs and plugins
 *.exe
 *.exe~
@@ -23,3 +24,6 @@ go.work.sum
 
 # env file
 .env
+
+# Dev Env
+.idea
