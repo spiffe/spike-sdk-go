@@ -4,7 +4,9 @@
 
 package reqres
 
-import "github.com/spiffe/spike-sdk-go/api/internal/entity/data"
+import (
+	"github.com/spiffe/spike-sdk-go/api/entity/data"
+)
 
 // RootKeyCacheRequest is to cache the generated root key in SPIKE Keep.
 // If the root key is lost due to a crash, it will be retrieved from SPIKE Keep.

@@ -7,16 +7,16 @@ package api
 import (
 	"encoding/json"
 	"errors"
+	"github.com/spiffe/spike-sdk-go/api/entity/data"
+	"github.com/spiffe/spike-sdk-go/api/entity/v1/reqres"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 
-	"github.com/spiffe/spike-sdk-go/api/entity"
-	"github.com/spiffe/spike-sdk-go/api/internal/entity/v1/reqres"
 	"github.com/spiffe/spike-sdk-go/api/internal/url"
 	"github.com/spiffe/spike-sdk-go/net"
 )
 
-func GetPolicy(source *workloadapi.X509Source, id string) (*entity.Policy, error) {
+func GetPolicy(source *workloadapi.X509Source, id string) (*data.Policy, error) {
 	r := reqres.PolicyReadRequest{Id: id}
 
 	mr, err := json.Marshal(r)

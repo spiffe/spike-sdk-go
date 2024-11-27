@@ -4,7 +4,9 @@
 
 package reqres
 
-import "github.com/spiffe/spike-sdk-go/api/internal/entity/data"
+import (
+	"github.com/spiffe/spike-sdk-go/api/entity/data"
+)
 
 // AdminTokenWriteRequest is to persist the admin token in memory.
 // Admin token can be persisted only once. It is used to receive a

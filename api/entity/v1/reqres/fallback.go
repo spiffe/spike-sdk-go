@@ -4,7 +4,9 @@
 
 package reqres
 
-import "github.com/spiffe/spike-sdk-go/api/internal/entity/data"
+import (
+	"github.com/spiffe/spike-sdk-go/api/entity/data"
+)
 
 // FallbackResponse is a generic response for any error.
 type FallbackResponse struct {
