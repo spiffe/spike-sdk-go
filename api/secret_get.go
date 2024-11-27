@@ -7,12 +7,12 @@ package api
 import (
 	"encoding/json"
 	"errors"
+	code "github.com/spiffe/spike-sdk-go/api/errors"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 
 	"github.com/spiffe/spike-sdk-go/api/entity"
 	"github.com/spiffe/spike-sdk-go/api/internal/entity/v1/reqres"
-	code "github.com/spiffe/spike-sdk-go/api/internal/errors"
 	"github.com/spiffe/spike-sdk-go/api/internal/url"
 	"github.com/spiffe/spike-sdk-go/net"
 )
