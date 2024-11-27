@@ -12,8 +12,8 @@ import (
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 
+	"github.com/spiffe/spike-sdk-go/api/entity"
 	"github.com/spiffe/spike-sdk-go/api/internal/config"
-	"github.com/spiffe/spike-sdk-go/api/internal/entity/data"
 	"github.com/spiffe/spike-sdk-go/api/internal/entity/v1/reqres"
 	"github.com/spiffe/spike-sdk-go/api/internal/url"
 	"github.com/spiffe/spike-sdk-go/net"
@@ -63,11 +63,11 @@ func Init(source *workloadapi.X509Source) error {
 }
 
 // CheckInitState sends a checkInitState request to SPIKE Nexus.
-func CheckInitState(source *workloadapi.X509Source) (data.InitState, error) {
+func CheckInitState(source *workloadapi.X509Source) (entity.InitState, error) {
 	r := reqres.CheckInitStateRequest{}
 	mr, err := json.Marshal(r)
 	if err != nil {
-		return data.NotInitialized, errors.Join(
+		return entity.NotInitialized, errors.Join(
 			errors.New(
 				"checkInitState: I am having problem generating the payload",
 			),
@@ -80,7 +80,7 @@ func CheckInitState(source *workloadapi.X509Source) (data.InitState, error) {
 	body, err := net.Post(client, url.InitState(), mr)
 
 	if err != nil {
-		return data.NotInitialized, errors.Join(
+		return entity.NotInitialized, errors.Join(
 			errors.New(
 				"checkInitState: I am having problem sending the request",
 			), err)
@@ -89,7 +89,7 @@ func CheckInitState(source *workloadapi.X509Source) (data.InitState, error) {
 	var res reqres.CheckInitStateResponse
 	err = json.Unmarshal(body, &res)
 	if err != nil {
-		return data.NotInitialized, errors.Join(
+		return entity.NotInitialized, errors.Join(
 			errors.New("checkInitState: Problem parsing response body"),
 			err,
 		)

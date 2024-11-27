@@ -4,7 +4,10 @@
 
 package reqres
 
-import "github.com/spiffe/spike-sdk-go/api/internal/entity/data"
+import (
+	"github.com/spiffe/spike-sdk-go/api/entity"
+	"github.com/spiffe/spike-sdk-go/api/internal/entity/data"
+)
 
 // CheckInitStateRequest is to check if the SPIKE Keep is initialized.
 type CheckInitStateRequest struct {
@@ -12,8 +15,8 @@ type CheckInitStateRequest struct {
 
 // CheckInitStateResponse is to check if the SPIKE Keep is initialized.
 type CheckInitStateResponse struct {
-	State data.InitState `json:"state"`
-	Err   data.ErrorCode `json:"err,omitempty"`
+	State entity.InitState `json:"state"`
+	Err   data.ErrorCode   `json:"err,omitempty"`
 }
 
 // InitRequest is to initialize SPIKE as a superuser.
