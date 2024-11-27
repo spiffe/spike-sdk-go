@@ -5,6 +5,7 @@
 package reqres
 
 import (
+	"github.com/spiffe/spike-sdk-go/api/entity"
 	"time"
 
 	"github.com/spiffe/spike-sdk-go/api/internal/entity/data"
@@ -39,7 +40,7 @@ type SecretReadRequest struct {
 
 // SecretReadResponse is for getting secrets
 type SecretReadResponse struct {
-	data.Secret
+	entity.Secret
 	Data map[string]string `json:"data"`
 	Err  data.ErrorCode    `json:"err,omitempty"`
 }

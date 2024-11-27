@@ -5,14 +5,15 @@
 package reqres
 
 import (
+	"github.com/spiffe/spike-sdk-go/api/entity"
 	data "github.com/spiffe/spike-sdk-go/api/internal/entity/data"
 )
 
 type PolicyCreateRequest struct {
-	Name            string                  `json:"name"`
-	SpiffeIdPattern string                  `json:"spiffe_id_pattern"`
-	PathPattern     string                  `json:"path_pattern"`
-	Permissions     []data.PolicyPermission `json:"permissions"`
+	Name            string                    `json:"name"`
+	SpiffeIdPattern string                    `json:"spiffe_id_pattern"`
+	PathPattern     string                    `json:"path_pattern"`
+	Permissions     []entity.PolicyPermission `json:"permissions"`
 }
 
 type PolicyCreateResponse struct {
@@ -25,7 +26,7 @@ type PolicyReadRequest struct {
 }
 
 type PolicyReadResponse struct {
-	data.Policy
+	entity.Policy
 	Err data.ErrorCode `json:"err,omitempty"`
 }
 
@@ -40,8 +41,8 @@ type PolicyDeleteResponse struct {
 type PolicyListRequest struct{}
 
 type PolicyListResponse struct {
-	Policies []data.Policy  `json:"policies"`
-	Err      data.ErrorCode `json:"err,omitempty"`
+	Policies []entity.Policy `json:"policies"`
+	Err      data.ErrorCode  `json:"err,omitempty"`
 }
 
 type PolicyAccessCheckRequest struct {

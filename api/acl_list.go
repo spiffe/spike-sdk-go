@@ -10,13 +10,13 @@ import (
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 
-	"github.com/spiffe/spike-sdk-go/api/internal/entity/data"
+	"github.com/spiffe/spike-sdk-go/api/entity"
 	"github.com/spiffe/spike-sdk-go/api/internal/entity/v1/reqres"
 	"github.com/spiffe/spike-sdk-go/api/internal/url"
 	"github.com/spiffe/spike-sdk-go/net"
 )
 
-func ListPolicies(source *workloadapi.X509Source) (*[]data.Policy, error) {
+func ListPolicies(source *workloadapi.X509Source) (*[]entity.Policy, error) {
 	r := reqres.PolicyListRequest{}
 	mr, err := json.Marshal(r)
 	if err != nil {

@@ -2,7 +2,7 @@
 //  \\\\\ Copyright 2024-present SPIKE contributors.
 // \\\\\\\ SPDX-License-Identifier: Apache-2.0
 
-package data
+package entity
 
 // Secret is the secret that returns from SPIKE Nexus mTLS REST API.
 type Secret struct {

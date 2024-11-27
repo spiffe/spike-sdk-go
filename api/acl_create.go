@@ -10,7 +10,7 @@ import (
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 
-	"github.com/spiffe/spike-sdk-go/api/internal/entity/data"
+	"github.com/spiffe/spike-sdk-go/api/entity"
 	"github.com/spiffe/spike-sdk-go/api/internal/entity/v1/reqres"
 	"github.com/spiffe/spike-sdk-go/api/internal/url"
 	"github.com/spiffe/spike-sdk-go/net"
@@ -18,7 +18,7 @@ import (
 
 func CreatePolicy(source *workloadapi.X509Source,
 	name string, spiffeIdPattern string, pathPattern string,
-	permissions []data.PolicyPermission,
+	permissions []entity.PolicyPermission,
 ) error {
 	r := reqres.PolicyCreateRequest{
 		Name:            name,

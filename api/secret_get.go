@@ -10,7 +10,7 @@ import (
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 
-	"github.com/spiffe/spike-sdk-go/api/internal/entity/data"
+	"github.com/spiffe/spike-sdk-go/api/entity"
 	"github.com/spiffe/spike-sdk-go/api/internal/entity/v1/reqres"
 	code "github.com/spiffe/spike-sdk-go/api/internal/errors"
 	"github.com/spiffe/spike-sdk-go/api/internal/url"
@@ -34,7 +34,7 @@ import (
 //
 //	secret, err := GetSecret(x509Source, "secret/path", 1)
 func GetSecret(source *workloadapi.X509Source,
-	path string, version int) (*data.Secret, error) {
+	path string, version int) (*entity.Secret, error) {
 	r := reqres.SecretReadRequest{
 		Path:    path,
 		Version: version,
@@ -74,5 +74,5 @@ func GetSecret(source *workloadapi.X509Source,
 		return nil, errors.New(string(res.Err))
 	}
 
-	return &data.Secret{Data: res.Data}, nil
+	return &entity.Secret{Data: res.Data}, nil
 }
