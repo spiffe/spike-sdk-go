@@ -8,12 +8,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/spiffe/spike-sdk-go/api/entity/data"
-	"github.com/spiffe/spike-sdk-go/api/entity/v1/reqres"
 	"os"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 
+	"github.com/spiffe/spike-sdk-go/api/entity/data"
+	"github.com/spiffe/spike-sdk-go/api/entity/v1/reqres"
 	"github.com/spiffe/spike-sdk-go/api/internal/config"
 	"github.com/spiffe/spike-sdk-go/api/internal/url"
 	"github.com/spiffe/spike-sdk-go/net"
@@ -25,12 +25,15 @@ func Init(source *workloadapi.X509Source) error {
 	mr, err := json.Marshal(r)
 	if err != nil {
 		return errors.Join(
-			errors.New("initialization: I am having problem generating the payload"),
+			errors.New(
+				"initialization: I am having problem generating the payload",
+			),
 			err,
 		)
 	}
 
-	// TODO: maybe restrict init and ACL operations at this level without doing any policy checks.
+	// TODO: maybe restrict init and ACL operations at this level without
+	// doing any policy checks.
 	var truer = func(string) bool { return true }
 	client, err := net.CreateMtlsClient(source, truer)
 
