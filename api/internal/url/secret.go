@@ -62,3 +62,14 @@ func SecretList() string {
 	params.Add(keyApiAction, string(actionNexusList))
 	return u + "?" + params.Encode()
 }
+
+// UrlSecretMetadataGet returns the URL for getting a secret metadata.
+func SecretMetadataGet() string {
+	u, _ := url.JoinPath(
+		env.NexusApiRoot(),
+		string(spikeNexusUrlSecrets),
+	)
+	params := url.Values{}
+	params.Add(keyApiAction, string(actionNexusGetMetadata))
+	return u + "?" + params.Encode()
+}

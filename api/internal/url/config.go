@@ -10,6 +10,7 @@ const keyApiAction = "action"
 
 const actionNexusCheck SpikeNexusApiAction = "check"
 const actionNexusGet SpikeNexusApiAction = "get"
+const actionNexusGetMetadata SpikeNexusApiAction = "metadata"
 const actionNexusDelete SpikeNexusApiAction = "delete"
 const actionNexusUndelete SpikeNexusApiAction = "undelete"
 const actionNexusList SpikeNexusApiAction = "list"

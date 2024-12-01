@@ -76,3 +76,32 @@ type SecretListResponse struct {
 	Keys []string        `json:"keys"`
 	Err  data2.ErrorCode `json:"err,omitempty"`
 }
+
+// SecretMetadataReadRequest for get secrets metadata
+type SecretMetadataReadRequest struct {
+	Path    string `json:"path"`
+	Version int    `json:"version,omitempty"` // Optional specific version
+}
+
+// SecretMetadataResponse for secrets versions and metadata
+type SecretMetadataResponse struct {
+	Versions map[int]SecretMetadataVersionResponse `json:"versions,omitempty"`
+	Metadata SecretRawMetadataResponse             `json:"metadata,omitempty"`
+	Err      data2.ErrorCode                       `json:"err,omitempty"`
+}
+
+// SecretMetadataVersionResponse for secrets version
+type SecretMetadataVersionResponse struct {
+	CreatedTime time.Time  `json:"createdTime"`
+	Version     int        `json:"version"`
+	DeletedTime *time.Time `json:"deletedTime"`
+}
+
+// SecretRawMetadataResponse for secrets raw metadata
+type SecretRawMetadataResponse struct {
+	CurrentVersion int       `json:"currentVersion"`
+	OldestVersion  int       `json:"oldestVersion"`
+	CreatedTime    time.Time `json:"createdTime"`
+	UpdatedTime    time.Time `json:"updatedTime"`
+	MaxVersions    int       `json:"maxVersions"`
+}
