@@ -10,7 +10,6 @@ const keyApiAction = "action"
 
 const actionNexusCheck SpikeNexusApiAction = "check"
 const actionNexusGet SpikeNexusApiAction = "get"
-const actionNexusGetMetadata SpikeNexusApiAction = "metadata"
 const actionNexusDelete SpikeNexusApiAction = "delete"
 const actionNexusUndelete SpikeNexusApiAction = "undelete"
 const actionNexusList SpikeNexusApiAction = "list"
@@ -24,7 +23,8 @@ const actionKeeperDefault SpikeKeeperApiAction = ""
 type ApiUrl string
 
 const spikeNexusUrlSecrets ApiUrl = "/v1/store/secrets"
-const spikeNexusUrlInit ApiUrl = "/v1/auth/init"
+const spikeNexusUrlSecretsMetadata ApiUrl = "/v1/store/secrets/metadata"
+const spikeNexusUrlInit ApiUrl = "/v1/auth/initialization"
 
 const spikeNexusUrlPolicy ApiUrl = "/v1/acl/policy"
 

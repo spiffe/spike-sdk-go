@@ -67,9 +67,9 @@ func SecretList() string {
 func SecretMetadataGet() string {
 	u, _ := url.JoinPath(
 		env.NexusApiRoot(),
-		string(spikeNexusUrlSecrets),
+		string(spikeNexusUrlSecretsMetadata),
 	)
 	params := url.Values{}
-	params.Add(keyApiAction, string(actionNexusGetMetadata))
+	params.Add(keyApiAction, string(actionNexusGet))
 	return u + "?" + params.Encode()
 }
