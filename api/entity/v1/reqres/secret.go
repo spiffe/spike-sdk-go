@@ -5,8 +5,9 @@
 package reqres
 
 import (
-	data2 "github.com/spiffe/spike-sdk-go/api/entity/data"
 	"time"
+
+	"github.com/spiffe/spike-sdk-go/api/entity/data"
 )
 
 // SecretResponseMetadata is meta information about secrets for internal
@@ -21,13 +22,13 @@ type SecretResponseMetadata struct {
 type SecretPutRequest struct {
 	Path   string            `json:"path"`
 	Values map[string]string `json:"values"`
-	Err    data2.ErrorCode   `json:"err,omitempty"`
+	Err    data.ErrorCode    `json:"err,omitempty"`
 }
 
 // SecretPutResponse is after successful secret write
 type SecretPutResponse struct {
 	SecretResponseMetadata
-	Err data2.ErrorCode `json:"err,omitempty"`
+	Err data.ErrorCode `json:"err,omitempty"`
 }
 
 // SecretReadRequest is for getting secrets
@@ -38,9 +39,9 @@ type SecretReadRequest struct {
 
 // SecretReadResponse is for getting secrets
 type SecretReadResponse struct {
-	data2.Secret
+	data.Secret
 	Data map[string]string `json:"data"`
-	Err  data2.ErrorCode   `json:"err,omitempty"`
+	Err  data.ErrorCode    `json:"err,omitempty"`
 }
 
 // SecretDeleteRequest for soft-deleting secret versions
@@ -52,7 +53,7 @@ type SecretDeleteRequest struct {
 // SecretDeleteResponse after soft-delete
 type SecretDeleteResponse struct {
 	Metadata SecretResponseMetadata `json:"metadata"`
-	Err      data2.ErrorCode        `json:"err,omitempty"`
+	Err      data.ErrorCode         `json:"err,omitempty"`
 }
 
 // SecretUndeleteRequest for recovering soft-deleted versions
@@ -64,7 +65,7 @@ type SecretUndeleteRequest struct {
 // SecretUndeleteResponse after recovery
 type SecretUndeleteResponse struct {
 	Metadata SecretResponseMetadata `json:"metadata"`
-	Err      data2.ErrorCode        `json:"err,omitempty"`
+	Err      data.ErrorCode         `json:"err,omitempty"`
 }
 
 // SecretListRequest for listing secrets
@@ -73,8 +74,8 @@ type SecretListRequest struct {
 
 // SecretListResponse for listing secrets
 type SecretListResponse struct {
-	Keys []string        `json:"keys"`
-	Err  data2.ErrorCode `json:"err,omitempty"`
+	Keys []string       `json:"keys"`
+	Err  data.ErrorCode `json:"err,omitempty"`
 }
 
 // SecretMetadataReadRequest for get secrets metadata
@@ -87,7 +88,7 @@ type SecretMetadataReadRequest struct {
 type SecretMetadataResponse struct {
 	Versions map[int]SecretMetadataVersionResponse `json:"versions,omitempty"`
 	Metadata SecretRawMetadataResponse             `json:"metadata,omitempty"`
-	Err      data2.ErrorCode                       `json:"err,omitempty"`
+	Err      data.ErrorCode                        `json:"err,omitempty"`
 }
 
 // SecretMetadataVersionResponse for secrets version
