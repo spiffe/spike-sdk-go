@@ -23,6 +23,18 @@ Prerequisites:
 2. `SPIFFE_ENDPOINT_SOCKET` environment variable set to address of the Workload
    API (e.g. `unix:///tmp/agent.sock`). 
 
+## Usage Example
+
+```go 
+package main
+
+func main() {
+
+
+}
+```
+
+
 // TODO: add more details and an example here.
 
 // TODO: add more documents COC, contributing, etc.
