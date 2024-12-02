@@ -23,7 +23,9 @@ func DeletePolicy(source *workloadapi.X509Source, id string) error {
 	mr, err := json.Marshal(r)
 	if err != nil {
 		return errors.Join(
-			errors.New("deletePolicy: I am having problem generating the payload"),
+			errors.New(
+				"deletePolicy: I am having problem generating the payload",
+			),
 			err,
 		)
 	}

@@ -30,7 +30,9 @@ func CreatePolicy(source *workloadapi.X509Source,
 	mr, err := json.Marshal(r)
 	if err != nil {
 		return errors.Join(
-			errors.New("createPolicy: I am having problem generating the payload"),
+			errors.New(
+				"createPolicy: I am having problem generating the payload",
+			),
 			err,
 		)
 	}

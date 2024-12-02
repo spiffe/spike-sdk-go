@@ -21,7 +21,9 @@ func ListPolicies(source *workloadapi.X509Source) (*[]data.Policy, error) {
 	mr, err := json.Marshal(r)
 	if err != nil {
 		return nil, errors.Join(
-			errors.New("listPolicies: I am having problem generating the payload"),
+			errors.New(
+				"listPolicies: I am having problem generating the payload",
+			),
 			err,
 		)
 	}
@@ -44,7 +46,7 @@ func ListPolicies(source *workloadapi.X509Source) (*[]data.Policy, error) {
 	err = json.Unmarshal(body, &res)
 	if err != nil {
 		return nil, errors.Join(
-			errors.New("getPolicy: Problem parsing response body"),
+			errors.New("listPolicies: Problem parsing response body"),
 			err,
 		)
 	}

@@ -15,8 +15,8 @@ import (
 	"github.com/spiffe/spike-sdk-go/net"
 )
 
-// GetSecretMetadata retrieves a specific version of a secret metadata at the given path using
-// mTLS authentication.
+// GetSecretMetadata retrieves a specific version of a secret metadata at the
+// given path using mTLS authentication.
 //
 // Parameters:
 //   - source: X509Source for mTLS client authentication
@@ -34,6 +34,8 @@ import (
 func GetSecretMetadata(
 	source *workloadapi.X509Source, path string, version int,
 ) (*reqres.SecretMetadataResponse, error) {
+
+	// TODO: this should be a `SecretMetadataRequest` struct instead, for clarity.
 	r := reqres.SecretReadRequest{
 		Path:    path,
 		Version: version,
