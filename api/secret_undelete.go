@@ -7,7 +7,6 @@ package api
 import (
 	"encoding/json"
 	"errors"
-	"strconv"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 
@@ -33,18 +32,10 @@ import (
 //
 //	err := UndeleteSecret(x509Source, "secret/path", []string{"1", "2"})
 func UndeleteSecret(source *workloadapi.X509Source,
-	path string, versions []string) error {
+	path string, versions []int) error {
 	var vv []int
 	if len(versions) == 0 {
 		vv = []int{}
-	}
-
-	for _, version := range versions {
-		v, e := strconv.Atoi(version)
-		if e != nil {
-			continue
-		}
-		vv = append(vv, v)
 	}
 
 	r := reqres.SecretUndeleteRequest{

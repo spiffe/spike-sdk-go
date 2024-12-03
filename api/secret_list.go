@@ -28,11 +28,11 @@ import (
 // Example:
 //
 //	keys, err := ListSecretKeys(x509Source)
-func ListSecretKeys(source *workloadapi.X509Source) ([]string, error) {
+func ListSecretKeys(source *workloadapi.X509Source) (*[]string, error) {
 	r := reqres.SecretListRequest{}
 	mr, err := json.Marshal(r)
 	if err != nil {
-		return []string{}, errors.Join(
+		return nil, errors.Join(
 			errors.New(
 				"listSecretKeys: I am having problem generating the payload",
 			),
@@ -43,28 +43,28 @@ func ListSecretKeys(source *workloadapi.X509Source) ([]string, error) {
 	var truer = func(string) bool { return true }
 	client, err := net.CreateMtlsClient(source, truer)
 	if err != nil {
-		return []string{}, err
+		return nil, err
 	}
 
 	body, err := net.Post(client, url.SecretList(), mr)
 	if err != nil {
 		if errors.Is(err, net.ErrNotFound) {
-			return []string{}, nil
+			return &[]string{}, nil
 		}
-		return []string{}, err
+		return nil, err
 	}
 
 	var res reqres.SecretListResponse
 	err = json.Unmarshal(body, &res)
 	if err != nil {
-		return []string{}, errors.Join(
+		return nil, errors.Join(
 			errors.New("getSecret: Problem parsing response body"),
 			err,
 		)
 	}
 	if res.Err != "" {
-		return []string{}, errors.New(string(res.Err))
+		return nil, errors.New(string(res.Err))
 	}
 
-	return res.Keys, nil
+	return &res.Keys, nil
 }
