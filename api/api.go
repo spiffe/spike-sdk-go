@@ -1,8 +1,14 @@
+//    \\ SPIKE: Secure your secrets with SPIFFE.
+//  \\\\\ Copyright 2024-present SPIKE contributors.
+// \\\\\\\ SPDX-License-Identifier: Apache-2.0
+
 package api
 
 import (
 	"context"
+
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
+
 	"github.com/spiffe/spike-sdk-go/api/entity/data"
 	"github.com/spiffe/spike-sdk-go/spiffe"
 )
@@ -50,12 +56,20 @@ func (a *Api) ListPolicies() (*[]data.Policy, error) {
 	return ListPolicies(a.source)
 }
 
-func (a *Api) DeleteSecret(path string, versions []int) error {
+func (a *Api) DeleteSecretVersions(path string, versions []int) error {
 	return DeleteSecret(a.source, path, versions)
 }
 
-func (a *Api) GetSecret(path string, version int) (*data.Secret, error) {
+func (a *Api) DeleteSecret(path string) error {
+	return DeleteSecret(a.source, path, []int{})
+}
+
+func (a *Api) GetSecretVersioned(path string, version int) (*data.Secret, error) {
 	return GetSecret(a.source, path, version)
+}
+
+func (a *Api) GetSecret(path string) (*data.Secret, error) {
+	return GetSecret(a.source, path, 0)
 }
 
 func (a *Api) ListSecretKeys() (*[]string, error) {
