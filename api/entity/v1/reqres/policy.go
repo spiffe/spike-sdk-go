@@ -5,19 +5,19 @@
 package reqres
 
 import (
-	data2 "github.com/spiffe/spike-sdk-go/api/entity/data"
+	"github.com/spiffe/spike-sdk-go/api/entity/data"
 )
 
 type PolicyCreateRequest struct {
-	Name            string                   `json:"name"`
-	SpiffeIdPattern string                   `json:"spiffe_id_pattern"`
-	PathPattern     string                   `json:"path_pattern"`
-	Permissions     []data2.PolicyPermission `json:"permissions"`
+	Name            string                  `json:"name"`
+	SpiffeIdPattern string                  `json:"spiffe_id_pattern"`
+	PathPattern     string                  `json:"path_pattern"`
+	Permissions     []data.PolicyPermission `json:"permissions"`
 }
 
 type PolicyCreateResponse struct {
-	Id  string          `json:"id,omitempty"`
-	Err data2.ErrorCode `json:"err,omitempty"`
+	Id  string         `json:"id,omitempty"`
+	Err data.ErrorCode `json:"err,omitempty"`
 }
 
 type PolicyReadRequest struct {
@@ -25,8 +25,8 @@ type PolicyReadRequest struct {
 }
 
 type PolicyReadResponse struct {
-	data2.Policy
-	Err data2.ErrorCode `json:"err,omitempty"`
+	data.Policy
+	Err data.ErrorCode `json:"err,omitempty"`
 }
 
 type PolicyDeleteRequest struct {
@@ -34,14 +34,14 @@ type PolicyDeleteRequest struct {
 }
 
 type PolicyDeleteResponse struct {
-	Err data2.ErrorCode `json:"err,omitempty"`
+	Err data.ErrorCode `json:"err,omitempty"`
 }
 
 type PolicyListRequest struct{}
 
 type PolicyListResponse struct {
-	Policies []data2.Policy  `json:"policies"`
-	Err      data2.ErrorCode `json:"err,omitempty"`
+	Policies []data.Policy  `json:"policies"`
+	Err      data.ErrorCode `json:"err,omitempty"`
 }
 
 type PolicyAccessCheckRequest struct {
@@ -51,7 +51,7 @@ type PolicyAccessCheckRequest struct {
 }
 
 type PolicyAccessCheckResponse struct {
-	Allowed          bool            `json:"allowed"`
-	MatchingPolicies []string        `json:"matching_policies"`
-	Err              data2.ErrorCode `json:"err,omitempty"`
+	Allowed          bool           `json:"allowed"`
+	MatchingPolicies []string       `json:"matching_policies"`
+	Err              data.ErrorCode `json:"err,omitempty"`
 }

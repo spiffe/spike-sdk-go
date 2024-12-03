@@ -3,8 +3,6 @@ package api
 import (
 	"encoding/json"
 	"errors"
-	"strconv"
-
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 
 	"github.com/spiffe/spike-sdk-go/api/entity/v1/reqres"
@@ -32,23 +30,10 @@ import (
 //
 //	err := DeleteSecret(x509Source, "secret/path", []string{"1", "2"})
 func DeleteSecret(source *workloadapi.X509Source,
-	path string, versions []string) error {
-	var vv []int
-	if len(versions) == 0 {
-		vv = []int{}
-	}
-
-	for _, version := range versions {
-		v, e := strconv.Atoi(version)
-		if e != nil {
-			continue
-		}
-		vv = append(vv, v)
-	}
-
+	path string, versions []int) error {
 	r := reqres.SecretDeleteRequest{
 		Path:     path,
-		Versions: vv,
+		Versions: versions,
 	}
 
 	mr, err := json.Marshal(r)

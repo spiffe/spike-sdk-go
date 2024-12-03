@@ -10,6 +10,7 @@ import (
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 
+	"github.com/spiffe/spike-sdk-go/api/entity/data"
 	"github.com/spiffe/spike-sdk-go/api/entity/v1/reqres"
 	"github.com/spiffe/spike-sdk-go/api/internal/url"
 	"github.com/spiffe/spike-sdk-go/net"
@@ -33,10 +34,8 @@ import (
 //	metadata, err := GetSecretMetadata(x509Source, "secret/path", 1)
 func GetSecretMetadata(
 	source *workloadapi.X509Source, path string, version int,
-) (*reqres.SecretMetadataResponse, error) {
-
-	// TODO: this should be a `SecretMetadataRequest` struct instead, for clarity.
-	r := reqres.SecretReadRequest{
+) (*data.SecretMetadata, error) {
+	r := reqres.SecretMetadataRequest{
 		Path:    path,
 		Version: version,
 	}
@@ -75,5 +74,8 @@ func GetSecretMetadata(
 		return nil, errors.New(string(res.Err))
 	}
 
-	return &res, nil
+	return &data.SecretMetadata{
+		Versions: res.Versions,
+		Metadata: res.Metadata,
+	}, nil
 }
