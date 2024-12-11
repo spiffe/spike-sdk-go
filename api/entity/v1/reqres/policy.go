@@ -10,8 +10,8 @@ import (
 
 type PolicyCreateRequest struct {
 	Name            string                  `json:"name"`
-	SpiffeIdPattern string                  `json:"spiffe_id_pattern"`
-	PathPattern     string                  `json:"path_pattern"`
+	SpiffeIdPattern string                  `json:"spiffedPattern"`
+	PathPattern     string                  `json:"pathPattern"`
 	Permissions     []data.PolicyPermission `json:"permissions"`
 }
 
@@ -45,13 +45,13 @@ type PolicyListResponse struct {
 }
 
 type PolicyAccessCheckRequest struct {
-	SpiffeId string `json:"spiffe_id"`
+	SpiffeId string `json:"spiffeId"`
 	Path     string `json:"path"`
 	Action   string `json:"action"`
 }
 
 type PolicyAccessCheckResponse struct {
 	Allowed          bool           `json:"allowed"`
-	MatchingPolicies []string       `json:"matching_policies"`
+	MatchingPolicies []string       `json:"matchingPolicies"`
 	Err              data.ErrorCode `json:"err,omitempty"`
 }

@@ -10,59 +10,50 @@ import (
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 
-	"github.com/spiffe/spike-sdk-go/api/entity/data"
 	"github.com/spiffe/spike-sdk-go/api/entity/v1/reqres"
 	"github.com/spiffe/spike-sdk-go/api/internal/url"
 	"github.com/spiffe/spike-sdk-go/net"
 )
 
-// GetSecretMetadata retrieves a specific version of a secret metadata at the
-// given path using mTLS authentication.
+// ListSecretKeys retrieves all secret keys using mTLS authentication.
 //
 // Parameters:
 //   - source: X509Source for mTLS client authentication
-//   - path: Path to the secret to retrieve
-//   - version: Version number of the secret to retrieve
 //
 // Returns:
-//   - *Secret: Secret metadata if found, nil if secret not found
+//   - []string: Array of secret keys if found, empty array if none found
 //   - error: nil on success, unauthorized error if not logged in, or
 //     wrapped error on request/parsing failure
 //
 // Example:
 //
-//	metadata, err := GetSecretMetadata(x509Source, "secret/path", 1)
-func GetSecretMetadata(
-	source *workloadapi.X509Source, path string, version int,
-) (*data.SecretMetadata, error) {
-	r := reqres.SecretMetadataRequest{
-		Path:    path,
-		Version: version,
-	}
-
+//	keys, err := listSecretKeys(x509Source)
+func ListSecretKeys(source *workloadapi.X509Source) (*[]string, error) {
+	r := reqres.SecretListRequest{}
 	mr, err := json.Marshal(r)
 	if err != nil {
 		return nil, errors.Join(
-			errors.New("getSecret: I am having problem generating the payload"),
+			errors.New(
+				"listSecretKeys: I am having problem generating the payload",
+			),
 			err,
 		)
 	}
 
-	truer := func(string) bool { return true }
-	client, err := net.CreateMtlsClient(source, truer)
+	client, err := net.CreateMtlsClient(source)
 	if err != nil {
 		return nil, err
 	}
 
-	body, err := net.Post(client, url.SecretMetadataGet(), mr)
+	body, err := net.Post(client, url.SecretList(), mr)
 	if err != nil {
 		if errors.Is(err, net.ErrNotFound) {
-			return nil, nil
+			return &[]string{}, nil
 		}
 		return nil, err
 	}
 
-	var res reqres.SecretMetadataResponse
+	var res reqres.SecretListResponse
 	err = json.Unmarshal(body, &res)
 	if err != nil {
 		return nil, errors.Join(
@@ -74,8 +65,5 @@ func GetSecretMetadata(
 		return nil, errors.New(string(res.Err))
 	}
 
-	return &data.SecretMetadata{
-		Versions: res.Versions,
-		Metadata: res.Metadata,
-	}, nil
+	return &res.Keys, nil
 }

@@ -32,10 +32,7 @@ func Init(source *workloadapi.X509Source) error {
 		)
 	}
 
-	// TODO: maybe restrict init and ACL operations at this level without
-	// doing any policy checks.
-	var truer = func(string) bool { return true }
-	client, err := net.CreateMtlsClient(source, truer)
+	client, err := net.CreateMtlsClient(source)
 
 	body, err := net.Post(client, url.Init(), mr)
 
@@ -78,8 +75,7 @@ func CheckInitState(source *workloadapi.X509Source) (data.InitState, error) {
 		)
 	}
 
-	var truer = func(string) bool { return true }
-	client, err := net.CreateMtlsClient(source, truer)
+	client, err := net.CreateMtlsClient(source)
 	body, err := net.Post(client, url.InitState(), mr)
 
 	if err != nil {

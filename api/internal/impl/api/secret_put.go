@@ -29,7 +29,7 @@ import (
 //
 // Example:
 //
-//	err := PutSecret(x509Source, "secret/path", map[string]string{"key": "value"})
+//	err := putSecret(x509Source, "secret/path", map[string]string{"key": "value"})
 func PutSecret(source *workloadapi.X509Source,
 	path string, values map[string]string) error {
 
@@ -46,10 +46,7 @@ func PutSecret(source *workloadapi.X509Source,
 		)
 	}
 
-	// TODO: this `truer` feels like a code smell; maybe create a variant of CreateMtlsClient.
-	// or maybe override the current one if nobody uses the predicates anymore.
-	var truer = func(string) bool { return true }
-	client, err := net.CreateMtlsClient(source, truer)
+	client, err := net.CreateMtlsClient(source)
 	if err != nil {
 		return err
 	}
