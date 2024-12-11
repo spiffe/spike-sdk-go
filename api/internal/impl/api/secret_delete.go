@@ -28,7 +28,7 @@ import (
 //
 // Example:
 //
-//	err := DeleteSecret(x509Source, "secret/path", []string{"1", "2"})
+//	err := deleteSecret(x509Source, "secret/path", []string{"1", "2"})
 func DeleteSecret(source *workloadapi.X509Source,
 	path string, versions []int) error {
 	r := reqres.SecretDeleteRequest{
@@ -46,8 +46,7 @@ func DeleteSecret(source *workloadapi.X509Source,
 		)
 	}
 
-	var truer = func(string) bool { return true }
-	client, err := net.CreateMtlsClient(source, truer)
+	client, err := net.CreateMtlsClient(source)
 	if err != nil {
 		return err
 	}

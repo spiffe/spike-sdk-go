@@ -45,7 +45,7 @@ type PolicyListResponse struct {
 }
 
 type PolicyAccessCheckRequest struct {
-	SpiffeId string `json:"spiffe_id"`
+	SpiffeId string `json:"spiffeId"`
 	Path     string `json:"path"`
 	Action   string `json:"action"`
 }

@@ -12,13 +12,12 @@ import (
 
 	"github.com/spiffe/spike-sdk-go/api/entity/data"
 	"github.com/spiffe/spike-sdk-go/api/entity/v1/reqres"
-	code "github.com/spiffe/spike-sdk-go/api/errors"
 	"github.com/spiffe/spike-sdk-go/api/internal/url"
 	"github.com/spiffe/spike-sdk-go/net"
 )
 
-// GetSecret retrieves a specific version of a secret at the given path using
-// mTLS authentication.
+// GetSecretMetadata retrieves a specific version of a secret metadata at the
+// given path using mTLS authentication.
 //
 // Parameters:
 //   - source: X509Source for mTLS client authentication
@@ -26,16 +25,17 @@ import (
 //   - version: Version number of the secret to retrieve
 //
 // Returns:
-//   - *Secret: Secret data if found, nil if secret not found
+//   - *Secret: Secret metadata if found, nil if secret not found
 //   - error: nil on success, unauthorized error if not logged in, or
 //     wrapped error on request/parsing failure
 //
 // Example:
 //
-//	secret, err := GetSecret(x509Source, "secret/path", 1)
-func GetSecret(source *workloadapi.X509Source,
-	path string, version int) (*data.Secret, error) {
-	r := reqres.SecretReadRequest{
+//	metadata, err := getSecretMetadata(x509Source, "secret/path", 1)
+func GetSecretMetadata(
+	source *workloadapi.X509Source, path string, version int,
+) (*data.SecretMetadata, error) {
+	r := reqres.SecretMetadataRequest{
 		Path:    path,
 		Version: version,
 	}
@@ -48,21 +48,20 @@ func GetSecret(source *workloadapi.X509Source,
 		)
 	}
 
-	truer := func(string) bool { return true }
-	client, err := net.CreateMtlsClient(source, truer)
+	client, err := net.CreateMtlsClient(source)
 	if err != nil {
 		return nil, err
 	}
 
-	body, err := net.Post(client, url.SecretGet(), mr)
+	body, err := net.Post(client, url.SecretMetadataGet(), mr)
 	if err != nil {
-		if errors.Is(err, code.ErrNotFound) {
+		if errors.Is(err, net.ErrNotFound) {
 			return nil, nil
 		}
 		return nil, err
 	}
 
-	var res reqres.SecretReadResponse
+	var res reqres.SecretMetadataResponse
 	err = json.Unmarshal(body, &res)
 	if err != nil {
 		return nil, errors.Join(
@@ -74,5 +73,8 @@ func GetSecret(source *workloadapi.X509Source,
 		return nil, errors.New(string(res.Err))
 	}
 
-	return &data.Secret{Data: res.Data}, nil
+	return &data.SecretMetadata{
+		Versions: res.Versions,
+		Metadata: res.Metadata,
+	}, nil
 }

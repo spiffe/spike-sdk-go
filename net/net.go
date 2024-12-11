@@ -56,8 +56,28 @@ func CreateMtlsServer(source *workloadapi.X509Source,
 	return server, nil
 }
 
-// TODO: document.
-func CreateMtlsClient(
+// CreateMtlsClientWithPredicate creates an HTTP client configured for mutual TLS
+// authentication using SPIFFE workload identities.
+// It uses the provided X.509 source for client certificates and validates peer
+// certificates against a predicate function.
+//
+// Parameters:
+//   - source: An X509Source that provides the client's identity certificates
+//     and trusted roots
+//   - predicate: A function that evaluates SPIFFE IDs (as strings) and returns
+//     true if the ID should be trusted
+//
+// Returns:
+//   - *http.Client: A configured HTTP client that will use mTLS for all
+//     connections
+//   - error: An error if the client creation fails
+//
+// The returned client will:
+//   - Present client certificates from the provided X509Source
+//   - Validate peer certificates using the same X509Source
+//   - Only accept peer certificates with SPIFFE IDs that pass the predicate
+//     function
+func CreateMtlsClientWithPredicate(
 	source *workloadapi.X509Source,
 	predicate func(string) bool,
 ) (*http.Client, error) {
@@ -79,6 +99,29 @@ func CreateMtlsClient(
 	}
 
 	return client, nil
+}
+
+// CreateMtlsClient creates an HTTP client configured for mutual TLS
+// authentication using SPIFFE workload identities.
+// It uses the provided X.509 source for client certificates and validates peer
+// certificates against a predicate function.
+//
+// Parameters:
+//   - source: An X509Source that provides the client's identity certificates
+//     and trusted roots
+//
+// Returns:
+//   - *http.Client: A configured HTTP client that will use mTLS for all
+//     connections
+//   - error: An error if the client creation fails
+//
+// The returned client will:
+//   - Present client certificates from the provided X509Source
+//   - Validate peer certificates using the same X509Source
+//   - Only accept peer certificates with SPIFFE IDs that pass the predicate
+//     function
+func CreateMtlsClient(source *workloadapi.X509Source) (*http.Client, error) {
+	return CreateMtlsClientWithPredicate(source, func(string) bool { return true })
 }
 
 // Serve initializes and starts an HTTPS server using mTLS authentication with

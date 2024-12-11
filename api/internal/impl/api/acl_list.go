@@ -28,8 +28,7 @@ func ListPolicies(source *workloadapi.X509Source) (*[]data.Policy, error) {
 		)
 	}
 
-	var truer = func(string) bool { return true }
-	client, err := net.CreateMtlsClient(source, truer)
+	client, err := net.CreateMtlsClient(source)
 	if err != nil {
 		return nil, err
 	}
