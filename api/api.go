@@ -113,3 +113,8 @@ func (a *Api) UndeleteSecret(path string, versions []int) error {
 func (a *Api) Init() error {
 	return impl.Init(a.source)
 }
+
+// CheckInitState checks the initialization state of SPIKE Nexus.
+func (a *Api) CheckInitState() (data.InitState, error) {
+	return impl.CheckInitState(a.source)
+}
