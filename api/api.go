@@ -6,11 +6,11 @@ package api
 
 import (
 	"context"
-	impl "github.com/spiffe/spike-sdk-go/api/internal/impl/api"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 
 	"github.com/spiffe/spike-sdk-go/api/entity/data"
+	impl "github.com/spiffe/spike-sdk-go/api/internal/impl/api"
 	"github.com/spiffe/spike-sdk-go/spiffe"
 )
 
