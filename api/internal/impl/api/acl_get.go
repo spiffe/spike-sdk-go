@@ -16,6 +16,46 @@ import (
 	"github.com/spiffe/spike-sdk-go/net"
 )
 
+// GetPolicy retrieves a policy from the system using its ID.
+// It requires a SPIFFE X.509 source for establishing a mutual TLS connection
+// to make the retrieval request.
+//
+// The function takes the following parameters:
+//   - source: A pointer to a workloadapi.X509Source for establishing mTLS
+//     connection
+//   - id: The unique identifier of the policy to retrieve
+//
+// The function returns:
+//   - (*data.Policy, nil) if the policy is found
+//   - (nil, nil) if the policy is not found
+//   - (nil, error) if an error occurs during the operation
+//
+// Errors can occur during:
+//   - Marshaling the policy retrieval request
+//   - Creating the mTLS client
+//   - Making the HTTP POST request (except for not found cases)
+//   - Unmarshaling the response
+//   - Server-side policy retrieval (indicated in the response)
+//
+// Example usage:
+//
+//	source, err := workloadapi.NewX509Source(context.Background())
+//	if err != nil {
+//	    log.Fatal(err)
+//	}
+//	defer source.Close()
+//
+//	policy, err := GetPolicy(source, "policy-123")
+//	if err != nil {
+//	    log.Printf("Error retrieving policy: %v", err)
+//	    return
+//	}
+//	if policy == nil {
+//	    log.Printf("Policy not found")
+//	    return
+//	}
+//
+//	log.Printf("Found policy: %+v", policy)
 func GetPolicy(source *workloadapi.X509Source, id string) (*data.Policy, error) {
 	r := reqres.PolicyReadRequest{Id: id}
 
