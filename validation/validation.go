@@ -1,6 +1,7 @@
 package validation
 
 import (
+	"github.com/google/uuid"
 	"regexp"
 
 	"github.com/spiffe/spike-sdk-go/api/errors"
@@ -65,5 +66,15 @@ func ValidatePathPattern(pathPattern string) error {
 		return errors.ErrInvalidInput
 	}
 
+	return nil
+}
+
+// ValidatePolicyId verifies if the given policyId is a valid UUID format.
+// Returns errors.ErrInvalidInput if the validation fails.
+func ValidatePolicyId(policyId string) error {
+	err := uuid.Validate(policyId)
+	if err != nil {
+		return errors.ErrInvalidInput
+	}
 	return nil
 }
