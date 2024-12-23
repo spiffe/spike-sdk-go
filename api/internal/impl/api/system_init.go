@@ -19,7 +19,14 @@ import (
 	"github.com/spiffe/spike-sdk-go/net"
 )
 
-// Init sends an initialization request to SPIKE Nexus.
+// Init initializes the SPIKE Nexus by submitting an initialization request.
+// It saves the received recovery token to a secure local file.
+//
+// Parameters:
+//   - source: An X509Source used to authenticate the mTLS client.
+//
+// Returns:
+//   - error: An error if any part of the initialization process fails.
 func Init(source *workloadapi.X509Source) error {
 	r := reqres.InitRequest{}
 	mr, err := json.Marshal(r)
@@ -62,7 +69,9 @@ func Init(source *workloadapi.X509Source) error {
 	return nil
 }
 
-// CheckInitState sends a checkInitState request to SPIKE Nexus.
+// CheckInitState checks if the SPIKE Keep is initialized.
+// It sends a request to the SPIKE Nexus API and parses the response.
+// Returns the initialization state or an error if the request fails.
 func CheckInitState(source *workloadapi.X509Source) (data.InitState, error) {
 	r := reqres.CheckInitStateRequest{}
 	mr, err := json.Marshal(r)

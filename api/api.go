@@ -19,7 +19,7 @@ type Api struct {
 	source *workloadapi.X509Source
 }
 
-// New creates a new SPIKE API.
+// New creates and returns a new instance of Api configured with a SPIFFE source.
 func New() *Api {
 	defaultEndpointSocket := spiffe.EndpointSocket()
 
@@ -31,12 +31,13 @@ func New() *Api {
 	return &Api{source: source}
 }
 
-// NewWithSource creates a new SPIKE API with a given X509Source.
+// NewWithSource initializes a new Api instance with the given X509Source.
 func NewWithSource(source *workloadapi.X509Source) *Api {
 	return &Api{source: source}
 }
 
-// Close closes the SPIKE API.
+// Close releases any resources held by the Api instance.
+// It ensures proper cleanup of the underlying source.
 func (a *Api) Close() {
 	spiffe.CloseSource(a.source)
 }
