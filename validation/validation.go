@@ -2,6 +2,7 @@ package validation
 
 import (
 	"github.com/google/uuid"
+	"github.com/spiffe/spike-sdk-go/api/entity/data"
 	"regexp"
 
 	"github.com/spiffe/spike-sdk-go/api/errors"
@@ -90,5 +91,32 @@ func ValidatePolicyId(policyId string) error {
 	if err != nil {
 		return errors.ErrInvalidInput
 	}
+	return nil
+}
+
+// ValidatePermissions checks if all provided permissions are valid.
+// Permissions are compared against a predefined list of allowed permissions.
+// Returns ErrInvalidInput if any permission is invalid, nil otherwise.
+func ValidatePermissions(permissions []data.PolicyPermission) error {
+	allowedPermissions := []data.PolicyPermission{
+		data.PermissionList,
+		data.PermissionRead,
+		data.PermissionWrite,
+		data.PermissionSuper,
+	}
+
+	for _, permission := range permissions {
+		isAllowed := false
+		for _, allowedPermission := range allowedPermissions {
+			if permission == allowedPermission {
+				isAllowed = true
+				break
+			}
+		}
+		if !isAllowed {
+			return errors.ErrInvalidInput
+		}
+	}
+
 	return nil
 }
