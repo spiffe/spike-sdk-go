@@ -12,6 +12,8 @@ const maxNameLength = 250
 const validSpiffeIdPattern = `^\^spiffe://[a-zA-Z0-9.-]+(/[a-zA-Z0-9._-]+)*$`
 const validRawSpiffeIdPattern = `^spiffe://[a-zA-Z0-9.-]+(/[a-zA-Z0-9._-]+)*$`
 const maxPathPatternLength = 500
+const validPathPattern = `^[a-zA-Z0-9._\-/^$()?+*|[\]{}\\]+$`
+const validPath = `^[a-zA-Z0-9._\-/()?+*|[\]{}\\]+$`
 
 // ValidateName checks if the provided name meets length and format constraints.
 // It returns an error if the name is invalid, otherwise it returns nil.
@@ -61,11 +63,23 @@ func ValidatePathPattern(pathPattern string) error {
 
 	// Validate format
 	// Allow regex special characters along with alphanumeric and basic symbols
-	const validPathPattern = `^[a-zA-Z0-9._\-/^$()?+*|[\]{}\\]+$`
 	if match, _ := regexp.MatchString(validPathPattern, pathPattern); !match {
 		return errors.ErrInvalidInput
 	}
 
+	return nil
+}
+
+// ValidatePath checks if the given path is valid based on predefined rules.
+// It returns an error if the path is empty, too long, or contains invalid
+// characters.
+func ValidatePath(path string) error {
+	if len(path) == 0 || len(path) > maxPathPatternLength {
+		return errors.ErrInvalidInput
+	}
+	if match, _ := regexp.MatchString(validPath, path); !match {
+		return errors.ErrInvalidInput
+	}
 	return nil
 }
 
