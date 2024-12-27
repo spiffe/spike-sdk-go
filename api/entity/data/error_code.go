@@ -22,7 +22,5 @@ const ErrInternal = ErrorCode("internal_error")
 const ErrUnauthorized = ErrorCode("unauthorized")
 const ErrLowEntropy = ErrorCode("low_entropy")
 
-const ErrAlreadyInitialized = ErrorCode("already_initialized")
-
 const ErrNotFound = ErrorCode("not_found")
 const ErrSuccess = ErrorCode("success")
