@@ -340,13 +340,3 @@ func (a *Api) PutSecret(path string, data map[string]string) error {
 func (a *Api) UndeleteSecret(path string, versions []int) error {
 	return impl.UndeleteSecret(a.source, path, versions)
 }
-
-// Init initializes SPIKE Nexus.
-func (a *Api) Init() error {
-	return impl.Init(a.source)
-}
-
-// CheckInitState checks the initialization state of SPIKE Nexus.
-func (a *Api) CheckInitState() (data.InitState, error) {
-	return impl.CheckInitState(a.source)
-}
