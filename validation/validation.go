@@ -10,8 +10,34 @@ import (
 
 const validNamePattern = `^[a-zA-Z0-9-_ ]+$`
 const maxNameLength = 250
-const validSpiffeIdPattern = `^\^spiffe://[a-zA-Z0-9.\-*]+(/[a-zA-Z0-9._\-*]+)*$`
-const validRawSpiffeIdPattern = `^spiffe://[a-zA-Z0-9.-]+(/[a-zA-Z0-9._-]+)*$`
+
+// ^(?:\^)? - Optionally matches a literal ^ at the start (for regex patterns that are anchored)
+// spiffe:// - Matches the SPIFFE URI scheme literally
+// [\w\\.-]+ - Matches the trust domain, which can contain:
+//   - Word characters (\w)
+//   - Escaped dots (\\.)
+//   - Literal dots (.)
+//   - Hyphens (-)
+//
+// / - Matches the path separator
+//
+// [\w\\./\[\]\{\}\?\*\+\-\^\$]* - Matches the path component, allowing:
+//   - Word characters
+//   - Escaped dots
+//   - Literal dots
+//   - Forward slashes
+//   - Common regex special characters ([]{}?*+-^$)
+const validSpiffeIdPattern = `^(?:\^)?spiffe://[\w\\.-]+/[\w\\./\[\]\{\}\?\*\+\-\^\$]*$`
+
+// Pattern for valid SPIFFE IDs
+// Following the SPIFFE standard:
+// - Must start with "spiffe://"
+// - Trust domain must be non-empty and contain only lowercase letters, numbers, dots, or hyphens
+// - Trust domain cannot start or end with a dot or hyphen
+// - Trust domain cannot contain consecutive dots
+// - Path component must be non-empty and start with a forward slash
+// - Path can contain letters, numbers, underscores, hyphens, dots, and forward slashes
+const validRawSpiffeIdPattern = `^spiffe://[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?)*(?:/[a-zA-Z0-9._/-]+)+$`
 const maxPathPatternLength = 500
 const validPathPattern = `^[a-zA-Z0-9._\-/^$()?+*|[\]{}\\]+$`
 const validPath = `^[a-zA-Z0-9._\-/()?+*|[\]{}\\]+$`
