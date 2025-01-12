@@ -2,7 +2,10 @@ module github.com/spiffe/spike-sdk-go
 
 go 1.23.3
 
-require github.com/spiffe/go-spiffe/v2 v2.4.0
+require (
+	github.com/google/uuid v1.6.0
+	github.com/spiffe/go-spiffe/v2 v2.4.0
+)
 
 require (
 	github.com/Microsoft/go-winio v0.6.2 // indirect

@@ -9,7 +9,6 @@ import "github.com/spiffe/spike-sdk-go/api/entity/data"
 type ShardContributionRequest struct {
 	KeeperId string `json:"id"`
 	Shard    string `json:"shard"`
-	Version  int    `json:"version,omitempty"` // Optional specific version
 }
 
 // ShardContributionResponse represents the response structure for a shard
