@@ -10,7 +10,7 @@ import (
 
 const validNamePattern = `^[a-zA-Z0-9-_ ]+$`
 const maxNameLength = 250
-const validSpiffeIdPattern = `^\^?spiffe:\/\/[a-zA-Z0-9.\-*()+?\[\]]+(\/[/a-zA-Z0-9._\-*()+?\[\]]+)*\$?$`
+const validSpiffeIdPattern = `^\^?spiffe://[a-zA-Z0-9.\-*()+?\[\]]+(/[/a-zA-Z0-9._\-*()+?\[\]]+)*\$?$`
 const validRawSpiffeIdPattern = `^spiffe://[a-zA-Z0-9.-]+(/[a-zA-Z0-9._-]+)*$`
 const maxPathPatternLength = 500
 const validPathPattern = `^[a-zA-Z0-9._\-/^$()?+*|[\]{}\\]+$`
