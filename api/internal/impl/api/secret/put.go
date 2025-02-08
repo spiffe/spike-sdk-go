@@ -2,7 +2,7 @@
 //  \\\\\ Copyright 2024-present SPIKE contributors.
 // \\\\\\\ SPDX-License-Identifier: Apache-2.0
 
-package api
+package secret
 
 import (
 	"encoding/json"
@@ -15,14 +15,13 @@ import (
 	"github.com/spiffe/spike-sdk-go/net"
 )
 
-// UndeleteSecret restores previously deleted versions of a secret at the
-// specified path using mTLS authentication.
+// Put creates or updates a secret at the specified path with the given
+// values using mTLS authentication.
 //
 // Parameters:
 //   - source: X509Source for mTLS client authentication
-//   - path: Path to the secret to restore
-//   - versions: String array of version numbers to restore. Empty array
-//     attempts no restoration
+//   - path: Path where the secret should be stored
+//   - values: Map of key-value pairs representing the secret data
 //
 // Returns:
 //   - error: nil on success, unauthorized error if not logged in, or
@@ -30,25 +29,20 @@ import (
 //
 // Example:
 //
-//	err := undeleteSecret(x509Source, "secret/path", []string{"1", "2"})
-func UndeleteSecret(source *workloadapi.X509Source,
-	path string, versions []int) error {
-	var vv []int
-	if len(versions) == 0 {
-		vv = []int{}
-	}
+//		err := putSecret(x509Source, "secret/path",
+//	 	map[string]string{"key": "value"})
+func Put(source *workloadapi.X509Source,
+	path string, values map[string]string) error {
 
-	r := reqres.SecretUndeleteRequest{
-		Path:     path,
-		Versions: vv,
+	r := reqres.SecretPutRequest{
+		Path:   path,
+		Values: values,
 	}
 
 	mr, err := json.Marshal(r)
 	if err != nil {
 		return errors.Join(
-			errors.New(
-				"undeleteSecret: I am having problem generating the payload",
-			),
+			errors.New("putSecret: I am having problem generating the payload"),
 			err,
 		)
 	}
@@ -58,16 +52,16 @@ func UndeleteSecret(source *workloadapi.X509Source,
 		return err
 	}
 
-	body, err := net.Post(client, url.SecretUndelete(), mr)
+	body, err := net.Post(client, url.SecretPut(), mr)
 	if err != nil {
-		return nil
+		return err
 	}
 
-	res := reqres.SecretUndeleteResponse{}
+	res := reqres.SecretPutResponse{}
 	err = json.Unmarshal(body, &res)
 	if err != nil {
 		return errors.Join(
-			errors.New("undeleteSecret: Problem parsing response body"),
+			errors.New("putSecret: Problem parsing response body"),
 			err,
 		)
 	}

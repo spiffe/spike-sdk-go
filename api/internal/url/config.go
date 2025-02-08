@@ -28,4 +28,7 @@ const spikeNexusUrlInit ApiUrl = "/v1/auth/initialization"
 
 const spikeNexusUrlPolicy ApiUrl = "/v1/acl/policy"
 
+const spikeNexusUrlRecover ApiUrl = "/v1/operator/recover"
+const spikeNexusUrlRestore ApiUrl = "/v1/operator/restore"
+
 const spikeKeeperUrlKeep ApiUrl = "/v1/store/keep"
