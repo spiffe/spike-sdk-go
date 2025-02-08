@@ -2,7 +2,7 @@
 //  \\\\\ Copyright 2024-present SPIKE contributors.
 // \\\\\\\ SPDX-License-Identifier: Apache-2.0
 
-package api
+package acl
 
 import (
 	"encoding/json"
@@ -56,7 +56,9 @@ import (
 //	}
 //
 //	log.Printf("Found policy: %+v", policy)
-func GetPolicy(source *workloadapi.X509Source, id string) (*data.Policy, error) {
+func GetPolicy(
+	source *workloadapi.X509Source, id string,
+) (*data.Policy, error) {
 	r := reqres.PolicyReadRequest{Id: id}
 
 	mr, err := json.Marshal(r)

@@ -2,7 +2,7 @@
 //  \\\\\ Copyright 2024-present SPIKE contributors.
 // \\\\\\\ SPDX-License-Identifier: Apache-2.0
 
-package api
+package secret
 
 import (
 	"encoding/json"
@@ -15,7 +15,7 @@ import (
 	"github.com/spiffe/spike-sdk-go/net"
 )
 
-// DeleteSecret deletes specified versions of a secret at the given path using
+// Delete deletes specified versions of a secret at the given path using
 // mTLS authentication.
 //
 // It converts string version numbers to integers, constructs a delete request,
@@ -34,7 +34,7 @@ import (
 // Example:
 //
 //	err := deleteSecret(x509Source, "secret/path", []string{"1", "2"})
-func DeleteSecret(source *workloadapi.X509Source,
+func Delete(source *workloadapi.X509Source,
 	path string, versions []int) error {
 	r := reqres.SecretDeleteRequest{
 		Path:     path,

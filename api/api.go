@@ -10,7 +10,9 @@ import (
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 
 	"github.com/spiffe/spike-sdk-go/api/entity/data"
-	impl "github.com/spiffe/spike-sdk-go/api/internal/impl/api"
+	"github.com/spiffe/spike-sdk-go/api/internal/impl/api/acl"
+	"github.com/spiffe/spike-sdk-go/api/internal/impl/api/operator"
+	"github.com/spiffe/spike-sdk-go/api/internal/impl/api/secret"
 	"github.com/spiffe/spike-sdk-go/spiffe"
 )
 
@@ -83,7 +85,7 @@ func (a *Api) CreatePolicy(
 	name string, spiffeIdPattern string, pathPattern string,
 	permissions []data.PolicyPermission,
 ) error {
-	return impl.CreatePolicy(a.source,
+	return acl.CreatePolicy(a.source,
 		name, spiffeIdPattern, pathPattern, permissions)
 }
 
@@ -107,7 +109,7 @@ func (a *Api) CreatePolicy(
 //	    return
 //	}
 func (a *Api) DeletePolicy(name string) error {
-	return impl.DeletePolicy(a.source, name)
+	return acl.DeletePolicy(a.source, name)
 }
 
 // GetPolicy retrieves a policy from the system using its Id.
@@ -141,7 +143,7 @@ func (a *Api) DeletePolicy(name string) error {
 //
 //	log.Printf("Found policy: %+v", policy)
 func (a *Api) GetPolicy(name string) (*data.Policy, error) {
-	return impl.GetPolicy(a.source, name)
+	return acl.GetPolicy(a.source, name)
 }
 
 // ListPolicies retrieves all policies from the system.
@@ -185,7 +187,7 @@ func (a *Api) GetPolicy(name string) (*data.Policy, error) {
 //	    log.Printf("Found policy: %+v", policy)
 //	}
 func (a *Api) ListPolicies() (*[]data.Policy, error) {
-	return impl.ListPolicies(a.source)
+	return acl.ListPolicies(a.source)
 }
 
 // DeleteSecretVersions deletes specified versions of a secret at the given
@@ -207,7 +209,7 @@ func (a *Api) ListPolicies() (*[]data.Policy, error) {
 //
 //	err := DeleteSecretVersions("secret/path", []string{"1", "2"})
 func (a *Api) DeleteSecretVersions(path string, versions []int) error {
-	return impl.DeleteSecret(a.source, path, versions)
+	return secret.Delete(a.source, path, versions)
 }
 
 // DeleteSecret deletes specified secret at the given path
@@ -226,9 +228,9 @@ func (a *Api) DeleteSecretVersions(path string, versions []int) error {
 //
 // Example:
 //
-//	err := DeleteSecret("secret/path")
+//	err := Delete("secret/path")
 func (a *Api) DeleteSecret(path string) error {
-	return impl.DeleteSecret(a.source, path, []int{})
+	return secret.Delete(a.source, path, []int{})
 }
 
 // GetSecretVersion retrieves a specific version of a secret at the given
@@ -249,7 +251,7 @@ func (a *Api) DeleteSecret(path string) error {
 func (a *Api) GetSecretVersion(
 	path string, version int,
 ) (*data.Secret, error) {
-	return impl.GetSecret(a.source, path, version)
+	return secret.Get(a.source, path, version)
 }
 
 // GetSecret retrieves the secret at the given path.
@@ -264,9 +266,9 @@ func (a *Api) GetSecretVersion(
 //
 // Example:
 //
-//	secret, err := GetSecret("secret/path")
+//	secret, err := Get("secret/path")
 func (a *Api) GetSecret(path string) (*data.Secret, error) {
-	return impl.GetSecret(a.source, path, 0)
+	return secret.Get(a.source, path, 0)
 }
 
 // ListSecretKeys retrieves all secret keys.
@@ -278,9 +280,9 @@ func (a *Api) GetSecret(path string) (*data.Secret, error) {
 //
 // Example:
 //
-//	keys, err := ListSecretKeys()
+//	keys, err := ListKeys()
 func (a *Api) ListSecretKeys() (*[]string, error) {
-	return impl.ListSecretKeys(a.source)
+	return secret.ListKeys(a.source)
 }
 
 // GetSecretMetadata retrieves a specific version of a secret metadata at the
@@ -297,11 +299,11 @@ func (a *Api) ListSecretKeys() (*[]string, error) {
 //
 // Example:
 //
-//	metadata, err := GetSecretMetadata("secret/path", 1)
+//	metadata, err := GetMetadata("secret/path", 1)
 func (a *Api) GetSecretMetadata(
 	path string, version int,
 ) (*data.SecretMetadata, error) {
-	return impl.GetSecretMetadata(a.source, path, version)
+	return secret.GetMetadata(a.source, path, version)
 }
 
 // PutSecret creates or updates a secret at the specified path with the given
@@ -317,9 +319,9 @@ func (a *Api) GetSecretMetadata(
 //
 // Example:
 //
-//	err := PutSecret("secret/path", map[string]string{"key": "value"})
+//	err := Put("secret/path", map[string]string{"key": "value"})
 func (a *Api) PutSecret(path string, data map[string]string) error {
-	return impl.PutSecret(a.source, path, data)
+	return secret.Put(a.source, path, data)
 }
 
 // UndeleteSecret restores previously deleted versions of a secret at the
@@ -336,7 +338,47 @@ func (a *Api) PutSecret(path string, data map[string]string) error {
 //
 // Example:
 //
-//	err := UndeleteSecret("secret/path", []string{"1", "2"})
+//	err := Undelete("secret/path", []string{"1", "2"})
 func (a *Api) UndeleteSecret(path string, versions []int) error {
-	return impl.UndeleteSecret(a.source, path, versions)
+	return secret.Undelete(a.source, path, versions)
+}
+
+// Recover return recovery partitions for SPIKE Nexus to be used in a
+// break-the-glass recovery operation if SPIKE Nexus auto-recovery mechanism
+// isn't successful.
+//
+// The returned shared are sensitive and should be securely stored out-of-band
+// in encrypted form.
+//
+// Returns:
+//   - []string: Array of recovery shards
+//   - error: nil on success, unauthorized error if not authorized, or
+//     wrapped error on request/parsing failure
+//
+// Example:
+//
+//	shards, err := Recover()
+func (a *Api) Recover() (*[]string, error) {
+	return operator.Recover(a.source)
+}
+
+// Restore SPIKE Nexus backing using recovery shards when SPIKE Keepers cannot
+// provide adequate shards and SPIKE Nexus cannot recall its root key either.
+//
+// This is a break-the-glass superuser-only operation that a well-architected
+// SPIKE deployment should not need.
+//
+// Parameters:
+//   - shard: the shared to seed.
+//
+// Returns:
+//   - *RestorationStatus: Status of the restoration process if successful
+//   - error: nil on success, unauthorized error if not authorized, or
+//     wrapped error on request/parsing failure
+//
+// Example:
+//
+//	status, err := Restore("randomShardString")
+func (a *Api) Restore(shard string) (*data.RestorationStatus, error) {
+	return operator.Restore(a.source, shard)
 }

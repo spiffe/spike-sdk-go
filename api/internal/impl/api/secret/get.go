@@ -2,7 +2,7 @@
 //  \\\\\ Copyright 2024-present SPIKE contributors.
 // \\\\\\\ SPDX-License-Identifier: Apache-2.0
 
-package api
+package secret
 
 import (
 	"encoding/json"
@@ -12,12 +12,13 @@ import (
 
 	"github.com/spiffe/spike-sdk-go/api/entity/data"
 	"github.com/spiffe/spike-sdk-go/api/entity/v1/reqres"
+	code "github.com/spiffe/spike-sdk-go/api/errors"
 	"github.com/spiffe/spike-sdk-go/api/internal/url"
 	"github.com/spiffe/spike-sdk-go/net"
 )
 
-// GetSecretMetadata retrieves a specific version of a secret metadata at the
-// given path using mTLS authentication.
+// Get retrieves a specific version of a secret at the given path using
+// mTLS authentication.
 //
 // Parameters:
 //   - source: X509Source for mTLS client authentication
@@ -25,17 +26,16 @@ import (
 //   - version: Version number of the secret to retrieve
 //
 // Returns:
-//   - *Secret: Secret metadata if found, nil if secret not found
+//   - *Secret: Secret data if found, nil if secret not found
 //   - error: nil on success, unauthorized error if not logged in, or
 //     wrapped error on request/parsing failure
 //
 // Example:
 //
-//	metadata, err := getSecretMetadata(x509Source, "secret/path", 1)
-func GetSecretMetadata(
-	source *workloadapi.X509Source, path string, version int,
-) (*data.SecretMetadata, error) {
-	r := reqres.SecretMetadataRequest{
+//	secret, err := getSecret(x509Source, "secret/path", 1)
+func Get(source *workloadapi.X509Source,
+	path string, version int) (*data.Secret, error) {
+	r := reqres.SecretReadRequest{
 		Path:    path,
 		Version: version,
 	}
@@ -53,15 +53,15 @@ func GetSecretMetadata(
 		return nil, err
 	}
 
-	body, err := net.Post(client, url.SecretMetadataGet(), mr)
+	body, err := net.Post(client, url.SecretGet(), mr)
 	if err != nil {
-		if errors.Is(err, net.ErrNotFound) {
+		if errors.Is(err, code.ErrNotFound) {
 			return nil, nil
 		}
 		return nil, err
 	}
 
-	var res reqres.SecretMetadataResponse
+	var res reqres.SecretReadResponse
 	err = json.Unmarshal(body, &res)
 	if err != nil {
 		return nil, errors.Join(
@@ -73,8 +73,5 @@ func GetSecretMetadata(
 		return nil, errors.New(string(res.Err))
 	}
 
-	return &data.SecretMetadata{
-		Versions: res.Versions,
-		Metadata: res.Metadata,
-	}, nil
+	return &data.Secret{Data: res.Data}, nil
 }

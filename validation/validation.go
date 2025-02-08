@@ -1,9 +1,10 @@
 package validation
 
 import (
+	"regexp"
+
 	"github.com/google/uuid"
 	"github.com/spiffe/spike-sdk-go/api/entity/data"
-	"regexp"
 
 	"github.com/spiffe/spike-sdk-go/api/errors"
 )
