@@ -17,7 +17,7 @@ func SecretGet() string {
 		string(SpikeNexusUrlSecrets),
 	)
 	params := url.Values{}
-	params.Add(keyApiAction, string(ActionGet))
+	params.Add(KeyApiAction, string(ActionGet))
 	return u + "?" + params.Encode()
 }
 
@@ -37,7 +37,7 @@ func SecretDelete() string {
 		string(SpikeNexusUrlSecrets),
 	)
 	params := url.Values{}
-	params.Add(keyApiAction, string(ActionDelete))
+	params.Add(KeyApiAction, string(ActionDelete))
 	return u + "?" + params.Encode()
 }
 
@@ -48,7 +48,7 @@ func SecretUndelete() string {
 		string(SpikeNexusUrlSecrets),
 	)
 	params := url.Values{}
-	params.Add(keyApiAction, string(ActionUndelete))
+	params.Add(KeyApiAction, string(ActionUndelete))
 	return u + "?" + params.Encode()
 }
 
@@ -59,7 +59,7 @@ func SecretList() string {
 		string(SpikeNexusUrlSecrets),
 	)
 	params := url.Values{}
-	params.Add(keyApiAction, string(ActionList))
+	params.Add(KeyApiAction, string(ActionList))
 	return u + "?" + params.Encode()
 }
 
@@ -70,6 +70,6 @@ func SecretMetadataGet() string {
 		string(SpikeNexusUrlSecretsMetadata),
 	)
 	params := url.Values{}
-	params.Add(keyApiAction, string(ActionGet))
+	params.Add(KeyApiAction, string(ActionGet))
 	return u + "?" + params.Encode()
 }

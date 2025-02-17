@@ -26,7 +26,7 @@ func PolicyList() string {
 		string(SpikeNexusUrlPolicy),
 	)
 	params := url.Values{}
-	params.Add(keyApiAction, string(ActionList))
+	params.Add(KeyApiAction, string(ActionList))
 	return u + "?" + params.Encode()
 }
 
@@ -37,7 +37,7 @@ func PolicyDelete() string {
 		string(SpikeNexusUrlPolicy),
 	)
 	params := url.Values{}
-	params.Add(keyApiAction, string(ActionDelete))
+	params.Add(KeyApiAction, string(ActionDelete))
 	return u + "?" + params.Encode()
 }
 
@@ -48,6 +48,6 @@ func PolicyGet() string {
 		string(SpikeNexusUrlPolicy),
 	)
 	params := url.Values{}
-	params.Add(keyApiAction, string(ActionGet))
+	params.Add(KeyApiAction, string(ActionGet))
 	return u + "?" + params.Encode()
 }

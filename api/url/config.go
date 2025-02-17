@@ -6,7 +6,7 @@ package url
 
 type ApiAction string
 
-const keyApiAction = "action"
+const KeyApiAction = "action"
 
 const ActionCheck ApiAction = "check"
 const ActionGet ApiAction = "get"
