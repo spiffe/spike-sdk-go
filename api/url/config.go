@@ -4,21 +4,17 @@
 
 package url
 
-type SpikeNexusApiAction string
+type ApiAction string
 
 const keyApiAction = "action"
 
-const actionNexusCheck SpikeNexusApiAction = "check"
-const actionNexusGet SpikeNexusApiAction = "get"
-const actionNexusDelete SpikeNexusApiAction = "delete"
-const actionNexusUndelete SpikeNexusApiAction = "undelete"
-const actionNexusList SpikeNexusApiAction = "list"
-const actionNexusDefault SpikeNexusApiAction = ""
-
-type SpikeKeeperApiAction string
-
-const actionKeeperRead SpikeKeeperApiAction = "read"
-const actionKeeperDefault SpikeKeeperApiAction = ""
+const ActionCheck ApiAction = "check"
+const ActionGet ApiAction = "get"
+const ActionDelete ApiAction = "delete"
+const ActionUndelete ApiAction = "undelete"
+const ActionList ApiAction = "list"
+const ActionDefault ApiAction = ""
+const ActionRead ApiAction = "read"
 
 type ApiUrl string
 

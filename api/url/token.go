@@ -27,6 +27,6 @@ func InitState() string {
 		string(SpikeNexusUrlInit),
 	)
 	params := url.Values{}
-	params.Add(keyApiAction, string(actionNexusCheck))
+	params.Add(keyApiAction, string(ActionCheck))
 	return u + "?" + params.Encode()
 }
