@@ -2,7 +2,7 @@
 //  \\\\\ Copyright 2024-present SPIKE contributors.
 // \\\\\\\ SPDX-License-Identifier: Apache-2.0
 
-package api
+package secret
 
 import (
 	"encoding/json"
@@ -15,7 +15,7 @@ import (
 	"github.com/spiffe/spike-sdk-go/net"
 )
 
-// PutSecret creates or updates a secret at the specified path with the given
+// Put creates or updates a secret at the specified path with the given
 // values using mTLS authentication.
 //
 // Parameters:
@@ -29,8 +29,9 @@ import (
 //
 // Example:
 //
-//	err := PutSecret(x509Source, "secret/path", map[string]string{"key": "value"})
-func PutSecret(source *workloadapi.X509Source,
+//		err := putSecret(x509Source, "secret/path",
+//	 	map[string]string{"key": "value"})
+func Put(source *workloadapi.X509Source,
 	path string, values map[string]string) error {
 
 	r := reqres.SecretPutRequest{
@@ -46,10 +47,7 @@ func PutSecret(source *workloadapi.X509Source,
 		)
 	}
 
-	// TODO: this `truer` feels like a code smell; maybe create a variant of CreateMtlsClient.
-	// or maybe override the current one if nobody uses the predicates anymore.
-	var truer = func(string) bool { return true }
-	client, err := net.CreateMtlsClient(source, truer)
+	client, err := net.CreateMtlsClient(source)
 	if err != nil {
 		return err
 	}

@@ -29,55 +29,45 @@ Prerequisites:
 package main
 
 import (
-   "context"
-   "fmt"
+	"fmt"
 
-   spike "github.com/spiffe/spike-sdk-go/api"
-   "github.com/spiffe/spike-sdk-go/spiffe"
+	spike "github.com/spiffe/spike-sdk-go/api"
 )
 
 func main() {
-   // Create a context.
-   ctx, cancel := context.WithCancel(context.Background())
-   defer cancel()
+	api := spike.New() // Use the default Workload API Socket
+	defer api.Close()  // Close the connection when done
 
-   // Initialize the SPIFFE endpoint socket.
-   defaultEndpointSocket := spiffe.EndpointSocket()
+	path := "/tenants/demo/db/creds"
 
-   // Initialize the SPIFFE source.
-   source, spiffeid, err := spiffe.Source(ctx, defaultEndpointSocket)
-   fmt.Println("SPIFFE ID:", spiffeid)
-   if err != nil {
-      fmt.Println(err.Error())
-      return
-   }
+	// Create a Secret
+	err := api.PutSecret(path, map[string]string{
+		"username": "SPIKE",
+		"password": "SPIKE_Rocks",
+	})
+	if err != nil {
+		fmt.Println("Error writing secret:", err.Error())
+		return
+	}
 
-   // Close the SPIFFE source when done.
-   defer spiffe.CloseSource(source)
+	// Read the Secret
+	secret, err := api.GetSecret(path)
+	if err != nil {
+		fmt.Println("Error reading secret:", err.Error())
+		return
+	}
 
-   //
-   // Retrieve a secret using SPIKE SDK.
-   //
+	if secret == nil {
+		fmt.Println("Secret not found.")
+		return
+	}
 
-   path := "/tenants/demo/db/creds"
-   version := 0
+	fmt.Println("Secret found:")
 
-   secret, err := spike.GetSecret(source, path, version)
-   if err != nil {
-      fmt.Println("Error reading secret:", err.Error())
-      return
-   }
-
-   if secret == nil {
-      fmt.Println("Secret not found.")
-      return
-   }
-
-   fmt.Println("Secret found:")
-   data := secret.Data
-   for k, v := range data {
-      fmt.Printf("%s: %s\n", k, v)
-   }
+	data := secret.Data
+	for k, v := range data {
+		fmt.Printf("%s: %s\n", k, v)
+	}
 }
 ```
 

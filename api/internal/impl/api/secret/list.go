@@ -2,7 +2,7 @@
 //  \\\\\ Copyright 2024-present SPIKE contributors.
 // \\\\\\\ SPDX-License-Identifier: Apache-2.0
 
-package api
+package secret
 
 import (
 	"encoding/json"
@@ -15,7 +15,7 @@ import (
 	"github.com/spiffe/spike-sdk-go/net"
 )
 
-// ListSecretKeys retrieves all secret keys using mTLS authentication.
+// ListKeys retrieves all secret keys using mTLS authentication.
 //
 // Parameters:
 //   - source: X509Source for mTLS client authentication
@@ -27,12 +27,12 @@ import (
 //
 // Example:
 //
-//	keys, err := ListSecretKeys(x509Source)
-func ListSecretKeys(source *workloadapi.X509Source) ([]string, error) {
+//	keys, err := listSecretKeys(x509Source)
+func ListKeys(source *workloadapi.X509Source) (*[]string, error) {
 	r := reqres.SecretListRequest{}
 	mr, err := json.Marshal(r)
 	if err != nil {
-		return []string{}, errors.Join(
+		return nil, errors.Join(
 			errors.New(
 				"listSecretKeys: I am having problem generating the payload",
 			),
@@ -40,31 +40,30 @@ func ListSecretKeys(source *workloadapi.X509Source) ([]string, error) {
 		)
 	}
 
-	var truer = func(string) bool { return true }
-	client, err := net.CreateMtlsClient(source, truer)
+	client, err := net.CreateMtlsClient(source)
 	if err != nil {
-		return []string{}, err
+		return nil, err
 	}
 
 	body, err := net.Post(client, url.SecretList(), mr)
 	if err != nil {
 		if errors.Is(err, net.ErrNotFound) {
-			return []string{}, nil
+			return &[]string{}, nil
 		}
-		return []string{}, err
+		return nil, err
 	}
 
 	var res reqres.SecretListResponse
 	err = json.Unmarshal(body, &res)
 	if err != nil {
-		return []string{}, errors.Join(
+		return nil, errors.Join(
 			errors.New("getSecret: Problem parsing response body"),
 			err,
 		)
 	}
 	if res.Err != "" {
-		return []string{}, errors.New(string(res.Err))
+		return nil, errors.New(string(res.Err))
 	}
 
-	return res.Keys, nil
+	return &res.Keys, nil
 }

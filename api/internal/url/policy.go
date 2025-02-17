@@ -10,7 +10,7 @@ import (
 	"github.com/spiffe/spike-sdk-go/api/internal/env"
 )
 
-// UrlPolicyCreate returns the URL for creating a policy.
+// PolicyCreate returns the URL for creating a policy.
 func PolicyCreate() string {
 	u, _ := url.JoinPath(
 		env.NexusApiRoot(),
@@ -19,7 +19,7 @@ func PolicyCreate() string {
 	return u
 }
 
-// UrlPolicyList returns the URL for listing policies.
+// PolicyList returns the URL for listing policies.
 func PolicyList() string {
 	u, _ := url.JoinPath(
 		env.NexusApiRoot(),
@@ -30,7 +30,7 @@ func PolicyList() string {
 	return u + "?" + params.Encode()
 }
 
-// UrlPolicyDelete returns the URL for deleting a policy.
+// PolicyDelete returns the URL for deleting a policy.
 func PolicyDelete() string {
 	u, _ := url.JoinPath(
 		env.NexusApiRoot(),
@@ -41,7 +41,7 @@ func PolicyDelete() string {
 	return u + "?" + params.Encode()
 }
 
-// UrlPolicyGet returns the URL for getting a policy.
+// PolicyGet returns the URL for getting a policy.
 func PolicyGet() string {
 	u, _ := url.JoinPath(
 		env.NexusApiRoot(),

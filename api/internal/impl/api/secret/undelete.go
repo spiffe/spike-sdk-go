@@ -2,12 +2,11 @@
 //  \\\\\ Copyright 2024-present SPIKE contributors.
 // \\\\\\\ SPDX-License-Identifier: Apache-2.0
 
-package api
+package secret
 
 import (
 	"encoding/json"
 	"errors"
-	"strconv"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 
@@ -16,7 +15,7 @@ import (
 	"github.com/spiffe/spike-sdk-go/net"
 )
 
-// UndeleteSecret restores previously deleted versions of a secret at the
+// Undelete restores previously deleted versions of a secret at the
 // specified path using mTLS authentication.
 //
 // Parameters:
@@ -31,20 +30,12 @@ import (
 //
 // Example:
 //
-//	err := UndeleteSecret(x509Source, "secret/path", []string{"1", "2"})
-func UndeleteSecret(source *workloadapi.X509Source,
-	path string, versions []string) error {
+//	err := undeleteSecret(x509Source, "secret/path", []string{"1", "2"})
+func Undelete(source *workloadapi.X509Source,
+	path string, versions []int) error {
 	var vv []int
 	if len(versions) == 0 {
 		vv = []int{}
-	}
-
-	for _, version := range versions {
-		v, e := strconv.Atoi(version)
-		if e != nil {
-			continue
-		}
-		vv = append(vv, v)
 	}
 
 	r := reqres.SecretUndeleteRequest{
@@ -62,8 +53,7 @@ func UndeleteSecret(source *workloadapi.X509Source,
 		)
 	}
 
-	var truer = func(string) bool { return true }
-	client, err := net.CreateMtlsClient(source, truer)
+	client, err := net.CreateMtlsClient(source)
 	if err != nil {
 		return err
 	}

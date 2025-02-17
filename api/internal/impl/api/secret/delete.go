@@ -1,9 +1,12 @@
-package api
+//    \\ SPIKE: Secure your secrets with SPIFFE.
+//  \\\\\ Copyright 2024-present SPIKE contributors.
+// \\\\\\\ SPDX-License-Identifier: Apache-2.0
+
+package secret
 
 import (
 	"encoding/json"
 	"errors"
-	"strconv"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 
@@ -12,7 +15,7 @@ import (
 	"github.com/spiffe/spike-sdk-go/net"
 )
 
-// DeleteSecret deletes specified versions of a secret at the given path using
+// Delete deletes specified versions of a secret at the given path using
 // mTLS authentication.
 //
 // It converts string version numbers to integers, constructs a delete request,
@@ -30,25 +33,12 @@ import (
 //
 // Example:
 //
-//	err := DeleteSecret(x509Source, "secret/path", []string{"1", "2"})
-func DeleteSecret(source *workloadapi.X509Source,
-	path string, versions []string) error {
-	var vv []int
-	if len(versions) == 0 {
-		vv = []int{}
-	}
-
-	for _, version := range versions {
-		v, e := strconv.Atoi(version)
-		if e != nil {
-			continue
-		}
-		vv = append(vv, v)
-	}
-
+//	err := deleteSecret(x509Source, "secret/path", []string{"1", "2"})
+func Delete(source *workloadapi.X509Source,
+	path string, versions []int) error {
 	r := reqres.SecretDeleteRequest{
 		Path:     path,
-		Versions: vv,
+		Versions: versions,
 	}
 
 	mr, err := json.Marshal(r)
@@ -61,8 +51,7 @@ func DeleteSecret(source *workloadapi.X509Source,
 		)
 	}
 
-	var truer = func(string) bool { return true }
-	client, err := net.CreateMtlsClient(source, truer)
+	client, err := net.CreateMtlsClient(source)
 	if err != nil {
 		return err
 	}

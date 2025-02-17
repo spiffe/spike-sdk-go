@@ -28,11 +28,11 @@ const PermissionSuper PolicyPermission = "super"
 type Policy struct {
 	Id              string             `json:"id"`
 	Name            string             `json:"name"`
-	SpiffeIdPattern string             `json:"spiffe_id_pattern"`
-	PathPattern     string             `json:"path_pattern"`
+	SpiffeIdPattern string             `json:"spiffeIdPattern"`
+	PathPattern     string             `json:"pathPattern"`
 	Permissions     []PolicyPermission `json:"permissions"`
-	CreatedAt       time.Time          `json:"created_at"`
-	CreatedBy       string             `json:"created_by"`
+	CreatedAt       time.Time          `json:"createdAt"`
+	CreatedBy       string             `json:"createdBy"`
 
 	// Unexported fields won't be serialized to JSON
 	IdRegex   *regexp.Regexp `json:"-"`

@@ -4,7 +4,8 @@
 
 package data
 
-type InitState string
-
-const AlreadyInitialized InitState = "AlreadyInitialized"
-const NotInitialized InitState = "NotInitialized"
+type RestorationStatus struct {
+	ShardsCollected int  `json:"collected"`
+	ShardsRemaining int  `json:"remaining"`
+	Restored        bool `json:"restored"`
+}

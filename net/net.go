@@ -56,8 +56,28 @@ func CreateMtlsServer(source *workloadapi.X509Source,
 	return server, nil
 }
 
-// TODO: document.
-func CreateMtlsClient(
+// CreateMtlsClientWithPredicate creates an HTTP client configured for mutual TLS
+// authentication using SPIFFE workload identities.
+// It uses the provided X.509 source for client certificates and validates peer
+// certificates against a predicate function.
+//
+// Parameters:
+//   - source: An X509Source that provides the client's identity certificates
+//     and trusted roots
+//   - predicate: A function that evaluates SPIFFE IDs (as strings) and returns
+//     true if the ID should be trusted
+//
+// Returns:
+//   - *http.Client: A configured HTTP client that will use mTLS for all
+//     connections
+//   - error: An error if the client creation fails
+//
+// The returned client will:
+//   - Present client certificates from the provided X509Source
+//   - Validate peer certificates using the same X509Source
+//   - Only accept peer certificates with SPIFFE IDs that pass the predicate
+//     function
+func CreateMtlsClientWithPredicate(
 	source *workloadapi.X509Source,
 	predicate func(string) bool,
 ) (*http.Client, error) {
@@ -81,16 +101,40 @@ func CreateMtlsClient(
 	return client, nil
 }
 
-// Serve initializes and starts an HTTPS server using mTLS authentication with
-// SPIFFE X.509 certificates. It sets up the server routes using the provided
-// initialization function and listens for incoming connections on the specified
-// port.
+// CreateMtlsClient creates an HTTP client configured for mutual TLS
+// authentication using SPIFFE workload identities.
+// It uses the provided X.509 source for client certificates and validates peer
+// certificates against a predicate function.
+//
+// Parameters:
+//   - source: An X509Source that provides the client's identity certificates
+//     and trusted roots
+//
+// Returns:
+//   - *http.Client: A configured HTTP client that will use mTLS for all
+//     connections
+//   - error: An error if the client creation fails
+//
+// The returned client will:
+//   - Present client certificates from the provided X509Source
+//   - Validate peer certificates using the same X509Source
+//   - Only accept peer certificates with SPIFFE IDs that pass the predicate
+//     function
+func CreateMtlsClient(source *workloadapi.X509Source) (*http.Client, error) {
+	return CreateMtlsClientWithPredicate(source, func(string) bool { return true })
+}
+
+// ServeWithPredicate initializes and starts an HTTPS server using mTLS
+// authentication with SPIFFE X.509 certificates. It sets up the server routes
+// using the provided initialization function and listens for incoming
+// connections on the specified port.
 //
 // Parameters:
 //   - source: An X509Source that provides the server's identity credentials and
 //     validates client certificates. Must not be nil.
 //   - initializeRoutes: A function that sets up the HTTP route handlers for the
 //     server. This function is called before the server starts.
+//   - predicate: a predicate function to pass to CreateMtlsServer.
 //   - tlsPort: The network address and port for the server to listen on
 //     (e.g., ":8443").
 //
@@ -104,7 +148,7 @@ func CreateMtlsClient(
 // The function uses empty strings for the certificate and key file parameters
 // in ListenAndServeTLS as the certificates are provided by the X509Source. The
 // server's mTLS configuration is determined by the CreateMtlsServer function.
-func Serve(source *workloadapi.X509Source,
+func ServeWithPredicate(source *workloadapi.X509Source,
 	initializeRoutes func(),
 	predicate func(string) bool,
 	tlsPort string) error {
@@ -127,4 +171,36 @@ func Serve(source *workloadapi.X509Source,
 	}
 
 	return nil
+}
+
+// Serve initializes and starts an HTTPS server using mTLS
+// authentication with SPIFFE X.509 certificates. It sets up the server routes
+// using the provided initialization function and listens for incoming
+// connections on the specified port.
+//
+// Parameters:
+//   - source: An X509Source that provides the server's identity credentials and
+//     validates client certificates. Must not be nil.
+//   - initializeRoutes: A function that sets up the HTTP route handlers for the
+//     server. This function is called before the server starts.
+//   - tlsPort: The network address and port for the server to listen on
+//     (e.g., ":8443").
+//
+// Returns:
+//   - error: Returns nil if the server starts successfully, otherwise returns
+//     an error explaining the failure. Specific error cases include:
+//   - If source is nil
+//   - If server creation fails
+//   - If the server fails to start or encounters an error while running
+//
+// The function uses empty strings for the certificate and key file parameters
+// in ListenAndServeTLS as the certificates are provided by the X509Source. The
+// server's mTLS configuration is determined by the CreateMtlsServer function.
+func Serve(
+	source *workloadapi.X509Source,
+	initializeRoutes func(),
+	tlsPort string) error {
+	return ServeWithPredicate(
+		source, initializeRoutes,
+		func(string) bool { return true }, tlsPort)
 }
