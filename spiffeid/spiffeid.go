@@ -6,29 +6,33 @@ package spiffeid
 
 import "github.com/spiffe/spike-sdk-go/spiffeid/internal/env"
 
-// SpikeKeeperSpiffeId constructs and returns the SPIKE Keeper's
+// SpikeKeeper constructs and returns the SPIKE Keeper's
 // SPIFFE ID string.
 // The output is constructed based on the trust root from the environment.
-func SpikeKeeperSpiffeId() string {
+func SpikeKeeper() string {
 	return "spiffe://" + env.TrustRoot() + "/spike/keeper"
 }
 
-// SpikeNexusSpiffeId constructs and returns the SPIFFE ID for SPIKE Nexus.
+// SpikeNexus constructs and returns the SPIFFE ID for SPIKE Nexus.
 // The output is constructed based on the trust root from the environment.
-func SpikeNexusSpiffeId() string {
+func SpikeNexus() string {
 	return "spiffe://" + env.TrustRoot() + "/spike/nexus"
 }
 
-// SpikePilotSpiffeId generates the SPIFFE ID for a SPIKE Pilot superuser role.
+// SpikePilot generates the SPIFFE ID for a SPIKE Pilot superuser role.
 // The output is constructed based on the trust root from the environment.
-func SpikePilotSpiffeId() string {
+func SpikePilot() string {
 	return "spiffe://" + env.TrustRoot() + "/spike/pilot/role/superuser"
 }
 
-func SpikePilotRecoverSpiffeId() string {
+// SpikePilotRecover generates the SPIFFE ID for a SPIKE Pilot recovery role.
+// The output is constructed based on the trust root from the environment.
+func SpikePilotRecover() string {
 	return "spiffe://" + env.TrustRoot() + "/spike/pilot/role/recover"
 }
 
-func SpikePilotRestoreSpiffeId() string {
+// SpikePilotRestore generates the SPIFFE ID for a SPIKE Pilot restore role.
+// The output is constructed based on the trust root from the environment.
+func SpikePilotRestore() string {
 	return "spiffe://" + env.TrustRoot() + "/spike/pilot/role/restore"
 }
