@@ -14,7 +14,7 @@ import (
 func Init() string {
 	u, _ := url.JoinPath(
 		env.NexusApiRoot(),
-		string(spikeNexusUrlInit),
+		string(SpikeNexusUrlInit),
 	)
 	return u
 }
@@ -24,7 +24,7 @@ func Init() string {
 func InitState() string {
 	u, _ := url.JoinPath(
 		env.NexusApiRoot(),
-		string(spikeNexusUrlInit),
+		string(SpikeNexusUrlInit),
 	)
 	params := url.Values{}
 	params.Add(keyApiAction, string(actionNexusCheck))

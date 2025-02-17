@@ -13,7 +13,7 @@ import (
 func Restore() string {
 	u, _ := url.JoinPath(
 		env.NexusApiRoot(),
-		string(spikeNexusUrlRestore),
+		string(SpikeNexusUrlRestore),
 	)
 	return u
 }
@@ -21,7 +21,7 @@ func Restore() string {
 func Recover() string {
 	u, _ := url.JoinPath(
 		env.NexusApiRoot(),
-		string(spikeNexusUrlRecover),
+		string(SpikeNexusUrlRecover),
 	)
 	return u
 }
