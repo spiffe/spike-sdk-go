@@ -13,6 +13,8 @@ import (
 
 var ErrNotFound = errors.New("not found")
 var ErrUnauthorized = errors.New("unauthorized")
+var ErrBadRequest = errors.New("bad request")
+var ErrNotReady = errors.New("not ready")
 
 func body(r *http.Response) (bod []byte, err error) {
 	body, err := io.ReadAll(r.Body)
@@ -82,6 +84,15 @@ func Post(client *http.Client, path string, mr []byte) ([]byte, error) {
 
 		if r.StatusCode == http.StatusUnauthorized {
 			return []byte{}, ErrUnauthorized
+		}
+
+		if r.StatusCode == http.StatusBadRequest {
+			return []byte{}, ErrBadRequest
+		}
+
+		// SPIKE Nexus is likely not initialized or in bad shape:
+		if r.StatusCode == http.StatusServiceUnavailable {
+			return []byte{}, ErrNotReady
 		}
 
 		return []byte{}, errors.New("post: Problem connecting to peer")
