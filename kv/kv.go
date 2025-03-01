@@ -10,13 +10,13 @@ type KV struct {
 	data              map[string]*Value
 }
 
-// KVConfig represents the configuration for a KV instance
-type KVConfig struct {
+// Config represents the configuration for a KV instance
+type Config struct {
 	MaxSecretVersions int
 }
 
-// NewKV creates a new KV instance
-func NewKV(config KVConfig) *KV {
+// New creates a new KV instance
+func New(config Config) *KV {
 	return &KV{
 		maxSecretVersions: config.MaxSecretVersions,
 		data:              make(map[string]*Value),
