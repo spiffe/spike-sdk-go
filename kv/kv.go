@@ -7,7 +7,7 @@ package kv
 // KV represents an in-memory key-value store with versioning
 type KV struct {
 	maxSecretVersions int
-	data              map[string]*Secret
+	data              map[string]*Value
 }
 
 // KVConfig represents the configuration for a KV instance
@@ -19,6 +19,6 @@ type KVConfig struct {
 func NewKV(config KVConfig) *KV {
 	return &KV{
 		maxSecretVersions: config.MaxSecretVersions,
-		data:              make(map[string]*Secret),
+		data:              make(map[string]*Value),
 	}
 }

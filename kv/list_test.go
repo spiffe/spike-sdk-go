@@ -12,7 +12,7 @@ func TestKV_List(t *testing.T) {
 			name: "empty_store",
 			setup: func() *KV {
 				return &KV{
-					data: make(map[string]*Secret),
+					data: make(map[string]*Value),
 				}
 			},
 			want: []string{},
@@ -21,7 +21,7 @@ func TestKV_List(t *testing.T) {
 			name: "non_empty_store",
 			setup: func() *KV {
 				return &KV{
-					data: map[string]*Secret{
+					data: map[string]*Value{
 						"test/path": {
 							Metadata: Metadata{
 								CurrentVersion: 1,

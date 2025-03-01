@@ -19,9 +19,9 @@ func TestKV_Undelete(t *testing.T) {
 			name: "undelete latest version if no versions specified",
 			setup: func() *KV {
 				kv := &KV{
-					data: make(map[string]*Secret),
+					data: make(map[string]*Value),
 				}
-				kv.data["test/path"] = &Secret{
+				kv.data["test/path"] = &Value{
 					Metadata: Metadata{
 						CurrentVersion: 1,
 					},
@@ -43,9 +43,9 @@ func TestKV_Undelete(t *testing.T) {
 			name: "undelete spesific versions",
 			setup: func() *KV {
 				kv := &KV{
-					data: make(map[string]*Secret),
+					data: make(map[string]*Value),
 				}
-				kv.data["test/path"] = &Secret{
+				kv.data["test/path"] = &Value{
 					Metadata: Metadata{
 						CurrentVersion: 2,
 					},
@@ -72,7 +72,7 @@ func TestKV_Undelete(t *testing.T) {
 			name: "if secret does not exist",
 			setup: func() *KV {
 				return &KV{
-					data:              make(map[string]*Secret),
+					data:              make(map[string]*Value),
 					maxSecretVersions: 10,
 				}
 			},
@@ -85,9 +85,9 @@ func TestKV_Undelete(t *testing.T) {
 			name: "skip non-existent versions",
 			setup: func() *KV {
 				kv := &KV{
-					data: make(map[string]*Secret),
+					data: make(map[string]*Value),
 				}
-				kv.data["test/path"] = &Secret{
+				kv.data["test/path"] = &Value{
 					Metadata: Metadata{
 						CurrentVersion: 1,
 					},
@@ -109,9 +109,9 @@ func TestKV_Undelete(t *testing.T) {
 			name: "skip non-existent versions",
 			setup: func() *KV {
 				kv := &KV{
-					data: make(map[string]*Secret),
+					data: make(map[string]*Value),
 				}
-				kv.data["test/path"] = &Secret{
+				kv.data["test/path"] = &Value{
 					Metadata: Metadata{
 						CurrentVersion: 2,
 					},
@@ -133,9 +133,9 @@ func TestKV_Undelete(t *testing.T) {
 			name: "if version is 0 undelete current version",
 			setup: func() *KV {
 				kv := &KV{
-					data: make(map[string]*Secret),
+					data: make(map[string]*Value),
 				}
-				kv.data["test/path"] = &Secret{
+				kv.data["test/path"] = &Value{
 					Metadata: Metadata{
 						CurrentVersion: 1,
 					},

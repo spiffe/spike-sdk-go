@@ -61,16 +61,16 @@ func (kv *KV) Get(path string, version int) (map[string]string, error) {
 }
 
 // GetRawSecret retrieves a raw secret from the store at the specified path.
-// This function is similar to Get, but it returns the raw Secret object instead
+// This function is similar to Get, but it returns the raw Value object instead
 // of the key-value data map.
 //
 // Parameters:
 // - path: The path to retrieve the secret from
 //
 // Returns:
-//   - *Secret: The secret at the specified path, or nil if it doesn't exist
+//   - *Value: The secret at the specified path, or nil if it doesn't exist
 //     or has been deleted.
-func (kv *KV) GetRawSecret(path string) (*Secret, error) {
+func (kv *KV) GetRawSecret(path string) (*Value, error) {
 	secret, exists := kv.data[path]
 	if !exists {
 		return nil, ErrItemNotFound

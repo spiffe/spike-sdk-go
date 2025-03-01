@@ -16,7 +16,7 @@ func TestKV_Delete(t *testing.T) {
 			name: "non_existent_path",
 			setup: func() *KV {
 				return &KV{
-					data: make(map[string]*Secret),
+					data: make(map[string]*Value),
 				}
 			},
 			path:     "non/existent/path",
@@ -27,9 +27,9 @@ func TestKV_Delete(t *testing.T) {
 			name: "delete_current_version_no_versions_specified",
 			setup: func() *KV {
 				kv := &KV{
-					data: make(map[string]*Secret),
+					data: make(map[string]*Value),
 				}
-				kv.data["test/path"] = &Secret{
+				kv.data["test/path"] = &Value{
 					Metadata: Metadata{
 						CurrentVersion: 1,
 					},
@@ -51,9 +51,9 @@ func TestKV_Delete(t *testing.T) {
 			name: "delete_specific_versions",
 			setup: func() *KV {
 				kv := &KV{
-					data: make(map[string]*Secret),
+					data: make(map[string]*Value),
 				}
-				kv.data["test/path"] = &Secret{
+				kv.data["test/path"] = &Value{
 					Metadata: Metadata{
 						CurrentVersion: 2,
 					},
@@ -91,7 +91,7 @@ func TestKV_Delete(t *testing.T) {
 			if tt.wantErr == nil {
 				secret, exists := kv.data[tt.path]
 				if !exists {
-					t.Errorf("Secret should still exist after deletion")
+					t.Errorf("Value should still exist after deletion")
 					return
 				}
 
