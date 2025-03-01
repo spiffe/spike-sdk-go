@@ -35,7 +35,7 @@ func (kv *KV) Put(path string, values map[string]string) {
 
 	secret, exists := kv.data[path]
 	if !exists {
-		secret = &Secret{
+		secret = &Value{
 			Versions: make(map[int]Version),
 			Metadata: Metadata{
 				CreatedTime: rightNow,

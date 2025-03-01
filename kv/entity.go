@@ -44,10 +44,10 @@ type Metadata struct {
 	MaxVersions int
 }
 
-// Secret represents a versioned collection of key-value pairs stored at a
+// Value represents a versioned collection of key-value pairs stored at a
 // specific path. It maintains both the version history and metadata about the
 // collection as a whole.
-type Secret struct {
+type Value struct {
 	// Versions maps version numbers to their corresponding Version objects
 	Versions map[int]Version
 

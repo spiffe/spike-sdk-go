@@ -16,7 +16,7 @@ func TestKV_Put(t *testing.T) {
 		{
 			setup: func() *KV {
 				return &KV{
-					data:              make(map[string]*Secret),
+					data:              make(map[string]*Value),
 					maxSecretVersions: 10,
 				}
 			},
@@ -29,7 +29,7 @@ func TestKV_Put(t *testing.T) {
 		{
 			name: "it creates a new version with an incremented version number",
 			setup: func() *KV {
-				kv := &KV{data: make(map[string]*Secret), maxSecretVersions: 10}
+				kv := &KV{data: make(map[string]*Value), maxSecretVersions: 10}
 				kv.Put("existing/secret/path", map[string]string{"key": "value1"})
 				return kv
 			},
@@ -40,7 +40,7 @@ func TestKV_Put(t *testing.T) {
 		{
 			name: "it automatically prunes old versions when exceeding MaxVersions",
 			setup: func() *KV {
-				kv := &KV{data: make(map[string]*Secret), maxSecretVersions: 2}
+				kv := &KV{data: make(map[string]*Value), maxSecretVersions: 2}
 				kv.Put("prune/old/versions", map[string]string{"key": "value1"})
 				kv.Put("prune/old/versions", map[string]string{"key": "value2"})
 				kv.Put("prune/old/versions", map[string]string{"key": "value3"})
@@ -56,7 +56,7 @@ func TestKV_Put(t *testing.T) {
 		{
 			name: "it updates timestamps for both creation and modification times",
 			setup: func() *KV {
-				kv := &KV{data: make(map[string]*Secret), maxSecretVersions: 10}
+				kv := &KV{data: make(map[string]*Value), maxSecretVersions: 10}
 				kv.Put("update/timestamps", map[string]string{"key": "value1"})
 				return kv
 			},

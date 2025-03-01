@@ -18,7 +18,7 @@ func TestKV_Get(t *testing.T) {
 			name: "non_existent_path",
 			setup: func() *KV {
 				return &KV{
-					data: make(map[string]*Secret),
+					data: make(map[string]*Value),
 				}
 			},
 			path:    "non/existent/path",
@@ -30,9 +30,9 @@ func TestKV_Get(t *testing.T) {
 			name: "get_current_version",
 			setup: func() *KV {
 				kv := &KV{
-					data: make(map[string]*Secret),
+					data: make(map[string]*Value),
 				}
-				kv.data["test/path"] = &Secret{
+				kv.data["test/path"] = &Value{
 					Metadata: Metadata{
 						CurrentVersion: 1,
 					},
@@ -58,9 +58,9 @@ func TestKV_Get(t *testing.T) {
 			name: "get_specific_version",
 			setup: func() *KV {
 				kv := &KV{
-					data: make(map[string]*Secret),
+					data: make(map[string]*Value),
 				}
-				kv.data["test/path"] = &Secret{
+				kv.data["test/path"] = &Value{
 					Metadata: Metadata{
 						CurrentVersion: 2,
 					},
@@ -93,9 +93,9 @@ func TestKV_Get(t *testing.T) {
 			setup: func() *KV {
 				deletedTime := time.Now()
 				kv := &KV{
-					data: make(map[string]*Secret),
+					data: make(map[string]*Value),
 				}
-				kv.data["test/path"] = &Secret{
+				kv.data["test/path"] = &Value{
 					Metadata: Metadata{
 						CurrentVersion: 1,
 					},
@@ -120,9 +120,9 @@ func TestKV_Get(t *testing.T) {
 			name: "non_existent_version",
 			setup: func() *KV {
 				kv := &KV{
-					data: make(map[string]*Secret),
+					data: make(map[string]*Value),
 				}
-				kv.data["test/path"] = &Secret{
+				kv.data["test/path"] = &Value{
 					Metadata: Metadata{
 						CurrentVersion: 1,
 					},
@@ -174,14 +174,14 @@ func TestKV_GetRawSecret(t *testing.T) {
 		name    string
 		setup   func() *KV
 		path    string
-		want    *Secret
+		want    *Value
 		wantErr error
 	}{
 		{
 			name: "non_existent_path",
 			setup: func() *KV {
 				return &KV{
-					data: make(map[string]*Secret),
+					data: make(map[string]*Value),
 				}
 			},
 			path:    "non/existent/path",
@@ -191,7 +191,7 @@ func TestKV_GetRawSecret(t *testing.T) {
 		{
 			name: "existing_secret",
 			setup: func() *KV {
-				secret := &Secret{
+				secret := &Value{
 					Metadata: Metadata{
 						CurrentVersion: 1,
 					},
@@ -205,13 +205,13 @@ func TestKV_GetRawSecret(t *testing.T) {
 					},
 				}
 				kv := &KV{
-					data: make(map[string]*Secret),
+					data: make(map[string]*Value),
 				}
 				kv.data["test/path"] = secret
 				return kv
 			},
 			path: "test/path",
-			want: &Secret{
+			want: &Value{
 				Metadata: Metadata{
 					CurrentVersion: 1,
 				},
