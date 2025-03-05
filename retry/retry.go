@@ -239,8 +239,8 @@ type Handler[T any] func() (T, error)
 //	result, err := Do(ctx, func() (string, error) {
 //	    return fetchData()
 //	})
-func Do[T any](ctx context.Context, handler Handler[T]) (T, error) {
+func Do[T any](ctx context.Context, handler Handler[T], options ...RetrierOption) (T, error) {
 	return NewTypedRetrier[T](
-		NewExponentialRetrier(),
+		NewExponentialRetrier(options...),
 	).RetryWithBackoff(ctx, handler)
 }
