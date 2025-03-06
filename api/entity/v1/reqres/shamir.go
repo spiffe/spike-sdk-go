@@ -7,8 +7,8 @@ import "github.com/spiffe/spike-sdk-go/api/entity/data"
 // Shard represents the shard data being contributed to the system.
 // Version optionally specifies the version of the shard being submitted.
 type ShardContributionRequest struct {
-	KeeperId string `json:"id"`
-	Shard    string `json:"shard"`
+	KeeperId string   `json:"id"`
+	Shard    [32]byte `json:"shard"`
 }
 
 // ShardContributionResponse represents the response structure for a shard
@@ -24,6 +24,6 @@ type ShardRequest struct {
 // ShardResponse represents the result of an operation on a specific data shard.
 // The struct includes the shard identifier and an associated error code.
 type ShardResponse struct {
-	Shard string `json:"shard"`
+	Shard [32]byte `json:"shard"`
 	Err   data.ErrorCode
 }
