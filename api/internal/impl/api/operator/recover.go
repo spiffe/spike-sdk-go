@@ -34,7 +34,7 @@ import (
 // Example:
 //
 //	shards, err := Recover(x509Source)
-func Recover(source *workloadapi.X509Source) (*[][32]byte, error) {
+func Recover(source *workloadapi.X509Source) (map[int]*[32]byte, error) {
 	r := reqres.RecoverRequest{}
 
 	mr, err := json.Marshal(r)
@@ -70,5 +70,11 @@ func Recover(source *workloadapi.X509Source) (*[][32]byte, error) {
 		return nil, errors.New(string(res.Err))
 	}
 
-	return &res.Shards, nil
+	result := make(map[int]*[32]byte)
+
+	for i, shard := range res.Shards {
+		result[i] = &shard
+	}
+
+	return result, nil
 }

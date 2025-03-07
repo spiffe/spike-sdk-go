@@ -7,6 +7,7 @@ package reqres
 import "github.com/spiffe/spike-sdk-go/api/entity/data"
 
 type RestoreRequest struct {
+	Id    int      `json:"id"`
 	Shard [32]byte `json:"shard"`
 }
 type RestoreResponse struct {
@@ -18,6 +19,6 @@ type RecoverRequest struct {
 }
 
 type RecoverResponse struct {
-	Shards [][32]byte     `json:"shards"`
-	Err    data.ErrorCode `json:"err,omitempty"`
+	Shards map[int][32]byte `json:"shards"`
+	Err    data.ErrorCode   `json:"err,omitempty"`
 }
