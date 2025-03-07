@@ -34,7 +34,7 @@ import (
 // Example:
 //
 //	shards, err := Recover(x509Source)
-func Recover(source *workloadapi.X509Source) (*[]string, error) {
+func Recover(source *workloadapi.X509Source) (*[][32]byte, error) {
 	r := reqres.RecoverRequest{}
 
 	mr, err := json.Marshal(r)

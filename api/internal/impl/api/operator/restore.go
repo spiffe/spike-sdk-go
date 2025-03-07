@@ -36,11 +36,16 @@ import (
 //
 //	status, err := Restore(x509Source, "randomshardentry")
 func Restore(
-	source *workloadapi.X509Source, shard string,
+	source *workloadapi.X509Source, shard *[32]byte,
 ) (*data.RestorationStatus, error) {
-	r := reqres.RestoreRequest{Shard: shard}
+	r := reqres.RestoreRequest{Shard: *shard}
 
 	mr, err := json.Marshal(r)
+	// Security: Zero out r.Shard as soon as we're done with it
+	for i := range r.Shard {
+		r.Shard[i] = 0
+	}
+
 	if err != nil {
 		return nil, errors.Join(
 			errors.New("restore: failed to marshal recover request"),
@@ -50,10 +55,19 @@ func Restore(
 
 	client, err := net.CreateMtlsClient(source)
 	if err != nil {
+		// Security: Zero out mr before returning error
+		for i := range mr {
+			mr[i] = 0
+		}
 		return nil, err
 	}
 
 	body, err := net.Post(client, url.Restore(), mr)
+	// Security: Zero out mr after post request is complete
+	for i := range mr {
+		mr[i] = 0
+	}
+
 	if err != nil {
 		if errors.Is(err, net.ErrNotFound) {
 			return nil, nil
