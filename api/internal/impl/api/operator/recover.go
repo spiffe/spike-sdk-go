@@ -73,7 +73,7 @@ func Recover(source *workloadapi.X509Source) (map[int]*[32]byte, error) {
 	result := make(map[int]*[32]byte)
 
 	for i, shard := range res.Shards {
-		result[i] = &shard
+		result[i] = shard
 	}
 
 	return result, nil

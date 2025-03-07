@@ -41,7 +41,7 @@ func Restore(
 ) (*data.RestorationStatus, error) {
 	r := reqres.RestoreRequest{
 		Id:    shardIndex,
-		Shard: *shardValue,
+		Shard: shardValue,
 	}
 
 	mr, err := json.Marshal(r)
