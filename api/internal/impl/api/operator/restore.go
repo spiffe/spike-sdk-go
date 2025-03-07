@@ -19,12 +19,13 @@ import (
 // Restore submits a recovery shard to continue the restoration process.
 //
 // Parameters:
-//   - source: X509Source used for mTLS client authentication
-//   - shard: Recovery shard identifier to submit
+//   - source *workloadapi.X509Source: X509Source used for mTLS client
+//     authentication
+//   - shard *[32]byte: Pointer to a 32-byte array containing the recovery shard
 //
 // Returns:
-//   - *RestorationStatus: Status containing shards collected, remaining, and
-//     restoration state if successful, nil if not found
+//   - *data.RestorationStatus: Status containing shards collected, remaining,
+//     and restoration state if successful, nil if not found
 //   - error: nil on success, error if:
 //   - Failed to marshal restore request
 //   - Failed to create mTLS client
@@ -34,7 +35,7 @@ import (
 //
 // Example:
 //
-//	status, err := Restore(x509Source, "randomshardentry")
+//	status, err := Restore(x509Source, shardPtr)
 func Restore(
 	source *workloadapi.X509Source, shard *[32]byte,
 ) (*data.RestorationStatus, error) {

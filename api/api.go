@@ -49,11 +49,12 @@ func (a *Api) Close() {
 // to the server.
 //
 // The function takes the following parameters:
-//   - name: The name of the policy to be created
-//   - spiffeIdPattern: The SPIFFE ID pattern that this policy will apply to
-//   - pathPattern: The path pattern that this policy will match against
-//   - permissions: A slice of PolicyPermission defining the access rights for
-//     this policy
+//   - name string: The name of the policy to be created
+//   - spiffeIdPattern string: The SPIFFE ID pattern that this policy will apply
+//     to
+//   - pathPattern string: The path pattern that this policy will match against
+//   - permissions []data.PolicyPermission: A slice of PolicyPermission defining
+//     the access rights for this policy
 //
 // The function returns an error if any of the following operations fail:
 //   - Marshaling the policy creation request
@@ -71,7 +72,7 @@ func (a *Api) Close() {
 //	    },
 //	}
 //
-//	err = CreatePolicy(
+//	err = api.CreatePolicy(
 //	    "doc-reader",
 //	    "spiffe://example.org/service/*",
 //	    "/api/documents/*",
@@ -89,10 +90,10 @@ func (a *Api) CreatePolicy(
 		name, spiffeIdPattern, pathPattern, permissions)
 }
 
-// DeletePolicy removes an existing policy from the system using its Id.
+// DeletePolicy removes an existing policy from the system using its name.
 //
 // The function takes the following parameters:
-//   - id: The unique identifier of the policy to be deleted
+//   - name string: The name of the policy to be deleted
 //
 // The function returns an error if any of the following operations fail:
 //   - Marshaling the policy deletion request
@@ -103,7 +104,7 @@ func (a *Api) CreatePolicy(
 //
 // Example usage:
 //
-//	err = DeletePolicy("policy-123")
+//	err = api.DeletePolicy("doc-reader")
 //	if err != nil {
 //	    log.Printf("Failed to delete policy: %v", err)
 //	    return
@@ -112,10 +113,10 @@ func (a *Api) DeletePolicy(name string) error {
 	return acl.DeletePolicy(a.source, name)
 }
 
-// GetPolicy retrieves a policy from the system using its Id.
+// GetPolicy retrieves a policy from the system using its name.
 //
 // The function takes the following parameters:
-//   - id: The unique identifier of the policy to retrieve
+//   - name string: The name of the policy to retrieve
 //
 // The function returns:
 //   - (*data.Policy, nil) if the policy is found
@@ -131,7 +132,7 @@ func (a *Api) DeletePolicy(name string) error {
 //
 // Example usage:
 //
-//	policy, err := GetPolicy("policy-123")
+//	policy, err := api.GetPolicy("doc-reader")
 //	if err != nil {
 //	    log.Printf("Error retrieving policy: %v", err)
 //	    return
@@ -166,13 +167,7 @@ func (a *Api) GetPolicy(name string) (*data.Policy, error) {
 //
 // Example usage:
 //
-//	source, err := workloadapi.NewX509Source(context.Background())
-//	if err != nil {
-//	    log.Fatal(err)
-//	}
-//	defer source.Close()
-//
-//	result, err := ListPolicies(source)
+//	result, err := api.ListPolicies()
 //	if err != nil {
 //	    log.Printf("Error listing policies: %v", err)
 //	    return
@@ -193,13 +188,11 @@ func (a *Api) ListPolicies() (*[]data.Policy, error) {
 // DeleteSecretVersions deletes specified versions of a secret at the given
 // path
 //
-// It converts string version numbers to integers, constructs a delete request,
-// and sends it to the secrets API endpoint. If no versions are specified or
-// conversion fails, no versions will be deleted.
+// It constructs a delete request and sends it to the secrets API endpoint.
 //
 // Parameters:
-//   - path: Path to the secret to delete
-//   - versions: String array of version numbers to delete
+//   - path string: Path to the secret to delete
+//   - versions []int: Array of version numbers to delete
 //
 // Returns:
 //   - error: nil on success, unauthorized error if not logged in, or wrapped
@@ -207,20 +200,15 @@ func (a *Api) ListPolicies() (*[]data.Policy, error) {
 //
 // Example:
 //
-//	err := DeleteSecretVersions("secret/path", []string{"1", "2"})
+//	err := api.DeleteSecretVersions("secret/path", []int{1, 2})
 func (a *Api) DeleteSecretVersions(path string, versions []int) error {
 	return secret.Delete(a.source, path, versions)
 }
 
-// DeleteSecret deletes specified secret at the given path
-//
-// It converts string version numbers to integers, constructs a delete request,
-// and sends it to the secrets API endpoint. If no versions are specified or
-// conversion fails, no versions will be deleted.
+// DeleteSecret deletes the entire secret at the given path
 //
 // Parameters:
-//   - path: Path to the secret to delete
-//   - versions: String array of version numbers to delete
+//   - path string: Path to the secret to delete
 //
 // Returns:
 //   - error: nil on success, unauthorized error if not logged in, or wrapped
@@ -228,7 +216,7 @@ func (a *Api) DeleteSecretVersions(path string, versions []int) error {
 //
 // Example:
 //
-//	err := Delete("secret/path")
+//	err := api.DeleteSecret("secret/path")
 func (a *Api) DeleteSecret(path string) error {
 	return secret.Delete(a.source, path, []int{})
 }
@@ -237,36 +225,36 @@ func (a *Api) DeleteSecret(path string) error {
 // path.
 //
 // Parameters:
-//   - path: Path to the secret to retrieve
-//   - version: Version number of the secret to retrieve
+//   - path string: Path to the secret to retrieve
+//   - version int: Version number of the secret to retrieve
 //
 // Returns:
-//   - *Secret: Secret data if found, nil if secret not found
+//   - *data.Secret: Secret data if found, nil if secret not found
 //   - error: nil on success, unauthorized error if not logged in, or
 //     wrapped error on request/parsing failure
 //
 // Example:
 //
-//	secret, err := GetSecretVersion("secret/path", 1)
+//	secret, err := api.GetSecretVersion("secret/path", 1)
 func (a *Api) GetSecretVersion(
 	path string, version int,
 ) (*data.Secret, error) {
 	return secret.Get(a.source, path, version)
 }
 
-// GetSecret retrieves the secret at the given path.
+// GetSecret retrieves the latest version of the secret at the given path.
 //
 // Parameters:
-//   - path: Path to the secret to retrieve
+//   - path string: Path to the secret to retrieve
 //
 // Returns:
-//   - *Secret: Secret data if found, nil if secret not found
+//   - *data.Secret: Secret data if found, nil if secret not found
 //   - error: nil on success, unauthorized error if not logged in, or
 //     wrapped error on request/parsing failure
 //
 // Example:
 //
-//	secret, err := Get("secret/path")
+//	secret, err := api.GetSecret("secret/path")
 func (a *Api) GetSecret(path string) (*data.Secret, error) {
 	return secret.Get(a.source, path, 0)
 }
@@ -274,32 +262,32 @@ func (a *Api) GetSecret(path string) (*data.Secret, error) {
 // ListSecretKeys retrieves all secret keys.
 //
 // Returns:
-//   - []string: Array of secret keys if found, empty array if none found
+//   - *[]string: Pointer to array of secret keys if found, nil if none found
 //   - error: nil on success, unauthorized error if not logged in, or
 //     wrapped error on request/parsing failure
 //
 // Example:
 //
-//	keys, err := ListKeys()
+//	keys, err := api.ListSecretKeys()
 func (a *Api) ListSecretKeys() (*[]string, error) {
 	return secret.ListKeys(a.source)
 }
 
-// GetSecretMetadata retrieves a specific version of a secret metadata at the
-// given path.
+// GetSecretMetadata retrieves metadata for a specific version of a secret at
+// the given path.
 //
 // Parameters:
-//   - path: Path to the secret to retrieve
-//   - version: Version number of the secret to retrieve
+//   - path string: Path to the secret to retrieve metadata for
+//   - version int: Version number of the secret to retrieve metadata for
 //
 // Returns:
-//   - *Secret: Secret metadata if found, nil if secret not found
+//   - *data.SecretMetadata: Secret metadata if found, nil if secret not found
 //   - error: nil on success, unauthorized error if not logged in, or
 //     wrapped error on request/parsing failure
 //
 // Example:
 //
-//	metadata, err := GetMetadata("secret/path", 1)
+//	metadata, err := api.GetSecretMetadata("secret/path", 1)
 func (a *Api) GetSecretMetadata(
 	path string, version int,
 ) (*data.SecretMetadata, error) {
@@ -310,8 +298,9 @@ func (a *Api) GetSecretMetadata(
 // values.
 //
 // Parameters:
-//   - path: Path where the secret should be stored
-//   - values: Map of key-value pairs representing the secret data
+//   - path string: Path where the secret should be stored
+//   - data map[string]string: Map of key-value pairs representing the secret
+//     data
 //
 // Returns:
 //   - error: nil on success, unauthorized error if not logged in, or
@@ -319,7 +308,7 @@ func (a *Api) GetSecretMetadata(
 //
 // Example:
 //
-//	err := Put("secret/path", map[string]string{"key": "value"})
+//	err := api.PutSecret("secret/path", map[string]string{"key": "value"})
 func (a *Api) PutSecret(path string, data map[string]string) error {
 	return secret.Put(a.source, path, data)
 }
@@ -328,8 +317,8 @@ func (a *Api) PutSecret(path string, data map[string]string) error {
 // specified path.
 //
 // Parameters:
-//   - path: Path to the secret to restore
-//   - versions: String array of version numbers to restore. Empty array
+//   - path string: Path to the secret to restore
+//   - versions []int: Array of version numbers to restore. Empty array
 //     attempts no restoration
 //
 // Returns:
@@ -338,26 +327,26 @@ func (a *Api) PutSecret(path string, data map[string]string) error {
 //
 // Example:
 //
-//	err := Undelete("secret/path", []string{"1", "2"})
+//	err := api.UndeleteSecret("secret/path", []int{1, 2})
 func (a *Api) UndeleteSecret(path string, versions []int) error {
 	return secret.Undelete(a.source, path, versions)
 }
 
-// Recover return recovery partitions for SPIKE Nexus to be used in a
+// Recover returns recovery partitions for SPIKE Nexus to be used in a
 // break-the-glass recovery operation if SPIKE Nexus auto-recovery mechanism
 // isn't successful.
 //
-// The returned shared are sensitive and should be securely stored out-of-band
+// The returned shards are sensitive and should be securely stored out-of-band
 // in encrypted form.
 //
 // Returns:
-//   - []string: Array of recovery shards
+//   - *[][32]byte: Pointer to array of recovery shards as 32-byte arrays
 //   - error: nil on success, unauthorized error if not authorized, or
 //     wrapped error on request/parsing failure
 //
 // Example:
 //
-//	shards, err := Recover()
+//	shards, err := api.Recover()
 func (a *Api) Recover() (*[][32]byte, error) {
 	return operator.Recover(a.source)
 }
@@ -369,16 +358,16 @@ func (a *Api) Recover() (*[][32]byte, error) {
 // SPIKE deployment should not need.
 //
 // Parameters:
-//   - shard: the shared to seed.
+//   - shard *[32]byte: Pointer to a 32-byte array containing the shard to seed
 //
 // Returns:
-//   - *RestorationStatus: Status of the restoration process if successful
+//   - *data.RestorationStatus: Status of the restoration process if successful
 //   - error: nil on success, unauthorized error if not authorized, or
 //     wrapped error on request/parsing failure
 //
 // Example:
 //
-//	status, err := Restore("randomShardString")
+//	status, err := api.Restore(shardPtr)
 func (a *Api) Restore(shard *[32]byte) (*data.RestorationStatus, error) {
 	return operator.Restore(a.source, shard)
 }
