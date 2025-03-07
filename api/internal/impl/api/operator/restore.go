@@ -37,9 +37,12 @@ import (
 //
 //	status, err := Restore(x509Source, shardPtr)
 func Restore(
-	source *workloadapi.X509Source, shard *[32]byte,
+	source *workloadapi.X509Source, shardIndex int, shardValue *[32]byte,
 ) (*data.RestorationStatus, error) {
-	r := reqres.RestoreRequest{Shard: *shard}
+	r := reqres.RestoreRequest{
+		Id:    shardIndex,
+		Shard: *shardValue,
+	}
 
 	mr, err := json.Marshal(r)
 	// Security: Zero out r.Shard as soon as we're done with it

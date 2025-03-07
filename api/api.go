@@ -347,7 +347,7 @@ func (a *Api) UndeleteSecret(path string, versions []int) error {
 // Example:
 //
 //	shards, err := api.Recover()
-func (a *Api) Recover() (*[][32]byte, error) {
+func (a *Api) Recover() (map[int]*[32]byte, error) {
 	return operator.Recover(a.source)
 }
 
@@ -368,6 +368,6 @@ func (a *Api) Recover() (*[][32]byte, error) {
 // Example:
 //
 //	status, err := api.Restore(shardPtr)
-func (a *Api) Restore(shard *[32]byte) (*data.RestorationStatus, error) {
-	return operator.Restore(a.source, shard)
+func (a *Api) Restore(index int, shard *[32]byte) (*data.RestorationStatus, error) {
+	return operator.Restore(a.source, index, shard)
 }
