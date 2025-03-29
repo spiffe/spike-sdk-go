@@ -49,6 +49,17 @@ func Clear[T any](s *T) {
 	runtime.KeepAlive(s)
 }
 
+// Zeroed32 checks if a 32-byte array contains only zero values.
+// Returns true if all bytes are zero, false otherwise.
+func Zeroed32(ar *[32]byte) bool {
+	for _, v := range ar {
+		if v != 0 {
+			return false
+		}
+	}
+	return true
+}
+
 // ClearBytes securely erases a byte slice by overwriting all bytes with zeros.
 // This is a convenience wrapper around Clear for byte slices.
 //
