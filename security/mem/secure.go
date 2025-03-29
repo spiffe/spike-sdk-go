@@ -6,6 +6,7 @@
 package mem
 
 import (
+	"crypto/rand"
 	"runtime"
 	"unsafe"
 )
@@ -46,6 +47,84 @@ func Clear[T any](s *T) {
 	}
 
 	// Make sure the data is actually wiped before gc has time to interfere
+	runtime.KeepAlive(s)
+}
+
+// ClearParanoid provides a more thorough memory wiping method for
+// highly-sensitive data.
+//
+// It performs multiple passes using different patterns (zeros, ones,
+// random data, and alternating bits) to minimize potential data remanence
+// concerns from sophisticated physical memory attacks.
+//
+// This method is designed for extremely security-sensitive applications where:
+//  1. An attacker might have physical access to RAM
+//  2. Cold boot attacks or specialized memory forensics equipment might be
+//     employed
+//  3. The data being protected is critically sensitive (e.g., high-value
+//     encryption keys)
+//
+// For most applications, the standard Clear() method is sufficient as:
+//   - Modern RAM technologies (DDR4/DDR5) make data remanence attacks
+//     increasingly difficult
+//   - Successful attacks typically require specialized equipment and immediate
+//     (sub-second) physical access.
+//   - The time window for such attacks is extremely short after power loss
+//   - The detectable signal from previous memory states diminishes rapidly with
+//     a single overwrite
+//
+// This method is provided for users with extreme security requirements or in
+// regulated environments where multiple-pass overwrite policies are mandated.
+func ClearParanoid[T any](s *T) {
+	if s == nil {
+		return
+	}
+
+	p := unsafe.Pointer(s)
+	size := unsafe.Sizeof(*s)
+	b := (*[1 << 30]byte)(p)[:size:size]
+
+	// Pattern overwrite cycles:
+	// 1. All zeros
+	// 2. All ones (0xFF)
+	// 3. Random data
+	// 4. Alternating 0x55/0xAA (01010101/10101010)
+	// 5. Final zero out
+
+	// Zero out all bytes (first pass)
+	for i := range b {
+		b[i] = 0
+	}
+	runtime.KeepAlive(s)
+
+	// Fill with ones (second pass)
+	for i := range b {
+		b[i] = 0xFF
+	}
+	runtime.KeepAlive(s)
+
+	// Fill with random data (third pass)
+	_, err := rand.Read(b)
+	if err != nil {
+		panic("")
+		return
+	}
+	runtime.KeepAlive(s)
+
+	// Alternating bit pattern (fourth pass)
+	for i := range b {
+		if i%2 == 0 {
+			b[i] = 0x55 // 01010101
+		} else {
+			b[i] = 0xAA // 10101010
+		}
+	}
+	runtime.KeepAlive(s)
+
+	// Final zero out (fifth pass)
+	for i := range b {
+		b[i] = 0
+	}
 	runtime.KeepAlive(s)
 }
 
