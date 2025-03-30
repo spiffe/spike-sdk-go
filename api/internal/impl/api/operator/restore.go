@@ -7,12 +7,12 @@ package operator
 import (
 	"encoding/json"
 	"errors"
-	"github.com/spiffe/spike-sdk-go/api/url"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 
 	"github.com/spiffe/spike-sdk-go/api/entity/data"
 	"github.com/spiffe/spike-sdk-go/api/entity/v1/reqres"
+	"github.com/spiffe/spike-sdk-go/api/url"
 	"github.com/spiffe/spike-sdk-go/net"
 )
 
@@ -21,7 +21,9 @@ import (
 // Parameters:
 //   - source *workloadapi.X509Source: X509Source used for mTLS client
 //     authentication
-//   - shard *[32]byte: Pointer to a 32-byte array containing the recovery shard
+//   - shardIndex int: Index of the recovery shard
+//   - shardValue *[32]byte: Pointer to a 32-byte array containing the recovery
+//     shard
 //
 // Returns:
 //   - *data.RestorationStatus: Status containing shards collected, remaining,
@@ -35,7 +37,7 @@ import (
 //
 // Example:
 //
-//	status, err := Restore(x509Source, shardPtr)
+//	status, err := Restore(x509Source, shardIndex, shardValue)
 func Restore(
 	source *workloadapi.X509Source, shardIndex int, shardValue *[32]byte,
 ) (*data.RestorationStatus, error) {

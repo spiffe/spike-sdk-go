@@ -6,18 +6,23 @@ package reqres
 
 import "github.com/spiffe/spike-sdk-go/api/entity/data"
 
+// RestoreRequest for disaster recovery.
 type RestoreRequest struct {
 	Id    int       `json:"id"`
 	Shard *[32]byte `json:"shard"`
 }
+
+// RestoreResponse for disaster recovery.
 type RestoreResponse struct {
 	data.RestorationStatus
 	Err data.ErrorCode `json:"err,omitempty"`
 }
 
+// RecoverRequest for disaster recovery.
 type RecoverRequest struct {
 }
 
+// RecoverResponse for disaster recovery.
 type RecoverResponse struct {
 	Shards map[int]*[32]byte `json:"shards"`
 	Err    data.ErrorCode    `json:"err,omitempty"`

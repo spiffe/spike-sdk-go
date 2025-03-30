@@ -7,11 +7,11 @@ package operator
 import (
 	"encoding/json"
 	"errors"
-	"github.com/spiffe/spike-sdk-go/api/url"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 
 	"github.com/spiffe/spike-sdk-go/api/entity/v1/reqres"
+	"github.com/spiffe/spike-sdk-go/api/url"
 	"github.com/spiffe/spike-sdk-go/net"
 )
 
@@ -22,8 +22,8 @@ import (
 //   - source: X509Source used for mTLS client authentication
 //
 // Returns:
-//   - *[]string: Array of recovery shard identifiers if successful, nil if
-//     not found
+//   - map[int]*[32]byte: Map of shard indices to shard byte arrays if
+//     successful, nil if not found
 //   - error: nil on success, error if:
 //   - Failed to marshal recover request
 //   - Failed to create mTLS client

@@ -10,7 +10,7 @@ import (
 	"github.com/spiffe/spike-sdk-go/api/internal/env"
 )
 
-// UrlSecretGet returns the URL for getting a secret.
+// SecretGet returns the URL for getting a secret.
 func SecretGet() string {
 	u, _ := url.JoinPath(
 		env.NexusApiRoot(),
@@ -21,7 +21,7 @@ func SecretGet() string {
 	return u + "?" + params.Encode()
 }
 
-// UrlSecretPut returns the URL for putting a secret.
+// SecretPut returns the URL for putting a secret.
 func SecretPut() string {
 	u, _ := url.JoinPath(
 		env.NexusApiRoot(),
@@ -30,7 +30,7 @@ func SecretPut() string {
 	return u
 }
 
-// UrlSecretDelete returns the URL for deleting a secret.
+// SecretDelete returns the URL for deleting a secret.
 func SecretDelete() string {
 	u, _ := url.JoinPath(
 		env.NexusApiRoot(),
@@ -41,7 +41,7 @@ func SecretDelete() string {
 	return u + "?" + params.Encode()
 }
 
-// UrlSecretUndelete returns the URL for undeleting a secret.
+// SecretUndelete returns the URL for undeleting a secret.
 func SecretUndelete() string {
 	u, _ := url.JoinPath(
 		env.NexusApiRoot(),
@@ -52,7 +52,7 @@ func SecretUndelete() string {
 	return u + "?" + params.Encode()
 }
 
-// UrlSecretList returns the URL for listing secrets.
+// SecretList returns the URL for listing secrets.
 func SecretList() string {
 	u, _ := url.JoinPath(
 		env.NexusApiRoot(),
@@ -63,7 +63,7 @@ func SecretList() string {
 	return u + "?" + params.Encode()
 }
 
-// UrlSecretMetadataGet returns the URL for getting a secret metadata.
+// SecretMetadataGet returns the URL for getting a secret metadata.
 func SecretMetadataGet() string {
 	u, _ := url.JoinPath(
 		env.NexusApiRoot(),

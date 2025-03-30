@@ -30,34 +30,3 @@ func SpikeNexusDataFolder() string {
 	// The data dir is not configurable for security reasons.
 	return filepath.Join(spikeDir, "/data")
 }
-
-// SpikePilotRecoveryFolder returns the path to the directory where Pilot stores
-// recovery material for its root key.
-func SpikePilotRecoveryFolder() string {
-	homeDir, err := os.UserHomeDir()
-	if err != nil {
-		homeDir = "/tmp"
-	}
-
-	spikeDir := filepath.Join(homeDir, ".spike")
-
-	// Create directory if it doesn't exist
-	// 0700 because we want to restrict access to the directory
-	// but allow the user to create db files in it.
-	err = os.MkdirAll(spikeDir+"/recovery", 0700)
-	if err != nil {
-		panic(err)
-	}
-
-	// The data dir is not configurable for security reasons.
-	return filepath.Join(spikeDir, "/recovery")
-}
-
-// SpikePilotRootKeyRecoveryFile returns the path to the file where Pilot stores
-// the root key recovery file.
-func SpikePilotRootKeyRecoveryFile() string {
-	folder := SpikePilotRecoveryFolder()
-
-	// The file path and file name are NOT configurable for security reasons.
-	return filepath.Join(folder, ".root-key-recovery.spike")
-}

@@ -231,7 +231,8 @@ func WithNotify(fn NotifyFn) RetrierOption {
 // It's used with the Do helper function for simple retry operations.
 type Handler[T any] func() (T, error)
 
-// Do provides a simplified way to retry a typed operation with default settings.
+// Do provides a simplified way to retry a typed operation with default
+// settings.
 // It creates a TypedRetrier with default exponential backoff configuration.
 //
 // Example:
@@ -239,7 +240,11 @@ type Handler[T any] func() (T, error)
 //	result, err := Do(ctx, func() (string, error) {
 //	    return fetchData()
 //	})
-func Do[T any](ctx context.Context, handler Handler[T], options ...RetrierOption) (T, error) {
+func Do[T any](
+	ctx context.Context,
+	handler Handler[T],
+	options ...RetrierOption,
+) (T, error) {
 	return NewTypedRetrier[T](
 		NewExponentialRetrier(options...),
 	).RetryWithBackoff(ctx, handler)

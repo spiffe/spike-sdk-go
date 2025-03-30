@@ -10,7 +10,7 @@ import (
 	"github.com/spiffe/spike-sdk-go/api/internal/env"
 )
 
-// UrlInit returns the URL for initializing SPIKE Nexus.
+// Init returns the URL for initializing SPIKE Nexus.
 func Init() string {
 	u, _ := url.JoinPath(
 		env.NexusApiRoot(),
@@ -19,7 +19,7 @@ func Init() string {
 	return u
 }
 
-// UrlInitState returns the URL for checking the initialization state of
+// InitState returns the URL for checking the initialization state of
 // SPIKE Nexus.
 func InitState() string {
 	u, _ := url.JoinPath(

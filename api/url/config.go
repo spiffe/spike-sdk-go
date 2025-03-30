@@ -24,13 +24,9 @@ const SpikeNexusUrlInit ApiUrl = "/v1/auth/initialization"
 
 const SpikeNexusUrlPolicy ApiUrl = "/v1/acl/policy"
 
-const SpikeNexusUrlRecover ApiUrl = "/v1/operator/recover"
-const SpikeNexusUrlRestore ApiUrl = "/v1/operator/restore"
+const SpikeNexusUrlOperatorRecover ApiUrl = "/v1/operator/recover"
+const SpikeNexusUrlOperatorRestore ApiUrl = "/v1/operator/restore"
 
 const SpikeKeeperUrlKeep ApiUrl = "/v1/store/keep"
-
-const SpikeNexusUrlOperatorRestore = "/v1/operator/restore"
-const SpikeNexusUrlOperatorRecover = "/v1/operator/recover"
-
 const SpikeKeeperUrlContribute ApiUrl = "/v1/store/contribute"
 const SpikeKeeperUrlShard ApiUrl = "/v1/store/shard"
