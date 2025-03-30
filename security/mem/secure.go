@@ -11,7 +11,7 @@ import (
 	"unsafe"
 )
 
-// Clear securely erases all bytes in the provided value by overwriting
+// ClearRawBytes securely erases all bytes in the provided value by overwriting
 // its mem with zeros. This ensures sensitive data like root keys and
 // Shamir shards are properly cleaned from mem before garbage collection.
 //
@@ -32,7 +32,7 @@ import (
 //	data := &SensitiveData{...}
 //	defer mem.Clear(data)
 //	// Use data...
-func Clear[T any](s *T) {
+func ClearRawBytes[T any](s *T) {
 	if s == nil {
 		return
 	}
@@ -50,7 +50,7 @@ func Clear[T any](s *T) {
 	runtime.KeepAlive(s)
 }
 
-// ClearParanoid provides a more thorough memory wiping method for
+// ClearRawBytesParanoid provides a more thorough memory wiping method for
 // highly-sensitive data.
 //
 // It performs multiple passes using different patterns (zeros, ones,
@@ -75,7 +75,7 @@ func Clear[T any](s *T) {
 //
 // This method is provided for users with extreme security requirements or in
 // regulated environments where multiple-pass overwrite policies are mandated.
-func ClearParanoid[T any](s *T) {
+func ClearRawBytesParanoid[T any](s *T) {
 	if s == nil {
 		return
 	}
@@ -141,6 +141,20 @@ func Zeroed32(ar *[32]byte) bool {
 
 // ClearBytes securely erases a byte slice by overwriting all bytes with zeros.
 // This is a convenience wrapper around Clear for byte slices.
+//
+// This is especially important for slices because executing `mem.Clear` on
+// a slice it will only zero out the slice header structure itself, NOT the
+// underlying array data that the slice points to.
+//
+// When we pass a byte slice s to the function Clear[T any](s *T),
+// we are passing a pointer to the slice header, not a pointer to the
+// underlying array. The slice header contains three fields:
+//   - A pointer to the underlying array
+//   - The length of the slice
+//   - The capacity of the slice
+//
+// mem.Clear(s) will zero out this slice header structure, but not the
+// actual array data the slice points to
 //
 // Parameters:
 //   - b: A byte slice that should be securely erased
