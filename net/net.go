@@ -7,12 +7,29 @@ package net
 import (
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 
 	"github.com/spiffe/go-spiffe/v2/spiffeid"
 	"github.com/spiffe/go-spiffe/v2/spiffetls/tlsconfig"
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 )
+
+func RequestBody(r *http.Request) (bod []byte, err error) {
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	defer func(b io.ReadCloser) {
+		if b == nil {
+			return
+		}
+		err = errors.Join(err, b.Close())
+	}(r.Body)
+
+	return body, err
+}
 
 // CreateMtlsServer creates an HTTP server configured for mutual TLS (mTLS)
 // authentication using SPIFFE X.509 certificates. It sets up the server with a
