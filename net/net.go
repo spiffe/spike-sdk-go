@@ -8,7 +8,9 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
+	"time"
 
 	"github.com/spiffe/go-spiffe/v2/spiffeid"
 	"github.com/spiffe/go-spiffe/v2/spiffetls/tlsconfig"
@@ -112,7 +114,19 @@ func CreateMtlsClientWithPredicate(
 	client := &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: tlsConfig,
+			IdleConnTimeout: 30 * time.Second,
+			MaxIdleConns: 100,
+			MaxConnsPerHost: 10,
+			MaxIdleConnsPerHost: 10,
+			DialContext: (&net.Dialer{
+				Timeout:   30 * time.Second,
+				KeepAlive: 30 * time.Second,
+			}).DialContext,
+			TLSHandshakeTimeout: 10 * time.Second,
+			ResponseHeaderTimeout: 10 * time.Second,
+			ExpectContinueTimeout: 5 * time.Second,
 		},
+		Timeout: 60 * time.Second,
 	}
 
 	return client, nil
