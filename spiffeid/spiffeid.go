@@ -4,35 +4,93 @@
 
 package spiffeid
 
-import "github.com/spiffe/spike-sdk-go/spiffeid/internal/env"
+import (
+	"path"
 
-// SpikeKeeper constructs and returns the SPIKE Keeper's
-// SPIFFE ID string.
-// The output is constructed based on the trust root from the environment.
-func SpikeKeeper() string {
-	return "spiffe://" + env.TrustRoot() + "/spike/keeper"
+	"github.com/spiffe/spike-sdk-go/spiffeid/internal/env"
+)
+
+// SpikeKeeper constructs and returns the SPIKE Keeper's SPIFFE ID string.
+//
+// Parameters:
+//   - trustRoot: The trust domain for the SPIFFE ID. If empty, the value is
+//     obtained from the environment.
+//
+// Returns:
+//   - string: The complete SPIFFE ID in the format:
+//     "spiffe://<trustRoot>/spike/keeper"
+func SpikeKeeper(trustRoot string) string {
+	if trustRoot == "" {
+		trustRoot = env.TrustRoot()
+	}
+
+	return "spiffe://" + path.Join(trustRoot, "spike", "keeper")
 }
 
 // SpikeNexus constructs and returns the SPIFFE ID for SPIKE Nexus.
-// The output is constructed based on the trust root from the environment.
-func SpikeNexus() string {
-	return "spiffe://" + env.TrustRoot() + "/spike/nexus"
+//
+// Parameters:
+//   - trustRoot: The trust domain for the SPIFFE ID. If empty, the value is
+//     obtained from the environment.
+//
+// Returns:
+//   - string: The complete SPIFFE ID in the format:
+//     "spiffe://<trustRoot>/spike/nexus"
+func SpikeNexus(trustRoot string) string {
+	if trustRoot == "" {
+		trustRoot = env.TrustRoot()
+	}
+
+	return "spiffe://" + path.Join(trustRoot, "spike", "nexus")
 }
 
 // SpikePilot generates the SPIFFE ID for a SPIKE Pilot superuser role.
-// The output is constructed based on the trust root from the environment.
-func SpikePilot() string {
-	return "spiffe://" + env.TrustRoot() + "/spike/pilot/role/superuser"
+//
+// Parameters:
+//   - trustRoot: The trust domain for the SPIFFE ID. If empty, the value is
+//     obtained from the environment.
+//
+// Returns:
+//   - string: The complete SPIFFE ID in the format:
+//     "spiffe://<trustRoot>/spike/pilot/role/superuser"
+func SpikePilot(trustRoot string) string {
+	if trustRoot == "" {
+		trustRoot = env.TrustRoot()
+	}
+
+	return "spiffe://" + path.Join(trustRoot, "spike", "pilot", "role", "superuser")
 }
 
 // SpikePilotRecover generates the SPIFFE ID for a SPIKE Pilot recovery role.
-// The output is constructed based on the trust root from the environment.
-func SpikePilotRecover() string {
-	return "spiffe://" + env.TrustRoot() + "/spike/pilot/role/recover"
+//
+// Parameters:
+//   - trustRoot: The trust domain for the SPIFFE ID. If empty, the value is
+//     obtained from the environment.
+//
+// Returns:
+//   - string: The complete SPIFFE ID in the format:
+//     "spiffe://<trustRoot>/spike/pilot/role/recover"
+func SpikePilotRecover(trustRoot string) string {
+	if trustRoot == "" {
+		trustRoot = env.TrustRoot()
+	}
+
+	return "spiffe://" + path.Join(trustRoot, "spike", "pilot", "role", "recover")
 }
 
 // SpikePilotRestore generates the SPIFFE ID for a SPIKE Pilot restore role.
-// The output is constructed based on the trust root from the environment.
-func SpikePilotRestore() string {
-	return "spiffe://" + env.TrustRoot() + "/spike/pilot/role/restore"
+//
+// Parameters:
+//   - trustRoot: The trust domain for the SPIFFE ID. If empty, the value is
+//     obtained from the environment.
+//
+// Returns:
+//   - string: The complete SPIFFE ID in the format:
+//     "spiffe://<trustRoot>/spike/pilot/role/restore"
+func SpikePilotRestore(trustRoot string) string {
+	if trustRoot == "" {
+		trustRoot = env.TrustRoot()
+	}
+
+	return "spiffe://" + path.Join(trustRoot, "spike", "pilot", "role", "restore")
 }
