@@ -4,6 +4,8 @@
 
 package spiffeid
 
+import "strings"
+
 // IsPilot checks if a given SPIFFE ID matches the SPIKE Pilot's SPIFFE ID.
 //
 // This function is used for identity verification to determine if the provided
@@ -11,21 +13,27 @@ package spiffeid
 // the expected pilot SPIFFE ID returned by SpikePilotSpiffeId().
 //
 // Parameters:
-//   - trustRoot: The trust domain root (e.g., "example.org")
+//   - trustRoots: Comma-delimited list of trust domain roots
+//     (e.g., "example.org,other.org")
 //   - spiffeid: The SPIFFE ID string to check
 //
 // Returns:
-//   - bool: true if the provided SPIFFE ID matches the pilot's ID, false
-//     otherwise
+//   - bool: true if the provided SPIFFE ID matches the pilot's ID for any of
+//     the trust roots, false otherwise
 //
 // Example usage:
 //
 //	id := "spiffe://example.org/spike/pilot"
-//	if IsPilot("example.org", id) {
+//	if IsPilot("example.org,other.org", id) {
 //	    // Handle pilot-specific logic
 //	}
-func IsPilot(trustRoot, id string) bool {
-	return id == SpikePilot(trustRoot)
+func IsPilot(trustRoots, id string) bool {
+	for _, root := range strings.Split(trustRoots, ",") {
+		if id == SpikePilot(strings.TrimSpace(root)) {
+			return true
+		}
+	}
+	return false
 }
 
 // IsPilotRecover checks if a given SPIFFE ID matches the SPIKE Pilot's
@@ -36,21 +44,27 @@ func IsPilot(trustRoot, id string) bool {
 // recovery SPIFFE ID returned by SpikePilotRecoverSpiffeId().
 //
 // Parameters:
-//   - trustRoot: The trust domain root (e.g., "example.org")
+//   - trustRoots: Comma-delimited list of trust domain roots
+//     (e.g., "example.org,other.org")
 //   - spiffeId: The SPIFFE ID string to check
 //
 // Returns:
-//   - bool: true if the provided SPIFFE ID matches the pilot's recovery ID,
-//     false otherwise
+//   - bool: true if the provided SPIFFE ID matches the pilot's recovery ID for
+//     any of the trust roots, false otherwise
 //
 // Example usage:
 //
 //	id := "spiffe://example.org/spike/pilot/recover"
-//	if IsPilotRecover("example.org", id) {
+//	if IsPilotRecover("example.org,other.org", id) {
 //	    // Handle recovery-specific logic
 //	}
-func IsPilotRecover(trustRoot, id string) bool {
-	return id == SpikePilotRecover(trustRoot)
+func IsPilotRecover(trustRoots, id string) bool {
+	for _, root := range strings.Split(trustRoots, ",") {
+		if id == SpikePilotRecover(strings.TrimSpace(root)) {
+			return true
+		}
+	}
+	return false
 }
 
 // IsPilotRestore checks if a given SPIFFE ID matches the SPIKE Pilot's restore
@@ -61,21 +75,27 @@ func IsPilotRecover(trustRoot, id string) bool {
 // restore SPIFFE ID returned by SpikePilotRestoreSpiffeId().
 //
 // Parameters:
-//   - trustRoot: The trust domain root (e.g., "example.org")
+//   - trustRoots: Comma-delimited list of trust domain roots
+//     (e.g., "example.org,other.org")
 //   - spiffeId: The SPIFFE ID string to check
 //
 // Returns:
-//   - bool: true if the provided SPIFFE ID matches the pilot's restore ID,
-//     false otherwise
+//   - bool: true if the provided SPIFFE ID matches the pilot's restore ID for
+//     any of the trust roots, false otherwise
 //
 // Example usage:
 //
 //	id := "spiffe://example.org/spike/pilot/restore"
-//	if IsPilotRestore("example.org", id) {
+//	if IsPilotRestore("example.org,other.org", id) {
 //	    // Handle restore-specific logic
 //	}
-func IsPilotRestore(trustRoot, spiffeId string) bool {
-	return spiffeId == SpikePilotRestore(trustRoot)
+func IsPilotRestore(trustRoots, spiffeId string) bool {
+	for _, root := range strings.Split(trustRoots, ",") {
+		if spiffeId == SpikePilotRestore(strings.TrimSpace(root)) {
+			return true
+		}
+	}
+	return false
 }
 
 // IsKeeper checks if a given SPIFFE ID matches the SPIKE Keeper's SPIFFE ID.
@@ -85,21 +105,27 @@ func IsPilotRestore(trustRoot, spiffeId string) bool {
 // the expected pilot SPIFFE ID returned by SpikeKeeperSpiffeId().
 //
 // Parameters:
-//   - trustRoot: The trust domain root (e.g., "example.org")
+//   - trustRoots: Comma-delimited list of trust domain roots
+//     (e.g., "example.org,other.org")
 //   - spiffeid: The SPIFFE ID string to check
 //
 // Returns:
-//   - bool: true if the provided SPIFFE ID matches the SPIKE Keeper's ID, false
-//     otherwise
+//   - bool: true if the provided SPIFFE ID matches the SPIKE Keeper's ID for
+//     and of the trust roots, false otherwise
 //
 // Example usage:
 //
 //	id := "spiffe://example.org/spike/keeper"
-//	if IsKeeper("example.org", id) {
+//	if IsKeeper("example.org,other.org", id) {
 //	    // Handle pilot-specific logic
 //	}
-func IsKeeper(trustRoot, id string) bool {
-	return id == SpikeKeeper(trustRoot)
+func IsKeeper(trustRoots, id string) bool {
+	for _, root := range strings.Split(trustRoots, ",") {
+		if id == SpikeKeeper(strings.TrimSpace(root)) {
+			return true
+		}
+	}
+	return false
 }
 
 // IsNexus checks if the provided SPIFFE ID matches the SPIKE Nexus SPIFFE ID.
@@ -109,13 +135,20 @@ func IsKeeper(trustRoot, id string) bool {
 // a given identity represents the Nexus service.
 //
 // Parameters:
-//   - trustRoot: The trust domain root (e.g., "example.org")
+//   - trustRoots: Comma-delimited list of trust domain roots
+//     (e.g., "example.org,other.org")
 //   - spiffeid: The SPIFFE ID string to check
 //
 // Returns:
-//   - bool: true if the SPIFFE ID matches the Nexus SPIFFE ID, false otherwise
-func IsNexus(trustRoot, id string) bool {
-	return id == SpikeNexus(trustRoot)
+//   - bool: true if the SPIFFE ID matches the Nexus SPIFFE ID for any of the
+//     trust roots, false otherwise
+func IsNexus(trustRoots, id string) bool {
+	for _, root := range strings.Split(trustRoots, ",") {
+		if id == SpikeNexus(strings.TrimSpace(root)) {
+			return true
+		}
+	}
+	return false
 }
 
 // PeerCanTalkToAnyone is used for debugging purposes
@@ -126,16 +159,22 @@ func PeerCanTalkToAnyone(_, _ string) bool {
 // PeerCanTalkToKeeper checks if the provided SPIFFE ID matches the SPIKE Nexus
 // SPIFFE ID.
 //
-// This is used as a validator in SPIKE Keeper, because currently only SPIKE
+// This is used as a validator in SPIKE Keeper because currently only SPIKE
 // Nexus can talk to SPIKE Keeper.
 //
 // Parameters:
-//   - trustRoot: The trust domain root (e.g., "example.org")
+//   - trustRoots: Comma-delimited list of trust domain roots
+//     (e.g., "example.org,other.org")
 //   - peerSpiffeId: The SPIFFE ID string to check
 //
 // Returns:
-//   - bool: true if the SPIFFE ID matches SPIKE Nexus' SPIFFE ID,
-//     false otherwise
-func PeerCanTalkToKeeper(trustRoot, peerSpiffeId string) bool {
-	return peerSpiffeId == SpikeNexus(trustRoot)
+//   - bool: true if the SPIFFE ID matches SPIKE Nexus' SPIFFE ID for any of
+//     the trust roots, false otherwise
+func PeerCanTalkToKeeper(trustRoots, peerSpiffeId string) bool {
+	for _, root := range strings.Split(trustRoots, ",") {
+		if peerSpiffeId == SpikeNexus(strings.TrimSpace(root)) {
+			return true
+		}
+	}
+	return false
 }
