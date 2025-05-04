@@ -11,6 +11,7 @@ package spiffeid
 // the expected pilot SPIFFE ID returned by SpikePilotSpiffeId().
 //
 // Parameters:
+//   - trustRoot: The trust domain root (e.g., "example.org")
 //   - spiffeid: The SPIFFE ID string to check
 //
 // Returns:
@@ -20,11 +21,11 @@ package spiffeid
 // Example usage:
 //
 //	id := "spiffe://example.org/spike/pilot"
-//	if IsPilot(id) {
+//	if IsPilot("example.org", id) {
 //	    // Handle pilot-specific logic
 //	}
-func IsPilot(id string) bool {
-	return id == SpikePilot()
+func IsPilot(trustRoot, id string) bool {
+	return id == SpikePilot(trustRoot)
 }
 
 // IsPilotRecover checks if a given SPIFFE ID matches the SPIKE Pilot's
@@ -35,6 +36,7 @@ func IsPilot(id string) bool {
 // recovery SPIFFE ID returned by SpikePilotRecoverSpiffeId().
 //
 // Parameters:
+//   - trustRoot: The trust domain root (e.g., "example.org")
 //   - spiffeId: The SPIFFE ID string to check
 //
 // Returns:
@@ -44,11 +46,11 @@ func IsPilot(id string) bool {
 // Example usage:
 //
 //	id := "spiffe://example.org/spike/pilot/recover"
-//	if IsPilotRecover(id) {
+//	if IsPilotRecover("example.org", id) {
 //	    // Handle recovery-specific logic
 //	}
-func IsPilotRecover(id string) bool {
-	return id == SpikePilotRecover()
+func IsPilotRecover(trustRoot, id string) bool {
+	return id == SpikePilotRecover(trustRoot)
 }
 
 // IsPilotRestore checks if a given SPIFFE ID matches the SPIKE Pilot's restore
@@ -59,6 +61,7 @@ func IsPilotRecover(id string) bool {
 // restore SPIFFE ID returned by SpikePilotRestoreSpiffeId().
 //
 // Parameters:
+//   - trustRoot: The trust domain root (e.g., "example.org")
 //   - spiffeId: The SPIFFE ID string to check
 //
 // Returns:
@@ -68,11 +71,11 @@ func IsPilotRecover(id string) bool {
 // Example usage:
 //
 //	id := "spiffe://example.org/spike/pilot/restore"
-//	if IsPilotRestore(id) {
+//	if IsPilotRestore("example.org", id) {
 //	    // Handle restore-specific logic
 //	}
-func IsPilotRestore(spiffeId string) bool {
-	return spiffeId == SpikePilotRestore()
+func IsPilotRestore(trustRoot, spiffeId string) bool {
+	return spiffeId == SpikePilotRestore(trustRoot)
 }
 
 // IsKeeper checks if a given SPIFFE ID matches the SPIKE Keeper's SPIFFE ID.
@@ -82,6 +85,7 @@ func IsPilotRestore(spiffeId string) bool {
 // the expected pilot SPIFFE ID returned by SpikeKeeperSpiffeId().
 //
 // Parameters:
+//   - trustRoot: The trust domain root (e.g., "example.org")
 //   - spiffeid: The SPIFFE ID string to check
 //
 // Returns:
@@ -91,11 +95,11 @@ func IsPilotRestore(spiffeId string) bool {
 // Example usage:
 //
 //	id := "spiffe://example.org/spike/keeper"
-//	if IsKeeper(id) {
+//	if IsKeeper("example.org", id) {
 //	    // Handle pilot-specific logic
 //	}
-func IsKeeper(id string) bool {
-	return id == SpikeKeeper()
+func IsKeeper(trustRoot, id string) bool {
+	return id == SpikeKeeper(trustRoot)
 }
 
 // IsNexus checks if the provided SPIFFE ID matches the SPIKE Nexus SPIFFE ID.
@@ -105,16 +109,17 @@ func IsKeeper(id string) bool {
 // a given identity represents the Nexus service.
 //
 // Parameters:
+//   - trustRoot: The trust domain root (e.g., "example.org")
 //   - spiffeid: The SPIFFE ID string to check
 //
 // Returns:
 //   - bool: true if the SPIFFE ID matches the Nexus SPIFFE ID, false otherwise
-func IsNexus(id string) bool {
-	return id == SpikeNexus()
+func IsNexus(trustRoot, id string) bool {
+	return id == SpikeNexus(trustRoot)
 }
 
 // PeerCanTalkToAnyone is used for debugging purposes
-func PeerCanTalkToAnyone(_ string) bool {
+func PeerCanTalkToAnyone(_, _ string) bool {
 	return true
 }
 
@@ -125,11 +130,12 @@ func PeerCanTalkToAnyone(_ string) bool {
 // Nexus can talk to SPIKE Keeper.
 //
 // Parameters:
+//   - trustRoot: The trust domain root (e.g., "example.org")
 //   - peerSpiffeId: The SPIFFE ID string to check
 //
 // Returns:
 //   - bool: true if the SPIFFE ID matches SPIKE Nexus' SPIFFE ID,
 //     false otherwise
-func PeerCanTalkToKeeper(peerSpiffeId string) bool {
-	return peerSpiffeId == SpikeNexus()
+func PeerCanTalkToKeeper(trustRoot, peerSpiffeId string) bool {
+	return peerSpiffeId == SpikeNexus(trustRoot)
 }
