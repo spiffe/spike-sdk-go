@@ -268,10 +268,5 @@ func PeerCanTalkToAnyone(_, _ string) bool {
 //   - bool: true if the SPIFFE ID matches SPIKE Nexus' SPIFFE ID for any of
 //     the trust roots, false otherwise
 func PeerCanTalkToKeeper(trustRoots, peerSpiffeId string) bool {
-	for _, root := range strings.Split(trustRoots, ",") {
-		if peerSpiffeId == SpikeNexus(strings.TrimSpace(root)) {
-			return true
-		}
-	}
-	return false
+	return IsNexus(trustRoots, peerSpiffeId)
 }
