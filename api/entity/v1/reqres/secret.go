@@ -27,7 +27,7 @@ type SecretPutRequest struct {
 	Err    data.ErrorCode    `json:"err,omitempty"`
 }
 
-// SecretPutResponse is after successful secret write
+// SecretPutResponse is after a successful secret write operation.
 type SecretPutResponse struct {
 	Err data.ErrorCode `json:"err,omitempty"`
 }
@@ -47,7 +47,7 @@ type SecretReadResponse struct {
 // SecretDeleteRequest for soft-deleting secret versions
 type SecretDeleteRequest struct {
 	Path     string `json:"path"`
-	Versions []int  `json:"versions"` // Empty means latest version
+	Versions []int  `json:"versions"` // Empty means the latest version
 }
 
 // SecretDeleteResponse after soft-delete
@@ -74,4 +74,44 @@ type SecretListRequest struct {
 type SecretListResponse struct {
 	Keys []string       `json:"keys"`
 	Err  data.ErrorCode `json:"err,omitempty"`
+}
+
+// SecretEncryptRequest for encrypting data
+type SecretEncryptRequest struct {
+	// Plaintext data to encrypt
+	Plaintext []byte `json:"plaintext"`
+	// Optional: specify encryption algorithm/version
+	Algorithm string `json:"algorithm,omitempty"`
+}
+
+// SecretEncryptResponse contains encrypted data
+type SecretEncryptResponse struct {
+	// Version byte for future compatibility
+	Version byte `json:"version"`
+	// Nonce used for encryption
+	Nonce []byte `json:"nonce"`
+	// Encrypted ciphertext
+	Ciphertext []byte `json:"ciphertext"`
+	// Error code if operation failed
+	Err data.ErrorCode `json:"err,omitempty"`
+}
+
+// SecretDecryptRequest for decrypting data
+type SecretDecryptRequest struct {
+	// Version byte to determine decryption method
+	Version byte `json:"version"`
+	// Nonce used during encryption
+	Nonce []byte `json:"nonce"`
+	// Encrypted ciphertext to decrypt
+	Ciphertext []byte `json:"ciphertext"`
+	// Optional: specify decryption algorithm/version
+	Algorithm string `json:"algorithm,omitempty"`
+}
+
+// SecretDecryptResponse contains decrypted data
+type SecretDecryptResponse struct {
+	// Decrypted plaintext data
+	Plaintext []byte `json:"plaintext"`
+	// Error code if operation failed
+	Err data.ErrorCode `json:"err,omitempty"`
 }
