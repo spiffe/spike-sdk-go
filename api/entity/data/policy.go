@@ -19,7 +19,13 @@ const PermissionRead PolicyPermission = "read"
 // create, update and delete) secrets.
 const PermissionWrite PolicyPermission = "write"
 
+// PermissionList gives permission to list available secrets or resources.
 const PermissionList PolicyPermission = "list"
+
+// PermissionExecute grants the ability to execute specified resources.
+// One such resource is encryption and decryption operations which
+// don't necessarily persist anything but execute an internal command.
+const PermissionExecute PolicyPermission = "execute"
 
 // PermissionSuper gives superuser permissions.
 // The user is the alpha and the omega.
