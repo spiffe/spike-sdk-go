@@ -209,6 +209,27 @@ func IsPilotRestore(trustRoots, id string) bool {
 	return false
 }
 
+// IsPilotLock checks whether the provided SPIFFE ID corresponds to the
+// Pilot lock/unlock role.
+//
+// Parameters:
+//   - trustRoots: A comma-separated list of trust domains.
+//   - id: The SPIFFE ID to validate.
+//
+// Returns:
+//   - bool: true if the id matches the lock role under any of the trust roots.
+func IsPilotLock(trustRoots, id string) bool {
+	for _, root := range strings.Split(trustRoots, ",") {
+		baseId := SpikePilotLock(strings.TrimSpace(root))
+		// Check if the ID is either exactly the base ID or starts with the base ID
+		// followed by "/"
+		if id == baseId || strings.HasPrefix(id, baseId+"/") {
+			return true
+		}
+	}
+	return false
+}
+
 // IsKeeper checks if a given SPIFFE ID matches the SPIKE Keeper's SPIFFE ID.
 //
 // This function is used for identity verification to determine if the provided
