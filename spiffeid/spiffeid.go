@@ -61,6 +61,23 @@ func SpikePilot(trustRoot string) string {
 	return "spiffe://" + path.Join(trustRoot, "spike", "pilot", "role", "superuser")
 }
 
+// SpikeLiteWorkload generates the SPIFFE ID for a SPIKE Lite workload role.
+//
+// Parameters:
+//   - trustRoot: The trust domain for the SPIFFE ID. If empty, the value is
+//     obtained from the environment.
+//
+// Returns:
+//   - string: The complete SPIFFE ID in the format:
+//     "spiffe://<trustRoot>/spike/workload/role/lite"
+func SpikeLiteWorkload(trustRoot string) string {
+	if trustRoot == "" {
+		trustRoot = env.TrustRoot()
+	}
+
+	return "spiffe://" + path.Join(trustRoot, "spike", "workload", "role", "lite")
+}
+
 // SpikePilotRecover generates the SPIFFE ID for a SPIKE Pilot recovery role.
 //
 // Parameters:

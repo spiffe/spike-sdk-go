@@ -54,6 +54,61 @@ func IsPilot(trustRoots, id string) bool {
 	return false
 }
 
+// IsLiteWorkload checks if a given SPIFFE ID matches the SPIKE Lite Workload's
+// SPIFFE ID pattern.
+//
+// A SPIKE Lite workload can freely use SPIKE Nexus encryption and decryption
+// RESTful APIs without needing any specific policies assigned to it. A SPIKE
+// Lite workload cannot use any other SPIKE Nexus API unless a relevant policy
+// is attached to it.
+//
+// This function is used for identity verification to determine if the provided
+// SPIFFE ID belongs to a SPIKE lite workload instance. It compares the input
+// against the expected lite workload SPIFFE ID pattern.
+//
+// The function supports two formats:
+//   - Exact match: "spiffe://<trustRoot>/spike/workload/role/lite"
+//   - Extended match with metadata:
+//     "spiffe://<trustRoot>/spike/workload/role/lite/<metadata>"
+//
+// This allows for instance-specific identifiers while maintaining compatibility
+// with the base lite workload identity.
+//
+// Parameters:
+//   - trustRoots: Comma-delimited list of trust domain roots
+//     (e.g., "example.org,other.org")
+//   - id: The SPIFFE ID string to check
+//
+// Returns:
+//   - bool: true if the provided SPIFFE ID matches either the exact lite
+//     workload ID or an extended ID with additional path segments for any of
+//     the trust roots, false otherwise
+//
+// Example usage:
+//
+//	baseId := "spiffe://example.org/spike/workload/role/lite"
+//	extendedId := "spiffe://example.org/spike/workload/role/lite/instance-0"
+//
+//	// Both will return true
+//	if IsLiteWorkload("example.org,other.org", baseId) {
+//	    // Handle lite workload-specific logic
+//	}
+//
+//	if IsLiteWorkload("example.org,other.org", extendedId) {
+//	    // Also recognized as a lite workload, with instance metadata
+//	}
+func IsLiteWorkload(trustRoots, id string) bool {
+	for _, root := range strings.Split(trustRoots, ",") {
+		baseId := SpikeLiteWorkload(strings.TrimSpace(root))
+		// Check if the ID is either exactly the base ID or starts with the base ID
+		// followed by "/"
+		if id == baseId || strings.HasPrefix(id, baseId+"/") {
+			return true
+		}
+	}
+	return false
+}
+
 // IsPilotRecover checks if a given SPIFFE ID matches the SPIKE Pilot's
 // recovery SPIFFE ID pattern.
 //
@@ -63,7 +118,8 @@ func IsPilot(trustRoots, id string) bool {
 //
 // The function supports two formats:
 //   - Exact match: "spiffe://<trustRoot>/spike/pilot/recover"
-//   - Extended match with metadata: "spiffe://<trustRoot>/spike/pilot/recover/<metadata>"
+//   - Extended match with metadata:
+//     "spiffe://<trustRoot>/spike/pilot/recover/<metadata>"
 //
 // This allows for instance-specific identifiers while maintaining compatibility
 // with the base pilot recovery identity.
@@ -74,9 +130,9 @@ func IsPilot(trustRoots, id string) bool {
 //   - id: The SPIFFE ID string to check
 //
 // Returns:
-//   - bool: true if the provided SPIFFE ID matches either the exact pilot recovery ID
-//     or an extended ID with additional path segments for any of the trust roots,
-//     false otherwise
+//   - bool: true if the provided SPIFFE ID matches either the exact pilot
+//     recovery ID or an extended ID with additional path segments for any of
+//     the trust roots, false otherwise
 //
 // Example usage:
 //
@@ -112,7 +168,8 @@ func IsPilotRecover(trustRoots, id string) bool {
 //
 // The function supports two formats:
 //   - Exact match: "spiffe://<trustRoot>/spike/pilot/restore"
-//   - Extended match with metadata: "spiffe://<trustRoot>/spike/pilot/restore/<metadata>"
+//   - Extended match with metadata:
+//     "spiffe://<trustRoot>/spike/pilot/restore/<metadata>"
 //
 // This allows for instance-specific identifiers while maintaining compatibility
 // with the base pilot restore identity.
@@ -123,9 +180,9 @@ func IsPilotRecover(trustRoots, id string) bool {
 //   - id: The SPIFFE ID string to check
 //
 // Returns:
-//   - bool: true if the provided SPIFFE ID matches either the exact pilot restore ID
-//     or an extended ID with additional path segments for any of the trust roots,
-//     false otherwise
+//   - bool: true if the provided SPIFFE ID matches either the exact pilot
+//     restore ID or an extended ID with additional path segments for any of the
+//     trust roots, false otherwise
 //
 // Example usage:
 //
@@ -160,7 +217,8 @@ func IsPilotRestore(trustRoots, id string) bool {
 //
 // The function supports two formats:
 //   - Exact match: "spiffe://<trustRoot>/spike/keeper"
-//   - Extended match with metadata: "spiffe://<trustRoot>/spike/keeper/<metadata>"
+//   - Extended match with metadata:
+//     "spiffe://<trustRoot>/spike/keeper/<metadata>"
 //
 // This allows for instance-specific identifiers while maintaining compatibility
 // with the base keeper identity.
@@ -208,7 +266,8 @@ func IsKeeper(trustRoots, id string) bool {
 //
 // The function supports two formats:
 //   - Exact match: "spiffe://<trustRoot>/spike/nexus"
-//   - Extended match with metadata: "spiffe://<trustRoot>/spike/nexus/<metadata>"
+//   - Extended match with metadata:
+//     "spiffe://<trustRoot>/spike/nexus/<metadata>"
 //
 // This allows for instance-specific identifiers while maintaining compatibility
 // with the base Nexus identity.
