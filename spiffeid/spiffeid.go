@@ -111,3 +111,23 @@ func SpikePilotRestore(trustRoot string) string {
 
 	return "spiffe://" + path.Join(trustRoot, "spike", "pilot", "role", "restore")
 }
+
+// SpikePilotLock generates the SPIFFE ID for a SPIKE Pilot lock/unlock role.
+//
+// This role is used to perform critical operations such as locking or unlocking
+// the SPIKE system, typically requiring operator privileges.
+//
+// Parameters:
+//   - trustRoot: The trust domain for the SPIFFE ID. If empty, the value is
+//     obtained from the environment (via env.TrustRoot()).
+//
+// Returns:
+//   - string: The complete SPIFFE ID in the format:
+//     "spiffe://<trustRoot>/spike/pilot/role/watchdog"
+func SpikePilotLock(trustRoot string) string {
+	if trustRoot == "" {
+		trustRoot = env.TrustRoot()
+	}
+
+	return "spiffe://" + path.Join(trustRoot, "spike", "pilot", "role", "watchdog")
+}
