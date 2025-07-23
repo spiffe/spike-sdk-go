@@ -8,7 +8,6 @@ package mem
 import (
 	"crypto/rand"
 	"runtime"
-	"syscall"
 	"unsafe"
 )
 
@@ -108,7 +107,6 @@ func ClearRawBytesParanoid[T any](s *T) {
 	_, err := rand.Read(b)
 	if err != nil {
 		panic("")
-		return
 	}
 	runtime.KeepAlive(s)
 
@@ -176,20 +174,4 @@ func ClearBytes(b []byte) {
 
 	// Make sure the data is actually wiped before gc has time to interfere
 	runtime.KeepAlive(b)
-}
-
-// Lock attempts to lock the process memory to prevent swapping.
-// Returns true if successful, false if not supported or failed.
-func Lock() bool {
-	// `mlock` is only available on Unix-like systems
-	if runtime.GOOS == "windows" {
-		return false
-	}
-
-	// Attempt to lock all current and future memory
-	if err := syscall.Mlockall(syscall.MCL_CURRENT | syscall.MCL_FUTURE); err != nil {
-		return false
-	}
-
-	return true
 }
