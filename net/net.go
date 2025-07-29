@@ -113,16 +113,16 @@ func CreateMtlsClientWithPredicate(
 	tlsConfig := tlsconfig.MTLSClientConfig(source, source, authorizer)
 	client := &http.Client{
 		Transport: &http.Transport{
-			TLSClientConfig: tlsConfig,
-			IdleConnTimeout: 30 * time.Second,
-			MaxIdleConns: 100,
-			MaxConnsPerHost: 10,
+			TLSClientConfig:     tlsConfig,
+			IdleConnTimeout:     30 * time.Second,
+			MaxIdleConns:        100,
+			MaxConnsPerHost:     10,
 			MaxIdleConnsPerHost: 10,
 			DialContext: (&net.Dialer{
 				Timeout:   30 * time.Second,
 				KeepAlive: 30 * time.Second,
 			}).DialContext,
-			TLSHandshakeTimeout: 10 * time.Second,
+			TLSHandshakeTimeout:   10 * time.Second,
 			ResponseHeaderTimeout: 10 * time.Second,
 			ExpectContinueTimeout: 5 * time.Second,
 		},

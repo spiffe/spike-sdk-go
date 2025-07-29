@@ -147,10 +147,17 @@ func (a *Api) GetPolicy(name string) (*data.Policy, error) {
 	return acl.GetPolicy(a.source, name)
 }
 
-// ListPolicies retrieves all policies from the system.
+// ListPolicies retrieves policies from the system, optionally filtering by
+// SPIFFE ID and path patterns.
+//
+// The function takes the following parameters:
+//   - spiffeIdPattern string: The SPIFFE ID pattern to filter policies.
+//     An empty string matches all SPIFFE IDs.
+//   - pathPattern string: The path pattern to filter policies.
+//     An empty string matches all paths.
 //
 // The function returns:
-//   - (*[]data.Policy, nil) containing all policies if successful
+//   - (*[]data.Policy, nil) containing all matching policies if successful
 //   - (nil, nil) if no policies are found
 //   - (nil, error) if an error occurs during the operation
 //
@@ -167,7 +174,8 @@ func (a *Api) GetPolicy(name string) (*data.Policy, error) {
 //
 // Example usage:
 //
-//	result, err := api.ListPolicies()
+//	// List all policies
+//	result, err := api.ListPolicies("", "")
 //	if err != nil {
 //	    log.Printf("Error listing policies: %v", err)
 //	    return
@@ -181,8 +189,8 @@ func (a *Api) GetPolicy(name string) (*data.Policy, error) {
 //	for _, policy := range policies {
 //	    log.Printf("Found policy: %+v", policy)
 //	}
-func (a *Api) ListPolicies() (*[]data.Policy, error) {
-	return acl.ListPolicies(a.source)
+func (a *Api) ListPolicies(spiffeIdPattern, pathPattern string) (*[]data.Policy, error) {
+	return acl.ListPolicies(a.source, spiffeIdPattern, pathPattern)
 }
 
 // DeleteSecretVersions deletes specified versions of a secret at the given

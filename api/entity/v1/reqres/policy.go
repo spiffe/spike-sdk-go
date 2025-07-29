@@ -44,7 +44,10 @@ type PolicyDeleteResponse struct {
 }
 
 // PolicyListRequest to list policies.
-type PolicyListRequest struct{}
+type PolicyListRequest struct {
+	SpiffeIdPattern string `json:"spiffedPattern"`
+	PathPattern     string `json:"pathPattern"`
+}
 
 // PolicyListResponse to list policies.
 type PolicyListResponse struct {
