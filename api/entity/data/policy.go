@@ -1,4 +1,4 @@
-//    \\ SPIKE: Secure your secrets with SPIFFE.
+//    \\ SPIKE: Secure your secrets with SPIFFE. — https://spike.ist/
 //  \\\\\ Copyright 2024-present SPIKE contributors.
 // \\\\\\\ SPDX-License-Identifier: Apache-2.0
 
@@ -32,15 +32,15 @@ const PermissionExecute PolicyPermission = "execute"
 const PermissionSuper PolicyPermission = "super"
 
 type Policy struct {
-	Id              string             `json:"id"`
+	ID              string             `json:"id"`
 	Name            string             `json:"name"`
-	SpiffeIdPattern string             `json:"spiffeIdPattern"`
+	SPIFFEIDPattern string             `json:"spiffeidPattern"`
 	PathPattern     string             `json:"pathPattern"`
 	Permissions     []PolicyPermission `json:"permissions"`
 	CreatedAt       time.Time          `json:"createdAt"`
 	CreatedBy       string             `json:"createdBy"`
 
 	// Unexported fields won't be serialized to JSON
-	IdRegex   *regexp.Regexp `json:"-"`
+	IDRegex   *regexp.Regexp `json:"-"`
 	PathRegex *regexp.Regexp `json:"-"`
 }

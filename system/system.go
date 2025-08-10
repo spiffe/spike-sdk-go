@@ -1,4 +1,4 @@
-//    \\ SPIKE: Secure your secrets with SPIFFE.
+//    \\ SPIKE: Secure your secrets with SPIFFE. — https://spike.ist/
 //  \\\\\ Copyright 2024-present SPIKE contributors.
 // \\\\\\\ SPDX-License-Identifier: Apache-2.0
 
@@ -92,15 +92,12 @@ func Watch(config WatchConfig) {
 	interval := config.PollInterval
 	ticker := time.NewTicker(interval)
 
-	for {
-		select {
-		case <-ticker.C:
-			log.Println("tick")
-			if config.InitializationPredicate() {
-				log.Println("initialized...")
-				time.Sleep(config.WaitTimeBeforeExit)
-				config.ExitAction()
-			}
+	for range ticker.C {
+		log.Println("tick")
+		if config.InitializationPredicate() {
+			log.Println("initialized...")
+			time.Sleep(config.WaitTimeBeforeExit)
+			config.ExitAction()
 		}
 	}
 }

@@ -1,4 +1,4 @@
-//    \\ SPIKE: Secure your secrets with SPIFFE.
+//    \\ SPIKE: Secure your secrets with SPIFFE. — https://spike.ist/
 //  \\\\\ Copyright 2024-present SPIKE contributors.
 // \\\\\\\ SPDX-License-Identifier: Apache-2.0
 
@@ -44,10 +44,10 @@ import "strings"
 //	}
 func IsPilot(trustRoots, id string) bool {
 	for _, root := range strings.Split(trustRoots, ",") {
-		baseId := SpikePilot(strings.TrimSpace(root))
+		baseID := SpikePilot(strings.TrimSpace(root))
 		// Check if the ID is either exactly the base ID or starts with the base ID
 		// followed by "/"
-		if id == baseId || strings.HasPrefix(id, baseId+"/") {
+		if id == baseID || strings.HasPrefix(id, baseID+"/") {
 			return true
 		}
 	}
@@ -99,10 +99,10 @@ func IsPilot(trustRoots, id string) bool {
 //	}
 func IsLiteWorkload(trustRoots, id string) bool {
 	for _, root := range strings.Split(trustRoots, ",") {
-		baseId := SpikeLiteWorkload(strings.TrimSpace(root))
+		baseID := SpikeLiteWorkload(strings.TrimSpace(root))
 		// Check if the ID is either exactly the base ID or starts with the base ID
 		// followed by "/"
-		if id == baseId || strings.HasPrefix(id, baseId+"/") {
+		if id == baseID || strings.HasPrefix(id, baseID+"/") {
 			return true
 		}
 	}
@@ -149,10 +149,10 @@ func IsLiteWorkload(trustRoots, id string) bool {
 //	}
 func IsPilotRecover(trustRoots, id string) bool {
 	for _, root := range strings.Split(trustRoots, ",") {
-		baseId := SpikePilotRecover(strings.TrimSpace(root))
+		baseID := SpikePilotRecover(strings.TrimSpace(root))
 		// Check if the ID is either exactly the base ID or starts with the base ID
 		// followed by "/"
-		if id == baseId || strings.HasPrefix(id, baseId+"/") {
+		if id == baseID || strings.HasPrefix(id, baseID+"/") {
 			return true
 		}
 	}
@@ -199,10 +199,10 @@ func IsPilotRecover(trustRoots, id string) bool {
 //	}
 func IsPilotRestore(trustRoots, id string) bool {
 	for _, root := range strings.Split(trustRoots, ",") {
-		baseId := SpikePilotRestore(strings.TrimSpace(root))
+		baseID := SpikePilotRestore(strings.TrimSpace(root))
 		// Check if the ID is either exactly the base ID or starts with the base ID
 		// followed by "/"
-		if id == baseId || strings.HasPrefix(id, baseId+"/") {
+		if id == baseID || strings.HasPrefix(id, baseID+"/") {
 			return true
 		}
 	}
@@ -248,10 +248,10 @@ func IsPilotRestore(trustRoots, id string) bool {
 //	}
 func IsKeeper(trustRoots, id string) bool {
 	for _, root := range strings.Split(trustRoots, ",") {
-		baseId := SpikeKeeper(strings.TrimSpace(root))
+		baseID := SpikeKeeper(strings.TrimSpace(root))
 		// Check if the ID is either exactly the base ID or starts with the base ID
 		// followed by "/"
-		if id == baseId || strings.HasPrefix(id, baseId+"/") {
+		if id == baseID || strings.HasPrefix(id, baseID+"/") {
 			return true
 		}
 	}
@@ -297,10 +297,10 @@ func IsKeeper(trustRoots, id string) bool {
 //	}
 func IsNexus(trustRoots, id string) bool {
 	for _, root := range strings.Split(trustRoots, ",") {
-		baseId := SpikeNexus(strings.TrimSpace(root))
+		baseID := SpikeNexus(strings.TrimSpace(root))
 		// Check if the ID is either exactly the base ID or starts with the base ID
 		// followed by "/"
-		if id == baseId || strings.HasPrefix(id, baseId+"/") {
+		if id == baseID || strings.HasPrefix(id, baseID+"/") {
 			return true
 		}
 	}
@@ -326,6 +326,6 @@ func PeerCanTalkToAnyone(_, _ string) bool {
 // Returns:
 //   - bool: true if the SPIFFE ID matches SPIKE Nexus' SPIFFE ID for any of
 //     the trust roots, false otherwise
-func PeerCanTalkToKeeper(trustRoots, peerSpiffeId string) bool {
-	return IsNexus(trustRoots, peerSpiffeId)
+func PeerCanTalkToKeeper(trustRoots, peerSPIFFEID string) bool {
+	return IsNexus(trustRoots, peerSPIFFEID)
 }

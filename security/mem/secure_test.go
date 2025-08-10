@@ -1,4 +1,4 @@
-//    \\ SPIKE: Secure your secrets with SPIFFE.
+//    \\ SPIKE: Secure your secrets with SPIFFE. — https://spike.ist/
 //  \\\\\ Copyright 2024-present SPIKE contributors.
 // \\\\\\\ SPDX-License-Identifier: Apache-2.0
 
@@ -12,7 +12,7 @@ func TestClear(t *testing.T) {
 	type testStruct struct {
 		Key    [32]byte
 		Token  string
-		UserId int64
+		UserID int64
 	}
 
 	// Create test data with non-zero values
@@ -24,11 +24,11 @@ func TestClear(t *testing.T) {
 	data := &testStruct{
 		Key:    key,
 		Token:  "secret-token-value",
-		UserId: 12345,
+		UserID: 12345,
 	}
 
 	// Call Clear on the data
-	Clear(data)
+	ClearRawBytes(data)
 
 	// Verify all fields are zeroed
 	for i, b := range data.Key {
@@ -41,8 +41,8 @@ func TestClear(t *testing.T) {
 	// The string header will point to the same backing array
 	// In a real application, sensitive strings should be stored as byte slices
 
-	if data.UserId != 0 {
-		t.Errorf("Expected UserId to be 0, got %d", data.UserId)
+	if data.UserID != 0 {
+		t.Errorf("Expected UserID to be 0, got %d", data.UserID)
 	}
 }
 

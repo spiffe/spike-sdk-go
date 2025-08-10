@@ -1,9 +1,14 @@
+//    \\ SPIKE: Secure your secrets with SPIFFE. — https://spike.ist/
+//  \\\\\ Copyright 2024-present SPIKE contributors.
+// \\\\\\\ SPDX-License-Identifier: Apache-2.0
+
 package kv
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestKV_Undelete(t *testing.T) {

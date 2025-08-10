@@ -1,4 +1,4 @@
-//    \\ SPIKE: Secure your secrets with SPIFFE.
+//    \\ SPIKE: Secure your secrets with SPIFFE. — https://spike.ist/
 //  \\\\\ Copyright 2024-present SPIKE contributors.
 // \\\\\\\ SPDX-License-Identifier: Apache-2.0
 
@@ -7,6 +7,7 @@ package acl
 import (
 	"encoding/json"
 	"errors"
+
 	"github.com/spiffe/spike-sdk-go/api/url"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
@@ -63,12 +64,12 @@ import (
 //	    return
 //	}
 func CreatePolicy(source *workloadapi.X509Source,
-	name string, spiffeIdPattern string, pathPattern string,
+	name string, SPIFFEIDPattern string, pathPattern string,
 	permissions []data.PolicyPermission,
 ) error {
 	r := reqres.PolicyCreateRequest{
 		Name:            name,
-		SpiffeIdPattern: spiffeIdPattern,
+		SPIFFEIDPattern: SPIFFEIDPattern,
 		PathPattern:     pathPattern,
 		Permissions:     permissions,
 	}

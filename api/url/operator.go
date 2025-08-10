@@ -1,4 +1,4 @@
-//    \\ SPIKE: Secure your secrets with SPIFFE.
+//    \\ SPIKE: Secure your secrets with SPIFFE. — https://spike.ist/
 //  \\\\\ Copyright 2024-present SPIKE contributors.
 // \\\\\\\ SPDX-License-Identifier: Apache-2.0
 
@@ -12,16 +12,16 @@ import (
 
 func Restore() string {
 	u, _ := url.JoinPath(
-		env.NexusApiRoot(),
-		string(SpikeNexusUrlOperatorRestore),
+		env.NexusAPIRoot(),
+		string(SpikeNexusURLOperatorRestore),
 	)
 	return u
 }
 
 func Recover() string {
 	u, _ := url.JoinPath(
-		env.NexusApiRoot(),
-		string(SpikeNexusUrlOperatorRecover),
+		env.NexusAPIRoot(),
+		string(SpikeNexusURLOperatorRecover),
 	)
 	return u
 }

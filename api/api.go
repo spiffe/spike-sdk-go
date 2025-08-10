@@ -1,4 +1,4 @@
-//    \\ SPIKE: Secure your secrets with SPIFFE.
+//    \\ SPIKE: Secure your secrets with SPIFFE. — https://spike.ist/
 //  \\\\\ Copyright 2024-present SPIKE contributors.
 // \\\\\\\ SPDX-License-Identifier: Apache-2.0
 
@@ -16,13 +16,13 @@ import (
 	"github.com/spiffe/spike-sdk-go/spiffe"
 )
 
-// Api is the SPIKE API.
-type Api struct {
+// API is the SPIKE API.
+type API struct {
 	source *workloadapi.X509Source
 }
 
-// New creates and returns a new instance of Api configured with a SPIFFE source.
-func New() *Api {
+// New creates and returns a new instance of API configured with a SPIFFE source.
+func New() *API {
 	defaultEndpointSocket := spiffe.EndpointSocket()
 
 	source, _, err := spiffe.Source(context.Background(), defaultEndpointSocket)
@@ -30,17 +30,17 @@ func New() *Api {
 		return nil
 	}
 
-	return &Api{source: source}
+	return &API{source: source}
 }
 
-// NewWithSource initializes a new Api instance with the given X509Source.
-func NewWithSource(source *workloadapi.X509Source) *Api {
-	return &Api{source: source}
+// NewWithSource initializes a new API instance with the given X509Source.
+func NewWithSource(source *workloadapi.X509Source) *API {
+	return &API{source: source}
 }
 
-// Close releases any resources held by the Api instance.
+// Close releases any resources held by the API instance.
 // It ensures proper cleanup of the underlying source.
-func (a *Api) Close() {
+func (a *API) Close() {
 	spiffe.CloseSource(a.source)
 }
 
@@ -82,12 +82,12 @@ func (a *Api) Close() {
 //	    log.Printf("Failed to create policy: %v", err)
 //	    return
 //	}
-func (a *Api) CreatePolicy(
-	name string, spiffeIdPattern string, pathPattern string,
+func (a *API) CreatePolicy(
+	name string, SPIFFEIDPattern string, pathPattern string,
 	permissions []data.PolicyPermission,
 ) error {
 	return acl.CreatePolicy(a.source,
-		name, spiffeIdPattern, pathPattern, permissions)
+		name, SPIFFEIDPattern, pathPattern, permissions)
 }
 
 // DeletePolicy removes an existing policy from the system using its name.
@@ -109,7 +109,7 @@ func (a *Api) CreatePolicy(
 //	    log.Printf("Failed to delete policy: %v", err)
 //	    return
 //	}
-func (a *Api) DeletePolicy(name string) error {
+func (a *API) DeletePolicy(name string) error {
 	return acl.DeletePolicy(a.source, name)
 }
 
@@ -143,7 +143,7 @@ func (a *Api) DeletePolicy(name string) error {
 //	}
 //
 //	log.Printf("Found policy: %+v", policy)
-func (a *Api) GetPolicy(name string) (*data.Policy, error) {
+func (a *API) GetPolicy(name string) (*data.Policy, error) {
 	return acl.GetPolicy(a.source, name)
 }
 
@@ -189,8 +189,10 @@ func (a *Api) GetPolicy(name string) (*data.Policy, error) {
 //	for _, policy := range policies {
 //	    log.Printf("Found policy: %+v", policy)
 //	}
-func (a *Api) ListPolicies(spiffeIdPattern, pathPattern string) (*[]data.Policy, error) {
-	return acl.ListPolicies(a.source, spiffeIdPattern, pathPattern)
+func (a *API) ListPolicies(
+	SPIFFEIDPattern, pathPattern string,
+) (*[]data.Policy, error) {
+	return acl.ListPolicies(a.source, SPIFFEIDPattern, pathPattern)
 }
 
 // DeleteSecretVersions deletes specified versions of a secret at the given
@@ -209,7 +211,7 @@ func (a *Api) ListPolicies(spiffeIdPattern, pathPattern string) (*[]data.Policy,
 // Example:
 //
 //	err := api.DeleteSecretVersions("secret/path", []int{1, 2})
-func (a *Api) DeleteSecretVersions(path string, versions []int) error {
+func (a *API) DeleteSecretVersions(path string, versions []int) error {
 	return secret.Delete(a.source, path, versions)
 }
 
@@ -225,7 +227,7 @@ func (a *Api) DeleteSecretVersions(path string, versions []int) error {
 // Example:
 //
 //	err := api.DeleteSecret("secret/path")
-func (a *Api) DeleteSecret(path string) error {
+func (a *API) DeleteSecret(path string) error {
 	return secret.Delete(a.source, path, []int{})
 }
 
@@ -244,7 +246,7 @@ func (a *Api) DeleteSecret(path string) error {
 // Example:
 //
 //	secret, err := api.GetSecretVersion("secret/path", 1)
-func (a *Api) GetSecretVersion(
+func (a *API) GetSecretVersion(
 	path string, version int,
 ) (*data.Secret, error) {
 	return secret.Get(a.source, path, version)
@@ -263,7 +265,7 @@ func (a *Api) GetSecretVersion(
 // Example:
 //
 //	secret, err := api.GetSecret("secret/path")
-func (a *Api) GetSecret(path string) (*data.Secret, error) {
+func (a *API) GetSecret(path string) (*data.Secret, error) {
 	return secret.Get(a.source, path, 0)
 }
 
@@ -277,7 +279,7 @@ func (a *Api) GetSecret(path string) (*data.Secret, error) {
 // Example:
 //
 //	keys, err := api.ListSecretKeys()
-func (a *Api) ListSecretKeys() (*[]string, error) {
+func (a *API) ListSecretKeys() (*[]string, error) {
 	return secret.ListKeys(a.source)
 }
 
@@ -296,7 +298,7 @@ func (a *Api) ListSecretKeys() (*[]string, error) {
 // Example:
 //
 //	metadata, err := api.GetSecretMetadata("secret/path", 1)
-func (a *Api) GetSecretMetadata(
+func (a *API) GetSecretMetadata(
 	path string, version int,
 ) (*data.SecretMetadata, error) {
 	return secret.GetMetadata(a.source, path, version)
@@ -317,7 +319,7 @@ func (a *Api) GetSecretMetadata(
 // Example:
 //
 //	err := api.PutSecret("secret/path", map[string]string{"key": "value"})
-func (a *Api) PutSecret(path string, data map[string]string) error {
+func (a *API) PutSecret(path string, data map[string]string) error {
 	return secret.Put(a.source, path, data)
 }
 
@@ -336,7 +338,7 @@ func (a *Api) PutSecret(path string, data map[string]string) error {
 // Example:
 //
 //	err := api.UndeleteSecret("secret/path", []int{1, 2})
-func (a *Api) UndeleteSecret(path string, versions []int) error {
+func (a *API) UndeleteSecret(path string, versions []int) error {
 	return secret.Undelete(a.source, path, versions)
 }
 
@@ -355,7 +357,7 @@ func (a *Api) UndeleteSecret(path string, versions []int) error {
 // Example:
 //
 //	shards, err := api.Recover()
-func (a *Api) Recover() (map[int]*[32]byte, error) {
+func (a *API) Recover() (map[int]*[32]byte, error) {
 	return operator.Recover(a.source)
 }
 
@@ -376,6 +378,6 @@ func (a *Api) Recover() (map[int]*[32]byte, error) {
 // Example:
 //
 //	status, err := api.Restore(shardPtr)
-func (a *Api) Restore(index int, shard *[32]byte) (*data.RestorationStatus, error) {
+func (a *API) Restore(index int, shard *[32]byte) (*data.RestorationStatus, error) {
 	return operator.Restore(a.source, index, shard)
 }

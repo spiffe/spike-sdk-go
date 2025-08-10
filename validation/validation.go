@@ -1,3 +1,7 @@
+//    \\ SPIKE: Secure your secrets with SPIFFE.
+//  \\\\\ Copyright 2024-present SPIKE contributors.
+// \\\\\\\ SPDX-License-Identifier: Apache-2.0
+
 package validation
 
 import (
@@ -11,8 +15,8 @@ import (
 
 const validNamePattern = `^[a-zA-Z0-9-_ ]+$`
 const maxNameLength = 250
-const validSpiffeIdPattern = `^\^?spiffe://[\\a-zA-Z0-9.\-*()+?\[\]]+(/[\\/a-zA-Z0-9._\-*()+?\[\]]+)*\$?$`
-const validRawSpiffeIdPattern = `^spiffe://[a-zA-Z0-9.-]+(/[a-zA-Z0-9._-]+)*$`
+const validSPIFFEIDPattern = `^\^?spiffe://[\\a-zA-Z0-9.\-*()+?\[\]]+(/[\\/a-zA-Z0-9._\-*()+?\[\]]+)*\$?$`
+const validRawSPIFFEIDPattern = `^spiffe://[a-zA-Z0-9.-]+(/[a-zA-Z0-9._-]+)*$`
 const maxPathPatternLength = 500
 const validPathPattern = `^[a-zA-Z0-9._\-/^$()?+*|[\]{}\\]+$`
 const validPath = `^[a-zA-Z0-9._\-/()?+*|[\]{}\\]+$`
@@ -33,23 +37,23 @@ func ValidateName(name string) error {
 	return nil
 }
 
-// ValidateSpiffeIdPattern validates whether the given SPIFFE ID pattern string
+// ValidateSPIFFEIDPattern validates whether the given SPIFFE ID pattern string
 // conforms to the expected format and returns an error if it does not.
-func ValidateSpiffeIdPattern(spiffeIdPattern string) error {
-	// Validate SpiffeIdPattern
+func ValidateSPIFFEIDPattern(SPIFFEIDPattern string) error {
+	// Validate SPIFFEIDPattern
 	if match, _ := regexp.MatchString(
-		validSpiffeIdPattern, spiffeIdPattern); !match {
+		validSPIFFEIDPattern, SPIFFEIDPattern); !match {
 		return errors.ErrInvalidInput
 	}
 
 	return nil
 }
 
-// ValidateSpiffeId validates if the given SPIFFE ID matches the expected format.
+// ValidateSPIFFEID validates if the given SPIFFE ID matches the expected format.
 // Returns an error if the SPIFFE ID is invalid.
-func ValidateSpiffeId(spiffeId string) error {
+func ValidateSPIFFEID(SPIFFEID string) error {
 	if match, _ := regexp.MatchString(
-		validRawSpiffeIdPattern, spiffeId); !match {
+		validRawSPIFFEIDPattern, SPIFFEID); !match {
 		return errors.ErrInvalidInput
 	}
 	return nil
@@ -85,10 +89,10 @@ func ValidatePath(path string) error {
 	return nil
 }
 
-// ValidatePolicyId verifies if the given policyId is a valid UUID format.
+// ValidatePolicyID verifies if the given policyId is a valid UUID format.
 // Returns errors.ErrInvalidInput if the validation fails.
-func ValidatePolicyId(policyId string) error {
-	err := uuid.Validate(policyId)
+func ValidatePolicyID(policyID string) error {
+	err := uuid.Validate(policyID)
 	if err != nil {
 		return errors.ErrInvalidInput
 	}
