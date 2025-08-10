@@ -24,7 +24,6 @@ func (kv *KV) Delete(path string, versions []int) error {
 
 	// If no versions specified, mark the latest version as deleted
 	if len(versions) == 0 {
-
 		if v, exists := secret.Versions[cv]; exists {
 			v.DeletedTime = &now // Mark as deleted.
 			secret.Versions[cv] = v

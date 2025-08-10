@@ -71,6 +71,7 @@ func Post(client *http.Client, path string, mr []byte) ([]byte, error) {
 			err,
 		)
 	}
+	defer r.Body.Close()
 
 	if r.StatusCode != http.StatusOK {
 		if r.StatusCode == http.StatusNotFound {

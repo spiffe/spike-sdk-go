@@ -179,7 +179,6 @@ func TestKV_Undelete(t *testing.T) {
 						assert.True(t, exist)
 						assert.Nil(t, v.DeletedTime)
 					}
-
 				}
 			}
 		})

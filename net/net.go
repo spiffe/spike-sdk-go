@@ -91,8 +91,9 @@ func CreateMTLSServer(source *workloadapi.X509Source,
 
 	tlsConfig := tlsconfig.MTLSServerConfig(source, source, authorizer)
 	server := &http.Server{
-		Addr:      tlsPort,
-		TLSConfig: tlsConfig,
+		Addr:              tlsPort,
+		TLSConfig:         tlsConfig,
+		ReadHeaderTimeout: 10 * time.Second,
 	}
 	return server, nil
 }
