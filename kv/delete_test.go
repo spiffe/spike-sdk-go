@@ -5,6 +5,7 @@
 package kv
 
 import (
+	"errors"
 	"testing"
 )
 
@@ -87,7 +88,7 @@ func TestKV_Delete(t *testing.T) {
 			kv := tt.setup()
 			err := kv.Delete(tt.path, tt.versions)
 
-			if err != tt.wantErr {
+			if !errors.Is(err, tt.wantErr) {
 				t.Errorf("Delete() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}

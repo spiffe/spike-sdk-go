@@ -9,7 +9,7 @@ import "fmt"
 const letters = "abcdefghijklmnopqrstuvwxyz" +
 	"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
-// RandomString generates a cryptographically-unique secure random string.
+// RandomString generates a cryptographically unique secure random string.
 func RandomString(n int) (string, error) {
 	bytes := make([]byte, n)
 
@@ -24,7 +24,7 @@ func RandomString(n int) (string, error) {
 	return string(bytes), nil
 }
 
-// Token generates a cryptographically-unique secure random string.
+// Token generates a cryptographically unique secure random string.
 func Token() string {
 	id, err := RandomString(26)
 	if err != nil {
@@ -33,7 +33,7 @@ func Token() string {
 	return "spike." + id
 }
 
-// ID generates a cryptographically-unique secure random string.
+// ID generates a cryptographically unique secure random string.
 func ID() string {
 	id, err := RandomString(8)
 	if err != nil {

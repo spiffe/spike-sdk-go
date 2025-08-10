@@ -6,6 +6,9 @@ package env
 
 import "os"
 
+// TrustRoot returns the trust root domain for SPIKE operations.
+// It first checks the SPIKE_TRUST_ROOT environment variable.
+// If the environment variable is not set or empty, it defaults to "spike.ist".
 func TrustRoot() string {
 	tr := os.Getenv("SPIKE_TRUST_ROOT")
 	if tr == "" {

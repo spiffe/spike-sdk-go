@@ -8,12 +8,11 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/spiffe/spike-sdk-go/api/url"
-
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 
 	"github.com/spiffe/spike-sdk-go/api/entity/data"
 	"github.com/spiffe/spike-sdk-go/api/entity/v1/reqres"
+	"github.com/spiffe/spike-sdk-go/api/url"
 	"github.com/spiffe/spike-sdk-go/net"
 )
 
@@ -25,7 +24,7 @@ import (
 //   - source: A pointer to a workloadapi.X509Source for establishing mTLS
 //     connection
 //   - name: The name of the policy to be created
-//   - spiffeIdPattern: The SPIFFE ID pattern that this policy will apply to
+//   - SPIFFEIDPattern: The SPIFFE ID pattern that this policy will apply to
 //   - pathPattern: The path pattern that this policy will match against
 //   - permissions: A slice of PolicyPermission defining the access rights for
 //     this policy
@@ -84,7 +83,7 @@ func CreatePolicy(source *workloadapi.X509Source,
 		)
 	}
 
-	client, err := net.CreateMtlsClient(source)
+	client, err := net.CreateMTLSClient(source)
 	if err != nil {
 		return err
 	}

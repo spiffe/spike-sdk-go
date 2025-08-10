@@ -41,7 +41,7 @@ func (kv *KV) Put(path string, values map[string]string) {
 				CreatedTime: rightNow,
 				UpdatedTime: rightNow,
 				MaxVersions: kv.maxSecretVersions,
-				// Versions start at 1, so that passing 0 as version will
+				// Versions start at 1, so that passing 0 as the version will
 				// default to the current version.
 				CurrentVersion: 1,
 				OldestVersion:  1,
@@ -54,7 +54,7 @@ func (kv *KV) Put(path string, values map[string]string) {
 
 	newVersion := secret.Metadata.CurrentVersion
 
-	// Add new version
+	// Add a new version:
 	secret.Versions[newVersion] = Version{
 		Data:        values,
 		CreatedTime: rightNow,
@@ -64,7 +64,7 @@ func (kv *KV) Put(path string, values map[string]string) {
 	// Update metadata
 	secret.Metadata.UpdatedTime = rightNow
 
-	// Cleanup old versions if exceeding MaxVersions
+	// Clean up the old versions if exceeding MaxVersions
 	var deletedAny bool
 	for version := range secret.Versions {
 		if newVersion-version >= secret.Metadata.MaxVersions {

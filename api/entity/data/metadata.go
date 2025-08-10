@@ -6,14 +6,14 @@ package data
 
 import "time"
 
-// SecretVersionInfo for secrets version
+// SecretVersionInfo for the secret's version
 type SecretVersionInfo struct {
 	CreatedTime time.Time  `json:"createdTime"`
 	Version     int        `json:"version"`
 	DeletedTime *time.Time `json:"deletedTime"`
 }
 
-// SecretMetaDataContent for secrets raw metadata
+// SecretMetaDataContent for the secret's raw metadata
 type SecretMetaDataContent struct {
 	CurrentVersion int       `json:"currentVersion"`
 	OldestVersion  int       `json:"oldestVersion"`
@@ -22,7 +22,7 @@ type SecretMetaDataContent struct {
 	MaxVersions    int       `json:"maxVersions"`
 }
 
-// SecretMetadata for secrets metadata
+// SecretMetadata for the secret's metadata
 type SecretMetadata struct {
 	Versions map[int]SecretVersionInfo `json:"versions,omitempty"`
 	Metadata SecretMetaDataContent     `json:"metadata,omitempty"`

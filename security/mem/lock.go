@@ -3,7 +3,6 @@
 // \\\\\\\ SPDX-License-Identifier: Apache-2.0
 
 //go:build !windows
-// +build !windows
 
 // Package mem provides utilities for secure mem operations.
 package mem

@@ -11,11 +11,6 @@ import (
 	"net/http"
 )
 
-var ErrNotFound = errors.New("not found")
-var ErrUnauthorized = errors.New("unauthorized")
-var ErrBadRequest = errors.New("bad request")
-var ErrNotReady = errors.New("not ready")
-
 func body(r *http.Response) (bod []byte, err error) {
 	body, err := io.ReadAll(r.Body)
 	if err != nil {

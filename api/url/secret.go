@@ -14,7 +14,7 @@ import (
 func SecretGet() string {
 	u, _ := url.JoinPath(
 		env.NexusAPIRoot(),
-		string(SpikeNexusURLSecrets),
+		string(NexusURLSecrets),
 	)
 	params := url.Values{}
 	params.Add(KeyAPIAction, string(ActionGet))
@@ -25,7 +25,7 @@ func SecretGet() string {
 func SecretPut() string {
 	u, _ := url.JoinPath(
 		env.NexusAPIRoot(),
-		string(SpikeNexusURLSecrets),
+		string(NexusURLSecrets),
 	)
 	return u
 }
@@ -34,7 +34,7 @@ func SecretPut() string {
 func SecretDelete() string {
 	u, _ := url.JoinPath(
 		env.NexusAPIRoot(),
-		string(SpikeNexusURLSecrets),
+		string(NexusURLSecrets),
 	)
 	params := url.Values{}
 	params.Add(KeyAPIAction, string(ActionDelete))
@@ -45,7 +45,7 @@ func SecretDelete() string {
 func SecretUndelete() string {
 	u, _ := url.JoinPath(
 		env.NexusAPIRoot(),
-		string(SpikeNexusURLSecrets),
+		string(NexusURLSecrets),
 	)
 	params := url.Values{}
 	params.Add(KeyAPIAction, string(ActionUndelete))
@@ -56,7 +56,7 @@ func SecretUndelete() string {
 func SecretList() string {
 	u, _ := url.JoinPath(
 		env.NexusAPIRoot(),
-		string(SpikeNexusURLSecrets),
+		string(NexusURLSecrets),
 	)
 	params := url.Values{}
 	params.Add(KeyAPIAction, string(ActionList))
@@ -67,7 +67,7 @@ func SecretList() string {
 func SecretMetadataGet() string {
 	u, _ := url.JoinPath(
 		env.NexusAPIRoot(),
-		string(SpikeNexusURLSecretsMetadata),
+		string(NexusURLSecretsMetadata),
 	)
 	params := url.Values{}
 	params.Add(KeyAPIAction, string(ActionGet))

@@ -76,7 +76,7 @@ func Source(ctx context.Context, socketPath string) (
 		)
 	}
 
-	svid, err := source.GetX509SVID()
+	sv, err := source.GetX509SVID()
 	if err != nil {
 		return nil, "", errors.Join(
 			errors.New("unable to get X509SVID"),
@@ -84,7 +84,7 @@ func Source(ctx context.Context, socketPath string) (
 		)
 	}
 
-	return source, svid.ID.String(), nil
+	return source, sv.ID.String(), nil
 }
 
 // IDFromRequest extracts the SPIFFE ID from the TLS peer certificate of

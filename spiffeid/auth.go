@@ -6,7 +6,8 @@ package spiffeid
 
 import "strings"
 
-// IsPilot checks if a given SPIFFE ID matches the SPIKE Pilot's SPIFFE ID pattern.
+// IsPilot checks if a given SPIFFE ID matches the SPIKE Pilot's SPIFFE ID
+// pattern.
 //
 // This function is used for identity verification to determine if the provided
 // SPIFFE ID belongs to a SPIKE pilot instance. It compares the input against
@@ -26,8 +27,8 @@ import "strings"
 //
 // Returns:
 //   - bool: true if the provided SPIFFE ID matches either the exact pilot ID
-//     or an extended ID with additional path segments for any of the trust roots,
-//     false otherwise
+//     or an extended ID with additional path segments for any of the trust
+//     roots, false otherwise
 //
 // Example usage:
 //
@@ -44,7 +45,7 @@ import "strings"
 //	}
 func IsPilot(trustRoots, id string) bool {
 	for _, root := range strings.Split(trustRoots, ",") {
-		baseID := SpikePilot(strings.TrimSpace(root))
+		baseID := Pilot(strings.TrimSpace(root))
 		// Check if the ID is either exactly the base ID or starts with the base ID
 		// followed by "/"
 		if id == baseID || strings.HasPrefix(id, baseID+"/") {
@@ -99,7 +100,7 @@ func IsPilot(trustRoots, id string) bool {
 //	}
 func IsLiteWorkload(trustRoots, id string) bool {
 	for _, root := range strings.Split(trustRoots, ",") {
-		baseID := SpikeLiteWorkload(strings.TrimSpace(root))
+		baseID := LiteWorkload(strings.TrimSpace(root))
 		// Check if the ID is either exactly the base ID or starts with the base ID
 		// followed by "/"
 		if id == baseID || strings.HasPrefix(id, baseID+"/") {
@@ -149,7 +150,7 @@ func IsLiteWorkload(trustRoots, id string) bool {
 //	}
 func IsPilotRecover(trustRoots, id string) bool {
 	for _, root := range strings.Split(trustRoots, ",") {
-		baseID := SpikePilotRecover(strings.TrimSpace(root))
+		baseID := PilotRecover(strings.TrimSpace(root))
 		// Check if the ID is either exactly the base ID or starts with the base ID
 		// followed by "/"
 		if id == baseID || strings.HasPrefix(id, baseID+"/") {
@@ -199,7 +200,7 @@ func IsPilotRecover(trustRoots, id string) bool {
 //	}
 func IsPilotRestore(trustRoots, id string) bool {
 	for _, root := range strings.Split(trustRoots, ",") {
-		baseID := SpikePilotRestore(strings.TrimSpace(root))
+		baseID := PilotRestore(strings.TrimSpace(root))
 		// Check if the ID is either exactly the base ID or starts with the base ID
 		// followed by "/"
 		if id == baseID || strings.HasPrefix(id, baseID+"/") {
@@ -248,7 +249,7 @@ func IsPilotRestore(trustRoots, id string) bool {
 //	}
 func IsKeeper(trustRoots, id string) bool {
 	for _, root := range strings.Split(trustRoots, ",") {
-		baseID := SpikeKeeper(strings.TrimSpace(root))
+		baseID := Keeper(strings.TrimSpace(root))
 		// Check if the ID is either exactly the base ID or starts with the base ID
 		// followed by "/"
 		if id == baseID || strings.HasPrefix(id, baseID+"/") {
@@ -260,7 +261,7 @@ func IsKeeper(trustRoots, id string) bool {
 
 // IsNexus checks if the provided SPIFFE ID matches the SPIKE Nexus SPIFFE ID.
 //
-// The function compares the input SPIFFE ID against the configured Spike Nexus
+// The function compares the input SPIFFE ID against the configured SPIKE Nexus
 // SPIFFE ID pattern. This is typically used for validating whether a given
 // identity represents the Nexus service.
 //
@@ -297,7 +298,7 @@ func IsKeeper(trustRoots, id string) bool {
 //	}
 func IsNexus(trustRoots, id string) bool {
 	for _, root := range strings.Split(trustRoots, ",") {
-		baseID := SpikeNexus(strings.TrimSpace(root))
+		baseID := Nexus(strings.TrimSpace(root))
 		// Check if the ID is either exactly the base ID or starts with the base ID
 		// followed by "/"
 		if id == baseID || strings.HasPrefix(id, baseID+"/") {
@@ -321,7 +322,7 @@ func PeerCanTalkToAnyone(_, _ string) bool {
 // Parameters:
 //   - trustRoots: Comma-delimited list of trust domain roots
 //     (e.g., "example.org,other.org")
-//   - peerSpiffeId: The SPIFFE ID string to check
+//   - peerSPIFFEID: The SPIFFE ID string to check
 //
 // Returns:
 //   - bool: true if the SPIFFE ID matches SPIKE Nexus' SPIFFE ID for any of

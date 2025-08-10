@@ -5,7 +5,7 @@
 package kv
 
 // ImportSecrets hydrates the key-value store with secrets loaded from
-// persistent storage or a similar medium. It takes a map of path to secret
+// persistent storage or a similar medium. It takes a map of the path to secret
 // values and adds them to the in-memory store. This is typically used during
 // initialization or recovery after a system crash.
 //

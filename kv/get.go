@@ -47,7 +47,7 @@ func (kv *KV) Get(path string, version int) (map[string]string, error) {
 	// fmt.Println("########")
 	// #endregion
 
-	// If version not specified, use current version
+	// If the version not specified, use the current version:
 	if version == 0 {
 		version = secret.Metadata.CurrentVersion
 	}

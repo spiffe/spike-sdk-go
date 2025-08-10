@@ -14,7 +14,7 @@ package kv
 // Returns:
 //   - error: ErrItemNotFound if the path doesn't exist, nil on success
 //
-// If a version number in the versions slice doesn't exist, it is silently
+// If a version number in the `versions` slice doesn't exist, it is silently
 // skipped without returning an error. Only existing versions are modified.
 func (kv *KV) Undelete(path string, versions []int) error {
 	secret, exists := kv.data[path]

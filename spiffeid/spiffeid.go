@@ -10,7 +10,7 @@ import (
 	"github.com/spiffe/spike-sdk-go/spiffeid/internal/env"
 )
 
-// SpikeKeeper constructs and returns the SPIKE Keeper's SPIFFE ID string.
+// Keeper constructs and returns the SPIKE Keeper's SPIFFE ID string.
 //
 // Parameters:
 //   - trustRoot: The trust domain for the SPIFFE ID. If empty, the value is
@@ -19,7 +19,7 @@ import (
 // Returns:
 //   - string: The complete SPIFFE ID in the format:
 //     "spiffe://<trustRoot>/spike/keeper"
-func SpikeKeeper(trustRoot string) string {
+func Keeper(trustRoot string) string {
 	if trustRoot == "" {
 		trustRoot = env.TrustRoot()
 	}
@@ -27,7 +27,7 @@ func SpikeKeeper(trustRoot string) string {
 	return "spiffe://" + path.Join(trustRoot, "spike", "keeper")
 }
 
-// SpikeNexus constructs and returns the SPIFFE ID for SPIKE Nexus.
+// Nexus constructs and returns the SPIFFE ID for SPIKE Nexus.
 //
 // Parameters:
 //   - trustRoot: The trust domain for the SPIFFE ID. If empty, the value is
@@ -36,7 +36,7 @@ func SpikeKeeper(trustRoot string) string {
 // Returns:
 //   - string: The complete SPIFFE ID in the format:
 //     "spiffe://<trustRoot>/spike/nexus"
-func SpikeNexus(trustRoot string) string {
+func Nexus(trustRoot string) string {
 	if trustRoot == "" {
 		trustRoot = env.TrustRoot()
 	}
@@ -44,7 +44,7 @@ func SpikeNexus(trustRoot string) string {
 	return "spiffe://" + path.Join(trustRoot, "spike", "nexus")
 }
 
-// SpikePilot generates the SPIFFE ID for a SPIKE Pilot superuser role.
+// Pilot generates the SPIFFE ID for a SPIKE Pilot superuser role.
 //
 // Parameters:
 //   - trustRoot: The trust domain for the SPIFFE ID. If empty, the value is
@@ -53,7 +53,7 @@ func SpikeNexus(trustRoot string) string {
 // Returns:
 //   - string: The complete SPIFFE ID in the format:
 //     "spiffe://<trustRoot>/spike/pilot/role/superuser"
-func SpikePilot(trustRoot string) string {
+func Pilot(trustRoot string) string {
 	if trustRoot == "" {
 		trustRoot = env.TrustRoot()
 	}
@@ -61,7 +61,7 @@ func SpikePilot(trustRoot string) string {
 	return "spiffe://" + path.Join(trustRoot, "spike", "pilot", "role", "superuser")
 }
 
-// SpikeLiteWorkload generates the SPIFFE ID for a SPIKE Lite workload role.
+// LiteWorkload generates the SPIFFE ID for a SPIKE Lite workload role.
 //
 // Parameters:
 //   - trustRoot: The trust domain for the SPIFFE ID. If empty, the value is
@@ -70,7 +70,7 @@ func SpikePilot(trustRoot string) string {
 // Returns:
 //   - string: The complete SPIFFE ID in the format:
 //     "spiffe://<trustRoot>/spike/workload/role/lite"
-func SpikeLiteWorkload(trustRoot string) string {
+func LiteWorkload(trustRoot string) string {
 	if trustRoot == "" {
 		trustRoot = env.TrustRoot()
 	}
@@ -78,7 +78,7 @@ func SpikeLiteWorkload(trustRoot string) string {
 	return "spiffe://" + path.Join(trustRoot, "spike", "workload", "role", "lite")
 }
 
-// SpikePilotRecover generates the SPIFFE ID for a SPIKE Pilot recovery role.
+// PilotRecover generates the SPIFFE ID for a SPIKE Pilot recovery role.
 //
 // Parameters:
 //   - trustRoot: The trust domain for the SPIFFE ID. If empty, the value is
@@ -87,7 +87,7 @@ func SpikeLiteWorkload(trustRoot string) string {
 // Returns:
 //   - string: The complete SPIFFE ID in the format:
 //     "spiffe://<trustRoot>/spike/pilot/role/recover"
-func SpikePilotRecover(trustRoot string) string {
+func PilotRecover(trustRoot string) string {
 	if trustRoot == "" {
 		trustRoot = env.TrustRoot()
 	}
@@ -95,7 +95,7 @@ func SpikePilotRecover(trustRoot string) string {
 	return "spiffe://" + path.Join(trustRoot, "spike", "pilot", "role", "recover")
 }
 
-// SpikePilotRestore generates the SPIFFE ID for a SPIKE Pilot restore role.
+// PilotRestore generates the SPIFFE ID for a SPIKE Pilot restore role.
 //
 // Parameters:
 //   - trustRoot: The trust domain for the SPIFFE ID. If empty, the value is
@@ -104,7 +104,7 @@ func SpikePilotRecover(trustRoot string) string {
 // Returns:
 //   - string: The complete SPIFFE ID in the format:
 //     "spiffe://<trustRoot>/spike/pilot/role/restore"
-func SpikePilotRestore(trustRoot string) string {
+func PilotRestore(trustRoot string) string {
 	if trustRoot == "" {
 		trustRoot = env.TrustRoot()
 	}

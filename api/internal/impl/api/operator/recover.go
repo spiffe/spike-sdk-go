@@ -27,7 +27,7 @@ import (
 //   - error: nil on success, error if:
 //   - Failed to marshal recover request
 //   - Failed to create mTLS client
-//   - Request failed (except for not found case)
+//   - Request failed (except for the "not found" case)
 //   - Failed to parse response body
 //   - Server returned error in response
 //
@@ -45,7 +45,7 @@ func Recover(source *workloadapi.X509Source) (map[int]*[32]byte, error) {
 		)
 	}
 
-	client, err := net.CreateMtlsClient(source)
+	client, err := net.CreateMTLSClient(source)
 	if err != nil {
 		return nil, err
 	}

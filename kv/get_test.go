@@ -5,6 +5,7 @@
 package kv
 
 import (
+	"errors"
 	"testing"
 	"time"
 )
@@ -153,7 +154,7 @@ func TestKV_Get(t *testing.T) {
 			kv := tt.setup()
 			got, err := kv.Get(tt.path, tt.version)
 
-			if err != tt.wantErr {
+			if !errors.Is(err, tt.wantErr) {
 				t.Errorf("Get() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
@@ -237,7 +238,7 @@ func TestKV_GetRawSecret(t *testing.T) {
 			kv := tt.setup()
 			got, err := kv.GetRawSecret(tt.path)
 
-			if err != tt.wantErr {
+			if !errors.Is(err, tt.wantErr) {
 				t.Errorf("GetRawSecret() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
