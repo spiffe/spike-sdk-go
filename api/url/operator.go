@@ -13,7 +13,7 @@ import (
 func Restore() string {
 	u, _ := url.JoinPath(
 		env.NexusAPIRoot(),
-		string(NexusURLOperatorRestore),
+		string(NexusOperatorRestore),
 	)
 	return u
 }
@@ -21,7 +21,7 @@ func Restore() string {
 func Recover() string {
 	u, _ := url.JoinPath(
 		env.NexusAPIRoot(),
-		string(NexusURLOperatorRecover),
+		string(NexusOperatorRecover),
 	)
 	return u
 }

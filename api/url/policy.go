@@ -14,7 +14,7 @@ import (
 func PolicyCreate() string {
 	u, _ := url.JoinPath(
 		env.NexusAPIRoot(),
-		string(NexusURLPolicy),
+		string(NexusPolicy),
 	)
 	return u
 }
@@ -23,7 +23,7 @@ func PolicyCreate() string {
 func PolicyList() string {
 	u, _ := url.JoinPath(
 		env.NexusAPIRoot(),
-		string(NexusURLPolicy),
+		string(NexusPolicy),
 	)
 	params := url.Values{}
 	params.Add(KeyAPIAction, string(ActionList))
@@ -34,7 +34,7 @@ func PolicyList() string {
 func PolicyDelete() string {
 	u, _ := url.JoinPath(
 		env.NexusAPIRoot(),
-		string(NexusURLPolicy),
+		string(NexusPolicy),
 	)
 	params := url.Values{}
 	params.Add(KeyAPIAction, string(ActionDelete))
@@ -45,7 +45,7 @@ func PolicyDelete() string {
 func PolicyGet() string {
 	u, _ := url.JoinPath(
 		env.NexusAPIRoot(),
-		string(NexusURLPolicy),
+		string(NexusPolicy),
 	)
 	params := url.Values{}
 	params.Add(KeyAPIAction, string(ActionGet))

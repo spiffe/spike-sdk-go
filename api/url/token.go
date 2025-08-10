@@ -14,7 +14,7 @@ import (
 func Init() string {
 	u, _ := url.JoinPath(
 		env.NexusAPIRoot(),
-		string(NexusURLInit),
+		string(NexusInit),
 	)
 	return u
 }
@@ -24,7 +24,7 @@ func Init() string {
 func InitState() string {
 	u, _ := url.JoinPath(
 		env.NexusAPIRoot(),
-		string(NexusURLInit),
+		string(NexusInit),
 	)
 	params := url.Values{}
 	params.Add(KeyAPIAction, string(ActionCheck))

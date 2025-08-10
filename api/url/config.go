@@ -18,15 +18,15 @@ const ActionRead APIAction = "read"
 
 type APIURL string
 
-const NexusURLSecrets APIURL = "/v1/store/secrets"
-const NexusURLSecretsMetadata APIURL = "/v1/store/secrets/metadata"
-const NexusURLInit APIURL = "/v1/auth/initialization"
+const NexusSecrets APIURL = "/v1/store/secrets"
+const NexusSecretsMetadata APIURL = "/v1/store/secrets/metadata"
+const NexusInit APIURL = "/v1/auth/initialization"
 
-const NexusURLPolicy APIURL = "/v1/acl/policy"
+const NexusPolicy APIURL = "/v1/acl/policy"
 
-const NexusURLOperatorRecover APIURL = "/v1/operator/recover"
-const NexusURLOperatorRestore APIURL = "/v1/operator/restore"
+const NexusOperatorRecover APIURL = "/v1/operator/recover"
+const NexusOperatorRestore APIURL = "/v1/operator/restore"
 
-const KeeperURLKeep APIURL = "/v1/store/keep"
-const KeeperURLContribute APIURL = "/v1/store/contribute"
-const KeeperURLShard APIURL = "/v1/store/shard"
+const KeeperKeep APIURL = "/v1/store/keep"
+const KeeperContribute APIURL = "/v1/store/contribute"
+const KeeperShard APIURL = "/v1/store/shard"
