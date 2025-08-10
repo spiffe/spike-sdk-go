@@ -29,14 +29,14 @@ const (
 // Retrier defines the interface for retry operations with backoff support.
 // Implementations of this interface provide different retry strategies.
 type Retrier interface {
-	// RetryWithBackoff executes an operation with backoff strategy.
+	// RetryWithBackoff executes an operation with a backoff strategy.
 	// It will repeatedly execute the operation until it succeeds or
-	// the context is cancelled. The backoff strategy determines the
+	// the context is canceled. The backoff strategy determines the
 	// delay between retry attempts.
 	//
 	// Parameters:
 	//   - ctx: Context for cancellation and timeout control
-	//   - op: The operation to retry, returns error if attempt failed
+	//   - op: The operation to retry, returns error if the attempt failed
 	//
 	// Returns:
 	//   - error: Last error from the operation or nil if successful
@@ -62,7 +62,7 @@ func NewTypedRetrier[T any](r Retrier) *TypedRetrier[T] {
 	return &TypedRetrier[T]{retrier: r}
 }
 
-// RetryWithBackoff executes a typed operation with backoff strategy.
+// RetryWithBackoff executes a typed operation with a backoff strategy.
 // It preserves the return value while maintaining retry functionality.
 //
 // Parameters:
@@ -86,7 +86,7 @@ func (r *TypedRetrier[T]) RetryWithBackoff(
 }
 
 // NotifyFn is a callback function type for retry notifications.
-// It provides information about each retry attempt including the error,
+// It provides information about each retry attempt, including the error,
 // current interval duration, and total elapsed time.
 type NotifyFn func(err error, duration, totalDuration time.Duration)
 
@@ -95,7 +95,7 @@ type NotifyFn func(err error, duration, totalDuration time.Duration)
 type RetrierOption func(*ExponentialRetrier)
 
 // ExponentialRetrier implements Retrier using exponential backoff strategy.
-// It provides configurable retry intervals and maximum attempt durations..
+// It provides configurable retry intervals and maximum attempt durations.
 type ExponentialRetrier struct {
 	newBackOff func() backoff.BackOff
 	notify     NotifyFn
@@ -211,7 +211,7 @@ func WithMultiplier(m float64) BackOffOption {
 }
 
 // WithNotify is an option to set the notification callback.
-// The callback is called after each failed attempt with retry statistics.
+// The callback is called after each failed attempt.
 //
 // Example:
 //

@@ -8,13 +8,12 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/spiffe/spike-sdk-go/api/url"
-
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 
 	"github.com/spiffe/spike-sdk-go/api/entity/data"
 	"github.com/spiffe/spike-sdk-go/api/entity/v1/reqres"
 	code "github.com/spiffe/spike-sdk-go/api/errors"
+	"github.com/spiffe/spike-sdk-go/api/url"
 	"github.com/spiffe/spike-sdk-go/net"
 )
 
@@ -49,7 +48,7 @@ func Get(source *workloadapi.X509Source,
 		)
 	}
 
-	client, err := net.CreateMtlsClient(source)
+	client, err := net.CreateMTLSClient(source)
 	if err != nil {
 		return nil, err
 	}

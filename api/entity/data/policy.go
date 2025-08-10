@@ -23,7 +23,7 @@ const PermissionWrite PolicyPermission = "write"
 const PermissionList PolicyPermission = "list"
 
 // PermissionExecute grants the ability to execute specified resources.
-// One such resource is encryption and decryption operations which
+// One such resource is encryption and decryption operations that
 // don't necessarily persist anything but execute an internal command.
 const PermissionExecute PolicyPermission = "execute"
 

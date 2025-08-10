@@ -4,6 +4,8 @@
 
 package data
 
+// RestorationStatus represents the status of a restoration process,
+// including collected shards, remaining shards, and completion status.
 type RestorationStatus struct {
 	ShardsCollected int  `json:"collected"`
 	ShardsRemaining int  `json:"remaining"`

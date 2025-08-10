@@ -96,7 +96,7 @@ func ClearRawBytes[T any](s *T) {
 }
 
 // ClearRawBytesParanoid provides a more thorough memory wiping method for
-// highly-sensitive data.
+// highly sensitive data.
 //
 // It performs multiple passes using different patterns (zeros, ones,
 // random data, and alternating bits) to minimize potential data remanence
@@ -105,7 +105,7 @@ func ClearRawBytes[T any](s *T) {
 // This method is designed for extremely security-sensitive applications where:
 //  1. An attacker might have physical access to RAM
 //  2. Cold boot attacks or specialized memory forensics equipment might be
-//     employed
+//     used
 //  3. The data being protected is critically sensitive (e.g., high-value
 //     encryption keys)
 //
@@ -187,7 +187,7 @@ func Zeroed32(ar *[32]byte) bool {
 // This is a convenience wrapper around Clear for byte slices.
 //
 // This is especially important for slices because executing `mem.Clear` on
-// a slice it will only zero out the slice header structure itself, NOT the
+// a slice, it will only zero out the slice header structure itself, NOT the
 // underlying array data that the slice points to.
 //
 // When we pass a byte slice s to the function Clear[T any](s *T),

@@ -14,7 +14,7 @@ var reader = rand.Read
 
 const aes256KeySize = 32
 
-// Aes256Seed generates a cryptographically secure random 256-bit key suitable
+// AES256Seed generates a cryptographically secure random 256-bit key suitable
 // for use with AES-256 encryption. The key is returned as a hexadecimal-encoded
 // string.
 //
@@ -26,7 +26,7 @@ const aes256KeySize = 32
 // The function uses a cryptographically secure random number generator to ensure
 // the generated key is suitable for cryptographic use. The resulting hex string
 // can be decoded back to bytes using hex.DecodeString when needed for encryption.
-func Aes256Seed() (string, error) {
+func AES256Seed() (string, error) {
 	// Generate a 256-bit key
 	key := make([]byte, aes256KeySize)
 
@@ -34,7 +34,7 @@ func Aes256Seed() (string, error) {
 	if err != nil {
 		return "", errors.Join(
 			err,
-			errors.New("Aes256Seed: failed to generate random key"),
+			errors.New("AES256Seed: failed to generate random key"),
 		)
 	}
 

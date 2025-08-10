@@ -59,7 +59,7 @@ func Restore(
 		)
 	}
 
-	client, err := net.CreateMtlsClient(source)
+	client, err := net.CreateMTLSClient(source)
 	if err != nil {
 		// Security: Zero out mr before returning error
 		for i := range mr {
@@ -69,7 +69,7 @@ func Restore(
 	}
 
 	body, err := net.Post(client, url.Restore(), mr)
-	// Security: Zero out mr after post request is complete
+	// Security: Zero out mr after the post request is complete
 	for i := range mr {
 		mr[i] = 0
 	}

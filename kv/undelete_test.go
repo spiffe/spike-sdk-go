@@ -45,7 +45,7 @@ func TestKV_Undelete(t *testing.T) {
 			wantErr:  nil,
 		},
 		{
-			name: "undelete spesific versions",
+			name: "undelete specific versions",
 			setup: func() *KV {
 				kv := &KV{
 					data: make(map[string]*Value),

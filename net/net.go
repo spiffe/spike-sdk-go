@@ -17,6 +17,28 @@ import (
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 )
 
+// RequestBody reads and returns the entire request body as a byte slice.
+// It reads all data from r.Body and ensures the body is properly closed
+// after reading, even if an error occurs during the read operation.
+//
+// The function uses errors.Join to combine any read error with potential
+// close errors, ensuring that close failures are not silently ignored.
+//
+// Parameters:
+//   - r: HTTP request containing the body to read
+//
+// Returns:
+//   - bod: byte slice containing the full request body data
+//   - err: any error that occurred during reading or closing the body
+//
+// Example:
+//
+//	body, err := RequestBody(req)
+//	if err != nil {
+//	    log.Printf("Failed to read request body: %v", err)
+//	    return
+//	}
+//	// Process body data...
 func RequestBody(r *http.Request) (bod []byte, err error) {
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -33,7 +55,7 @@ func RequestBody(r *http.Request) (bod []byte, err error) {
 	return body, err
 }
 
-// CreateMtlsServer creates an HTTP server configured for mutual TLS (mTLS)
+// CreateMTLSServer creates an HTTP server configured for mutual TLS (mTLS)
 // authentication using SPIFFE X.509 certificates. It sets up the server with a
 // custom authorizer that validates client SPIFFE IDs against a provided
 // predicate function.
@@ -54,7 +76,7 @@ func RequestBody(r *http.Request) (bod []byte, err error) {
 // The server uses the provided X509Source for both its own identity and for
 // validating client certificates. Client connections are only accepted if their
 // SPIFFE ID passes the provided predicate function.
-func CreateMtlsServer(source *workloadapi.X509Source,
+func CreateMTLSServer(source *workloadapi.X509Source,
 	tlsPort string,
 	predicate func(string) bool) (*http.Server, error) {
 	authorizer := tlsconfig.AdaptMatcher(func(id spiffeid.ID) error {
@@ -75,7 +97,7 @@ func CreateMtlsServer(source *workloadapi.X509Source,
 	return server, nil
 }
 
-// CreateMtlsClientWithPredicate creates an HTTP client configured for mutual TLS
+// CreateMTLSClientWithPredicate creates an HTTP client configured for mutual TLS
 // authentication using SPIFFE workload identities.
 // It uses the provided X.509 source for client certificates and validates peer
 // certificates against a predicate function.
@@ -96,7 +118,7 @@ func CreateMtlsServer(source *workloadapi.X509Source,
 //   - Validate peer certificates using the same X509Source
 //   - Only accept peer certificates with SPIFFE IDs that pass the predicate
 //     function
-func CreateMtlsClientWithPredicate(
+func CreateMTLSClientWithPredicate(
 	source *workloadapi.X509Source,
 	predicate func(string) bool,
 ) (*http.Client, error) {
@@ -132,7 +154,7 @@ func CreateMtlsClientWithPredicate(
 	return client, nil
 }
 
-// CreateMtlsClient creates an HTTP client configured for mutual TLS
+// CreateMTLSClient creates an HTTP client configured for mutual TLS
 // authentication using SPIFFE workload identities.
 // It uses the provided X.509 source for client certificates and validates peer
 // certificates against a predicate function.
@@ -151,8 +173,8 @@ func CreateMtlsClientWithPredicate(
 //   - Validate peer certificates using the same X509Source
 //   - Only accept peer certificates with SPIFFE IDs that pass the predicate
 //     function
-func CreateMtlsClient(source *workloadapi.X509Source) (*http.Client, error) {
-	return CreateMtlsClientWithPredicate(source, func(string) bool { return true })
+func CreateMTLSClient(source *workloadapi.X509Source) (*http.Client, error) {
+	return CreateMTLSClientWithPredicate(source, func(string) bool { return true })
 }
 
 // ServeWithPredicate initializes and starts an HTTPS server using mTLS
@@ -165,20 +187,20 @@ func CreateMtlsClient(source *workloadapi.X509Source) (*http.Client, error) {
 //     validates client certificates. Must not be nil.
 //   - initializeRoutes: A function that sets up the HTTP route handlers for the
 //     server. This function is called before the server starts.
-//   - predicate: a predicate function to pass to CreateMtlsServer.
-//   - tlsPort: The network address and port for the server to listen on
+//   - predicate: a predicate function to pass to CreateMTLSServer.
+//   - tlsPort: The network address and port for the server to listen to on
 //     (e.g., ":8443").
 //
 // Returns:
 //   - error: Returns nil if the server starts successfully, otherwise returns
 //     an error explaining the failure. Specific error cases include:
-//   - If source is nil
+//   - If the source is nil
 //   - If server creation fails
 //   - If the server fails to start or encounters an error while running
 //
 // The function uses empty strings for the certificate and key file parameters
 // in ListenAndServeTLS as the certificates are provided by the X509Source. The
-// server's mTLS configuration is determined by the CreateMtlsServer function.
+// server's mTLS configuration is determined by the CreateMTLSServer function.
 func ServeWithPredicate(source *workloadapi.X509Source,
 	initializeRoutes func(),
 	predicate func(string) bool,
@@ -189,7 +211,7 @@ func ServeWithPredicate(source *workloadapi.X509Source,
 
 	initializeRoutes()
 
-	server, err := CreateMtlsServer(source, tlsPort, predicate)
+	server, err := CreateMTLSServer(source, tlsPort, predicate)
 	if err != nil {
 		return err
 	}
@@ -220,13 +242,13 @@ func ServeWithPredicate(source *workloadapi.X509Source,
 // Returns:
 //   - error: Returns nil if the server starts successfully, otherwise returns
 //     an error explaining the failure. Specific error cases include:
-//   - If source is nil
+//   - If `source` is nil
 //   - If server creation fails
 //   - If the server fails to start or encounters an error while running
 //
 // The function uses empty strings for the certificate and key file parameters
 // in ListenAndServeTLS as the certificates are provided by the X509Source. The
-// server's mTLS configuration is determined by the CreateMtlsServer function.
+// server's mTLS configuration is determined by the CreateMTLSServer function.
 func Serve(
 	source *workloadapi.X509Source,
 	initializeRoutes func(),

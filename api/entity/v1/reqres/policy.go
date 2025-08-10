@@ -57,7 +57,7 @@ type PolicyListResponse struct {
 
 // PolicyAccessCheckRequest to validate policy access.
 type PolicyAccessCheckRequest struct {
-	SpiffeID string `json:"spiffeid"`
+	SPIFFEID string `json:"spiffeid"`
 	Path     string `json:"path"`
 	Action   string `json:"action"`
 }

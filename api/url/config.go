@@ -18,15 +18,15 @@ const ActionRead APIAction = "read"
 
 type APIURL string
 
-const SpikeNexusURLSecrets APIURL = "/v1/store/secrets"
-const SpikeNexusURLSecretsMetadata APIURL = "/v1/store/secrets/metadata"
-const SpikeNexusURLInit APIURL = "/v1/auth/initialization"
+const NexusURLSecrets APIURL = "/v1/store/secrets"
+const NexusURLSecretsMetadata APIURL = "/v1/store/secrets/metadata"
+const NexusURLInit APIURL = "/v1/auth/initialization"
 
-const SpikeNexusURLPolicy APIURL = "/v1/acl/policy"
+const NexusURLPolicy APIURL = "/v1/acl/policy"
 
-const SpikeNexusURLOperatorRecover APIURL = "/v1/operator/recover"
-const SpikeNexusURLOperatorRestore APIURL = "/v1/operator/restore"
+const NexusURLOperatorRecover APIURL = "/v1/operator/recover"
+const NexusURLOperatorRestore APIURL = "/v1/operator/restore"
 
-const SpikeKeeperURLKeep APIURL = "/v1/store/keep"
-const SpikeKeeperURLContribute APIURL = "/v1/store/contribute"
-const SpikeKeeperURLShard APIURL = "/v1/store/shard"
+const KeeperURLKeep APIURL = "/v1/store/keep"
+const KeeperURLContribute APIURL = "/v1/store/contribute"
+const KeeperURLShard APIURL = "/v1/store/shard"
