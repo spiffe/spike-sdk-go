@@ -1,4 +1,4 @@
-//    \\ SPIKE: Secure your secrets with SPIFFE.
+//    \\ SPIKE: Secure your secrets with SPIFFE. — https://spike.ist/
 //  \\\\\ Copyright 2024-present SPIKE contributors.
 // \\\\\\\ SPDX-License-Identifier: Apache-2.0
 
@@ -87,7 +87,7 @@ func Source(ctx context.Context, socketPath string) (
 	return source, svid.ID.String(), nil
 }
 
-// IdFromRequest extracts the SPIFFE ID from the TLS peer certificate of
+// IDFromRequest extracts the SPIFFE ID from the TLS peer certificate of
 // an HTTP request.
 // It checks if the incoming request has a valid TLS connection and at least one
 // peer certificate.
@@ -111,7 +111,7 @@ func Source(ctx context.Context, socketPath string) (
 //	This function assumes that the request is already over a secured TLS
 //	connection and will fail if the TLS connection state is not available or
 //	the peer certificates are missing.
-func IdFromRequest(r *http.Request) (*spiffeid.ID, error) {
+func IDFromRequest(r *http.Request) (*spiffeid.ID, error) {
 	tlsConnectionState := r.TLS
 	if len(tlsConnectionState.PeerCertificates) == 0 {
 		return nil, errors.New("no peer certs")

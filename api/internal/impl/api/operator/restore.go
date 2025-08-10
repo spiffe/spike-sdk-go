@@ -1,4 +1,4 @@
-//    \\ SPIKE: Secure your secrets with SPIFFE.
+//    \\ SPIKE: Secure your secrets with SPIFFE. — https://spike.ist/
 //  \\\\\ Copyright 2024-present SPIKE contributors.
 // \\\\\\\ SPDX-License-Identifier: Apache-2.0
 
@@ -42,7 +42,7 @@ func Restore(
 	source *workloadapi.X509Source, shardIndex int, shardValue *[32]byte,
 ) (*data.RestorationStatus, error) {
 	r := reqres.RestoreRequest{
-		Id:    shardIndex,
+		ID:    shardIndex,
 		Shard: shardValue,
 	}
 

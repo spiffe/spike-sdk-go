@@ -1,4 +1,4 @@
-//    \\ SPIKE: Secure your secrets with SPIFFE.
+//    \\ SPIKE: Secure your secrets with SPIFFE. — https://spike.ist/
 //  \\\\\ Copyright 2024-present SPIKE contributors.
 // \\\\\\\ SPDX-License-Identifier: Apache-2.0
 
@@ -13,19 +13,19 @@ import (
 // SecretGet returns the URL for getting a secret.
 func SecretGet() string {
 	u, _ := url.JoinPath(
-		env.NexusApiRoot(),
-		string(SpikeNexusUrlSecrets),
+		env.NexusAPIRoot(),
+		string(SpikeNexusURLSecrets),
 	)
 	params := url.Values{}
-	params.Add(KeyApiAction, string(ActionGet))
+	params.Add(KeyAPIAction, string(ActionGet))
 	return u + "?" + params.Encode()
 }
 
 // SecretPut returns the URL for putting a secret.
 func SecretPut() string {
 	u, _ := url.JoinPath(
-		env.NexusApiRoot(),
-		string(SpikeNexusUrlSecrets),
+		env.NexusAPIRoot(),
+		string(SpikeNexusURLSecrets),
 	)
 	return u
 }
@@ -33,43 +33,43 @@ func SecretPut() string {
 // SecretDelete returns the URL for deleting a secret.
 func SecretDelete() string {
 	u, _ := url.JoinPath(
-		env.NexusApiRoot(),
-		string(SpikeNexusUrlSecrets),
+		env.NexusAPIRoot(),
+		string(SpikeNexusURLSecrets),
 	)
 	params := url.Values{}
-	params.Add(KeyApiAction, string(ActionDelete))
+	params.Add(KeyAPIAction, string(ActionDelete))
 	return u + "?" + params.Encode()
 }
 
 // SecretUndelete returns the URL for undeleting a secret.
 func SecretUndelete() string {
 	u, _ := url.JoinPath(
-		env.NexusApiRoot(),
-		string(SpikeNexusUrlSecrets),
+		env.NexusAPIRoot(),
+		string(SpikeNexusURLSecrets),
 	)
 	params := url.Values{}
-	params.Add(KeyApiAction, string(ActionUndelete))
+	params.Add(KeyAPIAction, string(ActionUndelete))
 	return u + "?" + params.Encode()
 }
 
 // SecretList returns the URL for listing secrets.
 func SecretList() string {
 	u, _ := url.JoinPath(
-		env.NexusApiRoot(),
-		string(SpikeNexusUrlSecrets),
+		env.NexusAPIRoot(),
+		string(SpikeNexusURLSecrets),
 	)
 	params := url.Values{}
-	params.Add(KeyApiAction, string(ActionList))
+	params.Add(KeyAPIAction, string(ActionList))
 	return u + "?" + params.Encode()
 }
 
 // SecretMetadataGet returns the URL for getting a secret metadata.
 func SecretMetadataGet() string {
 	u, _ := url.JoinPath(
-		env.NexusApiRoot(),
-		string(SpikeNexusUrlSecretsMetadata),
+		env.NexusAPIRoot(),
+		string(SpikeNexusURLSecretsMetadata),
 	)
 	params := url.Values{}
-	params.Add(KeyApiAction, string(ActionGet))
+	params.Add(KeyAPIAction, string(ActionGet))
 	return u + "?" + params.Encode()
 }

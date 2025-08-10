@@ -1,32 +1,32 @@
-//    \\ SPIKE: Secure your secrets with SPIFFE.
+//    \\ SPIKE: Secure your secrets with SPIFFE. — https://spike.ist/
 //  \\\\\ Copyright 2024-present SPIKE contributors.
 // \\\\\\\ SPDX-License-Identifier: Apache-2.0
 
 package url
 
-type ApiAction string
+type APIAction string
 
-const KeyApiAction = "action"
+const KeyAPIAction = "action"
 
-const ActionCheck ApiAction = "check"
-const ActionGet ApiAction = "get"
-const ActionDelete ApiAction = "delete"
-const ActionUndelete ApiAction = "undelete"
-const ActionList ApiAction = "list"
-const ActionDefault ApiAction = ""
-const ActionRead ApiAction = "read"
+const ActionCheck APIAction = "check"
+const ActionGet APIAction = "get"
+const ActionDelete APIAction = "delete"
+const ActionUndelete APIAction = "undelete"
+const ActionList APIAction = "list"
+const ActionDefault APIAction = ""
+const ActionRead APIAction = "read"
 
-type ApiUrl string
+type APIURL string
 
-const SpikeNexusUrlSecrets ApiUrl = "/v1/store/secrets"
-const SpikeNexusUrlSecretsMetadata ApiUrl = "/v1/store/secrets/metadata"
-const SpikeNexusUrlInit ApiUrl = "/v1/auth/initialization"
+const SpikeNexusURLSecrets APIURL = "/v1/store/secrets"
+const SpikeNexusURLSecretsMetadata APIURL = "/v1/store/secrets/metadata"
+const SpikeNexusURLInit APIURL = "/v1/auth/initialization"
 
-const SpikeNexusUrlPolicy ApiUrl = "/v1/acl/policy"
+const SpikeNexusURLPolicy APIURL = "/v1/acl/policy"
 
-const SpikeNexusUrlOperatorRecover ApiUrl = "/v1/operator/recover"
-const SpikeNexusUrlOperatorRestore ApiUrl = "/v1/operator/restore"
+const SpikeNexusURLOperatorRecover APIURL = "/v1/operator/recover"
+const SpikeNexusURLOperatorRestore APIURL = "/v1/operator/restore"
 
-const SpikeKeeperUrlKeep ApiUrl = "/v1/store/keep"
-const SpikeKeeperUrlContribute ApiUrl = "/v1/store/contribute"
-const SpikeKeeperUrlShard ApiUrl = "/v1/store/shard"
+const SpikeKeeperURLKeep APIURL = "/v1/store/keep"
+const SpikeKeeperURLContribute APIURL = "/v1/store/contribute"
+const SpikeKeeperURLShard APIURL = "/v1/store/shard"

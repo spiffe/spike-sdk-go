@@ -1,4 +1,4 @@
-//    \\ SPIKE: Secure your secrets with SPIFFE.
+//    \\ SPIKE: Secure your secrets with SPIFFE. — https://spike.ist/
 //  \\\\\ Copyright 2024-present SPIKE contributors.
 // \\\\\\\ SPDX-License-Identifier: Apache-2.0
 
@@ -68,9 +68,12 @@ import (
 //	for _, policy := range policies {
 //	    log.Printf("Found policy: %+v", policy)
 //	}
-func ListPolicies(source *workloadapi.X509Source, spiffeIdPattern string, pathPattern string) (*[]data.Policy, error) {
+func ListPolicies(
+	source *workloadapi.X509Source,
+	SPIFFEIDPattern string, pathPattern string,
+) (*[]data.Policy, error) {
 	r := reqres.PolicyListRequest{
-		SpiffeIdPattern: spiffeIdPattern,
+		SPIFFEIDPattern: SPIFFEIDPattern,
 		PathPattern:     pathPattern,
 	}
 	mr, err := json.Marshal(r)

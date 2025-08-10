@@ -1,4 +1,4 @@
-//    \\ SPIKE: Secure your secrets with SPIFFE.
+//    \\ SPIKE: Secure your secrets with SPIFFE. — https://spike.ist/
 //  \\\\\ Copyright 2024-present SPIKE contributors.
 // \\\\\\\ SPDX-License-Identifier: Apache-2.0
 
@@ -33,8 +33,8 @@ func Token() string {
 	return "spike." + id
 }
 
-// Id generates a cryptographically-unique secure random string.
-func Id() string {
+// ID generates a cryptographically-unique secure random string.
+func ID() string {
 	id, err := RandomString(8)
 	if err != nil {
 		id = fmt.Sprintf("CRYPTO-ERR: %s", err.Error())
