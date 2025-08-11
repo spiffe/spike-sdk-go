@@ -4,5 +4,5 @@
 #  \\\\\ Copyright 2024-present SPIKE contributors.
 # \\\\\\\ SPDX-License-Identifier: Apache-2.0
 
-go run github.com/golangci/golangci-lint/cmd/golangci-lint run -v
+go run github.com/golangci/golangci-lint/cmd/golangci-lint@latest run -v
 # '-v' flag is used for verbose output
