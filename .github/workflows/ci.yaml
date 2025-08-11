@@ -41,6 +41,8 @@ jobs:
           persist-credentials: false
       - name: Set up Go
         uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
       - name: golangci-lint
         uses: golangci/golangci-lint-action@55c2c1448f86e01eaae002a5a3a9624417608d84 # v6.5.2 - Used pin to avoid breaking changes
         with:
