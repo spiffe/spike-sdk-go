@@ -8,13 +8,13 @@ import (
 	"context"
 )
 
-// MockRetrier implements Retrier for testing
-type MockRetrier struct {
+// Retrier implements Retrier for testing
+type Retrier struct {
 	RetryFunc func(context.Context, func() error) error
 }
 
 // RetryWithBackoff implements the Retrier interface
-func (m *MockRetrier) RetryWithBackoff(
+func (m *Retrier) RetryWithBackoff(
 	ctx context.Context,
 	operation func() error,
 ) error {
