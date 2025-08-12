@@ -93,7 +93,7 @@ func CreateMTLSServer(source *workloadapi.X509Source,
 	server := &http.Server{
 		Addr:              tlsPort,
 		TLSConfig:         tlsConfig,
-		ReadHeaderTimeout: 10 * time.Second,
+		ReadHeaderTimeout: 10 * time.Second, // Timeout for reading request headers, it helps prevent slowloris attacks
 	}
 	return server, nil
 }
