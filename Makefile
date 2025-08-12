@@ -2,6 +2,8 @@
 #  \\\\\ Copyright 2024-present SPIKE contributors.
 # \\\\\\\ SPDX-License-Identifier: Apache-2.0
 
+.PHONY: test/cover test audit ci confirm no-dirty upgradeable tidy
+
 # Run tests with coverage report and open HTML visualization
 # Usage: make test/cover
 # Executes all tests with race detection and coverage profiling
@@ -22,7 +24,6 @@ test:
 
 # Comprehensive code quality audit
 # Usage: make audit
-# Prerequisite: runs 'test' target first to ensure tests pass
 # Performs multiple quality checks:
 #   1. go mod tidy -diff: checks if go.mod needs tidying
 #      (fails if changes needed)
@@ -32,8 +33,9 @@ test:
 #   5. staticcheck: runs advanced static analysis
 #      (excluding ST1000, U1000 checks)
 #   6. govulncheck: scans for known security vulnerabilities
-# Designed for CI/CD pipelines to ensure code quality and security
-audit: test
+#   7. golangci-lint: runs a comprehensive set of linters
+#      (follows the configuration in .golangci.yml)
+audit:
 	go mod tidy -diff
 	go mod verify
 	test -z "$(shell gofmt -l .)"
@@ -41,6 +43,13 @@ audit: test
 	go run honnef.co/go/tools/cmd/staticcheck@latest -checks=all,-ST1000,-U1000 ./...
 	go run golang.org/x/vuln/cmd/govulncheck@latest ./...
 	go run github.com/golangci/golangci-lint/cmd/golangci-lint@latest run
+
+# Comprehensive set of checks to simulate a CI environment
+# Usage: make ci
+# Prerequisites:
+#   1. runs 'test' target first to ensure tests pass
+#   2. runs 'audit' target to perform code quality checks
+ci: test audit
 
 # Interactive confirmation prompt
 # Usage: make confirm && make some-destructive-action
