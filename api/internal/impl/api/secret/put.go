@@ -33,7 +33,6 @@ import (
 //	 	map[string]string{"key": "value"})
 func Put(source *workloadapi.X509Source,
 	path string, values map[string]string) error {
-
 	r := reqres.SecretPutRequest{
 		Path:   path,
 		Values: values,
