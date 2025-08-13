@@ -27,6 +27,9 @@ const NexusPolicy APIURL = "/v1/acl/policy"
 const NexusOperatorRecover APIURL = "/v1/operator/recover"
 const NexusOperatorRestore APIURL = "/v1/operator/restore"
 
+const NexusCipherEncrypt APIURL = "/v1/cipher/encrypt"
+const NexusCipherDecrypt APIURL = "/v1/cipher/decrypt"
+
 const KeeperKeep APIURL = "/v1/store/keep"
 const KeeperContribute APIURL = "/v1/store/contribute"
 const KeeperShard APIURL = "/v1/store/shard"
