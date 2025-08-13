@@ -105,7 +105,9 @@ import (
 // generator expression is invalid.
 func StringFromTemplate(template string) (string, error) {
 	// Regular expression to match generator expressions like [a-z]{5} or [\w]{3}
-	re := regexp.MustCompile(`\[([^]]+)]\{(\d+)}`)
+	// Modified to capture any content in braces, not just digits
+	// Changed + to * to allow empty character classes like []
+	re := regexp.MustCompile(`\[([^]]*)]\{([^}]+)}`)
 
 	result := template
 
@@ -120,13 +122,18 @@ func StringFromTemplate(template string) (string, error) {
 		charClass := match[1]
 		lengthStr := match[2]
 
-		// Parse length
+		// Parse length - this will now catch non-numeric values
 		length, err := strconv.Atoi(lengthStr)
 		if err != nil {
 			return "", fmt.Errorf("invalid length: %s", lengthStr)
 		}
 
-		// StringFromTemplate random string based on character class
+		// Validate that length is non-negative
+		if length < 0 {
+			return "", fmt.Errorf("length cannot be negative: %d", length)
+		}
+
+		// Generate random string based on character class
 		randomStr, err := secureRandomStringFromCharClass(charClass, length)
 		if err != nil {
 			return "", err

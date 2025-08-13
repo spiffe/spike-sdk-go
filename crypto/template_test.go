@@ -10,6 +10,7 @@ import (
 	"testing"
 )
 
+//nolint:gocyclo
 func TestStringFromTemplate(t *testing.T) {
 	tests := []struct {
 		name        string
@@ -90,8 +91,13 @@ func TestStringFromTemplate(t *testing.T) {
 			},
 		},
 		{
-			name:     "cross-case range a-Z",
-			template: `pass[a-Z]{8}`,
+			name:        "cross-case range a-Z",
+			template:    `fail[a-Z]{8}`,
+			expectError: true,
+		},
+		{
+			name:     "mixed case letters",
+			template: `pass[A-Za-z]{8}`,
 			validate: func(t *testing.T, result string) {
 				if !strings.HasPrefix(result, "pass") {
 					t.Errorf("result should start with 'pass', got: %s", result)
@@ -100,10 +106,9 @@ func TestStringFromTemplate(t *testing.T) {
 				if len(suffix) != 8 {
 					t.Errorf("suffix should be 8 characters, got %d: %s", len(suffix), suffix)
 				}
-				// a-Z includes letters and some punctuation between Z and a in ASCII
-				matched, _ := regexp.MatchString(`^[A-Za-z\[\\\]^_\x60]{8}$`, suffix)
+				matched, _ := regexp.MatchString(`^[A-Za-z]{8}$`, suffix)
 				if !matched {
-					t.Errorf("suffix should contain characters in range a-Z, got: %s", suffix)
+					t.Errorf("suffix should contain only letters, got: %s", suffix)
 				}
 			},
 		},
@@ -157,13 +162,13 @@ func TestStringFromTemplate(t *testing.T) {
 				if len(suffix) != 6 { // 2 uppercase + 4 digits
 					t.Errorf("suffix should be 6 characters, got %d: %s", len(suffix), suffix)
 				}
-				// First 2 should be uppercase letters
+				// The first 2 should be uppercase letters
 				upperPart := suffix[:2]
 				matched, _ := regexp.MatchString(`^[A-Z]{2}$`, upperPart)
 				if !matched {
 					t.Errorf("first part should be uppercase letters, got: %s", upperPart)
 				}
-				// Last 4 should be digits
+				// The last 4 should be digits
 				digitPart := suffix[2:]
 				matched, _ = regexp.MatchString(`^[0-9]{4}$`, digitPart)
 				if !matched {
@@ -227,7 +232,7 @@ func TestStringFromTemplate(t *testing.T) {
 				if len(middle) != 5 {
 					t.Errorf("middle part should be 5 characters, got %d: %s", len(middle), middle)
 				}
-				// Should only contain A,B,C,a,b,c,1,2,3
+				// Should only contain A, B, C, a, b, c, 1, 2, 3.
 				matched, _ := regexp.MatchString(`^[ABCabc123]{5}$`, middle)
 				if !matched {
 					t.Errorf("middle part should contain only A,B,C,a,b,c,1,2,3, got: %s", middle)

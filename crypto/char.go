@@ -8,8 +8,8 @@ import (
 	"fmt"
 )
 
-// secureRandomStringFromCharClass generates a random string of specified length using
-// the given character class
+// secureRandomStringFromCharClass generates a random string of specified
+// length using the given character class
 func secureRandomStringFromCharClass(
 	charClass string, length int,
 ) (string, error) {
@@ -37,7 +37,11 @@ func secureRandomStringFromCharClass(
 // expandCharacterClass expands character class expressions into a string
 // of valid characters
 func expandCharacterClass(charClass string) (string, error) {
-	var chars []byte
+	// Check for empty character class first
+	if len(charClass) == 0 {
+		return "", fmt.Errorf("empty character class")
+	}
+
 	charSet := make(map[byte]bool) // Use map to avoid duplicates
 
 	// Handle predefined character classes
@@ -78,7 +82,7 @@ func expandCharacterClass(charClass string) (string, error) {
 				start := charClass[i]
 				end := charClass[i+2]
 
-				// Validate range
+				// Only allow forward ranges (`start <= end`)
 				if start > end {
 					return "",
 						fmt.Errorf("invalid range specified: %c-%c", start, end)
@@ -98,8 +102,14 @@ func expandCharacterClass(charClass string) (string, error) {
 	}
 
 	// Convert map to slice
+	chars := make([]byte, 0, len(charSet))
 	for char := range charSet {
 		chars = append(chars, char)
+	}
+
+	// Final check for the empty result (this catches edge cases)
+	if len(chars) == 0 {
+		return "", fmt.Errorf("character class resulted in empty character set")
 	}
 
 	return string(chars), nil
