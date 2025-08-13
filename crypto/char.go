@@ -42,7 +42,6 @@ func expandCharacterClass(charClass string) (string, error) {
 		return "", fmt.Errorf("empty character class")
 	}
 
-	var chars []byte
 	charSet := make(map[byte]bool) // Use map to avoid duplicates
 
 	// Handle predefined character classes
@@ -103,6 +102,7 @@ func expandCharacterClass(charClass string) (string, error) {
 	}
 
 	// Convert map to slice
+	chars := make([]byte, 0, len(charSet))
 	for char := range charSet {
 		chars = append(chars, char)
 	}

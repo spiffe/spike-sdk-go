@@ -10,6 +10,7 @@ import (
 	"testing"
 )
 
+//nolint:gocyclo
 func TestStringFromTemplate(t *testing.T) {
 	tests := []struct {
 		name        string
