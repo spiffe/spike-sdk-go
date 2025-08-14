@@ -192,15 +192,64 @@ func IsPilotRecover(trustRoots, id string) bool {
 //
 //	// Both will return true
 //	if IsPilotRestore("example.org,other.org", baseId) {
-//	    // Handle restore-specific logic
+//			// Handle restore-specific logic
 //	}
 //
 //	if IsPilotRestore("example.org,other.org", extendedId) {
-//	    // Also recognized as a pilot restore, with instance metadata
+//			// Also recognized as a pilot restore, with instance metadata
 //	}
 func IsPilotRestore(trustRoots, id string) bool {
 	for _, root := range strings.Split(trustRoots, ",") {
 		baseID := PilotRestore(strings.TrimSpace(root))
+		// Check if the ID is either exactly the base ID or starts with the base ID
+		// followed by "/"
+		if id == baseID || strings.HasPrefix(id, baseID+"/") {
+			return true
+		}
+	}
+	return false
+}
+
+// IsBootstrap checks if a given SPIFFE ID matches the SPIKE Bootstrap's
+// SPIFFE ID pattern.
+//
+// This function verifies if the provided SPIFFE ID corresponds to a bootstrap
+// instance by comparing it against the expected bootstrap SPIFFE ID pattern.
+//
+// The function supports two formats:
+//   - Exact match: "spiffe://<trustRoot>/spike/bootstrap"
+//   - Extended match with metadata:
+//     "spiffe://<trustRoot>/spike/bootstrap/<metadata>"
+//
+// This allows for instance-specific identifiers while maintaining compatibility
+// with the base bootstrap identity.
+//
+// Parameters:
+//   - trustRoots: Comma-delimited list of trust domain roots
+//     (e.g., "example.org,other.org")
+//   - id: The SPIFFE ID string to check
+//
+// Returns:
+//   - bool: true if the provided SPIFFE ID matches either the exact bootstrap
+//     ID or an extended ID with additional path segments for any of the
+//     trust roots, false otherwise
+//
+// Example usage:
+//
+//	baseId := "spiffe://example.org/spike/bootstrap"
+//	extendedId := "spiffe://example.org/spike/bootstrap/instance-0"
+//
+//	// Both will return true
+//	if IsBootstrap("example.org,other.org", baseId) {
+//			// Handle bootstrap-specific logic
+//	}
+//
+//	if IsBootstrap("example.org,other.org", extendedId) {
+//			// Also recognized as a bootstrap, with instance metadata
+//	}
+func IsBootstrap(trustRoots, id string) bool {
+	for _, root := range strings.Split(trustRoots, ",") {
+		baseID := Bootstrap(strings.TrimSpace(root))
 		// Check if the ID is either exactly the base ID or starts with the base ID
 		// followed by "/"
 		if id == baseID || strings.HasPrefix(id, baseID+"/") {
@@ -328,5 +377,6 @@ func PeerCanTalkToAnyone(_, _ string) bool {
 //   - bool: true if the SPIFFE ID matches SPIKE Nexus' SPIFFE ID for any of
 //     the trust roots, false otherwise
 func PeerCanTalkToKeeper(trustRoots, peerSPIFFEID string) bool {
-	return IsNexus(trustRoots, peerSPIFFEID)
+	return IsNexus(trustRoots, peerSPIFFEID) ||
+		IsBootstrap(trustRoots, peerSPIFFEID)
 }
