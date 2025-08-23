@@ -12,7 +12,8 @@ import (
 
 var reader = rand.Read
 
-const aes256KeySize = 32
+// AES256KeySize defines the size of a key in bytes for AES-256 encryption.
+const AES256KeySize = 32
 
 // AES256Seed generates a cryptographically secure random 256-bit key suitable
 // for use with AES-256 encryption. The key is returned as a hexadecimal-encoded
@@ -28,7 +29,7 @@ const aes256KeySize = 32
 // can be decoded back to bytes using hex.DecodeString when needed for encryption.
 func AES256Seed() (string, error) {
 	// Generate a 256-bit key
-	key := make([]byte, aes256KeySize)
+	key := make([]byte, AES256KeySize)
 
 	_, err := reader(key)
 	if err != nil {
