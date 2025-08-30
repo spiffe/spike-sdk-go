@@ -9,7 +9,7 @@
 package log
 
 import (
-	"log"
+	"fmt"
 	"log/slog"
 	"os"
 	"strings"
@@ -23,6 +23,9 @@ var loggerMutex sync.Mutex
 // JSON output. If the logger hasn't been initialized, it creates a new instance
 // with the log level specified by the environment. Further calls return the
 // same logger instance.
+//
+// By convention, when using the returned logger, the first argument (msg)
+// should be the function name (fName) from which the logging call is made.
 func Log() *slog.Logger {
 	loggerMutex.Lock()
 	defer loggerMutex.Unlock()
@@ -41,21 +44,36 @@ func Log() *slog.Logger {
 	return logger
 }
 
-// Fatal logs a message at Fatal level and then calls os.Exit(1).
-func Fatal(msg string) {
-	log.Fatal(msg)
+// Fatal logs a message at Fatal level.
+// The fName parameter indicates the function name from which the call is made.
+// The details parameter contains the error message or details to log.
+// This function panics before exiting.
+func Fatal(fName string, details string) {
+	Log().Error(fName, "message", details)
+	panic(fName + " " + details + " ")
 }
 
-// FatalF logs a formatted message at Fatal level and then calls os.Exit(1).
+// FatalF logs a formatted message at Fatal level.
+// The fName parameter indicates the function name from which the call is made.
+// The format parameter is a printf-style format string.
+// The args parameter contains values to be formatted according to the format
+// string.
 // It follows the printf formatting rules.
-func FatalF(format string, args ...any) {
-	log.Fatalf(format, args...)
+// This function panics before exiting.
+func FatalF(fName string, format string, args ...any) {
+	m := fmt.Sprintf(format, args)
+	Log().Error(fName, "message", m)
+	panic(fName + " " + m + " ")
 }
 
-// FatalLn logs a message at Fatal level with a line feed and then calls
-// os.Exit(1).
-func FatalLn(args ...any) {
-	log.Fatalln(args...)
+// FatalLn logs a message at Fatal level with a line feed.
+// The fName parameter indicates the function name from which the call is made.
+// The args parameter contains the values to be logged, which will be formatted
+// and joined.
+// This function panics before exiting.
+func FatalLn(fName string, args ...any) {
+	Log().Error(fName, args...)
+	panic(fName + " " + strings.Join([]string{fmt.Sprint(args...)}, " "))
 }
 
 // Level returns the logging level for the SPIKE components.
