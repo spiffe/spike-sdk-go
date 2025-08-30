@@ -3,12 +3,17 @@
 
 ## SPIKE Go SDK
 
-This library is a convenient Go library for working with [SPIKE](https://spike.ist/).
+This library is a convenient Go library for working with [SPIKE][spike-web].
 
-It leverages the [SPIFFE Workload API](https://github.com/spiffe/spiffe/blob/main/standards/SPIFFE_Workload_API.md), 
-providing high level functionality that includes:
-* Establishing mutually authenticated TLS (__mTLS__) between workloads powered by [SPIFFE](https://spiffe.io).
+It leverages the [SPIFFE Workload API][workload-api], 
+providing high-level functionality that includes:
+* Establishing mutually authenticated TLS (*mTLS*) between workloads powered 
+  by [SPIFFE][spiffe-web].
 * Abstracting SPIKE REST API calls.
+
+[workload-api]: https://github.com/spiffe/spiffe/blob/main/standards/SPIFFE_Workload_API.md "SPIFFE Workload API"
+[spike-web]: https://spike.ist/ "SPIKE"
+[spiffe-web]: https://spiffe.io/ "SPIFFE"
 
 ## Documentation
 
@@ -38,7 +43,7 @@ func main() {
 	api := spike.New() // Use the default Workload API Socket
 	defer api.Close()  // Close the connection when done
 
-	path := "/tenants/demo/db/creds"
+	path := "tenants/demo/db/creds"
 
 	// Create a Secret
 	err := api.PutSecret(path, map[string]string{
