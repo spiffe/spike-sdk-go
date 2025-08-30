@@ -1,19 +1,27 @@
 //    \\ SPIKE: Secure your secrets with SPIFFE. — https://spike.ist/
-//  \\\\\ Copyright 2024-present SPIKE contributors.
-// \\\\\\\ SPDX-License-Identifier: Apache-2.0
+//  \\\\ Copyright 2024-present SPIKE contributors.
+// \\\\\ SPDX-License-Identifier: Apache-2.0
 
 package api
 
 import (
 	"context"
+	"io"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 
 	"github.com/spiffe/spike-sdk-go/api/entity/data"
 	"github.com/spiffe/spike-sdk-go/api/internal/impl/api/acl"
+	"github.com/spiffe/spike-sdk-go/api/internal/impl/api/cipher"
 	"github.com/spiffe/spike-sdk-go/api/internal/impl/api/operator"
 	"github.com/spiffe/spike-sdk-go/api/internal/impl/api/secret"
 	"github.com/spiffe/spike-sdk-go/spiffe"
+)
+
+// indirection for testability: allows stubbing cipher calls in unit tests
+var (
+	cipherEncryptFunc = cipher.Encrypt
+	cipherDecryptFunc = cipher.Decrypt
 )
 
 // API is the SPIKE API.
@@ -274,7 +282,7 @@ func (a *API) GetSecret(path string) (*data.Secret, error) {
 // Returns:
 //   - *[]string: Pointer to array of secret keys if found, nil if none found
 //   - error: nil on success, unauthorized error if not logged in, or
-//     wrapped error on request/parsing failure
+//     wrapped error on request-parsing failure
 //
 // Example:
 //
@@ -293,7 +301,7 @@ func (a *API) ListSecretKeys() (*[]string, error) {
 // Returns:
 //   - *data.SecretMetadata: Secret metadata if found, nil if secret not found
 //   - error: nil on success, unauthorized error if not logged in, or
-//     wrapped error on request/parsing failure
+//     wrapped error on request-parsing failure
 //
 // Example:
 //
@@ -314,7 +322,7 @@ func (a *API) GetSecretMetadata(
 //
 // Returns:
 //   - error: nil on success, unauthorized error if not logged in, or
-//     wrapped error on request/parsing failure
+//     wrapped error on request-parsing failure
 //
 // Example:
 //
@@ -333,7 +341,7 @@ func (a *API) PutSecret(path string, data map[string]string) error {
 //
 // Returns:
 //   - error: nil on success, unauthorized error if not logged in, or
-//     wrapped error on request/parsing failure
+//     wrapped error on request-parsing failure
 //
 // Example:
 //
@@ -352,7 +360,7 @@ func (a *API) UndeleteSecret(path string, versions []int) error {
 // Returns:
 //   - *[][32]byte: Pointer to array of recovery shards as 32-byte arrays
 //   - error: nil on success, unauthorized error if not authorized, or
-//     wrapped error on request/parsing failure
+//     wrapped error on request-parsing failure
 //
 // Example:
 //
@@ -373,11 +381,31 @@ func (a *API) Recover() (map[int]*[32]byte, error) {
 // Returns:
 //   - *data.RestorationStatus: Status of the restoration process if successful
 //   - error: nil on success, unauthorized error if not authorized, or
-//     wrapped error on request/parsing failure
+//     wrapped error on request-parsing failure
 //
 // Example:
 //
 //	status, err := api.Restore(shardPtr)
 func (a *API) Restore(index int, shard *[32]byte) (*data.RestorationStatus, error) {
 	return operator.Restore(a.source, index, shard)
+}
+
+// CipherEncryptStream encrypts by streaming bytes with a content-type.
+func (a *API) CipherEncryptStream(reader io.Reader, contentType string) ([]byte, error) {
+	return cipherEncryptFunc(a.source, cipher.ModeStream, reader, contentType, nil, "")
+}
+
+// CipherEncryptJSON encrypts using JSON payload (plaintext + algorithm) and returns ciphertext bytes.
+func (a *API) CipherEncryptJSON(plaintext []byte, algorithm string) ([]byte, error) {
+	return cipherEncryptFunc(a.source, cipher.ModeJSON, nil, "", plaintext, algorithm)
+}
+
+// CipherDecryptStream decrypts by streaming bytes with a content-type and returns plaintext bytes.
+func (a *API) CipherDecryptStream(reader io.Reader, contentType string) ([]byte, error) {
+	return cipherDecryptFunc(a.source, cipher.ModeStream, reader, contentType, 0, nil, nil, "")
+}
+
+// CipherDecryptJSON decrypts using JSON payload and returns plaintext bytes.
+func (a *API) CipherDecryptJSON(version byte, nonce, ciphertext []byte, algorithm string) ([]byte, error) {
+	return cipherDecryptFunc(a.source, cipher.ModeJSON, nil, "", version, nonce, ciphertext, algorithm)
 }
