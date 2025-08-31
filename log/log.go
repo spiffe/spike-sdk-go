@@ -61,7 +61,7 @@ func Fatal(fName string, details string) {
 // It follows the printf formatting rules.
 // This function panics before exiting.
 func FatalF(fName string, format string, args ...any) {
-	m := fmt.Sprintf(format, args)
+	m := fmt.Sprintf(format, args...)
 	Log().Error(fName, "message", m)
 	panic(fName + " " + m + " ")
 }

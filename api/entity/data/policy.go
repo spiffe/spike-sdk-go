@@ -31,10 +31,12 @@ const PermissionExecute PolicyPermission = "execute"
 // The user is the alpha and the omega.
 const PermissionSuper PolicyPermission = "super"
 
+// Policy represents a security policy applied within SPIKE.
+// It includes details such as ID, name, patterns, permissions, and metadata.
 type Policy struct {
 	ID              string             `json:"id"`
 	Name            string             `json:"name"`
-	SPIFFEIDPattern string             `json:"spiffeidPattern"`
+	SPIFFEIDPattern string             `json:"spiffiedPattern"`
 	PathPattern     string             `json:"pathPattern"`
 	Permissions     []PolicyPermission `json:"permissions"`
 	CreatedAt       time.Time          `json:"createdAt"`
@@ -43,4 +45,16 @@ type Policy struct {
 	// Unexported fields won't be serialized to JSON
 	IDRegex   *regexp.Regexp `json:"-"`
 	PathRegex *regexp.Regexp `json:"-"`
+}
+
+// PolicySpec defines the specification of a policy configuration.
+// Name specifies the name of the policy.
+// SpiffeIDPattern specifies the SPIFFE ID regex pattern for the policy.
+// PathPattern defines the path regex pattern associated with the policy.
+// Permissions lists the permissions granted by the policy.
+type PolicySpec struct {
+	Name            string             `yaml:"name"`
+	SpiffeIDPattern string             `yaml:"spiffeidPattern"`
+	PathPattern     string             `yaml:"pathPattern"`
+	Permissions     []PolicyPermission `json:"permissions"`
 }
