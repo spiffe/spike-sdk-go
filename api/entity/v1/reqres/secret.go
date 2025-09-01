@@ -76,26 +76,6 @@ type SecretListResponse struct {
 	Err  data.ErrorCode `json:"err,omitempty"`
 }
 
-// SecretEncryptRequest for encrypting data
-type SecretEncryptRequest struct {
-	// Plaintext data to encrypt
-	Plaintext []byte `json:"plaintext"`
-	// Optional: specify encryption algorithm/version
-	Algorithm string `json:"algorithm,omitempty"`
-}
-
-// SecretEncryptResponse contains encrypted data
-type SecretEncryptResponse struct {
-	// Version byte for future compatibility
-	Version byte `json:"version"`
-	// Nonce used for encryption
-	Nonce []byte `json:"nonce"`
-	// Encrypted ciphertext
-	Ciphertext []byte `json:"ciphertext"`
-	// Error code if operation failed
-	Err data.ErrorCode `json:"err,omitempty"`
-}
-
 // SecretDecryptRequest for decrypting data
 type SecretDecryptRequest struct {
 	// Version byte to determine decryption method
