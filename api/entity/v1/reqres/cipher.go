@@ -25,3 +25,23 @@ type CipherEncryptResponse struct {
 	// Error code if operation failed
 	Err data.ErrorCode `json:"err,omitempty"`
 }
+
+// CipherDecryptRequest for decrypting data
+type CipherDecryptRequest struct {
+	// Version byte to determine decryption method
+	Version byte `json:"version"`
+	// Nonce used during encryption
+	Nonce []byte `json:"nonce"`
+	// Encrypted ciphertext to decrypt
+	Ciphertext []byte `json:"ciphertext"`
+	// Optional: specify decryption algorithm/version
+	Algorithm string `json:"algorithm,omitempty"`
+}
+
+// CipherDecryptResponse contains decrypted data
+type CipherDecryptResponse struct {
+	// Decrypted plaintext data
+	Plaintext []byte `json:"plaintext"`
+	// Error code if operation failed
+	Err data.ErrorCode `json:"err,omitempty"`
+}
