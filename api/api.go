@@ -351,7 +351,7 @@ func (a *API) UndeleteSecret(path string, versions []int) error {
 }
 
 // Recover returns recovery partitions for SPIKE Nexus to be used in a
-// break-the-glass recovery operation if SPIKE Nexus auto-recovery mechanism
+// break-the-glass recovery operation if the SPIKE Nexus auto-recovery mechanism
 // isn't successful.
 //
 // The returned shards are sensitive and should be securely stored out-of-band
