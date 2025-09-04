@@ -4,11 +4,15 @@
 
 package env
 
-import "os"
+import (
+	"os"
+
+	appEnv "github.com/spiffe/spike-sdk-go/config/env"
+)
 
 // NexusAPIRoot returns the URL of the Nexus API.
 func NexusAPIRoot() string {
-	p := os.Getenv("SPIKE_NEXUS_API_URL")
+	p := os.Getenv(appEnv.NexusAPIURL)
 	if p != "" {
 		return p
 	}
