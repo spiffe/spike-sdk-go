@@ -14,6 +14,8 @@ import (
 	"github.com/spiffe/go-spiffe/v2/spiffeid"
 	"github.com/spiffe/go-spiffe/v2/svid/x509svid"
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
+
+	"github.com/spiffe/spike-sdk-go/config/env"
 )
 
 // EndpointSocket returns the UNIX domain socket address for the SPIFFE
@@ -42,7 +44,7 @@ import (
 // Environment Variables:
 //   - SPIFFE_ENDPOINT_SOCKET: Override the default socket path
 func EndpointSocket() string {
-	p := os.Getenv("SPIFFE_ENDPOINT_SOCKET")
+	p := os.Getenv(env.SPIFFEEndpointSocket)
 	if p != "" {
 		return p
 	}

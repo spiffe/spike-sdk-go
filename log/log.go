@@ -14,6 +14,8 @@ import (
 	"os"
 	"strings"
 	"sync"
+
+	"github.com/spiffe/spike-sdk-go/config/env"
 )
 
 var logger *slog.Logger
@@ -89,7 +91,7 @@ func FatalLn(fName string, args ...any) {
 // If the environment variable is not set or contains an invalid value,
 // it returns the default level slog.LevelWarn.
 func Level() slog.Level {
-	level := os.Getenv("SPIKE_SYSTEM_LOG_LEVEL")
+	level := os.Getenv(env.SystemLogLevel)
 	level = strings.ToUpper(level)
 
 	switch level {
