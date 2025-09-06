@@ -7,7 +7,7 @@ package env
 const KeeperTLSPort = "SPIKE_KEEPER_TLS_PORT"
 const NexusKeeperPeers = "SPIKE_NEXUS_KEEPER_PEERS"
 const NexusTLSPort = "SPIKE_NEXUS_TLS_PORT"
-const NexusMaxSecretVersions = "SPIKE_NEXUS_MAX_SECRET_VERSIONS"
+const NexusMaxEntryVersions = "SPIKE_NEXUS_MAX_SECRET_VERSIONS"
 const NexusBackendStore = "SPIKE_NEXUS_BACKEND_STORE"
 const NexusDBOperationTimeout = "SPIKE_NEXUS_DB_OPERATION_TIMEOUT"
 const NexusDBJournalMode = "SPIKE_NEXUS_DB_JOURNAL_MODE"
