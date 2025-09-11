@@ -7,3 +7,4 @@ package auth
 const PathSystemPolicyAccess = "spike/system/acl"
 const PathSystemCipherEncrypt = "spike/system/cipher/encrypt"
 const PathSystemCipherDecrypt = "spike/system/cipher/decrypt"
+const PathSystemSecretAccess = "spike/system/secret"
