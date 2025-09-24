@@ -13,6 +13,7 @@ import (
 	"github.com/spiffe/spike-sdk-go/api/entity/data"
 	"github.com/spiffe/spike-sdk-go/api/internal/impl/api/acl"
 	"github.com/spiffe/spike-sdk-go/api/internal/impl/api/cipher"
+	"github.com/spiffe/spike-sdk-go/api/internal/impl/api/health"
 	"github.com/spiffe/spike-sdk-go/api/internal/impl/api/operator"
 	"github.com/spiffe/spike-sdk-go/api/internal/impl/api/secret"
 	"github.com/spiffe/spike-sdk-go/spiffe"
@@ -408,4 +409,8 @@ func (a *API) CipherDecryptStream(reader io.Reader, contentType string) ([]byte,
 // CipherDecryptJSON decrypts using JSON payload and returns plaintext bytes.
 func (a *API) CipherDecryptJSON(version byte, nonce, ciphertext []byte, algorithm string) ([]byte, error) {
 	return cipherDecryptFunc(a.source, cipher.ModeJSON, nil, "", version, nonce, ciphertext, algorithm)
+}
+
+func (a *API) GetSystemStatus() (*data.StatusResponse, error) {
+	return health.GetSystemStatus(context.Background(), a.source)
 }

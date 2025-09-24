@@ -33,3 +33,5 @@ const NexusCipherDecrypt APIURL = "/v1/cipher/decrypt"
 const KeeperKeep APIURL = "/v1/store/keep"
 const KeeperContribute APIURL = "/v1/store/contribute"
 const KeeperShard APIURL = "/v1/store/shard"
+
+const NexusHealth APIURL = "/v1/health/status"
