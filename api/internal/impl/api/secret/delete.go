@@ -13,6 +13,7 @@ import (
 	"github.com/spiffe/spike-sdk-go/api/entity/v1/reqres"
 	"github.com/spiffe/spike-sdk-go/api/url"
 	"github.com/spiffe/spike-sdk-go/net"
+	"github.com/spiffe/spike-sdk-go/predicate"
 )
 
 // Delete deletes specified versions of a secret at the given path using
@@ -20,12 +21,14 @@ import (
 //
 // It converts string version numbers to integers, constructs a delete request,
 // and sends it to the secrets API endpoint. If no versions are specified or
-// conversion fails, no versions will be deleted.
+// the conversion fails, no versions will be deleted.
 //
 // Parameters:
 //   - source: X509Source for mTLS client authentication
 //   - path: Path to the secret to delete
-//   - versions: String array of version numbers to delete
+//   - versions: Integer array of version numbers to delete
+//   - allow: A predicate.Predicate that determines which server certificates
+//     to trust during the mTLS connection
 //
 // Returns:
 //   - error: nil on success, unauthorized error if not logged in, or wrapped
@@ -33,9 +36,9 @@ import (
 //
 // Example:
 //
-//	err := deleteSecret(x509Source, "secret/path", []string{"1", "2"})
+//	err := Delete(x509Source, "secret/path", []int{1, 2}, predicate.AllowAll)
 func Delete(source *workloadapi.X509Source,
-	path string, versions []int) error {
+	path string, versions []int, allow predicate.Predicate) error {
 	r := reqres.SecretDeleteRequest{
 		Path:     path,
 		Versions: versions,
@@ -51,7 +54,7 @@ func Delete(source *workloadapi.X509Source,
 		)
 	}
 
-	client, err := net.CreateMTLSClient(source)
+	client, err := net.CreateMTLSClientWithPredicate(source, allow)
 	if err != nil {
 		return err
 	}

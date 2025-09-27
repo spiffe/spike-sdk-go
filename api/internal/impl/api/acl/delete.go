@@ -13,6 +13,7 @@ import (
 	"github.com/spiffe/spike-sdk-go/api/entity/v1/reqres"
 	"github.com/spiffe/spike-sdk-go/api/url"
 	"github.com/spiffe/spike-sdk-go/net"
+	"github.com/spiffe/spike-sdk-go/predicate"
 )
 
 // DeletePolicy removes an existing policy from the system using its ID.
@@ -23,6 +24,8 @@ import (
 //   - source: A pointer to a workloadapi.X509Source for establishing mTLS
 //     connection
 //   - id: The unique identifier of the policy to be deleted
+//   - allow: A predicate.Predicate that determines which server certificates
+//     to trust during the mTLS connection
 //
 // The function returns an error if any of the following operations fail:
 //   - Marshaling the policy deletion request
@@ -39,12 +42,16 @@ import (
 //	}
 //	defer source.Close()
 //
-//	err = DeletePolicy(source, "policy-123")
+//	err = DeletePolicy(source, "policy-123", predicate.AllowAll)
 //	if err != nil {
 //	    log.Printf("Failed to delete policy: %v", err)
 //	    return
 //	}
-func DeletePolicy(source *workloadapi.X509Source, id string) error {
+func DeletePolicy(
+	source *workloadapi.X509Source,
+	id string,
+	allow predicate.Predicate,
+) error {
 	r := reqres.PolicyDeleteRequest{
 		ID: id,
 	}
@@ -59,7 +66,7 @@ func DeletePolicy(source *workloadapi.X509Source, id string) error {
 		)
 	}
 
-	client, err := net.CreateMTLSClient(source)
+	client, err := net.CreateMTLSClientWithPredicate(source, allow)
 	if err != nil {
 		return err
 	}

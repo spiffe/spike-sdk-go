@@ -15,6 +15,7 @@ import (
 	"github.com/spiffe/go-spiffe/v2/spiffeid"
 	"github.com/spiffe/go-spiffe/v2/spiffetls/tlsconfig"
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
+	"github.com/spiffe/spike-sdk-go/predicate"
 )
 
 // RequestBody reads and returns the entire request body as a byte slice.
@@ -93,7 +94,9 @@ func CreateMTLSServer(source *workloadapi.X509Source,
 	server := &http.Server{
 		Addr:              tlsPort,
 		TLSConfig:         tlsConfig,
-		ReadHeaderTimeout: 10 * time.Second, // Timeout for reading request headers, it helps prevent slowloris attacks
+		ReadHeaderTimeout: 10 * time.Second,
+		// ^ Timeout for reading request headers,
+		// it helps prevent slowloris attacks
 	}
 	return server, nil
 }
@@ -121,7 +124,7 @@ func CreateMTLSServer(source *workloadapi.X509Source,
 //     function
 func CreateMTLSClientWithPredicate(
 	source *workloadapi.X509Source,
-	predicate func(string) bool,
+	predicate predicate.Predicate,
 ) (*http.Client, error) {
 	authorizer := tlsconfig.AdaptMatcher(func(id spiffeid.ID) error {
 		if predicate(id.String()) {
@@ -175,7 +178,7 @@ func CreateMTLSClientWithPredicate(
 //   - Only accept peer certificates with SPIFFE IDs that pass the predicate
 //     function
 func CreateMTLSClient(source *workloadapi.X509Source) (*http.Client, error) {
-	return CreateMTLSClientWithPredicate(source, func(string) bool { return true })
+	return CreateMTLSClientWithPredicate(source, predicate.AllowAll)
 }
 
 // ServeWithPredicate initializes and starts an HTTPS server using mTLS

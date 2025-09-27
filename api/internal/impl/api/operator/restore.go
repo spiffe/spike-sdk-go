@@ -9,11 +9,13 @@ import (
 	"errors"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
+	"github.com/spiffe/spike-sdk-go/config/env"
 
 	"github.com/spiffe/spike-sdk-go/api/entity/data"
 	"github.com/spiffe/spike-sdk-go/api/entity/v1/reqres"
 	"github.com/spiffe/spike-sdk-go/api/url"
 	"github.com/spiffe/spike-sdk-go/net"
+	"github.com/spiffe/spike-sdk-go/predicate"
 )
 
 // Restore submits a recovery shard to continue the restoration process.
@@ -59,7 +61,10 @@ func Restore(
 		)
 	}
 
-	client, err := net.CreateMTLSClient(source)
+	// Security: Recovery and Restoration can ONLY be done through SPIKE Pilot.
+	client, err := net.CreateMTLSClientWithPredicate(
+		source, predicate.AllowPilot(env.TrustRoot),
+	)
 	if err != nil {
 		// Security: Zero out mr before returning error
 		for i := range mr {
@@ -69,7 +74,7 @@ func Restore(
 	}
 
 	body, err := net.Post(client, url.Restore(), mr)
-	// Security: Zero out mr after the post request is complete
+	// Security: Zero out mr after the POST request is complete
 	for i := range mr {
 		mr[i] = 0
 	}

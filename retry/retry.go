@@ -139,7 +139,15 @@ func NewExponentialRetrier(opts ...RetrierOption) *ExponentialRetrier {
 	return r
 }
 
-// RetryWithBackoff implements the Retrier interface
+// RetryWithBackoff implements the Retrier interface using exponential backoff.
+// It executes the operation repeatedly until success or context cancellation.
+//
+// Parameters:
+//   - ctx: Context for cancellation and timeout control
+//   - operation: The function to retry that returns an error
+//
+// Returns:
+//   - error: nil if the operation eventually succeeds, or the last error encountered
 func (r *ExponentialRetrier) RetryWithBackoff(
 	ctx context.Context,
 	operation func() error,
@@ -187,7 +195,7 @@ func WithInitialInterval(d time.Duration) BackOffOption {
 }
 
 // WithMaxInterval sets the maximum interval between retries.
-// The interval will never exceed this value, regardless of the multiplier.s
+// The interval will never exceed this value, regardless of the multiplier.
 func WithMaxInterval(d time.Duration) BackOffOption {
 	return func(b *backoff.ExponentialBackOff) {
 		b.MaxInterval = d
@@ -231,15 +239,27 @@ func WithNotify(fn NotifyFn) RetrierOption {
 // It's used with the Do helper function for simple retry operations.
 type Handler[T any] func() (T, error)
 
-// Do provides a simplified way to retry a typed operation with default
-// settings.
-// It creates a TypedRetrier with default exponential backoff configuration.
+// Do provides a simplified way to retry a typed operation with configurable
+// settings. It creates a TypedRetrier with exponential backoff and applies
+// any provided options.
+//
+// This is a convenience function for common retry scenarios where you don't
+// need to create and manage a retrier instance explicitly.
+//
+// Parameters:
+//   - ctx: Context for cancellation and timeout control
+//   - handler: The function to retry that returns a value and error
+//   - options: Optional configuration for the retry behavior
+//
+// Returns:
+//   - T: The result value from the successful operation
+//   - error: nil if successful, or the last error encountered
 //
 // Example:
 //
 //	result, err := Do(ctx, func() (string, error) {
 //	    return fetchData()
-//	})
+//	}, WithNotify(logRetryAttempts))
 func Do[T any](
 	ctx context.Context,
 	handler Handler[T],

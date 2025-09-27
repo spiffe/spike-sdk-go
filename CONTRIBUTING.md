@@ -19,13 +19,23 @@ One great way to initiate such discussions is asking a question
 Please note that [we have a code of conduct](CODE_OF_CONDUCT.md). We expect all
 contributors to adhere to it in all interactions with the project.
 
-Also make sure you read, understand and accept
+Also, make sure you read, understand and accept
 [The Developer Certificate of Origin Contribution Guide](CONTRIBUTING_DCO.md)
 as it is a requirement to contribute to this project and contains more details
 about the contribution process.
 
 ## How To Run Tests
 
-Before merging your changes, make sure all tests pass.
+Before merging your changes or creating a Pull Request, make sure all tests 
+pass and code quality checks are satisfied.
 
-Turn test the SDK locally, run `go test ./...` on the project root.
+To test the SDK locally and run quality checks, use the following commands in 
+the project root:
+
+```bash
+# Run all tests
+make test
+
+# Run code quality and security audit
+make audit
+```

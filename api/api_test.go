@@ -12,19 +12,20 @@ import (
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 	"github.com/spiffe/spike-sdk-go/api/internal/impl/api/cipher"
+	"github.com/spiffe/spike-sdk-go/predicate"
 )
 
 // stub source (nil pointer acceptable for our stubs)
 var fakeSource *workloadapi.X509Source
 
 func TestAPI_CipherStreamMethods(t *testing.T) {
-	a := NewWithSource(fakeSource)
+	a := NewWithSource(fakeSource, predicate.AllowAll)
 
 	// backup and restore
 	origEnc, origDec := cipherEncryptFunc, cipherDecryptFunc
 	t.Cleanup(func() { cipherEncryptFunc, cipherDecryptFunc = origEnc, origDec })
 
-	cipherEncryptFunc = func(_ *workloadapi.X509Source, mode cipher.Mode, r io.Reader, contentType string, _ []byte, _ string) ([]byte, error) {
+	cipherEncryptFunc = func(_ *workloadapi.X509Source, mode cipher.Mode, r io.Reader, contentType string, _ []byte, _ string, _ predicate.Predicate) ([]byte, error) {
 		if mode != cipher.ModeStream || contentType != "application/octet-stream" {
 			return nil, errors.New("bad mode or content-type")
 		}
@@ -34,7 +35,7 @@ func TestAPI_CipherStreamMethods(t *testing.T) {
 		}
 		return []byte("cipher"), nil
 	}
-	cipherDecryptFunc = func(_ *workloadapi.X509Source, mode cipher.Mode, r io.Reader, contentType string, _ byte, _, _ []byte, _ string) ([]byte, error) {
+	cipherDecryptFunc = func(_ *workloadapi.X509Source, mode cipher.Mode, r io.Reader, contentType string, _ byte, _, _ []byte, _ string, _ predicate.Predicate) ([]byte, error) {
 		if mode != cipher.ModeStream || contentType != "application/octet-stream" {
 			return nil, errors.New("bad mode or content-type")
 		}
@@ -62,7 +63,7 @@ func TestAPI_CipherStreamMethods(t *testing.T) {
 	}
 
 	// error path
-	cipherEncryptFunc = func(_ *workloadapi.X509Source, _ cipher.Mode, _ io.Reader, _ string, _ []byte, _ string) ([]byte, error) {
+	cipherEncryptFunc = func(_ *workloadapi.X509Source, _ cipher.Mode, _ io.Reader, _ string, _ []byte, _ string, _ predicate.Predicate) ([]byte, error) {
 		return nil, errors.New("boom")
 	}
 	if _, err := a.CipherEncryptStream(bytes.NewReader(nil), "application/octet-stream"); err == nil {
@@ -71,12 +72,15 @@ func TestAPI_CipherStreamMethods(t *testing.T) {
 }
 
 func TestAPI_CipherJSONMethods(t *testing.T) {
-	a := NewWithSource(fakeSource)
+	a := NewWithSource(fakeSource, predicate.AllowAll)
 
 	origEnc, origDec := cipherEncryptFunc, cipherDecryptFunc
 	t.Cleanup(func() { cipherEncryptFunc, cipherDecryptFunc = origEnc, origDec })
 
-	cipherEncryptFunc = func(_ *workloadapi.X509Source, mode cipher.Mode, _ io.Reader, _ string, plaintext []byte, algorithm string) ([]byte, error) {
+	cipherEncryptFunc = func(
+		_ *workloadapi.X509Source, mode cipher.Mode, _ io.Reader,
+		_ string, plaintext []byte, algorithm string, _ predicate.Predicate,
+	) ([]byte, error) {
 		if mode != cipher.ModeJSON {
 			return nil, errors.New("bad mode")
 		}
@@ -85,7 +89,11 @@ func TestAPI_CipherJSONMethods(t *testing.T) {
 		}
 		return []byte{2}, nil
 	}
-	cipherDecryptFunc = func(_ *workloadapi.X509Source, mode cipher.Mode, _ io.Reader, _ string, version byte, _, _ []byte, algorithm string) ([]byte, error) {
+	cipherDecryptFunc = func(
+		_ *workloadapi.X509Source, mode cipher.Mode, _ io.Reader,
+		_ string, version byte, _, _ []byte,
+		algorithm string, _ predicate.Predicate,
+	) ([]byte, error) {
 		if mode != cipher.ModeJSON {
 			return nil, errors.New("bad mode")
 		}
