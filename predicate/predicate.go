@@ -87,3 +87,41 @@ func AllowPilot(trustRoots string) Predicate {
 		return spiffeid.IsPilot(trustRoots, spiffeID)
 	}
 }
+
+// AllowNexus creates a predicate that only allows SPIKE Nexus workloads.
+// It returns a predicate function that validates whether a given SPIFFE ID
+// matches the SPIKE Nexus identity pattern for the specified trust domains.
+//
+// This is used to restrict API access to only SPIKE Nexus instances, providing
+// an additional layer of security for sensitive operations that should only
+// be performed by the data plane storage component.
+//
+// Parameters:
+//   - trustRoots: Comma-delimited list of trust domain roots (e.g.,
+//     "example.org,other.org")
+//
+// Returns:
+//   - Predicate: A function that returns true only for SPIKE Nexus SPIFFE IDs
+//
+// Example usage:
+//
+//	// Create predicate for nexus-only access
+//	nexusOnly := AllowNexus("example.org,dev.example.org")
+//
+//	// Use in API calls to restrict access
+//	policy, err := acl.GetPolicy(source, policyID, nexusOnly)
+//	secret, err := secret.Get(source, secretPath, version, nexusOnly)
+//
+// The returned predicate will accept SPIFFE IDs matching:
+//   - "spiffe://example.org/spike/nexus"
+//   - "spiffe://example.org/spike/nexus/instance-1"
+//   - "spiffe://dev.example.org/spike/nexus"
+//   - etc.
+//
+// if the trust root of the SPIFFE ID belongs to one of the specified domains
+// in the trustRoots input parameter.
+func AllowNexus(trustRoots string) Predicate {
+	return func(spiffeID string) bool {
+		return spiffeid.IsNexus(trustRoots, spiffeID)
+	}
+}
