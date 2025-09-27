@@ -15,6 +15,7 @@ import (
 	code "github.com/spiffe/spike-sdk-go/api/errors"
 	"github.com/spiffe/spike-sdk-go/api/url"
 	"github.com/spiffe/spike-sdk-go/net"
+	"github.com/spiffe/spike-sdk-go/predicate"
 )
 
 // Get retrieves a specific version of a secret at the given path using
@@ -24,6 +25,8 @@ import (
 //   - source: X509Source for mTLS client authentication
 //   - path: Path to the secret to retrieve
 //   - version: Version number of the secret to retrieve
+//   - allow: A predicate.Predicate that determines which server certificates
+//     to trust during the mTLS connection
 //
 // Returns:
 //   - *Secret: Secret data if found, nil if secret not found
@@ -32,9 +35,9 @@ import (
 //
 // Example:
 //
-//	secret, err := getSecret(x509Source, "secret/path", 1)
+//	secret, err := Get(x509Source, "secret/path", 1, predicate.AllowAll)
 func Get(source *workloadapi.X509Source,
-	path string, version int) (*data.Secret, error) {
+	path string, version int, allow predicate.Predicate) (*data.Secret, error) {
 	r := reqres.SecretReadRequest{
 		Path:    path,
 		Version: version,
@@ -48,7 +51,7 @@ func Get(source *workloadapi.X509Source,
 		)
 	}
 
-	client, err := net.CreateMTLSClient(source)
+	client, err := net.CreateMTLSClientWithPredicate(source, allow)
 	if err != nil {
 		return nil, err
 	}

@@ -11,25 +11,40 @@ import (
 	"testing"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
+	"github.com/spiffe/spike-sdk-go/predicate"
 )
 
 type rtFunc func(*http.Request) (*http.Response, error)
 
-func (f rtFunc) RoundTrip(_ *http.Request) (*http.Response, error) { return f(nil) }
+func (f rtFunc) RoundTrip(_ *http.Request) (*http.Response, error) {
+	return f(nil)
+}
 
-func fakeClient(rt http.RoundTripper) *http.Client { return &http.Client{Transport: rt} }
+func fakeClient(rt http.RoundTripper) *http.Client {
+	return &http.Client{Transport: rt}
+}
 
-func TestEncrypt_OctetStream(t *testing.T) {
+func TestEncryptOctetStream(t *testing.T) {
 	origCreate := createMTLSClient
 	origPostCT := streamPostWithContentType
 	origHTTPPost := httpPost
-	t.Cleanup(func() { createMTLSClient = origCreate; streamPostWithContentType = origPostCT; httpPost = origHTTPPost })
+	t.Cleanup(func() {
+		createMTLSClient = origCreate
+		streamPostWithContentType = origPostCT
+		httpPost = origHTTPPost
+	})
 
 	// stub client creation and streaming
-	createMTLSClient = func(_ *workloadapi.X509Source) (*http.Client, error) {
-		return fakeClient(rtFunc(func(_ *http.Request) (*http.Response, error) { return nil, nil })), nil
+	createMTLSClient = func(
+		_ *workloadapi.X509Source, _ predicate.Predicate,
+	) (*http.Client, error) {
+		return fakeClient(rtFunc(func(_ *http.Request) (*http.Response, error) {
+			return nil, nil
+		})), nil
 	}
-	streamPostWithContentType = func(_ *http.Client, path string, body io.Reader, ct string) (io.ReadCloser, error) {
+	streamPostWithContentType = func(
+		_ *http.Client, path string, body io.Reader, ct string,
+	) (io.ReadCloser, error) {
 		if path == "" {
 			t.Fatalf("empty path")
 		}
@@ -43,7 +58,10 @@ func TestEncrypt_OctetStream(t *testing.T) {
 		return io.NopCloser(bytes.NewReader([]byte("cipher"))), nil
 	}
 
-	out, err := Encrypt(nil, ModeStream, bytes.NewReader([]byte("plain")), "application/octet-stream", nil, "")
+	out, err := Encrypt(
+		nil, ModeStream, bytes.NewReader([]byte("plain")),
+		"application/octet-stream", nil, "", predicate.AllowAll,
+	)
 	if err != nil {
 		t.Fatalf("Encrypt error: %v", err)
 	}

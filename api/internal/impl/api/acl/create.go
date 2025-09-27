@@ -14,6 +14,7 @@ import (
 	"github.com/spiffe/spike-sdk-go/api/entity/v1/reqres"
 	"github.com/spiffe/spike-sdk-go/api/url"
 	"github.com/spiffe/spike-sdk-go/net"
+	"github.com/spiffe/spike-sdk-go/predicate"
 )
 
 // CreatePolicy creates a new policy in the system using the provided SPIFFE
@@ -28,6 +29,8 @@ import (
 //   - pathPattern: The path pattern that this policy will match against
 //   - permissions: A slice of PolicyPermission defining the access rights for
 //     this policy
+//   - allow: A predicate.Predicate that determines which server connections
+//     are trusted for the mTLS connection
 //
 // The function returns an error if any of the following operations fail:
 //   - Marshaling the policy creation request
@@ -57,6 +60,7 @@ import (
 //	    "spiffe://example.org/service/*",
 //	    "/api/documents/*",
 //	    permissions,
+//	    predicate.AllowAll(),
 //	)
 //	if err != nil {
 //	    log.Printf("Failed to create policy: %v", err)
@@ -65,6 +69,7 @@ import (
 func CreatePolicy(source *workloadapi.X509Source,
 	name string, SPIFFEIDPattern string, pathPattern string,
 	permissions []data.PolicyPermission,
+	allow predicate.Predicate,
 ) error {
 	r := reqres.PolicyCreateRequest{
 		Name:            name,
@@ -83,7 +88,7 @@ func CreatePolicy(source *workloadapi.X509Source,
 		)
 	}
 
-	client, err := net.CreateMTLSClient(source)
+	client, err := net.CreateMTLSClientWithPredicate(source, allow)
 	if err != nil {
 		return err
 	}

@@ -11,18 +11,27 @@ import (
 	"testing"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
+	"github.com/spiffe/spike-sdk-go/predicate"
 )
 
 func TestDecrypt_OctetStream(t *testing.T) {
 	origCreate := createMTLSClient
 	origPost := streamPost
 	origPostCT := streamPostWithContentType
-	t.Cleanup(func() { createMTLSClient = origCreate; streamPost = origPost; streamPostWithContentType = origPostCT })
+	t.Cleanup(func() {
+		createMTLSClient = origCreate
+		streamPost = origPost
+		streamPostWithContentType = origPostCT
+	})
 
-	createMTLSClient = func(_ *workloadapi.X509Source) (*http.Client, error) {
+	createMTLSClient = func(
+		_ *workloadapi.X509Source, _ predicate.Predicate,
+	) (*http.Client, error) {
 		return &http.Client{}, nil
 	}
-	streamPostWithContentType = func(_ *http.Client, _ string, body io.Reader, ct string) (io.ReadCloser, error) {
+	streamPostWithContentType = func(
+		_ *http.Client, _ string, body io.Reader, ct string,
+	) (io.ReadCloser, error) {
 		if ct != "application/octet-stream" {
 			t.Fatalf("unexpected ct: %s", ct)
 		}
@@ -33,7 +42,11 @@ func TestDecrypt_OctetStream(t *testing.T) {
 		return io.NopCloser(bytes.NewReader([]byte("plain"))), nil
 	}
 
-	out, err := Decrypt(nil, ModeStream, bytes.NewReader([]byte("cipher")), "application/octet-stream", 0, nil, nil, "")
+	out, err := Decrypt(
+		nil, ModeStream, bytes.NewReader([]byte("cipher")),
+		"application/octet-stream", 0, nil, nil, "",
+		predicate.AllowAll,
+	)
 	if err != nil {
 		t.Fatalf("Decrypt error: %v", err)
 	}

@@ -9,6 +9,8 @@ import (
 	"errors"
 	"io"
 	"net/http"
+
+	"github.com/spiffe/spike-sdk-go/log"
 )
 
 func body(r *http.Response) (bod []byte, err error) {
@@ -51,6 +53,8 @@ func body(r *http.Response) (bod []byte, err error) {
 //	    log.Fatalf("failed to post: %v", err)
 //	}
 func Post(client *http.Client, path string, mr []byte) ([]byte, error) {
+	const fName = "Post"
+
 	// Create the request while preserving the mTLS client
 	req, err := http.NewRequest("POST", path, bytes.NewBuffer(mr))
 	if err != nil {
@@ -64,6 +68,7 @@ func Post(client *http.Client, path string, mr []byte) ([]byte, error) {
 	req.Header.Set("Content-Type", "application/json")
 
 	// Use the existing mTLS client to make the request
+	//nolint:bodyclose // Response body is properly closed in defer block
 	r, err := client.Do(req)
 	if err != nil {
 		return []byte{}, errors.Join(
@@ -71,7 +76,19 @@ func Post(client *http.Client, path string, mr []byte) ([]byte, error) {
 			err,
 		)
 	}
-	defer r.Body.Close()
+	defer func(b io.ReadCloser) {
+		if b == nil {
+			return
+		}
+		err := b.Close()
+		if err != nil {
+			log.Log().Info(
+				fName,
+				"msg", "Failed to close response body",
+				"err", err.Error(),
+			)
+		}
+	}(r.Body)
 
 	if r.StatusCode != http.StatusOK {
 		if r.StatusCode == http.StatusNotFound {

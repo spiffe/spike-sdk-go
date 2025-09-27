@@ -14,6 +14,7 @@ import (
 	"github.com/spiffe/spike-sdk-go/api/entity/v1/reqres"
 	"github.com/spiffe/spike-sdk-go/api/url"
 	"github.com/spiffe/spike-sdk-go/net"
+	"github.com/spiffe/spike-sdk-go/predicate"
 )
 
 // ListPolicies retrieves policies from the system, optionally filtering by
@@ -27,6 +28,8 @@ import (
 //     string matches all SPIFFE IDs.
 //   - pathPattern: The path pattern to filter policies. An empty string
 //     matches all paths.
+//   - allow: A predicate.Predicate that determines which server certificates
+//     to trust during the mTLS connection
 //
 // The function returns:
 //   - (*[]data.Policy, nil) containing all matching policies if successful
@@ -53,7 +56,7 @@ import (
 //	defer source.Close()
 //
 //	// List all policies
-//	result, err := ListPolicies(source, "", "")
+//	result, err := ListPolicies(source, "", "", predicate.AllowAll)
 //	if err != nil {
 //	    log.Printf("Error listing policies: %v", err)
 //	    return
@@ -70,6 +73,7 @@ import (
 func ListPolicies(
 	source *workloadapi.X509Source,
 	SPIFFEIDPattern string, pathPattern string,
+	allow predicate.Predicate,
 ) (*[]data.Policy, error) {
 	r := reqres.PolicyListRequest{
 		SPIFFEIDPattern: SPIFFEIDPattern,
@@ -85,7 +89,7 @@ func ListPolicies(
 		)
 	}
 
-	client, err := net.CreateMTLSClient(source)
+	client, err := net.CreateMTLSClientWithPredicate(source, allow)
 	if err != nil {
 		return nil, err
 	}

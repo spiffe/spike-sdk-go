@@ -14,6 +14,7 @@ import (
 	"github.com/spiffe/spike-sdk-go/api/entity/v1/reqres"
 	"github.com/spiffe/spike-sdk-go/api/url"
 	"github.com/spiffe/spike-sdk-go/net"
+	"github.com/spiffe/spike-sdk-go/predicate"
 )
 
 // GetMetadata retrieves a specific version of a secret metadata at the
@@ -23,6 +24,8 @@ import (
 //   - source: X509Source for mTLS client authentication
 //   - path: Path to the secret to retrieve
 //   - version: Version number of the secret to retrieve
+//   - allow: A predicate.Predicate that determines which server certificates
+//     to trust during the mTLS connection
 //
 // Returns:
 //   - *Secret: Secret metadata if found, nil if secret not found
@@ -31,9 +34,10 @@ import (
 //
 // Example:
 //
-//	metadata, err := getSecretMetadata(x509Source, "secret/path", 1)
+//	metadata, err := GetMetadata(x509Source, "secret/path", 1, predicate.AllowAll)
 func GetMetadata(
 	source *workloadapi.X509Source, path string, version int,
+	allow predicate.Predicate,
 ) (*data.SecretMetadata, error) {
 	r := reqres.SecretMetadataRequest{
 		Path:    path,
@@ -48,7 +52,7 @@ func GetMetadata(
 		)
 	}
 
-	client, err := net.CreateMTLSClient(source)
+	client, err := net.CreateMTLSClientWithPredicate(source, allow)
 	if err != nil {
 		return nil, err
 	}

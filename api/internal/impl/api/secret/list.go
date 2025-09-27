@@ -13,12 +13,15 @@ import (
 	"github.com/spiffe/spike-sdk-go/api/entity/v1/reqres"
 	"github.com/spiffe/spike-sdk-go/api/url"
 	"github.com/spiffe/spike-sdk-go/net"
+	"github.com/spiffe/spike-sdk-go/predicate"
 )
 
 // ListKeys retrieves all secret keys using mTLS authentication.
 //
 // Parameters:
 //   - source: X509Source for mTLS client authentication
+//   - allow: A predicate.Predicate that determines which server certificates
+//     to trust during the mTLS connection
 //
 // Returns:
 //   - []string: Array of secret keys if found, empty array if none found
@@ -27,8 +30,10 @@ import (
 //
 // Example:
 //
-//	keys, err := listSecretKeys(x509Source)
-func ListKeys(source *workloadapi.X509Source) (*[]string, error) {
+//	keys, err := ListKeys(x509Source, predicate.AllowAll)
+func ListKeys(
+	source *workloadapi.X509Source, allow predicate.Predicate,
+) (*[]string, error) {
 	r := reqres.SecretListRequest{}
 	mr, err := json.Marshal(r)
 	if err != nil {
@@ -40,7 +45,7 @@ func ListKeys(source *workloadapi.X509Source) (*[]string, error) {
 		)
 	}
 
-	client, err := net.CreateMTLSClient(source)
+	client, err := net.CreateMTLSClientWithPredicate(source, allow)
 	if err != nil {
 		return nil, err
 	}
