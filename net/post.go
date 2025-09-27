@@ -68,6 +68,7 @@ func Post(client *http.Client, path string, mr []byte) ([]byte, error) {
 	req.Header.Set("Content-Type", "application/json")
 
 	// Use the existing mTLS client to make the request
+	//nolint:bodyclose // Response body is properly closed in defer block
 	r, err := client.Do(req)
 	if err != nil {
 		return []byte{}, errors.Join(

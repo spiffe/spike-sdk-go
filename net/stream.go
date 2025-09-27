@@ -60,6 +60,7 @@ func StreamPostWithContentType(
 	}
 	req.Header.Set("Content-Type", contentType)
 
+	//nolint:bodyclose // Response body is properly closed in defer block
 	r, err := client.Do(req)
 	if err != nil {
 		return nil, errors.Join(

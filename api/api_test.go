@@ -25,7 +25,10 @@ func TestAPI_CipherStreamMethods(t *testing.T) {
 	origEnc, origDec := cipherEncryptFunc, cipherDecryptFunc
 	t.Cleanup(func() { cipherEncryptFunc, cipherDecryptFunc = origEnc, origDec })
 
-	cipherEncryptFunc = func(_ *workloadapi.X509Source, mode cipher.Mode, r io.Reader, contentType string, _ []byte, _ string, _ predicate.Predicate) ([]byte, error) {
+	cipherEncryptFunc = func(_ *workloadapi.X509Source,
+		mode cipher.Mode, r io.Reader, contentType string,
+		_ []byte, _ string, _ predicate.Predicate,
+	) ([]byte, error) {
 		if mode != cipher.ModeStream || contentType != "application/octet-stream" {
 			return nil, errors.New("bad mode or content-type")
 		}
@@ -35,7 +38,9 @@ func TestAPI_CipherStreamMethods(t *testing.T) {
 		}
 		return []byte("cipher"), nil
 	}
-	cipherDecryptFunc = func(_ *workloadapi.X509Source, mode cipher.Mode, r io.Reader, contentType string, _ byte, _, _ []byte, _ string, _ predicate.Predicate) ([]byte, error) {
+	cipherDecryptFunc = func(_ *workloadapi.X509Source, mode cipher.Mode,
+		r io.Reader, contentType string, _ byte, _, _ []byte, _ string,
+		_ predicate.Predicate) ([]byte, error) {
 		if mode != cipher.ModeStream || contentType != "application/octet-stream" {
 			return nil, errors.New("bad mode or content-type")
 		}
@@ -46,7 +51,8 @@ func TestAPI_CipherStreamMethods(t *testing.T) {
 		return []byte("plain"), nil
 	}
 
-	out, err := a.CipherEncryptStream(bytes.NewReader([]byte("plain")), "application/octet-stream")
+	out, err := a.CipherEncryptStream(
+		bytes.NewReader([]byte("plain")), "application/octet-stream")
 	if err != nil {
 		t.Fatalf("CipherEncryptStream error: %v", err)
 	}
@@ -54,7 +60,8 @@ func TestAPI_CipherStreamMethods(t *testing.T) {
 		t.Fatalf("unexpected encrypt out: %s", string(out))
 	}
 
-	out2, err := a.CipherDecryptStream(bytes.NewReader([]byte("cipher")), "application/octet-stream")
+	out2, err := a.CipherDecryptStream(
+		bytes.NewReader([]byte("cipher")), "application/octet-stream")
 	if err != nil {
 		t.Fatalf("CipherDecryptStream error: %v", err)
 	}
@@ -63,10 +70,13 @@ func TestAPI_CipherStreamMethods(t *testing.T) {
 	}
 
 	// error path
-	cipherEncryptFunc = func(_ *workloadapi.X509Source, _ cipher.Mode, _ io.Reader, _ string, _ []byte, _ string, _ predicate.Predicate) ([]byte, error) {
+	cipherEncryptFunc = func(_ *workloadapi.X509Source,
+		_ cipher.Mode, _ io.Reader, _ string, _ []byte, _ string,
+		_ predicate.Predicate) ([]byte, error) {
 		return nil, errors.New("boom")
 	}
-	if _, err := a.CipherEncryptStream(bytes.NewReader(nil), "application/octet-stream"); err == nil {
+	if _, err := a.CipherEncryptStream(
+		bytes.NewReader(nil), "application/octet-stream"); err == nil {
 		t.Fatalf("expected error from CipherEncryptStream")
 	}
 }

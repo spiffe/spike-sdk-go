@@ -25,7 +25,7 @@ func TestDecrypt_OctetStream(t *testing.T) {
 	})
 
 	createMTLSClient = func(
-		_ *workloadapi.X509Source, predicate predicate.Predicate,
+		_ *workloadapi.X509Source, _ predicate.Predicate,
 	) (*http.Client, error) {
 		return &http.Client{}, nil
 	}
