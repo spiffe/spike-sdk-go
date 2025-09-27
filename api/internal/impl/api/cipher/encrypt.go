@@ -56,7 +56,9 @@ func Encrypt(
 		defer func(rc io.ReadCloser) {
 			err := rc.Close()
 			if err != nil {
-				log.Log().Error(fName, "err", err.Error())
+				log.Log().Info(fName,
+					"message", "Error closing response body",
+					"err", err.Error())
 			}
 		}(rc)
 		b, err := io.ReadAll(rc)
