@@ -75,8 +75,11 @@ func Post(client *http.Client, path string, mr []byte) ([]byte, error) {
 			err,
 		)
 	}
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
+	defer func(b io.ReadCloser) {
+		if b == nil {
+			return
+		}
+		err := b.Close()
 		if err != nil {
 			log.Log().Info(
 				fName,

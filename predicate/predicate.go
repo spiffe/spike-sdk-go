@@ -38,7 +38,7 @@ type Predicate func(string) bool
 //
 //	// Allow any workload to access the API
 //	secret, err := secret.Get(source, path, version, AllowAll)
-var AllowAll = Predicate(func(data string) bool { return true })
+var AllowAll = Predicate(func(_ string) bool { return true })
 
 // DenyAll is a predicate that rejects all SPIFFE IDs.
 // This can be used to temporarily disable access or as a default restrictive
@@ -48,7 +48,7 @@ var AllowAll = Predicate(func(data string) bool { return true })
 //
 //	// Deny all access during maintenance
 //	policy, err := acl.GetPolicy(source, policyID, DenyAll)
-var DenyAll = Predicate(func(data string) bool { return false })
+var DenyAll = Predicate(func(_ string) bool { return false })
 
 // AllowPilot creates a predicate that only allows SPIKE Pilot workloads.
 // It returns a predicate function that validates whether a given SPIFFE ID

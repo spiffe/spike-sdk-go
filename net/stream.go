@@ -67,18 +67,20 @@ func StreamPostWithContentType(
 			err,
 		)
 	}
+	defer func(b io.ReadCloser) {
+		if b == nil {
+			return
+		}
+		err := b.Close()
+		if err != nil {
+			log.Log().Info(fName,
+				"message", "Failed to close response body",
+				"err", err.Error(),
+			)
+		}
+	}(r.Body)
 
 	if r.StatusCode != http.StatusOK {
-		defer func(Body io.ReadCloser) {
-			err := Body.Close()
-			if err != nil {
-				log.Log().Info(fName,
-					"message", "Failed to close response body",
-					"err", err.Error(),
-				)
-			}
-		}(r.Body)
-
 		if r.StatusCode == http.StatusNotFound {
 			return nil, ErrNotFound
 		}
