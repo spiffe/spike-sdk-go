@@ -10,6 +10,8 @@ import (
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 	"github.com/spiffe/spike-sdk-go/config/env"
+	"github.com/spiffe/spike-sdk-go/log"
+	"github.com/spiffe/spike-sdk-go/spiffeid"
 
 	"github.com/spiffe/spike-sdk-go/api/entity/data"
 	"github.com/spiffe/spike-sdk-go/api/entity/v1/reqres"
@@ -48,6 +50,21 @@ func Restore(
 		Shard: shardValue,
 	}
 
+	svid, err := source.GetX509SVID()
+	if err != nil {
+		log.FatalLn(err.Error())
+	}
+	if svid == nil {
+		log.FatalLn("no X509SVID in source")
+	}
+	if svid != nil {
+		selfSPIFFEID := svid.ID.String()
+		// Security: Recovery and Restoration can ONLY be done via SPIKE Pilot.
+		if !spiffeid.IsPilot(env.TrustRoot, selfSPIFFEID) {
+			log.FatalLn("spiffeid is not pilot")
+		}
+	}
+
 	mr, err := json.Marshal(r)
 	// Security: Zero out r.Shard as soon as we're done with it
 	for i := range r.Shard {
@@ -61,9 +78,8 @@ func Restore(
 		)
 	}
 
-	// Security: Recovery and Restoration can ONLY be done through SPIKE Pilot.
 	client, err := net.CreateMTLSClientWithPredicate(
-		source, predicate.AllowPilot(env.TrustRoot),
+		source, predicate.AllowNexus(env.TrustRootNexus),
 	)
 	if err != nil {
 		// Security: Zero out mr before returning error
