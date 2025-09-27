@@ -16,9 +16,7 @@ func SecretGet() string {
 		env.NexusAPIRoot(),
 		string(NexusSecrets),
 	)
-	params := url.Values{}
-	params.Add(KeyAPIAction, string(ActionGet))
-	return u + "?" + params.Encode()
+	return u
 }
 
 // SecretPut returns the URL for putting a secret.
