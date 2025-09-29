@@ -19,7 +19,7 @@ import (
 var fakeSource *workloadapi.X509Source
 
 func TestAPI_CipherStreamMethods(t *testing.T) {
-	a := NewWithSource(fakeSource, predicate.AllowAll)
+	a := NewWithSource(fakeSource)
 
 	// backup and restore
 	origEnc, origDec := cipherEncryptFunc, cipherDecryptFunc
@@ -82,7 +82,7 @@ func TestAPI_CipherStreamMethods(t *testing.T) {
 }
 
 func TestAPI_CipherJSONMethods(t *testing.T) {
-	a := NewWithSource(fakeSource, predicate.AllowAll)
+	a := NewWithSource(fakeSource)
 
 	origEnc, origDec := cipherEncryptFunc, cipherDecryptFunc
 	t.Cleanup(func() { cipherEncryptFunc, cipherDecryptFunc = origEnc, origDec })
