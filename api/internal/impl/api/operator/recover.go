@@ -9,14 +9,14 @@ import (
 	"errors"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
-	"github.com/spiffe/spike-sdk-go/config/env"
-	"github.com/spiffe/spike-sdk-go/log"
-	"github.com/spiffe/spike-sdk-go/spiffeid"
 
 	"github.com/spiffe/spike-sdk-go/api/entity/v1/reqres"
 	"github.com/spiffe/spike-sdk-go/api/url"
+	"github.com/spiffe/spike-sdk-go/config/env"
+	"github.com/spiffe/spike-sdk-go/log"
 	"github.com/spiffe/spike-sdk-go/net"
 	"github.com/spiffe/spike-sdk-go/predicate"
+	"github.com/spiffe/spike-sdk-go/spiffeid"
 )
 
 // Recover makes a request to initiate recovery of secrets, returning the
