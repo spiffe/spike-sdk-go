@@ -105,3 +105,37 @@ var AllowNexus = Predicate(
 var AllowKeeper = Predicate(
 	func(SPIFFEID string) bool { return spiffeid.IsKeeper(SPIFFEID) },
 )
+
+// AllowKeeperPeer is a predicate function that validates whether a peer
+// SPIFFE ID is authorized to communicate with SPIKE Keeper instances.
+//
+// For security reasons, only SPIKE Nexus and SPIKE Bootstrap components
+// are allowed to communicate with SPIKE Keeper. This function enforces
+// this security policy by checking if the peer SPIFFE ID matches either
+// the Nexus or Bootstrap identity patterns.
+//
+// Parameters:
+//   - peerSpiffeId: The SPIFFE ID string of the peer attempting to connect
+//
+// Returns:
+//   - bool: true if the peer is authorized (Nexus or Bootstrap),
+//     false otherwise
+//
+// Example usage:
+//
+//	// Use in server configuration to restrict Keeper access
+//	if AllowKeeperPeer(clientSpiffeId) {
+//	    // Allow connection to Keeper
+//	} else {
+//	    // Deny connection
+//	}
+//
+// The function will return true for SPIFFE IDs matching:
+//   - SPIKE Nexus: "spiffe://example.org/spike/nexus"
+//   - SPIKE Bootstrap: "spiffe://example.org/spike/bootstrap"
+//   - Extended variants with additional path segments
+var AllowKeeperPeer = func(peerSpiffeId string) bool {
+	// Security: Only SPIKE Nexus and SPIKE Bootstrap
+	// can talk to SPIKE Keepers.
+	return spiffeid.PeerCanTalkToKeeper(peerSpiffeId)
+}
