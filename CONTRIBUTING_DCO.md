@@ -5,7 +5,7 @@
 We welcome contributions from the community and first want to thank you for
 taking the time to contribute!
 
-Please familiarize yourself with our [Code of Conduct](CODE_OF_CONDUCT.md) 
+Please familiarize yourself with our [Code of Conduct](CODE_OF_CONDUCT.md)
 before contributing.
 
 Before you start working with SPIKE, please read our
@@ -44,7 +44,7 @@ Pull request. Contributions may include:
 
 ## Getting started
 
-Please [quickstart guide][use-the-source] to learn how to build, deploy, and 
+Please [quickstart guide][use-the-source] to learn how to build, deploy, and
 test **SPIKE** from the source.
 
 [use-the-source]: https://spike.ist/#/quickstart

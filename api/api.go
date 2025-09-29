@@ -15,7 +15,6 @@ import (
 	"github.com/spiffe/spike-sdk-go/api/internal/impl/api/cipher"
 	"github.com/spiffe/spike-sdk-go/api/internal/impl/api/operator"
 	"github.com/spiffe/spike-sdk-go/api/internal/impl/api/secret"
-	"github.com/spiffe/spike-sdk-go/config/env"
 	"github.com/spiffe/spike-sdk-go/predicate"
 	"github.com/spiffe/spike-sdk-go/spiffe"
 )
@@ -49,7 +48,7 @@ func NewWithSource(source *workloadapi.X509Source) *API {
 	return &API{
 		source: source,
 		// API Client can only talk to SPIKE Nexus as a peer.
-		predicate: predicate.AllowNexus(env.TrustRootNexus),
+		predicate: predicate.AllowNexus,
 	}
 }
 

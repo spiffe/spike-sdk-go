@@ -1,32 +1,35 @@
 ![SPIKE](assets/spike-banner-lg.png)
 
-
 ## SPIKE Go SDK
 
 This library is a convenient Go library for working with [SPIKE][spike-web].
 
-It leverages the [SPIFFE Workload API][workload-api], 
+It leverages the [SPIFFE Workload API][workload-api],
 providing high-level functionality that includes:
-* Establishing mutually authenticated TLS (*mTLS*) between workloads powered 
+
+* Establishing mutually authenticated TLS (*mTLS*) between workloads powered
   by [SPIFFE][spiffe-web].
 * Abstracting SPIKE REST API calls.
 
 [workload-api]: https://github.com/spiffe/spiffe/blob/main/standards/SPIFFE_Workload_API.md "SPIFFE Workload API"
+
 [spike-web]: https://spike.ist/ "SPIKE"
+
 [spiffe-web]: https://spiffe.io/ "SPIFFE"
 
 ## Documentation
 
-See the [Go Package](https://pkg.go.dev/github.com/spiffe/spike-sdk-go) 
+See the [Go Package](https://pkg.go.dev/github.com/spiffe/spike-sdk-go)
 documentation.
 
 ## Quick Start
 
 Prerequisites:
+
 1. Running [SPIRE](https://spiffe.io/spire/) or another SPIFFE Workload API
    implementation.
 2. `SPIFFE_ENDPOINT_SOCKET` environment variable set to address of the Workload
-   API (e.g. `unix:///tmp/agent.sock`). 
+   API (e.g. `unix:///tmp/agent.sock`).
 
 ## Usage Example
 
@@ -109,6 +112,9 @@ Use GitHub issues to request features or file bugs.
 [Mozilla Public License v2.0](LICENSE).
 
 [spiffe-slack]: https://slack.spiffe.io/
+
 [spiffe]: https://spiffe.io/
+
 [spike]: https://spike.ist/
+
 [quickstart]: https://spike.ist/#/quickstart
