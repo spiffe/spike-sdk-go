@@ -37,3 +37,48 @@ func TrustRootFromEnv(trustRootEnvVar string) string {
 	}
 	return tr
 }
+
+// TrustRootVal returns the default trust root from the SPIKE_TRUST_ROOT
+// environment variable. This is a convenience function that calls
+// TrustRootFromEnv with the default trust root environment variable name.
+//
+// Returns:
+//   - The value of SPIKE_TRUST_ROOT environment variable, or "spike.ist"
+//     if not set
+func TrustRootVal() string {
+	return TrustRootFromEnv(TrustRoot)
+}
+
+// TrustRootForKeeperVal returns the trust root for SPIKE Keeper from the
+// SPIKE_TRUST_ROOT_KEEPER environment variable. This is a convenience function
+// that calls TrustRootFromEnv with the Keeper-specific environment variable.
+//
+// Returns:
+//   - The value of SPIKE_TRUST_ROOT_KEEPER environment variable, or "spike.ist"
+//     if not set
+func TrustRootForKeeperVal() string {
+	return TrustRootFromEnv(TrustRootKeeper)
+}
+
+// TrustRootForPilotVal returns the trust root for SPIKE Pilot from the
+// SPIKE_TRUST_ROOT_PILOT environment variable. This is a convenience function
+// that calls TrustRootFromEnv with the Pilot-specific environment variable.
+//
+// Returns:
+//   - The value of SPIKE_TRUST_ROOT_PILOT environment variable, or "spike.ist"
+//     if not set
+func TrustRootForPilotVal() string {
+	return TrustRootFromEnv(TrustRootPilot)
+}
+
+// TrustRootForLiteWorkloadVal returns the trust root for SPIKE Lite Workloads
+// from the SPIKE_TRUST_ROOT_LITE_WORKLOAD environment variable. This is a
+// convenience function that calls TrustRootFromEnv with the Lite
+// Workload-specific environment variable.
+//
+// Returns:
+//   - The value of SPIKE_TRUST_ROOT_LITE_WORKLOAD environment variable, or
+//     "spike.ist" if not set
+func TrustRootForLiteWorkloadVal() string {
+	return TrustRootFromEnv(TrustRootLiteWorkload)
+}
