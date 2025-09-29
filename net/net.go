@@ -56,18 +56,18 @@ func RequestBody(r *http.Request) (bod []byte, err error) {
 	return body, err
 }
 
-// CreateMTLSServer creates an HTTP server configured for mutual TLS (mTLS)
-// authentication using SPIFFE X.509 certificates. It sets up the server with a
-// custom authorizer that validates client SPIFFE IDs against a provided
-// predicate function.
+// CreateMTLSServerWithPredicate creates an HTTP server configured for mutual
+// TLS (mTLS) authentication using SPIFFE X.509 certificates. It sets up the
+// server with a custom authorizer that validates client SPIFFE IDs against a
+// provided predicate function.
 //
 // Parameters:
 //   - source: An X509Source that provides the server's identity credentials and
 //     validates client certificates. It must be initialized and valid.
 //   - tlsPort: The network address and port for the server to listen on
 //     (e.g., ":8443").
-//   - predicate: A function that takes a SPIFFE ID string and returns true if
-//     the client should be allowed access, false otherwise.
+//   - predicate: A function that takes a client SPIFFE ID string and returns
+//     true if the client should be allowed access, false otherwise.
 //
 // Returns:
 //   - *http.Server: A configured HTTP server ready to be started with TLS
@@ -77,7 +77,7 @@ func RequestBody(r *http.Request) (bod []byte, err error) {
 // The server uses the provided X509Source for both its own identity and for
 // validating client certificates. Client connections are only accepted if their
 // SPIFFE ID passes the provided predicate function.
-func CreateMTLSServer(source *workloadapi.X509Source,
+func CreateMTLSServerWithPredicate(source *workloadapi.X509Source,
 	tlsPort string,
 	predicate func(string) bool) (*http.Server, error) {
 	authorizer := tlsconfig.AdaptMatcher(func(id spiffeid.ID) error {
@@ -99,6 +99,32 @@ func CreateMTLSServer(source *workloadapi.X509Source,
 		// it helps prevent slowloris attacks
 	}
 	return server, nil
+}
+
+// CreateMTLSServer creates an HTTP server configured for mutual TLS (mTLS)
+// authentication using SPIFFE X.509 certificates.
+//
+// WARNING: This function accepts ALL client SPIFFE IDs without validation.
+// For production use, consider using CreateMTLSServerWithPredicate to restrict
+// which clients can connect to this server for better security.
+//
+// Parameters:
+//   - source: An X509Source that provides the server's identity credentials and
+//     validates client certificates. It must be initialized and valid.
+//   - tlsPort: The network address and port for the server to listen on
+//     (e.g., ":8443").
+//
+// Returns:
+//   - *http.Server: A configured HTTP server ready to be started with TLS
+//     enabled.
+//   - error: An error if the server configuration fails.
+//
+// The server uses the provided X509Source for both its own identity and for
+// validating client certificates. Client connections are accepted from ANY
+// client with a valid SPIFFE certificate.
+func CreateMTLSServer(source *workloadapi.X509Source,
+	tlsPort string) (*http.Server, error) {
+	return CreateMTLSServerWithPredicate(source, tlsPort, predicate.AllowAll)
 }
 
 // CreateMTLSClientWithPredicate creates an HTTP client configured for
@@ -168,8 +194,10 @@ func CreateMTLSClientWithPredicate(
 
 // CreateMTLSClient creates an HTTP client configured for mutual TLS
 // authentication using SPIFFE workload identities.
-// It uses the provided X.509 source for client certificates and validates peer
-// certificates against a predicate function.
+//
+// WARNING: This function accepts ALL server SPIFFE IDs without validation.
+// For production use, consider using CreateMTLSClientWithPredicate to restrict
+// which servers this client will connect to for better security.
 //
 // Parameters:
 //   - source: An X509Source that provides the client's identity certificates
@@ -182,9 +210,8 @@ func CreateMTLSClientWithPredicate(
 //
 // The returned client will:
 //   - Present client certificates from the provided X509Source
-//   - Validate peer certificates using the same X509Source
-//   - Only accept peer certificates with SPIFFE IDs that pass the predicate
-//     function
+//   - Validate server certificates using the same X509Source
+//   - Accept connections to ANY server with a valid SPIFFE certificate
 func CreateMTLSClient(source *workloadapi.X509Source) (*http.Client, error) {
 	return CreateMTLSClientWithPredicate(source, predicate.AllowAll)
 }
@@ -223,7 +250,7 @@ func ServeWithPredicate(source *workloadapi.X509Source,
 
 	initializeRoutes()
 
-	server, err := CreateMTLSServer(source, tlsPort, predicate)
+	server, err := CreateMTLSServerWithPredicate(source, tlsPort, predicate)
 	if err != nil {
 		return err
 	}
@@ -242,6 +269,10 @@ func ServeWithPredicate(source *workloadapi.X509Source,
 // authentication with SPIFFE X.509 certificates. It sets up the server routes
 // using the provided initialization function and listens for incoming
 // connections on the specified port.
+//
+// WARNING: This function accepts ALL client SPIFFE IDs without validation.
+// For production use, consider using ServeWithPredicate to restrict
+// which clients can connect to this server for better security.
 //
 // Parameters:
 //   - source: An X509Source that provides the server's identity credentials and
@@ -267,5 +298,5 @@ func Serve(
 	tlsPort string) error {
 	return ServeWithPredicate(
 		source, initializeRoutes,
-		func(string) bool { return true }, tlsPort)
+		predicate.AllowAll, tlsPort)
 }

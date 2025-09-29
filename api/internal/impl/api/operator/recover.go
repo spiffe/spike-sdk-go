@@ -12,7 +12,6 @@ import (
 
 	"github.com/spiffe/spike-sdk-go/api/entity/v1/reqres"
 	"github.com/spiffe/spike-sdk-go/api/url"
-	"github.com/spiffe/spike-sdk-go/config/env"
 	"github.com/spiffe/spike-sdk-go/log"
 	"github.com/spiffe/spike-sdk-go/net"
 	"github.com/spiffe/spike-sdk-go/predicate"
@@ -51,8 +50,11 @@ func Recover(source *workloadapi.X509Source) (map[int]*[32]byte, error) {
 	if svid != nil {
 		selfSPIFFEID := svid.ID.String()
 		// Security: Recovery and Restoration can ONLY be done via SPIKE Pilot.
-		if !spiffeid.IsPilot(env.TrustRoot, selfSPIFFEID) {
-			log.FatalLn(fName, "message", "spiffeid is not SPIKE Pilot")
+		if !spiffeid.IsPilot(selfSPIFFEID) {
+			log.FatalLn(fName,
+				"message",
+				"You can recover only from SPIKE Pilot: spiffeid is not SPIKE Pilot",
+			)
 		}
 	}
 
@@ -67,7 +69,8 @@ func Recover(source *workloadapi.X509Source) (map[int]*[32]byte, error) {
 	}
 
 	client, err := net.CreateMTLSClientWithPredicate(
-		source, predicate.AllowNexus(env.TrustRootNexus))
+		source, predicate.AllowNexus,
+	)
 	if err != nil {
 		return nil, err
 	}

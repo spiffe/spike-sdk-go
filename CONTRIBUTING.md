@@ -11,7 +11,7 @@ When contributing to this repository, please first discuss the change you wish
 to make via an issue, email, or any other method before making a change.
 This way, we can avoid misunderstandings and wasted effort.
 
-One great way to initiate such discussions is asking a question 
+One great way to initiate such discussions is asking a question
 [SPIFFE Slack Community][slack].
 
 [slack]: https://slack.spiffe.io/ "Join SPIFFE on Slack"
@@ -26,10 +26,10 @@ about the contribution process.
 
 ## How To Run Tests
 
-Before merging your changes or creating a Pull Request, make sure all tests 
+Before merging your changes or creating a Pull Request, make sure all tests
 pass and code quality checks are satisfied.
 
-To test the SDK locally and run quality checks, use the following commands in 
+To test the SDK locally and run quality checks, use the following commands in
 the project root:
 
 ```bash

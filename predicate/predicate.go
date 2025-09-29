@@ -12,7 +12,9 @@
 // workloads (e.g., only SPIKE Pilot instances).
 package predicate
 
-import "github.com/spiffe/spike-sdk-go/spiffeid"
+import (
+	"github.com/spiffe/spike-sdk-go/spiffeid"
+)
 
 // Predicate is a function type that validates a SPIFFE ID string.
 // It returns true if the SPIFFE ID should be allowed access, false otherwise.
@@ -50,29 +52,21 @@ var AllowAll = Predicate(func(_ string) bool { return true })
 //	policy, err := acl.GetPolicy(source, policyID, DenyAll)
 var DenyAll = Predicate(func(_ string) bool { return false })
 
-// AllowNexus creates a predicate that only allows SPIKE Nexus workloads.
-// It returns a predicate function that validates whether a given SPIFFE ID
-// matches the SPIKE Nexus identity pattern for the specified trust domains.
+// AllowNexus is a predicate that only allows SPIKE Nexus workloads.
+// It validates whether a given SPIFFE ID matches the SPIKE Nexus identity
+// pattern for the configured trust domains.
 //
 // This is used to restrict API access to only SPIKE Nexus instances, providing
 // an additional layer of security for sensitive operations that should only
 // be performed by the data plane storage component.
 //
-// Parameters:
-//   - trustRoots: Comma-delimited list of trust domain roots (e.g.,
-//     "example.org,other.org")
-//
-// Returns:
-//   - Predicate: A function that returns true only for SPIKE Nexus SPIFFE IDs
+// The predicate uses trust domains configured via environment variables.
 //
 // Example usage:
 //
-//	// Create predicate for nexus-only access
-//	nexusOnly := AllowNexus("example.org,dev.example.org")
-//
-//	// Use in API calls to restrict access
-//	policy, err := acl.GetPolicy(source, policyID, nexusOnly)
-//	secret, err := secret.Get(source, secretPath, version, nexusOnly)
+//	// Use predicate for nexus-only access
+//	policy, err := acl.GetPolicy(source, policyID, AllowNexus)
+//	secret, err := secret.Get(source, secretPath, version, AllowNexus)
 //
 // The returned predicate will accept SPIFFE IDs matching:
 //   - "spiffe://example.org/spike/nexus"
@@ -80,10 +74,7 @@ var DenyAll = Predicate(func(_ string) bool { return false })
 //   - "spiffe://dev.example.org/spike/nexus"
 //   - etc.
 //
-// if the trust root of the SPIFFE ID belongs to one of the specified domains
-// in the trustRoots input parameter.
-func AllowNexus(trustRoots string) Predicate {
-	return func(spiffeID string) bool {
-		return spiffeid.IsNexus(trustRoots, spiffeID)
-	}
-}
+// based on the trust domains configured in the environment.
+var AllowNexus = Predicate(
+	func(SPIFFEID string) bool { return spiffeid.IsNexus(SPIFFEID) },
+)

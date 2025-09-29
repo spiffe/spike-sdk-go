@@ -4,7 +4,11 @@
 
 package spiffeid
 
-import "strings"
+import (
+	"strings"
+
+	"github.com/spiffe/spike-sdk-go/config/env"
+)
 
 // IsPilot checks if a given SPIFFE ID matches the SPIKE Pilot's SPIFFE ID
 // pattern.
@@ -21,9 +25,7 @@ import "strings"
 // with the base pilot identity.
 //
 // Parameters:
-//   - trustRoots: Comma-delimited list of trust domain roots
-//     (e.g., "example.org,other.org")
-//   - id: The SPIFFE ID string to check
+//   - SPIFFEID: The SPIFFE ID string to check
 //
 // Returns:
 //   - bool: true if the provided SPIFFE ID matches either the exact pilot ID
@@ -36,19 +38,20 @@ import "strings"
 //	extendedId := "spiffe://example.org/spike/pilot/instance-0"
 //
 //	// Both will return true
-//	if IsPilot("example.org,other.org", baseId) {
+//	if IsPilot(baseId) {
 //	    // Handle pilot-specific logic
 //	}
 //
-//	if IsPilot("example.org,other.org", extendedId) {
-//	    // Also recognized as a pilot, with instance metadata
+//	if IsPilot(extendedId) {
+//	    // Also recognized as a SPIKE Pilot, with instance metadata
 //	}
-func IsPilot(trustRoots, id string) bool {
+func IsPilot(SPIFFEID string) bool {
+	trustRoots := env.TrustRootFromEnv(env.TrustRootPilot)
 	for _, root := range strings.Split(trustRoots, ",") {
 		baseID := Pilot(strings.TrimSpace(root))
 		// Check if the ID is either exactly the base ID or starts with the base ID
 		// followed by "/"
-		if id == baseID || strings.HasPrefix(id, baseID+"/") {
+		if SPIFFEID == baseID || strings.HasPrefix(SPIFFEID, baseID+"/") {
 			return true
 		}
 	}
@@ -76,9 +79,7 @@ func IsPilot(trustRoots, id string) bool {
 // with the base lite workload identity.
 //
 // Parameters:
-//   - trustRoots: Comma-delimited list of trust domain roots
-//     (e.g., "example.org,other.org")
-//   - id: The SPIFFE ID string to check
+//   - SPIFFEID: The SPIFFE ID string to check
 //
 // Returns:
 //   - bool: true if the provided SPIFFE ID matches either the exact lite
@@ -91,19 +92,20 @@ func IsPilot(trustRoots, id string) bool {
 //	extendedId := "spiffe://example.org/spike/workload/role/lite/instance-0"
 //
 //	// Both will return true
-//	if IsLiteWorkload("example.org,other.org", baseId) {
+//	if IsLiteWorkload(baseId) {
 //	    // Handle lite workload-specific logic
 //	}
 //
-//	if IsLiteWorkload("example.org,other.org", extendedId) {
-//	    // Also recognized as a lite workload, with instance metadata
+//	if IsLiteWorkload(extendedId) {
+//	    // Also recognized as a SPIKE Lite Workload, with instance metadata
 //	}
-func IsLiteWorkload(trustRoots, id string) bool {
+func IsLiteWorkload(SPIFFEID string) bool {
+	trustRoots := env.TrustRootFromEnv(env.TrustRootLiteWorkload)
 	for _, root := range strings.Split(trustRoots, ",") {
 		baseID := LiteWorkload(strings.TrimSpace(root))
 		// Check if the ID is either exactly the base ID or starts with the base ID
 		// followed by "/"
-		if id == baseID || strings.HasPrefix(id, baseID+"/") {
+		if SPIFFEID == baseID || strings.HasPrefix(SPIFFEID, baseID+"/") {
 			return true
 		}
 	}
@@ -126,9 +128,7 @@ func IsLiteWorkload(trustRoots, id string) bool {
 // with the base pilot recovery identity.
 //
 // Parameters:
-//   - trustRoots: Comma-delimited list of trust domain roots
-//     (e.g., "example.org,other.org")
-//   - id: The SPIFFE ID string to check
+//   - SPIFFEID: The SPIFFE ID string to check
 //
 // Returns:
 //   - bool: true if the provided SPIFFE ID matches either the exact pilot
@@ -141,19 +141,20 @@ func IsLiteWorkload(trustRoots, id string) bool {
 //	extendedId := "spiffe://example.org/spike/pilot/recover/instance-0"
 //
 //	// Both will return true
-//	if IsPilotRecover("example.org,other.org", baseId) {
+//	if IsPilotRecover(baseId) {
 //	    // Handle recovery-specific logic
 //	}
 //
-//	if IsPilotRecover("example.org,other.org", extendedId) {
-//	    // Also recognized as a pilot recovery, with instance metadata
+//	if IsPilotRecover(extendedId) {
+//	    // Also recognized as a SPIKE Pilot recovery, with instance metadata
 //	}
-func IsPilotRecover(trustRoots, id string) bool {
+func IsPilotRecover(SPIFFEID string) bool {
+	trustRoots := env.TrustRootFromEnv(env.TrustRootPilot)
 	for _, root := range strings.Split(trustRoots, ",") {
 		baseID := PilotRecover(strings.TrimSpace(root))
 		// Check if the ID is either exactly the base ID or starts with the base ID
 		// followed by "/"
-		if id == baseID || strings.HasPrefix(id, baseID+"/") {
+		if SPIFFEID == baseID || strings.HasPrefix(SPIFFEID, baseID+"/") {
 			return true
 		}
 	}
@@ -176,9 +177,7 @@ func IsPilotRecover(trustRoots, id string) bool {
 // with the base pilot restore identity.
 //
 // Parameters:
-//   - trustRoots: Comma-delimited list of trust domain roots
-//     (e.g., "example.org,other.org")
-//   - id: The SPIFFE ID string to check
+//   - SPIFFEID: The SPIFFE ID string to check
 //
 // Returns:
 //   - bool: true if the provided SPIFFE ID matches either the exact pilot
@@ -191,19 +190,20 @@ func IsPilotRecover(trustRoots, id string) bool {
 //	extendedId := "spiffe://example.org/spike/pilot/restore/instance-0"
 //
 //	// Both will return true
-//	if IsPilotRestore("example.org,other.org", baseId) {
+//	if IsPilotRestore(baseId) {
 //			// Handle restore-specific logic
 //	}
 //
-//	if IsPilotRestore("example.org,other.org", extendedId) {
-//			// Also recognized as a pilot restore, with instance metadata
+//	if IsPilotRestore(extendedId) {
+//			// Also recognized as a SPIKE Pilot restore, with instance metadata
 //	}
-func IsPilotRestore(trustRoots, id string) bool {
+func IsPilotRestore(SPIFFEID string) bool {
+	trustRoots := env.TrustRootFromEnv(env.TrustRootPilot)
 	for _, root := range strings.Split(trustRoots, ",") {
 		baseID := PilotRestore(strings.TrimSpace(root))
 		// Check if the ID is either exactly the base ID or starts with the base ID
 		// followed by "/"
-		if id == baseID || strings.HasPrefix(id, baseID+"/") {
+		if SPIFFEID == baseID || strings.HasPrefix(SPIFFEID, baseID+"/") {
 			return true
 		}
 	}
@@ -225,9 +225,7 @@ func IsPilotRestore(trustRoots, id string) bool {
 // with the base bootstrap identity.
 //
 // Parameters:
-//   - trustRoots: Comma-delimited list of trust domain roots
-//     (e.g., "example.org,other.org")
-//   - id: The SPIFFE ID string to check
+//   - SPIFFEID: The SPIFFE ID string to check
 //
 // Returns:
 //   - bool: true if the provided SPIFFE ID matches either the exact bootstrap
@@ -240,19 +238,20 @@ func IsPilotRestore(trustRoots, id string) bool {
 //	extendedId := "spiffe://example.org/spike/bootstrap/instance-0"
 //
 //	// Both will return true
-//	if IsBootstrap("example.org,other.org", baseId) {
+//	if IsBootstrap(baseId) {
 //			// Handle bootstrap-specific logic
 //	}
 //
-//	if IsBootstrap("example.org,other.org", extendedId) {
-//			// Also recognized as a bootstrap, with instance metadata
+//	if IsBootstrap(extendedId) {
+//			// Also recognized as a SPIKE Bootstrap, with instance metadata
 //	}
-func IsBootstrap(trustRoots, id string) bool {
+func IsBootstrap(SPIFFEID string) bool {
+	trustRoots := env.TrustRootFromEnv(env.TrustRootBootstrap)
 	for _, root := range strings.Split(trustRoots, ",") {
 		baseID := Bootstrap(strings.TrimSpace(root))
 		// Check if the ID is either exactly the base ID or starts with the base ID
 		// followed by "/"
-		if id == baseID || strings.HasPrefix(id, baseID+"/") {
+		if SPIFFEID == baseID || strings.HasPrefix(SPIFFEID, baseID+"/") {
 			return true
 		}
 	}
@@ -274,9 +273,7 @@ func IsBootstrap(trustRoots, id string) bool {
 // with the base keeper identity.
 //
 // Parameters:
-//   - trustRoots: Comma-delimited list of trust domain roots
-//     (e.g., "example.org,other.org")
-//   - id: The SPIFFE ID string to check
+//   - SPIFFEID: The SPIFFE ID string to check
 //
 // Returns:
 //   - bool: true if the provided SPIFFE ID matches either the exact
@@ -289,19 +286,20 @@ func IsBootstrap(trustRoots, id string) bool {
 //	extendedId := "spiffe://example.org/spike/keeper/instance-0"
 //
 //	// Both will return true
-//	if IsKeeper("example.org", baseId) {
+//	if IsKeeper(baseId) {
 //	    // Handle keeper-specific logic
 //	}
 //
-//	if IsKeeper("example.org", extendedId) {
-//	    // Also recognized as a keeper, with instance metadata
+//	if IsKeeper(extendedId) {
+//	    // Also recognized as a SPIKE Keeper, with instance metadata
 //	}
-func IsKeeper(trustRoots, id string) bool {
+func IsKeeper(SPIFFEID string) bool {
+	trustRoots := env.TrustRootFromEnv(env.TrustRootKeeper)
 	for _, root := range strings.Split(trustRoots, ",") {
 		baseID := Keeper(strings.TrimSpace(root))
 		// Check if the ID is either exactly the base ID or starts with the base ID
 		// followed by "/"
-		if id == baseID || strings.HasPrefix(id, baseID+"/") {
+		if SPIFFEID == baseID || strings.HasPrefix(SPIFFEID, baseID+"/") {
 			return true
 		}
 	}
@@ -323,9 +321,7 @@ func IsKeeper(trustRoots, id string) bool {
 // with the base Nexus identity.
 //
 // Parameters:
-//   - trustRoots: Comma-delimited list of trust domain roots
-//     (e.g., "example.org,other.org")
-//   - id: The SPIFFE ID string to check
+//   - SPIFFEID: The SPIFFE ID string to check
 //
 // Returns:
 //   - bool: true if the SPIFFE ID matches either the exact Nexus SPIFFE ID
@@ -338,19 +334,20 @@ func IsKeeper(trustRoots, id string) bool {
 //	extendedId := "spiffe://example.org/spike/nexus/instance-0"
 //
 //	// Both will return true
-//	if IsNexus("example.org", baseId) {
+//	if IsNexus(baseId) {
 //	    // Handle Nexus-specific logic
 //	}
 //
-//	if IsNexus("example.org", extendedId) {
-//	    // Also recognized as a Nexus, with instance metadata
+//	if IsNexus(extendedId) {
+//	    // Also recognized as a SPIKE Nexus, with instance metadata
 //	}
-func IsNexus(trustRoots, id string) bool {
+func IsNexus(SPIFFEID string) bool {
+	trustRoots := env.TrustRootFromEnv(env.TrustRootNexus)
 	for _, root := range strings.Split(trustRoots, ",") {
 		baseID := Nexus(strings.TrimSpace(root))
 		// Check if the ID is either exactly the base ID or starts with the base ID
 		// followed by "/"
-		if id == baseID || strings.HasPrefix(id, baseID+"/") {
+		if SPIFFEID == baseID || strings.HasPrefix(SPIFFEID, baseID+"/") {
 			return true
 		}
 	}
@@ -369,14 +366,11 @@ func PeerCanTalkToAnyone(_, _ string) bool {
 // Nexus can talk to SPIKE Keeper.
 //
 // Parameters:
-//   - trustRoots: Comma-delimited list of trust domain roots
-//     (e.g., "example.org,other.org")
 //   - peerSPIFFEID: The SPIFFE ID string to check
 //
 // Returns:
-//   - bool: true if the SPIFFE ID matches SPIKE Nexus' SPIFFE ID for any of
-//     the trust roots, false otherwise
-func PeerCanTalkToKeeper(trustRoots, peerSPIFFEID string) bool {
-	return IsNexus(trustRoots, peerSPIFFEID) ||
-		IsBootstrap(trustRoots, peerSPIFFEID)
+//   - bool: true if the SPIFFE ID matches SPIKE Nexus' or SPIKE Bootstrap's
+//     SPIFFE ID for any of the trust roots, false otherwise
+func PeerCanTalkToKeeper(peerSPIFFEID string) bool {
+	return IsNexus(peerSPIFFEID) || IsBootstrap(peerSPIFFEID)
 }

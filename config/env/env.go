@@ -4,6 +4,8 @@
 
 package env
 
+// Sort alphabetically.
+
 const BannerEnabled = "SPIKE_BANNER_ENABLED"
 const BootstrapConfigMapName = "SPIKE_BOOTSTRAP_CONFIGMAP_NAME"
 const BootstrapForce = "SPIKE_BOOTSTRAP_FORCE"
@@ -32,6 +34,7 @@ const PilotShowMemoryWarning = "SPIKE_PILOT_SHOW_MEMORY_WARNING"
 const SPIFFEEndpointSocket = "SPIFFE_ENDPOINT_SOCKET"
 const SystemLogLevel = "SPIKE_SYSTEM_LOG_LEVEL"
 const TrustRoot = "SPIKE_TRUST_ROOT"
+const TrustRootBootstrap = "SPIKE_TRUST_ROOT_BOOTSTRAP"
 const TrustRootKeeper = "SPIKE_TRUST_ROOT_KEEPER"
 const TrustRootLiteWorkload = "SPIKE_TRUST_ROOT_LITE_WORKLOAD"
 const TrustRootNexus = "SPIKE_TRUST_ROOT_NEXUS"
