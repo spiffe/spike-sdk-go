@@ -9,13 +9,15 @@ import (
 	"errors"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
-	"github.com/spiffe/spike-sdk-go/config/env"
 
 	"github.com/spiffe/spike-sdk-go/api/entity/data"
 	"github.com/spiffe/spike-sdk-go/api/entity/v1/reqres"
 	"github.com/spiffe/spike-sdk-go/api/url"
+	"github.com/spiffe/spike-sdk-go/config/env"
+	"github.com/spiffe/spike-sdk-go/log"
 	"github.com/spiffe/spike-sdk-go/net"
 	"github.com/spiffe/spike-sdk-go/predicate"
+	"github.com/spiffe/spike-sdk-go/spiffeid"
 )
 
 // Restore submits a recovery shard to continue the restoration process.
@@ -43,9 +45,26 @@ import (
 func Restore(
 	source *workloadapi.X509Source, shardIndex int, shardValue *[32]byte,
 ) (*data.RestorationStatus, error) {
+	const fName = "restore"
+
 	r := reqres.RestoreRequest{
 		ID:    shardIndex,
 		Shard: shardValue,
+	}
+
+	svid, err := source.GetX509SVID()
+	if err != nil {
+		log.FatalLn(fName, "message", "Problem acquiring SVID", "err", err.Error())
+	}
+	if svid == nil {
+		log.FatalLn("no X509SVID in source")
+	}
+	if svid != nil {
+		selfSPIFFEID := svid.ID.String()
+		// Security: Recovery and Restoration can ONLY be done via SPIKE Pilot.
+		if !spiffeid.IsPilot(env.TrustRoot, selfSPIFFEID) {
+			log.FatalLn(fName, "message", "spiffeid is not SPIKE Pilot")
+		}
 	}
 
 	mr, err := json.Marshal(r)
@@ -61,9 +80,8 @@ func Restore(
 		)
 	}
 
-	// Security: Recovery and Restoration can ONLY be done through SPIKE Pilot.
 	client, err := net.CreateMTLSClientWithPredicate(
-		source, predicate.AllowPilot(env.TrustRoot),
+		source, predicate.AllowNexus(env.TrustRootNexus),
 	)
 	if err != nil {
 		// Security: Zero out mr before returning error

@@ -15,6 +15,7 @@ import (
 	"github.com/spiffe/spike-sdk-go/api/internal/impl/api/cipher"
 	"github.com/spiffe/spike-sdk-go/api/internal/impl/api/operator"
 	"github.com/spiffe/spike-sdk-go/api/internal/impl/api/secret"
+	"github.com/spiffe/spike-sdk-go/config/env"
 	"github.com/spiffe/spike-sdk-go/predicate"
 	"github.com/spiffe/spike-sdk-go/spiffe"
 )
@@ -44,8 +45,12 @@ func New(allow predicate.Predicate) *API {
 }
 
 // NewWithSource initializes a new API instance with the given X509Source.
-func NewWithSource(source *workloadapi.X509Source, allow predicate.Predicate) *API {
-	return &API{source: source, predicate: allow}
+func NewWithSource(source *workloadapi.X509Source) *API {
+	return &API{
+		source: source,
+		// API Client can only talk to SPIKE Nexus as a peer.
+		predicate: predicate.AllowNexus(env.TrustRootNexus),
+	}
 }
 
 // Close releases any resources held by the API instance.

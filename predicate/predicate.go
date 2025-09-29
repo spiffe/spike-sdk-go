@@ -50,44 +50,6 @@ var AllowAll = Predicate(func(_ string) bool { return true })
 //	policy, err := acl.GetPolicy(source, policyID, DenyAll)
 var DenyAll = Predicate(func(_ string) bool { return false })
 
-// AllowPilot creates a predicate that only allows SPIKE Pilot workloads.
-// It returns a predicate function that validates whether a given SPIFFE ID
-// matches the SPIKE Pilot identity pattern for the specified trust domains.
-//
-// This is used to restrict API access to only SPIKE Pilot instances, providing
-// an additional layer of security for sensitive operations that should only
-// be performed by the control plane.
-//
-// Parameters:
-//   - trustRoots: Comma-delimited list of trust domain roots (e.g.,
-//     "example.org,other.org")
-//
-// Returns:
-//   - Predicate: A function that returns true only for SPIKE Pilot SPIFFE IDs
-//
-// Example usage:
-//
-//	// Create predicate for pilot-only access
-//	pilotOnly := AllowPilot("example.org,dev.example.org")
-//
-//	// Use in API calls to restrict access
-//	policy, err := acl.GetPolicy(source, policyID, pilotOnly)
-//	secret, err := secret.Get(source, secretPath, version, pilotOnly)
-//
-// The returned predicate will accept SPIFFE IDs matching:
-//   - "spiffe://example.org/spike/pilot"
-//   - "spiffe://example.org/spike/pilot/instance-1"
-//   - "spiffe://dev.example.org/spike/pilot"
-//   - etc.
-//
-// if the trust root of the SPIFFE ID belongs to one of the specified domains
-// in the trustRoots input parameter.
-func AllowPilot(trustRoots string) Predicate {
-	return func(spiffeID string) bool {
-		return spiffeid.IsPilot(trustRoots, spiffeID)
-	}
-}
-
 // AllowNexus creates a predicate that only allows SPIKE Nexus workloads.
 // It returns a predicate function that validates whether a given SPIFFE ID
 // matches the SPIKE Nexus identity pattern for the specified trust domains.

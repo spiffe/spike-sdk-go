@@ -9,12 +9,14 @@ import (
 	"errors"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
-	"github.com/spiffe/spike-sdk-go/config/env"
 
 	"github.com/spiffe/spike-sdk-go/api/entity/v1/reqres"
 	"github.com/spiffe/spike-sdk-go/api/url"
+	"github.com/spiffe/spike-sdk-go/config/env"
+	"github.com/spiffe/spike-sdk-go/log"
 	"github.com/spiffe/spike-sdk-go/net"
 	"github.com/spiffe/spike-sdk-go/predicate"
+	"github.com/spiffe/spike-sdk-go/spiffeid"
 )
 
 // Recover makes a request to initiate recovery of secrets, returning the
@@ -37,6 +39,23 @@ import (
 //
 //	shards, err := Recover(x509Source)
 func Recover(source *workloadapi.X509Source) (map[int]*[32]byte, error) {
+	const fName = "recover"
+
+	svid, err := source.GetX509SVID()
+	if err != nil {
+		log.FatalLn(fName, "message", "Could not acquire SVID", "err", err.Error())
+	}
+	if svid == nil {
+		log.FatalLn(fName, "message", "no X509SVID in source")
+	}
+	if svid != nil {
+		selfSPIFFEID := svid.ID.String()
+		// Security: Recovery and Restoration can ONLY be done via SPIKE Pilot.
+		if !spiffeid.IsPilot(env.TrustRoot, selfSPIFFEID) {
+			log.FatalLn(fName, "message", "spiffeid is not SPIKE Pilot")
+		}
+	}
+
 	r := reqres.RecoverRequest{}
 
 	mr, err := json.Marshal(r)
@@ -47,9 +66,8 @@ func Recover(source *workloadapi.X509Source) (map[int]*[32]byte, error) {
 		)
 	}
 
-	// Security: Recovery and Restoration can ONLY be done via SPIKE Pilot.
 	client, err := net.CreateMTLSClientWithPredicate(
-		source, predicate.AllowPilot(env.TrustRoot))
+		source, predicate.AllowNexus(env.TrustRootNexus))
 	if err != nil {
 		return nil, err
 	}
