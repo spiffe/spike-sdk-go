@@ -78,3 +78,30 @@ var DenyAll = Predicate(func(_ string) bool { return false })
 var AllowNexus = Predicate(
 	func(SPIFFEID string) bool { return spiffeid.IsNexus(SPIFFEID) },
 )
+
+// AllowKeeper is a predicate that only allows SPIKE Keeper workloads.
+// It validates whether a given SPIFFE ID matches the SPIKE Keeper identity
+// pattern for the configured trust domains.
+//
+// This is used to restrict API access to only SPIKE Keeper instances, providing
+// an additional layer of security for operations that should only be performed
+// by the key management component.
+//
+// The predicate uses trust domains configured via environment variables.
+//
+// Example usage:
+//
+//	// Use predicate for keeper-only access
+//	policy, err := acl.GetPolicy(source, policyID, AllowKeeper)
+//	secret, err := secret.Get(source, secretPath, version, AllowKeeper)
+//
+// The predicate will accept SPIFFE IDs matching:
+//   - "spiffe://example.org/spike/keeper"
+//   - "spiffe://example.org/spike/keeper/instance-1"
+//   - "spiffe://dev.example.org/spike/keeper"
+//   - etc.
+//
+// based on the trust domains configured in the environment.
+var AllowKeeper = Predicate(
+	func(SPIFFEID string) bool { return spiffeid.IsKeeper(SPIFFEID) },
+)
