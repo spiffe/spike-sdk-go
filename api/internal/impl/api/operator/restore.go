@@ -45,6 +45,8 @@ import (
 func Restore(
 	source *workloadapi.X509Source, shardIndex int, shardValue *[32]byte,
 ) (*data.RestorationStatus, error) {
+	const fName = "restore"
+
 	r := reqres.RestoreRequest{
 		ID:    shardIndex,
 		Shard: shardValue,
@@ -52,7 +54,7 @@ func Restore(
 
 	svid, err := source.GetX509SVID()
 	if err != nil {
-		log.FatalLn(err.Error())
+		log.FatalLn(fName, "message", "Problem acquiring SVID", "err", err.Error())
 	}
 	if svid == nil {
 		log.FatalLn("no X509SVID in source")
@@ -61,7 +63,7 @@ func Restore(
 		selfSPIFFEID := svid.ID.String()
 		// Security: Recovery and Restoration can ONLY be done via SPIKE Pilot.
 		if !spiffeid.IsPilot(env.TrustRoot, selfSPIFFEID) {
-			log.FatalLn("spiffeid is not pilot")
+			log.FatalLn(fName, "message", "spiffeid is not SPIKE Pilot")
 		}
 	}
 

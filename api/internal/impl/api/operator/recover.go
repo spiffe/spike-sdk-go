@@ -39,19 +39,20 @@ import (
 //
 //	shards, err := Recover(x509Source)
 func Recover(source *workloadapi.X509Source) (map[int]*[32]byte, error) {
+	const fName = "recover"
+
 	svid, err := source.GetX509SVID()
 	if err != nil {
-		// TODO: FatalLn takes fName as first arg and it is formatted. fix it across API.
-		log.FatalLn(err.Error())
+		log.FatalLn(fName, "message", "Could not acquire SVID", "err", err.Error())
 	}
 	if svid == nil {
-		log.FatalLn("no X509SVID in source")
+		log.FatalLn(fName, "message", "no X509SVID in source")
 	}
 	if svid != nil {
 		selfSPIFFEID := svid.ID.String()
 		// Security: Recovery and Restoration can ONLY be done via SPIKE Pilot.
 		if !spiffeid.IsPilot(env.TrustRoot, selfSPIFFEID) {
-			log.FatalLn("spiffeid is not pilot")
+			log.FatalLn(fName, "message", "spiffeid is not SPIKE Pilot")
 		}
 	}
 
