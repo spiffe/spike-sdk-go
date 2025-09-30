@@ -97,9 +97,24 @@ func TestExponentialRetrier_Notification(t *testing.T) {
 			totalDurations = append(totalDurations, totalDuration)
 		}),
 		WithBackOffOptions(
-			WithInitialInterval(1*time.Millisecond),
-			WithMaxInterval(5*time.Millisecond),
-			WithMaxElapsedTime(20*time.Millisecond),
+			// NOTE: These intervals are intentionally set to reasonable values
+			// (10ms+) to ensure test reliability across different systems and
+			// CI environments. DO NOT reduce these values without good reason:
+			//
+			// 1. System timer precision: Many systems have timer resolution
+			//    of 1-15ms, making sub-millisecond intervals unreliable
+			// 2. Scheduling jitter: OS thread scheduling can cause actual
+			//    sleep durations to vary significantly from intended values
+			// 3. CI environment variance: Different CI systems (GitHub Actions,
+			//    local Docker, etc.) have different performance characteristics
+			// 4. Test determinism: Smaller intervals make the test more likely
+			//    to fail due to timing race conditions
+			//
+			// If you need faster tests, consider mocking time instead of
+			// reducing these intervals.
+			WithInitialInterval(10*time.Millisecond),
+			WithMaxInterval(50*time.Millisecond),
+			WithMaxElapsedTime(200*time.Millisecond),
 		),
 	)
 

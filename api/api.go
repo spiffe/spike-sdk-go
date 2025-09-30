@@ -34,10 +34,7 @@ type API struct {
 // New creates and returns a new instance of API configured with a SPIFFE source.
 // It automatically discovers and connects to the SPIFFE Workload API endpoint
 // using the default socket path and creates an X.509 source for authentication.
-//
-// Parameters:
-//   - allow: A predicate function that determines which server SPIFFE IDs
-//     this API client is allowed to connect to (e.g., predicate.AllowNexus)
+// The API client is configured to communicate exclusively with SPIKE Nexus servers.
 //
 // Returns:
 //   - *API: A configured API instance ready for use, or nil if initialization
@@ -50,8 +47,8 @@ type API struct {
 //
 // Example usage:
 //
-//	// Create API client that only connects to SPIKE Nexus
-//	api := New(predicate.AllowNexus)
+//	// Create API client that connects to SPIKE Nexus
+//	api := New()
 //	if api == nil {
 //	    log.Fatal("Failed to initialize SPIKE API")
 //	}
