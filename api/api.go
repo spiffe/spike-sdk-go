@@ -66,6 +66,7 @@ func New() *API {
 		return nil
 	}
 
+	// API Client can only talk to SPIKE Nexus as a peer.
 	return &API{source: source, predicate: predicate.AllowNexus}
 }
 
