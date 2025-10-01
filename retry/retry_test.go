@@ -112,9 +112,9 @@ func TestExponentialRetrier_Notification(t *testing.T) {
 			//
 			// If you need faster tests, consider mocking time instead of
 			// reducing these intervals.
-			WithInitialInterval(10*time.Millisecond),
-			WithMaxInterval(50*time.Millisecond),
-			WithMaxElapsedTime(200*time.Millisecond),
+			WithInitialInterval(100*time.Millisecond),
+			WithMaxInterval(500*time.Millisecond),
+			WithMaxElapsedTime(2000*time.Millisecond),
 		),
 	)
 

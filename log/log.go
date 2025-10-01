@@ -65,7 +65,7 @@ func Fatal(fName string, details string) {
 func FatalF(fName string, format string, args ...any) {
 	m := fmt.Sprintf(format, args...)
 	Log().Error(fName, "message", m)
-	panic(fName + " " + m + " ")
+	panic(fName + " " + strings.Join([]string{fmt.Sprint(args...)}, ","))
 }
 
 // FatalLn logs a message at Fatal level with a line feed.
@@ -75,7 +75,7 @@ func FatalF(fName string, format string, args ...any) {
 // This function panics before exiting.
 func FatalLn(fName string, args ...any) {
 	Log().Error(fName, args...)
-	panic(fName + " " + strings.Join([]string{fmt.Sprint(args...)}, " "))
+	panic(fName + " " + strings.Join([]string{fmt.Sprint(args...)}, ","))
 }
 
 // Level returns the logging level for the SPIKE components.
