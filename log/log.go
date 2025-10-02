@@ -21,7 +21,7 @@ import (
 var logger *slog.Logger
 var loggerMutex sync.Mutex
 
-func panicWithArgs(fName string, args ...any) {
+func panicWithArgs(fName string, args []any) {
 	ss := make([]string, len(args))
 	for i, arg := range args {
 		ss[i] = fmt.Sprint(arg)
