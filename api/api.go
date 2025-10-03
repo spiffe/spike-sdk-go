@@ -11,8 +11,10 @@ import (
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 
 	"github.com/spiffe/spike-sdk-go/api/entity/data"
+	"github.com/spiffe/spike-sdk-go/api/entity/v1/reqres"
 	"github.com/spiffe/spike-sdk-go/api/internal/impl/api/acl"
 	"github.com/spiffe/spike-sdk-go/api/internal/impl/api/cipher"
+	"github.com/spiffe/spike-sdk-go/api/internal/impl/api/health"
 	"github.com/spiffe/spike-sdk-go/api/internal/impl/api/operator"
 	"github.com/spiffe/spike-sdk-go/api/internal/impl/api/secret"
 	"github.com/spiffe/spike-sdk-go/predicate"
@@ -544,4 +546,8 @@ func (a *API) CipherDecryptJSON(
 		a.source, cipher.ModeJSON, nil, "",
 		version, nonce, ciphertext, algorithm, a.predicate,
 	)
+}
+
+func (a *API) GetSystemStatus() (*reqres.StatusResponse, error) {
+	return health.GetSystemStatus(context.Background(), a.source)
 }
