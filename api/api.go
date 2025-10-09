@@ -9,12 +9,12 @@ import (
 	"io"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
+
+	"github.com/spiffe/spike-sdk-go/api/entity/data"
 	"github.com/spiffe/spike-sdk-go/api/internal/impl/acl"
 	"github.com/spiffe/spike-sdk-go/api/internal/impl/cipher"
 	"github.com/spiffe/spike-sdk-go/api/internal/impl/operator"
 	"github.com/spiffe/spike-sdk-go/api/internal/impl/secret"
-
-	"github.com/spiffe/spike-sdk-go/api/entity/data"
 	"github.com/spiffe/spike-sdk-go/predicate"
 	"github.com/spiffe/spike-sdk-go/spiffe"
 )
