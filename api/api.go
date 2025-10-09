@@ -34,7 +34,7 @@ type API struct {
 // New creates and returns a new instance of API configured with a SPIFFE source.
 // It automatically discovers and connects to the SPIFFE Workload API endpoint
 // using the default socket path and creates an X.509 source for authentication.
-// The API client is configured to communicate exclusively with SPIKE Nexus servers.
+// The API client is configured to communicate exclusively with SPIKE Nexus.
 //
 // Returns:
 //   - *API: A configured API instance ready for use, or nil if initialization
@@ -48,11 +48,11 @@ type API struct {
 // Example usage:
 //
 //	// Create API client that connects to SPIKE Nexus
-//	impl := New()
-//	if impl == nil {
+//	api := New()
+//	if api == nil {
 //	    log.Fatal("Failed to initialize SPIKE API")
 //	}
-//	defer impl.Close()
+//	defer api.Close()
 func New() *API {
 	defaultEndpointSocket := spiffe.EndpointSocket()
 
@@ -91,8 +91,8 @@ func New() *API {
 //		if err != nil {
 //		    log.Fatal("Failed to create X509Source")
 //		}
-//		impl := NewWithSource(source)
-//		defer impl.Close()
+//		api := NewWithSource(source)
+//		defer api.Close()
 func NewWithSource(source *workloadapi.X509Source) *API {
 	return &API{
 		source: source,
@@ -135,10 +135,10 @@ func (a *API) Close() {
 //	    },
 //	}
 //
-//	err = impl.CreatePolicy(
+//	err = api.CreatePolicy(
 //	    "doc-reader",
 //	    "spiffe://example.org/service/*",
-//	    "/impl/documents/*",
+//	    "/api/documents/*",
 //	    permissions,
 //	)
 //	if err != nil {
@@ -167,7 +167,7 @@ func (a *API) CreatePolicy(
 //
 // Example usage:
 //
-//	err = impl.DeletePolicy("doc-reader")
+//	err = api.DeletePolicy("doc-reader")
 //	if err != nil {
 //	    log.Printf("Failed to delete policy: %v", err)
 //	    return
@@ -195,7 +195,7 @@ func (a *API) DeletePolicy(name string) error {
 //
 // Example usage:
 //
-//	policy, err := impl.GetPolicy("doc-reader")
+//	policy, err := api.GetPolicy("doc-reader")
 //	if err != nil {
 //	    log.Printf("Error retrieving policy: %v", err)
 //	    return
@@ -238,7 +238,7 @@ func (a *API) GetPolicy(name string) (*data.Policy, error) {
 // Example usage:
 //
 //	// List all policies
-//	result, err := impl.ListPolicies("", "")
+//	result, err := api.ListPolicies("", "")
 //	if err != nil {
 //	    log.Printf("Error listing policies: %v", err)
 //	    return
@@ -273,7 +273,7 @@ func (a *API) ListPolicies(
 //
 // Example:
 //
-//	err := impl.DeleteSecretVersions("secret/path", []int{1, 2})
+//	err := api.DeleteSecretVersions("secret/path", []int{1, 2})
 func (a *API) DeleteSecretVersions(path string, versions []int) error {
 	return secret.Delete(a.source, path, versions, a.predicate)
 }
@@ -289,7 +289,7 @@ func (a *API) DeleteSecretVersions(path string, versions []int) error {
 //
 // Example:
 //
-//	err := impl.DeleteSecret("secret/path")
+//	err := api.DeleteSecret("secret/path")
 func (a *API) DeleteSecret(path string) error {
 	return secret.Delete(a.source, path, []int{}, a.predicate)
 }
@@ -308,7 +308,7 @@ func (a *API) DeleteSecret(path string) error {
 //
 // Example:
 //
-//	secret, err := impl.GetSecretVersion("secret/path", 1)
+//	secret, err := api.GetSecretVersion("secret/path", 1)
 func (a *API) GetSecretVersion(
 	path string, version int,
 ) (*data.Secret, error) {
@@ -327,7 +327,7 @@ func (a *API) GetSecretVersion(
 //
 // Example:
 //
-//	secret, err := impl.GetSecret("secret/path")
+//	secret, err := api.GetSecret("secret/path")
 func (a *API) GetSecret(path string) (*data.Secret, error) {
 	return secret.Get(a.source, path, 0, a.predicate)
 }
@@ -341,7 +341,7 @@ func (a *API) GetSecret(path string) (*data.Secret, error) {
 //
 // Example:
 //
-//	keys, err := impl.ListSecretKeys()
+//	keys, err := api.ListSecretKeys()
 func (a *API) ListSecretKeys() (*[]string, error) {
 	return secret.ListKeys(a.source, a.predicate)
 }
@@ -360,7 +360,7 @@ func (a *API) ListSecretKeys() (*[]string, error) {
 //
 // Example:
 //
-//	metadata, err := impl.GetSecretMetadata("secret/path", 1)
+//	metadata, err := api.GetSecretMetadata("secret/path", 1)
 func (a *API) GetSecretMetadata(
 	path string, version int,
 ) (*data.SecretMetadata, error) {
@@ -381,7 +381,7 @@ func (a *API) GetSecretMetadata(
 //
 // Example:
 //
-//	err := impl.PutSecret("secret/path", map[string]string{"key": "value"})
+//	err := api.PutSecret("secret/path", map[string]string{"key": "value"})
 func (a *API) PutSecret(path string, data map[string]string) error {
 	return secret.Put(a.source, path, data, a.predicate)
 }
@@ -400,7 +400,7 @@ func (a *API) PutSecret(path string, data map[string]string) error {
 //
 // Example:
 //
-//	err := impl.UndeleteSecret("secret/path", []int{1, 2})
+//	err := api.UndeleteSecret("secret/path", []int{1, 2})
 func (a *API) UndeleteSecret(path string, versions []int) error {
 	return secret.Undelete(a.source, path, versions, a.predicate)
 }
@@ -419,7 +419,7 @@ func (a *API) UndeleteSecret(path string, versions []int) error {
 //
 // Example:
 //
-//	shards, err := impl.Recover()
+//	shards, err := api.Recover()
 func (a *API) Recover() (map[int]*[32]byte, error) {
 	return operator.Recover(a.source)
 }
@@ -440,7 +440,7 @@ func (a *API) Recover() (map[int]*[32]byte, error) {
 //
 // Example:
 //
-//	status, err := impl.Restore(shardPtr)
+//	status, err := api.Restore(shardPtr)
 func (a *API) Restore(
 	index int, shard *[32]byte,
 ) (*data.RestorationStatus, error) {
@@ -461,7 +461,7 @@ func (a *API) Restore(
 // Example:
 //
 //	reader := strings.NewReader("sensitive data")
-//	encrypted, err := impl.CipherEncryptStream(reader, "text/plain")
+//	encrypted, err := api.CipherEncryptStream(reader, "text/plain")
 func (a *API) CipherEncryptStream(
 	reader io.Reader, contentType string,
 ) ([]byte, error) {
@@ -485,7 +485,7 @@ func (a *API) CipherEncryptStream(
 // Example:
 //
 //	data := []byte("secret message")
-//	encrypted, err := impl.CipherEncryptJSON(data, "AES-GCM")
+//	encrypted, err := api.CipherEncryptJSON(data, "AES-GCM")
 func (a *API) CipherEncryptJSON(
 	plaintext []byte, algorithm string,
 ) ([]byte, error) {
@@ -511,7 +511,7 @@ func (a *API) CipherEncryptJSON(
 // Example:
 //
 //		reader := bytes.NewReader(encryptedData)
-//		plaintext, err := impl.CipherDecryptStream(
+//		plaintext, err := api.CipherDecryptStream(
 //	 	reader, "application/octet-stream")
 func (a *API) CipherDecryptStream(
 	reader io.Reader, contentType string,
@@ -538,7 +538,7 @@ func (a *API) CipherDecryptStream(
 //
 // Example:
 //
-//	plaintext, err := impl.CipherDecryptJSON(1, nonce, ciphertext, "AES-GCM")
+//	plaintext, err := api.CipherDecryptJSON(1, nonce, ciphertext, "AES-GCM")
 func (a *API) CipherDecryptJSON(
 	version byte, nonce, ciphertext []byte, algorithm string,
 ) ([]byte, error) {
