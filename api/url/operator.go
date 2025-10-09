@@ -7,20 +7,22 @@ package url
 import (
 	"net/url"
 
-	"github.com/spiffe/spike-sdk-go/api/internal/env"
+	"github.com/spiffe/spike-sdk-go/config/env"
 )
 
+// Restore returns the URL for operator's restore endpoint.
 func Restore() string {
 	u, _ := url.JoinPath(
-		env.NexusAPIRoot(),
+		env.NexusAPIRootVal(),
 		string(NexusOperatorRestore),
 	)
 	return u
 }
 
+// Recover returns the URL for operator's recover endpoint.
 func Recover() string {
 	u, _ := url.JoinPath(
-		env.NexusAPIRoot(),
+		env.NexusAPIRootVal(),
 		string(NexusOperatorRecover),
 	)
 	return u

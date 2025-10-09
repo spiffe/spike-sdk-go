@@ -7,13 +7,13 @@ package url
 import (
 	"net/url"
 
-	"github.com/spiffe/spike-sdk-go/api/internal/env"
+	"github.com/spiffe/spike-sdk-go/config/env"
 )
 
 // CipherEncrypt returns the URL for encrypting a text.
 func CipherEncrypt() string {
 	u, _ := url.JoinPath(
-		env.NexusAPIRoot(),
+		env.NexusAPIRootVal(),
 		string(NexusCipherEncrypt),
 	)
 	return u
@@ -22,7 +22,7 @@ func CipherEncrypt() string {
 // CipherDecrypt returns the URL for decrypting a text.
 func CipherDecrypt() string {
 	u, _ := url.JoinPath(
-		env.NexusAPIRoot(),
+		env.NexusAPIRootVal(),
 		string(NexusCipherDecrypt),
 	)
 	return u

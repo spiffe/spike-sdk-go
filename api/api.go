@@ -11,10 +11,10 @@ import (
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 
 	"github.com/spiffe/spike-sdk-go/api/entity/data"
-	"github.com/spiffe/spike-sdk-go/api/internal/impl/api/acl"
-	"github.com/spiffe/spike-sdk-go/api/internal/impl/api/cipher"
-	"github.com/spiffe/spike-sdk-go/api/internal/impl/api/operator"
-	"github.com/spiffe/spike-sdk-go/api/internal/impl/api/secret"
+	"github.com/spiffe/spike-sdk-go/api/internal/impl/acl"
+	"github.com/spiffe/spike-sdk-go/api/internal/impl/cipher"
+	"github.com/spiffe/spike-sdk-go/api/internal/impl/operator"
+	"github.com/spiffe/spike-sdk-go/api/internal/impl/secret"
 	"github.com/spiffe/spike-sdk-go/predicate"
 	"github.com/spiffe/spike-sdk-go/spiffe"
 )
@@ -34,7 +34,7 @@ type API struct {
 // New creates and returns a new instance of API configured with a SPIFFE source.
 // It automatically discovers and connects to the SPIFFE Workload API endpoint
 // using the default socket path and creates an X.509 source for authentication.
-// The API client is configured to communicate exclusively with SPIKE Nexus servers.
+// The API client is configured to communicate exclusively with SPIKE Nexus.
 //
 // Returns:
 //   - *API: A configured API instance ready for use, or nil if initialization
@@ -441,7 +441,9 @@ func (a *API) Recover() (map[int]*[32]byte, error) {
 // Example:
 //
 //	status, err := api.Restore(shardPtr)
-func (a *API) Restore(index int, shard *[32]byte) (*data.RestorationStatus, error) {
+func (a *API) Restore(
+	index int, shard *[32]byte,
+) (*data.RestorationStatus, error) {
 	return operator.Restore(a.source, index, shard)
 }
 

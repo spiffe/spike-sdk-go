@@ -2,7 +2,6 @@
 //  \\\\\ Copyright 2024-present SPIKE contributors.
 // \\\\\\\ SPDX-License-Identifier: Apache-2.0
 
-// Package mem provides utilities for secure mem operations.
 package mem
 
 import (

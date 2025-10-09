@@ -11,7 +11,7 @@ import (
 	"testing"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
-	"github.com/spiffe/spike-sdk-go/api/internal/impl/api/cipher"
+	"github.com/spiffe/spike-sdk-go/api/internal/impl/cipher"
 	"github.com/spiffe/spike-sdk-go/predicate"
 )
 
