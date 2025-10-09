@@ -9,10 +9,10 @@ import (
 	"io"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
-	acl2 "github.com/spiffe/spike-sdk-go/api/internal/impl/acl"
-	cipher2 "github.com/spiffe/spike-sdk-go/api/internal/impl/cipher"
-	operator2 "github.com/spiffe/spike-sdk-go/api/internal/impl/operator"
-	secret2 "github.com/spiffe/spike-sdk-go/api/internal/impl/secret"
+	"github.com/spiffe/spike-sdk-go/api/internal/impl/acl"
+	"github.com/spiffe/spike-sdk-go/api/internal/impl/cipher"
+	"github.com/spiffe/spike-sdk-go/api/internal/impl/operator"
+	"github.com/spiffe/spike-sdk-go/api/internal/impl/secret"
 
 	"github.com/spiffe/spike-sdk-go/api/entity/data"
 	"github.com/spiffe/spike-sdk-go/predicate"
@@ -21,8 +21,8 @@ import (
 
 // indirection for testability: allows stubbing cipher calls in unit tests
 var (
-	cipherEncryptFunc = cipher2.Encrypt
-	cipherDecryptFunc = cipher2.Decrypt
+	cipherEncryptFunc = cipher.Encrypt
+	cipherDecryptFunc = cipher.Decrypt
 )
 
 // API is the SPIKE API.
@@ -149,7 +149,7 @@ func (a *API) CreatePolicy(
 	name string, SPIFFEIDPattern string, pathPattern string,
 	permissions []data.PolicyPermission,
 ) error {
-	return acl2.CreatePolicy(a.source,
+	return acl.CreatePolicy(a.source,
 		name, SPIFFEIDPattern, pathPattern, permissions, a.predicate)
 }
 
@@ -173,7 +173,7 @@ func (a *API) CreatePolicy(
 //	    return
 //	}
 func (a *API) DeletePolicy(name string) error {
-	return acl2.DeletePolicy(a.source, name, a.predicate)
+	return acl.DeletePolicy(a.source, name, a.predicate)
 }
 
 // GetPolicy retrieves a policy from the system using its name.
@@ -207,7 +207,7 @@ func (a *API) DeletePolicy(name string) error {
 //
 //	log.Printf("Found policy: %+v", policy)
 func (a *API) GetPolicy(name string) (*data.Policy, error) {
-	return acl2.GetPolicy(a.source, name, a.predicate)
+	return acl.GetPolicy(a.source, name, a.predicate)
 }
 
 // ListPolicies retrieves policies from the system, optionally filtering by
@@ -255,7 +255,7 @@ func (a *API) GetPolicy(name string) (*data.Policy, error) {
 func (a *API) ListPolicies(
 	SPIFFEIDPattern, pathPattern string,
 ) (*[]data.Policy, error) {
-	return acl2.ListPolicies(a.source, SPIFFEIDPattern, pathPattern, a.predicate)
+	return acl.ListPolicies(a.source, SPIFFEIDPattern, pathPattern, a.predicate)
 }
 
 // DeleteSecretVersions deletes specified versions of a secret at the given
@@ -275,7 +275,7 @@ func (a *API) ListPolicies(
 //
 //	err := impl.DeleteSecretVersions("secret/path", []int{1, 2})
 func (a *API) DeleteSecretVersions(path string, versions []int) error {
-	return secret2.Delete(a.source, path, versions, a.predicate)
+	return secret.Delete(a.source, path, versions, a.predicate)
 }
 
 // DeleteSecret deletes the entire secret at the given path
@@ -291,7 +291,7 @@ func (a *API) DeleteSecretVersions(path string, versions []int) error {
 //
 //	err := impl.DeleteSecret("secret/path")
 func (a *API) DeleteSecret(path string) error {
-	return secret2.Delete(a.source, path, []int{}, a.predicate)
+	return secret.Delete(a.source, path, []int{}, a.predicate)
 }
 
 // GetSecretVersion retrieves a specific version of a secret at the given
@@ -312,7 +312,7 @@ func (a *API) DeleteSecret(path string) error {
 func (a *API) GetSecretVersion(
 	path string, version int,
 ) (*data.Secret, error) {
-	return secret2.Get(a.source, path, version, a.predicate)
+	return secret.Get(a.source, path, version, a.predicate)
 }
 
 // GetSecret retrieves the latest version of the secret at the given path.
@@ -329,7 +329,7 @@ func (a *API) GetSecretVersion(
 //
 //	secret, err := impl.GetSecret("secret/path")
 func (a *API) GetSecret(path string) (*data.Secret, error) {
-	return secret2.Get(a.source, path, 0, a.predicate)
+	return secret.Get(a.source, path, 0, a.predicate)
 }
 
 // ListSecretKeys retrieves all secret keys.
@@ -343,7 +343,7 @@ func (a *API) GetSecret(path string) (*data.Secret, error) {
 //
 //	keys, err := impl.ListSecretKeys()
 func (a *API) ListSecretKeys() (*[]string, error) {
-	return secret2.ListKeys(a.source, a.predicate)
+	return secret.ListKeys(a.source, a.predicate)
 }
 
 // GetSecretMetadata retrieves metadata for a specific version of a secret at
@@ -364,7 +364,7 @@ func (a *API) ListSecretKeys() (*[]string, error) {
 func (a *API) GetSecretMetadata(
 	path string, version int,
 ) (*data.SecretMetadata, error) {
-	return secret2.GetMetadata(a.source, path, version, a.predicate)
+	return secret.GetMetadata(a.source, path, version, a.predicate)
 }
 
 // PutSecret creates or updates a secret at the specified path with the given
@@ -383,7 +383,7 @@ func (a *API) GetSecretMetadata(
 //
 //	err := impl.PutSecret("secret/path", map[string]string{"key": "value"})
 func (a *API) PutSecret(path string, data map[string]string) error {
-	return secret2.Put(a.source, path, data, a.predicate)
+	return secret.Put(a.source, path, data, a.predicate)
 }
 
 // UndeleteSecret restores previously deleted versions of a secret at the
@@ -402,7 +402,7 @@ func (a *API) PutSecret(path string, data map[string]string) error {
 //
 //	err := impl.UndeleteSecret("secret/path", []int{1, 2})
 func (a *API) UndeleteSecret(path string, versions []int) error {
-	return secret2.Undelete(a.source, path, versions, a.predicate)
+	return secret.Undelete(a.source, path, versions, a.predicate)
 }
 
 // Recover returns recovery partitions for SPIKE Nexus to be used in a
@@ -421,7 +421,7 @@ func (a *API) UndeleteSecret(path string, versions []int) error {
 //
 //	shards, err := impl.Recover()
 func (a *API) Recover() (map[int]*[32]byte, error) {
-	return operator2.Recover(a.source)
+	return operator.Recover(a.source)
 }
 
 // Restore SPIKE Nexus backing using recovery shards when SPIKE Keepers cannot
@@ -444,7 +444,7 @@ func (a *API) Recover() (map[int]*[32]byte, error) {
 func (a *API) Restore(
 	index int, shard *[32]byte,
 ) (*data.RestorationStatus, error) {
-	return operator2.Restore(a.source, index, shard)
+	return operator.Restore(a.source, index, shard)
 }
 
 // CipherEncryptStream encrypts data from a reader using streaming mode.
@@ -466,7 +466,7 @@ func (a *API) CipherEncryptStream(
 	reader io.Reader, contentType string,
 ) ([]byte, error) {
 	return cipherEncryptFunc(
-		a.source, cipher2.ModeStream, reader,
+		a.source, cipher.ModeStream, reader,
 		contentType, nil, "", a.predicate,
 	)
 }
@@ -490,7 +490,7 @@ func (a *API) CipherEncryptJSON(
 	plaintext []byte, algorithm string,
 ) ([]byte, error) {
 	return cipherEncryptFunc(
-		a.source, cipher2.ModeJSON, nil, "",
+		a.source, cipher.ModeJSON, nil, "",
 		plaintext, algorithm, a.predicate,
 	)
 }
@@ -517,7 +517,7 @@ func (a *API) CipherDecryptStream(
 	reader io.Reader, contentType string,
 ) ([]byte, error) {
 	return cipherDecryptFunc(
-		a.source, cipher2.ModeStream, reader,
+		a.source, cipher.ModeStream, reader,
 		contentType, 0, nil, nil, "", a.predicate,
 	)
 }
@@ -543,7 +543,7 @@ func (a *API) CipherDecryptJSON(
 	version byte, nonce, ciphertext []byte, algorithm string,
 ) ([]byte, error) {
 	return cipherDecryptFunc(
-		a.source, cipher2.ModeJSON, nil, "",
+		a.source, cipher.ModeJSON, nil, "",
 		version, nonce, ciphertext, algorithm, a.predicate,
 	)
 }
