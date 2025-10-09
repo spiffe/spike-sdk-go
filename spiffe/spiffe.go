@@ -27,14 +27,14 @@ import (
 //
 //	socket path:
 //
-// "unix:///tmp/spire-agent/public/impl.sock"
+// "unix:///tmp/spire-agent/public/api.sock"
 //
 // For production deployments, especially in Kubernetes environments, it's
 // recommended to set SPIFFE_ENDPOINT_SOCKET to a more restricted socket path,
 // such as: "unix:///run/spire/agent/sockets/spire.sock"
 //
 // Default socket paths by environment:
-//   - Development (Linux): unix:///tmp/spire-agent/public/impl.sock
+//   - Development (Linux): unix:///tmp/spire-agent/public/api.sock
 //   - Kubernetes: unix:///run/spire/agent/sockets/spire.sock
 //
 // Returns:
@@ -49,7 +49,7 @@ func EndpointSocket() string {
 		return p
 	}
 
-	return "unix:///tmp/spire-agent/public/impl.sock"
+	return "unix:///tmp/spire-agent/public/api.sock"
 }
 
 // Source creates a new SPIFFE X.509 source and returns the associated SVID ID.
