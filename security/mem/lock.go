@@ -4,7 +4,6 @@
 
 //go:build !windows
 
-// Package mem provides utilities for secure mem operations.
 package mem
 
 import (

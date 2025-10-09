@@ -39,7 +39,7 @@ package main
 import (
 	"fmt"
 
-	spike "github.com/spiffe/spike-sdk-go/api"
+	spike "github.com/spiffe/spike-sdk-go/impl"
 )
 
 func main() {
