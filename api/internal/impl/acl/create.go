@@ -58,7 +58,7 @@ import (
 //	    source,
 //	    "doc-reader",
 //	    "spiffe://example.org/service/*",
-//	    "/impl/documents/*",
+//	    "/api/documents/*",
 //	    permissions,
 //	    predicate.AllowAll(),
 //	)

@@ -40,7 +40,7 @@ import (
 //
 //		data := strings.NewReader("large data payload")
 //		response, err := StreamPostWithContentType(client,
-//	 	"/impl/upload", data, "text/plain")
+//	 	"/api/upload", data, "text/plain")
 //		if err != nil {
 //		    return err
 //		}
@@ -121,7 +121,7 @@ func StreamPostWithContentType(
 // Example:
 //
 //	binaryData := bytes.NewReader(fileBytes)
-//	response, err := StreamPost(client, "/impl/upload", binaryData)
+//	response, err := StreamPost(client, "/api/upload", binaryData)
 //	if err != nil {
 //	    return err
 //	}
