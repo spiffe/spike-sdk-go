@@ -22,10 +22,10 @@ func TestAPI_CipherStreamMethods(t *testing.T) {
 	a := NewWithSource(fakeSource)
 
 	// backup and restore
-	origEnc, origDec := cipherEncryptFunc, cipherDecryptFunc
-	t.Cleanup(func() { cipherEncryptFunc, cipherDecryptFunc = origEnc, origDec })
+	origEnc, origDec := cipherEncrypt, cipherDecrypt
+	t.Cleanup(func() { cipherEncrypt, cipherDecrypt = origEnc, origDec })
 
-	cipherEncryptFunc = func(_ *workloadapi.X509Source,
+	cipherEncrypt = func(_ *workloadapi.X509Source,
 		mode cipher.Mode, r io.Reader, contentType string,
 		_ []byte, _ string, _ predicate.Predicate,
 	) ([]byte, error) {
@@ -38,7 +38,7 @@ func TestAPI_CipherStreamMethods(t *testing.T) {
 		}
 		return []byte("cipher"), nil
 	}
-	cipherDecryptFunc = func(_ *workloadapi.X509Source, mode cipher.Mode,
+	cipherDecrypt = func(_ *workloadapi.X509Source, mode cipher.Mode,
 		r io.Reader, contentType string, _ byte, _, _ []byte, _ string,
 		_ predicate.Predicate) ([]byte, error) {
 		if mode != cipher.ModeStream || contentType != "application/octet-stream" {
@@ -70,7 +70,7 @@ func TestAPI_CipherStreamMethods(t *testing.T) {
 	}
 
 	// error path
-	cipherEncryptFunc = func(_ *workloadapi.X509Source,
+	cipherEncrypt = func(_ *workloadapi.X509Source,
 		_ cipher.Mode, _ io.Reader, _ string, _ []byte, _ string,
 		_ predicate.Predicate) ([]byte, error) {
 		return nil, errors.New("boom")
@@ -84,10 +84,10 @@ func TestAPI_CipherStreamMethods(t *testing.T) {
 func TestAPI_CipherJSONMethods(t *testing.T) {
 	a := NewWithSource(fakeSource)
 
-	origEnc, origDec := cipherEncryptFunc, cipherDecryptFunc
-	t.Cleanup(func() { cipherEncryptFunc, cipherDecryptFunc = origEnc, origDec })
+	origEnc, origDec := cipherEncrypt, cipherDecrypt
+	t.Cleanup(func() { cipherEncrypt, cipherDecrypt = origEnc, origDec })
 
-	cipherEncryptFunc = func(
+	cipherEncrypt = func(
 		_ *workloadapi.X509Source, mode cipher.Mode, _ io.Reader,
 		_ string, plaintext []byte, algorithm string, _ predicate.Predicate,
 	) ([]byte, error) {
@@ -99,7 +99,7 @@ func TestAPI_CipherJSONMethods(t *testing.T) {
 		}
 		return []byte{2}, nil
 	}
-	cipherDecryptFunc = func(
+	cipherDecrypt = func(
 		_ *workloadapi.X509Source, mode cipher.Mode, _ io.Reader,
 		_ string, version byte, _, _ []byte,
 		algorithm string, _ predicate.Predicate,
