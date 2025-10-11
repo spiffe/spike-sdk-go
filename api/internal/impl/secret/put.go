@@ -13,7 +13,6 @@ import (
 	"github.com/spiffe/spike-sdk-go/api/entity/v1/reqres"
 	"github.com/spiffe/spike-sdk-go/api/url"
 	"github.com/spiffe/spike-sdk-go/net"
-	"github.com/spiffe/spike-sdk-go/predicate"
 )
 
 // Put creates or updates a secret at the specified path with the given
@@ -34,9 +33,9 @@ import (
 //
 //		err := Put(x509Source, "secret/path",
 //	 	map[string]string{"key": "value"}, predicate.AllowAll)
-func Put(source *workloadapi.X509Source,
+func Put(
+	source *workloadapi.X509Source,
 	path string, values map[string]string,
-	allow predicate.Predicate,
 ) error {
 	if source == nil {
 		return errors.New("nil X509Source")
@@ -55,10 +54,7 @@ func Put(source *workloadapi.X509Source,
 		)
 	}
 
-	client, err := net.CreateMTLSClientWithPredicate(source, allow)
-	if err != nil {
-		return err
-	}
+	client := net.CreateMTLSClientForNexus(source)
 
 	body, err := net.Post(client, url.SecretPut(), mr)
 	if err != nil {

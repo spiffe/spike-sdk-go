@@ -14,7 +14,6 @@ import (
 	"github.com/spiffe/spike-sdk-go/api/entity/v1/reqres"
 	"github.com/spiffe/spike-sdk-go/api/url"
 	"github.com/spiffe/spike-sdk-go/net"
-	"github.com/spiffe/spike-sdk-go/predicate"
 )
 
 // CreatePolicy creates a new policy in the system using the provided SPIFFE
@@ -69,7 +68,6 @@ import (
 func CreatePolicy(source *workloadapi.X509Source,
 	name string, SPIFFEIDPattern string, pathPattern string,
 	permissions []data.PolicyPermission,
-	allow predicate.Predicate,
 ) error {
 	if source == nil {
 		return errors.New("nil X509Source")
@@ -92,10 +90,7 @@ func CreatePolicy(source *workloadapi.X509Source,
 		)
 	}
 
-	client, err := net.CreateMTLSClientWithPredicate(source, allow)
-	if err != nil {
-		return err
-	}
+	client := net.CreateMTLSClientForNexus(source)
 
 	body, err := net.Post(client, url.PolicyCreate(), mr)
 	if err != nil {

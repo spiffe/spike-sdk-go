@@ -93,10 +93,7 @@ func ListPolicies(
 		)
 	}
 
-	client, err := net.CreateMTLSClientWithPredicate(source, allow)
-	if err != nil {
-		return nil, err
-	}
+	client := net.CreateMTLSClientForNexus(source)
 
 	body, err := net.Post(client, url.PolicyList(), mr)
 	if err != nil {

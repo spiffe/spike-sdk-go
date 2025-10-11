@@ -13,7 +13,6 @@ import (
 	"github.com/spiffe/spike-sdk-go/api/entity/v1/reqres"
 	"github.com/spiffe/spike-sdk-go/api/url"
 	"github.com/spiffe/spike-sdk-go/net"
-	"github.com/spiffe/spike-sdk-go/predicate"
 )
 
 // Delete deletes specified versions of a secret at the given path using
@@ -37,8 +36,14 @@ import (
 // Example:
 //
 //	err := Delete(x509Source, "secret/path", []int{1, 2}, predicate.AllowAll)
-func Delete(source *workloadapi.X509Source,
-	path string, versions []int, allow predicate.Predicate) error {
+func Delete(
+	source *workloadapi.X509Source,
+	path string, versions []int,
+) error {
+	if source == nil {
+		return errors.New("nil X509Source")
+	}
+
 	r := reqres.SecretDeleteRequest{
 		Path:     path,
 		Versions: versions,
@@ -54,10 +59,7 @@ func Delete(source *workloadapi.X509Source,
 		)
 	}
 
-	client, err := net.CreateMTLSClientWithPredicate(source, allow)
-	if err != nil {
-		return err
-	}
+	client := net.CreateMTLSClientForNexus(source)
 
 	body, err := net.Post(client, url.SecretDelete(), mr)
 	if err != nil {

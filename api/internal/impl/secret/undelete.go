@@ -13,7 +13,6 @@ import (
 	"github.com/spiffe/spike-sdk-go/api/entity/v1/reqres"
 	"github.com/spiffe/spike-sdk-go/api/url"
 	"github.com/spiffe/spike-sdk-go/net"
-	"github.com/spiffe/spike-sdk-go/predicate"
 )
 
 // Undelete restores previously deleted versions of a secret at the
@@ -36,7 +35,11 @@ import (
 //	err := Undelete(x509Source, "secret/path", []int{1, 2}, predicate.AllowAll)
 func Undelete(source *workloadapi.X509Source,
 	path string, versions []int,
-	allow predicate.Predicate) error {
+) error {
+	if source == nil {
+		return errors.New("nil X509Source")
+	}
+
 	var vv []int
 	if len(versions) == 0 {
 		vv = []int{}
@@ -57,11 +60,7 @@ func Undelete(source *workloadapi.X509Source,
 		)
 	}
 
-	client, err := net.CreateMTLSClientWithPredicate(source, allow)
-	if err != nil {
-		return err
-	}
-
+	client := net.CreateMTLSClientForNexus(source)
 	body, err := net.Post(client, url.SecretUndelete(), mr)
 	if err != nil {
 		return nil

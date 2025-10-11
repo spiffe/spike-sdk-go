@@ -15,7 +15,6 @@ import (
 	"github.com/spiffe/spike-sdk-go/api/url"
 	"github.com/spiffe/spike-sdk-go/log"
 	"github.com/spiffe/spike-sdk-go/net"
-	"github.com/spiffe/spike-sdk-go/predicate"
 	"github.com/spiffe/spike-sdk-go/spiffeid"
 )
 
@@ -86,16 +85,7 @@ func Restore(
 		)
 	}
 
-	client, err := net.CreateMTLSClientWithPredicate(
-		source, predicate.AllowNexus,
-	)
-	if err != nil {
-		// Security: Zero out mr before returning error
-		for i := range mr {
-			mr[i] = 0
-		}
-		return nil, err
-	}
+	client := net.CreateMTLSClientForNexus(source)
 
 	body, err := net.Post(client, url.Restore(), mr)
 	// Security: Zero out mr after the POST request is complete
