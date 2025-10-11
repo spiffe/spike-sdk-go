@@ -27,8 +27,31 @@ var (
 )
 
 // EncryptStream encrypts data from a reader using streaming mode.
-// It sends the reader content as the request body with the specified content type.
-// Returns the encrypted ciphertext bytes.
+// It sends the reader content as the request body with the specified content type
+// and returns the encrypted ciphertext bytes.
+//
+// Parameters:
+//   - source: X509Source for establishing mTLS connection to SPIKE Nexus
+//   - r: io.Reader containing the data to encrypt
+//   - contentType: Content type for the request (defaults to "application/octet-stream" if empty)
+//
+// Returns:
+//   - ([]byte, nil) containing the encrypted ciphertext if successful
+//   - (nil, error) if an error occurs during encryption
+//
+// Example:
+//
+//	source, err := workloadapi.NewX509Source(ctx)
+//	if err != nil {
+//	    log.Fatal(err)
+//	}
+//	defer source.Close()
+//
+//	reader := bytes.NewReader([]byte("sensitive data"))
+//	ciphertext, err := EncryptStream(source, reader, "text/plain")
+//	if err != nil {
+//	    log.Printf("Encryption failed: %v", err)
+//	}
 func EncryptStream(
 	source *workloadapi.X509Source, r io.Reader, contentType string,
 ) ([]byte, error) {
@@ -66,6 +89,30 @@ func EncryptStream(
 
 // EncryptJSON encrypts data using JSON mode with structured parameters.
 // It sends plaintext and algorithm as JSON and returns encrypted ciphertext bytes.
+//
+// Parameters:
+//   - source: X509Source for establishing mTLS connection to SPIKE Nexus
+//   - plaintext: The data to encrypt
+//   - algorithm: The encryption algorithm to use (e.g., "AES-GCM")
+//
+// Returns:
+//   - ([]byte, nil) containing the encrypted ciphertext if successful
+//   - ([]byte{}, nil) if the data is not found
+//   - (nil, error) if an error occurs during encryption
+//
+// Example:
+//
+//	source, err := workloadapi.NewX509Source(ctx)
+//	if err != nil {
+//	    log.Fatal(err)
+//	}
+//	defer source.Close()
+//
+//	data := []byte("secret message")
+//	ciphertext, err := EncryptJSON(source, data, "AES-GCM")
+//	if err != nil {
+//	    log.Printf("Encryption failed: %v", err)
+//	}
 func EncryptJSON(
 	source *workloadapi.X509Source, plaintext []byte, algorithm string,
 ) ([]byte, error) {

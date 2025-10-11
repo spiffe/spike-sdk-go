@@ -26,7 +26,7 @@ import (
 //
 //	err := api.DeleteSecretVersions("secret/path", []int{1, 2})
 func (a *API) DeleteSecretVersions(path string, versions []int) error {
-	return secret.Delete(a.source, path, versions, a.predicate)
+	return secret.Delete(a.source, path, versions)
 }
 
 // DeleteSecret deletes the entire secret at the given path
@@ -42,7 +42,7 @@ func (a *API) DeleteSecretVersions(path string, versions []int) error {
 //
 //	err := api.DeleteSecret("secret/path")
 func (a *API) DeleteSecret(path string) error {
-	return secret.Delete(a.source, path, []int{}, a.predicate)
+	return secret.Delete(a.source, path, []int{})
 }
 
 // GetSecretVersion retrieves a specific version of a secret at the given
@@ -63,7 +63,7 @@ func (a *API) DeleteSecret(path string) error {
 func (a *API) GetSecretVersion(
 	path string, version int,
 ) (*data.Secret, error) {
-	return secret.Get(a.source, path, version, a.predicate)
+	return secret.Get(a.source, path, version)
 }
 
 // GetSecret retrieves the latest version of the secret at the given path.
@@ -80,7 +80,7 @@ func (a *API) GetSecretVersion(
 //
 //	secret, err := api.GetSecret("secret/path")
 func (a *API) GetSecret(path string) (*data.Secret, error) {
-	return secret.Get(a.source, path, 0, a.predicate)
+	return secret.Get(a.source, path, 0)
 }
 
 // ListSecretKeys retrieves all secret keys.
@@ -94,7 +94,7 @@ func (a *API) GetSecret(path string) (*data.Secret, error) {
 //
 //	keys, err := api.ListSecretKeys()
 func (a *API) ListSecretKeys() (*[]string, error) {
-	return secret.ListKeys(a.source, a.predicate)
+	return secret.ListKeys(a.source)
 }
 
 // GetSecretMetadata retrieves metadata for a specific version of a secret at
@@ -115,7 +115,7 @@ func (a *API) ListSecretKeys() (*[]string, error) {
 func (a *API) GetSecretMetadata(
 	path string, version int,
 ) (*data.SecretMetadata, error) {
-	return secret.GetMetadata(a.source, path, version, a.predicate)
+	return secret.GetMetadata(a.source, path, version)
 }
 
 // PutSecret creates or updates a secret at the specified path with the given
@@ -134,7 +134,7 @@ func (a *API) GetSecretMetadata(
 //
 //	err := api.PutSecret("secret/path", map[string]string{"key": "value"})
 func (a *API) PutSecret(path string, data map[string]string) error {
-	return secret.Put(a.source, path, data, a.predicate)
+	return secret.Put(a.source, path, data)
 }
 
 // UndeleteSecret restores previously deleted versions of a secret at the
@@ -153,5 +153,5 @@ func (a *API) PutSecret(path string, data map[string]string) error {
 //
 //	err := api.UndeleteSecret("secret/path", []int{1, 2})
 func (a *API) UndeleteSecret(path string, versions []int) error {
-	return secret.Undelete(a.source, path, versions, a.predicate)
+	return secret.Undelete(a.source, path, versions)
 }

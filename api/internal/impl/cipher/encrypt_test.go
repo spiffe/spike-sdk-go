@@ -58,7 +58,7 @@ func TestEncryptOctetStream(t *testing.T) {
 	}
 
 	out, err := EncryptStream(
-		nil, bytes.NewReader([]byte("plain")),
+		&workloadapi.X509Source{}, bytes.NewReader([]byte("plain")),
 		"application/octet-stream",
 	)
 	if err != nil {

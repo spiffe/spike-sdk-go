@@ -6,6 +6,5 @@
 // operations. It includes functions for creating, retrieving, updating,
 // deleting, undeleting, and listing secrets, as well as accessing secret
 // metadata and version information. All operations require mutual TLS
-// authentication using SPIFFE X.509 certificates and support predicate-based
-// trust validation for server connections.
+// authentication using SPIFFE X.509 certificates.
 package secret

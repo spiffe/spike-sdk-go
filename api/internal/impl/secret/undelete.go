@@ -16,15 +16,13 @@ import (
 )
 
 // Undelete restores previously deleted versions of a secret at the
-// specified path using mTLS authentication.
+// specified path.
 //
 // Parameters:
-//   - source: X509Source for mTLS client authentication
+//   - source: X509Source for establishing mTLS connection to SPIKE Nexus
 //   - path: Path to the secret to restore
 //   - versions: Integer array of version numbers to restore. Empty array
 //     attempts no restoration
-//   - allow: A predicate.Predicate that determines which server certificates
-//     to trust during the mTLS connection
 //
 // Returns:
 //   - error: nil on success, unauthorized error if not logged in, or
@@ -32,7 +30,7 @@ import (
 //
 // Example:
 //
-//	err := Undelete(x509Source, "secret/path", []int{1, 2}, predicate.AllowAll)
+//	err := Undelete(x509Source, "secret/path", []int{1, 2})
 func Undelete(source *workloadapi.X509Source,
 	path string, versions []int,
 ) error {

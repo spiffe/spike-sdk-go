@@ -15,12 +15,10 @@ import (
 	"github.com/spiffe/spike-sdk-go/net"
 )
 
-// ListKeys retrieves all secret keys using mTLS authentication.
+// ListKeys retrieves all secret keys.
 //
 // Parameters:
-//   - source: X509Source for mTLS client authentication
-//   - allow: A predicate.Predicate that determines which server certificates
-//     to trust during the mTLS connection
+//   - source: X509Source for establishing mTLS connection to SPIKE Nexus
 //
 // Returns:
 //   - []string: Array of secret keys if found, empty array if none found
@@ -29,7 +27,7 @@ import (
 //
 // Example:
 //
-//	keys, err := ListKeys(x509Source, predicate.AllowAll)
+//	keys, err := ListKeys(x509Source)
 func ListKeys(
 	source *workloadapi.X509Source,
 ) (*[]string, error) {

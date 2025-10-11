@@ -17,30 +17,23 @@ import (
 )
 
 // CreatePolicy creates a new policy in the system using the provided SPIFFE
-// X.509 source and policy details. It establishes a mutual TLS connection using
-// the X.509 source and sends a policy creation request to the server.
+// X.509 source and policy details. It establishes a mutual TLS connection to
+// SPIKE Nexus using the X.509 source and sends a policy creation request.
 //
-// The function takes the following parameters:
-//   - source: A pointer to a workloadapi.X509Source for establishing mTLS
-//     connection
+// Parameters:
+//   - source: X509Source for establishing mTLS connection to SPIKE Nexus
 //   - name: The name of the policy to be created
 //   - SPIFFEIDPattern: The SPIFFE ID pattern that this policy will apply to
 //   - pathPattern: The path pattern that this policy will match against
-//   - permissions: A slice of PolicyPermission defining the access rights for
-//     this policy
-//   - allow: A predicate.Predicate that determines which server connections
-//     are trusted for the mTLS connection
+//   - permissions: A slice of PolicyPermission defining the access rights
 //
-// The function returns an error if any of the following operations fail:
-//   - Marshaling the policy creation request
-//   - Creating the mTLS client
-//   - Making the HTTP POST request
-//   - Unmarshaling the response
-//   - Server-side policy creation (indicated in the response)
+// Returns:
+//   - nil if successful
+//   - error if marshaling, network request, or server-side creation fails
 //
-// Example usage:
+// Example:
 //
-//	source, err := workloadapi.NewX509Source(context.Background())
+//	source, err := workloadapi.NewX509Source(ctx)
 //	if err != nil {
 //	    log.Fatal(err)
 //	}
@@ -59,11 +52,9 @@ import (
 //	    "spiffe://example.org/service/*",
 //	    "/api/documents/*",
 //	    permissions,
-//	    predicate.AllowAll(),
 //	)
 //	if err != nil {
 //	    log.Printf("Failed to create policy: %v", err)
-//	    return
 //	}
 func CreatePolicy(source *workloadapi.X509Source,
 	name string, SPIFFEIDPattern string, pathPattern string,

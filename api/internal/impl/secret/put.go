@@ -16,14 +16,12 @@ import (
 )
 
 // Put creates or updates a secret at the specified path with the given
-// values using mTLS authentication.
+// values.
 //
 // Parameters:
-//   - source: X509Source for mTLS client authentication
+//   - source: X509Source for establishing mTLS connection to SPIKE Nexus
 //   - path: Path where the secret should be stored
 //   - values: Map of key-value pairs representing the secret data
-//   - allow: A predicate.Predicate that determines which server certificates
-//     to trust during the mTLS connection
 //
 // Returns:
 //   - error: nil on success, unauthorized error if not logged in, or
@@ -31,8 +29,8 @@ import (
 //
 // Example:
 //
-//		err := Put(x509Source, "secret/path",
-//	 	map[string]string{"key": "value"}, predicate.AllowAll)
+//	err := Put(x509Source, "secret/path",
+//		map[string]string{"key": "value"})
 func Put(
 	source *workloadapi.X509Source,
 	path string, values map[string]string,

@@ -53,29 +53,31 @@ import (
 //
 // Usage examples:
 //
-//	// GOOD: Fixed-size byte array
-//	key := &[32]byte{...}
-//	defer ClearRawBytes(key)
+//		// GOOD: Fixed-size byte array
+//		key := &[32]byte{...}
+//		defer ClearRawBytes(key)
 //
-//	// GOOD: Struct with only value types
-//	type Coordinates struct {
-//	    X, Y, Z float64
-//	    Valid   bool
-//	}
-//	coords := &Coordinates{...}
-//	defer ClearRawBytes(coords)
+//		// GOOD: Struct with only value types
+//		type Coordinates struct {
+//		    X, Y, Z float64
+//		    Valid   bool
+//		}
+//		coords := &Coordinates{...}
+//		defer ClearRawBytes(coords)
 //
-//	// CAUTION: Struct with pointers - only clears the pointer values
-//	type MixedData struct {
-//	    Key     [32]byte  // This will be cleared
-//	    Secret  *string   // Only the pointer is cleared, not the string data
-//	    Tokens  []byte    // Only slice header is cleared, not the underlying array
-//	}
-//	data := &MixedData{...}
-//	// Clear referenced data first:
-//	ClearRawBytes(data.Secret)  // Clear the string (if it points to a fixed array)
-//	ClearRawBytes(&data.Tokens[0]) // Clear slice data manually if needed
-//	ClearRawBytes(data)         // Finally clear the struct itself.
+//		// CAUTION: Struct with pointers - only clears the pointer values
+//		type MixedData struct {
+//		    Key     [32]byte  // This will be cleared
+//		    Secret  *string   // Only the pointer is cleared, not the string data
+//		    Tokens  []byte    // Only slice header is cleared, not the underlying
+//		                         array
+//		}
+//		data := &MixedData{...}
+//		// Clear referenced data first:
+//		ClearRawBytes(data.Secret)  // Clear the string (if it points to a fixed
+//	                             // array)
+//		ClearRawBytes(&data.Tokens[0]) // Clear slice data manually if needed
+//		ClearRawBytes(data)            // Finally clear the struct itself.
 func ClearRawBytes[T any](s *T) {
 	if s == nil {
 		return

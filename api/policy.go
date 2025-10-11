@@ -52,7 +52,7 @@ func (a *API) CreatePolicy(
 	permissions []data.PolicyPermission,
 ) error {
 	return acl.CreatePolicy(a.source,
-		name, SPIFFEIDPattern, pathPattern, permissions, a.predicate)
+		name, SPIFFEIDPattern, pathPattern, permissions)
 }
 
 // DeletePolicy removes an existing policy from the system using its name.
@@ -75,7 +75,7 @@ func (a *API) CreatePolicy(
 //	    return
 //	}
 func (a *API) DeletePolicy(name string) error {
-	return acl.DeletePolicy(a.source, name, a.predicate)
+	return acl.DeletePolicy(a.source, name)
 }
 
 // GetPolicy retrieves a policy from the system using its name.
@@ -109,7 +109,7 @@ func (a *API) DeletePolicy(name string) error {
 //
 //	log.Printf("Found policy: %+v", policy)
 func (a *API) GetPolicy(name string) (*data.Policy, error) {
-	return acl.GetPolicy(a.source, name, a.predicate)
+	return acl.GetPolicy(a.source, name)
 }
 
 // ListPolicies retrieves policies from the system, optionally filtering by
@@ -157,5 +157,5 @@ func (a *API) GetPolicy(name string) (*data.Policy, error) {
 func (a *API) ListPolicies(
 	SPIFFEIDPattern, pathPattern string,
 ) (*[]data.Policy, error) {
-	return acl.ListPolicies(a.source, SPIFFEIDPattern, pathPattern, a.predicate)
+	return acl.ListPolicies(a.source, SPIFFEIDPattern, pathPattern)
 }

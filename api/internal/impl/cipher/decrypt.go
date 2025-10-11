@@ -18,9 +18,31 @@ import (
 )
 
 // DecryptStream decrypts data from a reader using streaming mode.
-// It sends the reader content as the request body with the specified
-// content type.
-// Returns the decrypted plaintext bytes.
+// It sends the reader content as the request body with the specified content type
+// and returns the decrypted plaintext bytes.
+//
+// Parameters:
+//   - source: X509Source for establishing mTLS connection to SPIKE Nexus
+//   - r: io.Reader containing the encrypted data
+//   - contentType: Content type for the request (defaults to "application/octet-stream" if empty)
+//
+// Returns:
+//   - ([]byte, nil) containing the decrypted plaintext if successful
+//   - (nil, error) if an error occurs during decryption
+//
+// Example:
+//
+//	source, err := workloadapi.NewX509Source(ctx)
+//	if err != nil {
+//	    log.Fatal(err)
+//	}
+//	defer source.Close()
+//
+//	reader := bytes.NewReader(encryptedData)
+//	plaintext, err := DecryptStream(source, reader, "application/octet-stream")
+//	if err != nil {
+//	    log.Printf("Decryption failed: %v", err)
+//	}
 func DecryptStream(
 	source *workloadapi.X509Source, r io.Reader, contentType string,
 ) ([]byte, error) {
@@ -57,6 +79,31 @@ func DecryptStream(
 // DecryptJSON decrypts data using JSON mode with structured parameters.
 // It sends version, nonce, ciphertext, and algorithm as JSON and returns
 // decrypted plaintext bytes.
+//
+// Parameters:
+//   - source: X509Source for establishing mTLS connection to SPIKE Nexus
+//   - version: The cipher version used during encryption
+//   - nonce: The nonce bytes used during encryption
+//   - ciphertext: The encrypted data to decrypt
+//   - algorithm: The encryption algorithm used (e.g., "AES-GCM")
+//
+// Returns:
+//   - ([]byte, nil) containing the decrypted plaintext if successful
+//   - ([]byte{}, nil) if the data is not found
+//   - (nil, error) if an error occurs during decryption
+//
+// Example:
+//
+//	source, err := workloadapi.NewX509Source(ctx)
+//	if err != nil {
+//	    log.Fatal(err)
+//	}
+//	defer source.Close()
+//
+//	plaintext, err := DecryptJSON(source, 1, nonce, ciphertext, "AES-GCM")
+//	if err != nil {
+//	    log.Printf("Decryption failed: %v", err)
+//	}
 func DecryptJSON(
 	source *workloadapi.X509Source,
 	version byte, nonce, ciphertext []byte, algorithm string,

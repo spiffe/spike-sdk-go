@@ -17,15 +17,12 @@ import (
 	"github.com/spiffe/spike-sdk-go/net"
 )
 
-// Get retrieves a specific version of a secret at the given path using
-// mTLS authentication.
+// Get retrieves a specific version of a secret at the given path.
 //
 // Parameters:
-//   - source: X509Source for mTLS client authentication
+//   - source: X509Source for establishing mTLS connection to SPIKE Nexus
 //   - path: Path to the secret to retrieve
 //   - version: Version number of the secret to retrieve
-//   - allow: A predicate.Predicate that determines which server certificates
-//     to trust during the mTLS connection
 //
 // Returns:
 //   - *Secret: Secret data if found, nil if secret not found
@@ -34,7 +31,7 @@ import (
 //
 // Example:
 //
-//	secret, err := Get(x509Source, "secret/path", 1, predicate.AllowAll)
+//	secret, err := Get(x509Source, "secret/path", 1)
 func Get(
 	source *workloadapi.X509Source,
 	path string, version int,
