@@ -71,6 +71,10 @@ func CreatePolicy(source *workloadapi.X509Source,
 	permissions []data.PolicyPermission,
 	allow predicate.Predicate,
 ) error {
+	if source == nil {
+		return errors.New("nil X509Source")
+	}
+
 	r := reqres.PolicyCreateRequest{
 		Name:            name,
 		SPIFFEIDPattern: SPIFFEIDPattern,

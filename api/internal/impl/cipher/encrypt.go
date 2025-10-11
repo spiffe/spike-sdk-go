@@ -16,84 +16,88 @@ import (
 	"github.com/spiffe/spike-sdk-go/api/url"
 	"github.com/spiffe/spike-sdk-go/log"
 	"github.com/spiffe/spike-sdk-go/net"
-	"github.com/spiffe/spike-sdk-go/predicate"
 )
 
 // indirections for testability within this package
 var (
-	createMTLSClient          = net.CreateMTLSClientWithPredicate
+	createMTLSClient          = net.CreateMTLSClientForNexus
 	streamPost                = net.StreamPost
 	streamPostWithContentType = net.StreamPostWithContentType
 	httpPost                  = net.Post
 )
 
-// Encrypt encrypts either via streaming or JSON based on mode.
-// Stream mode: send r as body with contentType. Returns ciphertext bytes.
-// JSON mode: send plaintext + algorithm; returns ciphertext bytes.
-func Encrypt(
-	source *workloadapi.X509Source, mode Mode, r io.Reader,
-	contentType string, plaintext []byte, algorithm string,
-	allow predicate.Predicate,
+// EncryptStream encrypts data from a reader using streaming mode.
+// It sends the reader content as the request body with the specified content type.
+// Returns the encrypted ciphertext bytes.
+func EncryptStream(
+	source *workloadapi.X509Source, r io.Reader, contentType string,
 ) ([]byte, error) {
-	const fName = "encrypt"
+	if source == nil {
+		return []byte{}, errors.New("nil X509Source")
+	}
 
-	client, err := createMTLSClient(source, allow)
+	const fName = "encryptStream"
+
+	client := createMTLSClient(source)
+
+	if contentType == "" {
+		contentType = "application/octet-stream"
+	}
+	rc, err := streamPostWithContentType(
+		client, url.CipherEncrypt(), r, contentType,
+	)
+	if err != nil {
+		return []byte{}, err
+	}
+	defer func(rc io.ReadCloser) {
+		err := rc.Close()
+		if err != nil {
+			log.Log().Info(fName,
+				"message", "Error closing response body",
+				"err", err.Error())
+		}
+	}(rc)
+	b, err := io.ReadAll(rc)
 	if err != nil {
 		return nil, err
 	}
+	return b, nil
+}
 
-	switch mode {
-	case ModeStream:
-		if contentType == "" {
-			contentType = "application/octet-stream"
-		}
-		rc, err := streamPostWithContentType(
-			client, url.CipherEncrypt(), r, contentType,
-		)
-		if err != nil {
-			return nil, err
-		}
-		defer func(rc io.ReadCloser) {
-			err := rc.Close()
-			if err != nil {
-				log.Log().Info(fName,
-					"message", "Error closing response body",
-					"err", err.Error())
-			}
-		}(rc)
-		b, err := io.ReadAll(rc)
-		if err != nil {
-			return nil, err
-		}
-		return b, nil
-
-	case ModeJSON:
-		payload := reqres.CipherEncryptRequest{
-			Plaintext: plaintext,
-			Algorithm: algorithm,
-		}
-		mr, err := json.Marshal(payload)
-		if err != nil {
-			return nil,
-				errors.Join(errors.New("cipher.Encrypt: marshal request"), err)
-		}
-		body, err := httpPost(client, url.CipherEncrypt(), mr)
-		if err != nil {
-			if errors.Is(err, apiErr.ErrNotFound) {
-				return nil, nil
-			}
-			return nil, err
-		}
-		var res reqres.CipherEncryptResponse
-		if err := json.Unmarshal(body, &res); err != nil {
-			return nil,
-				errors.Join(errors.New("cipher.Encrypt: unmarshal response"), err)
-		}
-		if res.Err != "" {
-			return nil, errors.New(string(res.Err))
-		}
-		return res.Ciphertext, nil
+// EncryptJSON encrypts data using JSON mode with structured parameters.
+// It sends plaintext and algorithm as JSON and returns encrypted ciphertext bytes.
+func EncryptJSON(
+	source *workloadapi.X509Source, plaintext []byte, algorithm string,
+) ([]byte, error) {
+	if source == nil {
+		return []byte{}, errors.New("nil X509Source")
 	}
 
-	return nil, errors.New("cipher.Encrypt: unsupported mode")
+	client := createMTLSClient(source)
+
+	payload := reqres.CipherEncryptRequest{
+		Plaintext: plaintext,
+		Algorithm: algorithm,
+	}
+	mr, err := json.Marshal(payload)
+	if err != nil {
+		return []byte{},
+			errors.Join(errors.New("cipher.EncryptJSON: marshal request"), err)
+	}
+	body, err := httpPost(client, url.CipherEncrypt(), mr)
+	if err != nil {
+		if errors.Is(err, apiErr.ErrNotFound) {
+			return []byte{}, nil
+		}
+		return []byte{}, err
+	}
+	var res reqres.CipherEncryptResponse
+	if err := json.Unmarshal(body, &res); err != nil {
+		return []byte{},
+			errors.Join(errors.New("cipher.EncryptJSON: unmarshal response"), err)
+	}
+	if res.Err != "" {
+		return []byte{}, errors.New(string(res.Err))
+	}
+	return res.Ciphertext, nil
 }

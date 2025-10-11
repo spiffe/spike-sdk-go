@@ -44,6 +44,10 @@ import (
 func Restore(
 	source *workloadapi.X509Source, shardIndex int, shardValue *[32]byte,
 ) (*data.RestorationStatus, error) {
+	if source == nil {
+		return nil, errors.New("nil X509Source")
+	}
+
 	const fName = "restore"
 
 	r := reqres.RestoreRequest{

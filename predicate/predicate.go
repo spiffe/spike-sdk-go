@@ -34,7 +34,8 @@ type Predicate func(string) bool
 
 // AllowAll is a predicate that accepts any SPIFFE ID.
 // This effectively disables access control and should be used with caution.
-// It's typically used when policy-based access control is handled at a higher level.
+// It's typically used when policy-based access control is handled at a
+// higher level.
 //
 // Example usage:
 //

@@ -9,15 +9,8 @@ import (
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 
-	"github.com/spiffe/spike-sdk-go/api/internal/impl/cipher"
 	"github.com/spiffe/spike-sdk-go/predicate"
 	"github.com/spiffe/spike-sdk-go/spiffe"
-)
-
-// indirection for testability: allows stubbing cipher calls in unit tests
-var (
-	cipherEncrypt = cipher.Encrypt
-	cipherDecrypt = cipher.Decrypt
 )
 
 // API is the SPIKE API.

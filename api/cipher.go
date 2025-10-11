@@ -28,10 +28,7 @@ import (
 func (a *API) CipherEncryptStream(
 	reader io.Reader, contentType string,
 ) ([]byte, error) {
-	return cipherEncrypt(
-		a.source, cipher.ModeStream, reader,
-		contentType, nil, "", a.predicate,
-	)
+	return cipher.EncryptStream(a.source, reader, contentType)
 }
 
 // CipherEncryptJSON encrypts data using JSON mode with structured parameters.
@@ -52,10 +49,7 @@ func (a *API) CipherEncryptStream(
 func (a *API) CipherEncryptJSON(
 	plaintext []byte, algorithm string,
 ) ([]byte, error) {
-	return cipherEncrypt(
-		a.source, cipher.ModeJSON, nil, "",
-		plaintext, algorithm, a.predicate,
-	)
+	return cipher.EncryptJSON(a.source, plaintext, algorithm)
 }
 
 // CipherDecryptStream decrypts data from a reader using streaming mode.
@@ -79,10 +73,7 @@ func (a *API) CipherEncryptJSON(
 func (a *API) CipherDecryptStream(
 	reader io.Reader, contentType string,
 ) ([]byte, error) {
-	return cipherDecrypt(
-		a.source, cipher.ModeStream, reader,
-		contentType, 0, nil, nil, "", a.predicate,
-	)
+	return cipher.DecryptStream(a.source, reader, contentType)
 }
 
 // CipherDecryptJSON decrypts data using JSON mode with structured parameters.
@@ -105,8 +96,5 @@ func (a *API) CipherDecryptStream(
 func (a *API) CipherDecryptJSON(
 	version byte, nonce, ciphertext []byte, algorithm string,
 ) ([]byte, error) {
-	return cipherDecrypt(
-		a.source, cipher.ModeJSON, nil, "",
-		version, nonce, ciphertext, algorithm, a.predicate,
-	)
+	return cipher.DecryptJSON(a.source, version, nonce, ciphertext, algorithm)
 }

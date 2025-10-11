@@ -52,6 +52,10 @@ func DeletePolicy(
 	id string,
 	allow predicate.Predicate,
 ) error {
+	if source == nil {
+		return errors.New("nil X509Source")
+	}
+
 	r := reqres.PolicyDeleteRequest{
 		ID: id,
 	}

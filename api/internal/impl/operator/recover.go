@@ -38,6 +38,10 @@ import (
 //
 //	shards, err := Recover(x509Source)
 func Recover(source *workloadapi.X509Source) (map[int]*[32]byte, error) {
+	if source == nil {
+		return nil, errors.New("nil X509Source")
+	}
+
 	const fName = "recover"
 
 	svid, err := source.GetX509SVID()

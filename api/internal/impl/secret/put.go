@@ -38,6 +38,10 @@ func Put(source *workloadapi.X509Source,
 	path string, values map[string]string,
 	allow predicate.Predicate,
 ) error {
+	if source == nil {
+		return errors.New("nil X509Source")
+	}
+
 	r := reqres.SecretPutRequest{
 		Path:   path,
 		Values: values,

@@ -75,6 +75,10 @@ func ListPolicies(
 	SPIFFEIDPattern string, pathPattern string,
 	allow predicate.Predicate,
 ) (*[]data.Policy, error) {
+	if source == nil {
+		return nil, errors.New("nil X509Source")
+	}
+
 	r := reqres.PolicyListRequest{
 		SPIFFEIDPattern: SPIFFEIDPattern,
 		PathPattern:     pathPattern,

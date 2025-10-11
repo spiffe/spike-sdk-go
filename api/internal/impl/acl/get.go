@@ -63,6 +63,10 @@ func GetPolicy(
 	source *workloadapi.X509Source, id string,
 	allow predicate.Predicate,
 ) (*data.Policy, error) {
+	if source == nil {
+		return nil, errors.New("nil X509Source")
+	}
+
 	r := reqres.PolicyReadRequest{ID: id}
 
 	mr, err := json.Marshal(r)
