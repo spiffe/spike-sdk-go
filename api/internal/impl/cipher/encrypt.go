@@ -20,20 +20,21 @@ import (
 
 // indirections for testability within this package
 var (
-	createMTLSClient          = net.CreateMTLSClientForNexus
-	streamPost                = net.StreamPost
+	createMTLSClient = net.CreateMTLSClientForNexus
+	// streamPost                = net.StreamPost
 	streamPostWithContentType = net.StreamPostWithContentType
 	httpPost                  = net.Post
 )
 
 // EncryptStream encrypts data from a reader using streaming mode.
-// It sends the reader content as the request body with the specified content type
-// and returns the encrypted ciphertext bytes.
+// It sends the reader content as the request body with the specified content
+// type and returns the encrypted ciphertext bytes.
 //
 // Parameters:
 //   - source: X509Source for establishing mTLS connection to SPIKE Nexus
 //   - r: io.Reader containing the data to encrypt
-//   - contentType: Content type for the request (defaults to "application/octet-stream" if empty)
+//   - contentType: Content type for the request (defaults to
+//     "application/octet-stream" if empty)
 //
 // Returns:
 //   - ([]byte, nil) containing the encrypted ciphertext if successful
@@ -88,7 +89,8 @@ func EncryptStream(
 }
 
 // EncryptJSON encrypts data using JSON mode with structured parameters.
-// It sends plaintext and algorithm as JSON and returns encrypted ciphertext bytes.
+// It sends plaintext and algorithm as JSON and returns encrypted ciphertext
+// bytes.
 //
 // Parameters:
 //   - source: X509Source for establishing mTLS connection to SPIKE Nexus

@@ -3,8 +3,8 @@ module github.com/spiffe/spike-sdk-go
 go 1.25.2
 
 require (
-	github.com/cloudflare/circl v1.6.1
 	github.com/cenkalti/backoff/v4 v4.3.0
+	github.com/cloudflare/circl v1.6.1
 	github.com/google/uuid v1.6.0
 	github.com/spiffe/go-spiffe/v2 v2.6.0
 	github.com/stretchr/testify v1.11.1
@@ -12,6 +12,7 @@ require (
 
 require (
 	github.com/Microsoft/go-winio v0.6.2 // indirect
+	github.com/bwesterb/go-ristretto v1.2.3 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/go-jose/go-jose/v4 v4.1.2 // indirect
 	github.com/kr/text v0.2.0 // indirect
