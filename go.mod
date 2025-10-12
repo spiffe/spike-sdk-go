@@ -3,6 +3,7 @@ module github.com/spiffe/spike-sdk-go
 go 1.25.2
 
 require (
+	github.com/cloudflare/circl v1.6.1
 	github.com/cenkalti/backoff/v4 v4.3.0
 	github.com/google/uuid v1.6.0
 	github.com/spiffe/go-spiffe/v2 v2.6.0
