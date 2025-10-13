@@ -32,10 +32,6 @@ const NexusCipherDecrypt APIURL = "/v1/cipher/decrypt"
 
 const NexusBootstrapVerify APIURL = "/v1/bootstrap/verify"
 
-// TODO: these two are not used here; check if SPIKE core uses them.
-// remove them if nobody uses them.
-
 const KeeperKeep APIURL = "/v1/store/keep"
 const KeeperShard APIURL = "/v1/store/shard"
-
 const KeeperContribute APIURL = "/v1/store/contribute"
