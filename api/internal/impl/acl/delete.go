@@ -10,6 +10,8 @@ import (
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 
+	code "github.com/spiffe/spike-sdk-go/api/errors"
+
 	"github.com/spiffe/spike-sdk-go/api/entity/v1/reqres"
 	"github.com/spiffe/spike-sdk-go/api/url"
 	"github.com/spiffe/spike-sdk-go/net"
@@ -44,7 +46,7 @@ func DeletePolicy(
 	id string,
 ) error {
 	if source == nil {
-		return errors.New("nil X509Source")
+		return code.ErrNilX509Source
 	}
 
 	r := reqres.PolicyDeleteRequest{

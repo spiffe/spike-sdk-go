@@ -37,7 +37,7 @@ func Get(
 	path string, version int,
 ) (*data.Secret, error) {
 	if source == nil {
-		return nil, errors.New("nil X509Source")
+		return nil, code.ErrNilX509Source
 	}
 
 	r := reqres.SecretReadRequest{

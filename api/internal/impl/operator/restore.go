@@ -12,6 +12,7 @@ import (
 
 	"github.com/spiffe/spike-sdk-go/api/entity/data"
 	"github.com/spiffe/spike-sdk-go/api/entity/v1/reqres"
+	code "github.com/spiffe/spike-sdk-go/api/errors"
 	"github.com/spiffe/spike-sdk-go/api/url"
 	"github.com/spiffe/spike-sdk-go/log"
 	"github.com/spiffe/spike-sdk-go/net"
@@ -44,7 +45,7 @@ func Restore(
 	source *workloadapi.X509Source, shardIndex int, shardValue *[32]byte,
 ) (*data.RestorationStatus, error) {
 	if source == nil {
-		return nil, errors.New("nil X509Source")
+		return nil, code.ErrNilX509Source
 	}
 
 	const fName = "restore"

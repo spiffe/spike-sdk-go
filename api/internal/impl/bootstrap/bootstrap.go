@@ -11,6 +11,7 @@ import (
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 
 	"github.com/spiffe/spike-sdk-go/api/entity/v1/reqres"
+	code "github.com/spiffe/spike-sdk-go/api/errors"
 	"github.com/spiffe/spike-sdk-go/api/url"
 	"github.com/spiffe/spike-sdk-go/config/env"
 	"github.com/spiffe/spike-sdk-go/crypto"
@@ -57,7 +58,7 @@ func Contribute(
 	const fName = "Contribute"
 
 	if source == nil {
-		return errors.New("nil X509Source")
+		return code.ErrNilX509Source
 	}
 
 	contribution, err := keeperShare.Value.MarshalBinary()
@@ -151,7 +152,7 @@ func Verify(
 	const fName = "Verify"
 
 	if source == nil {
-		return errors.New("nil X509Source")
+		return code.ErrNilX509Source
 	}
 
 	client := net.CreateMTLSClientForNexus(source)

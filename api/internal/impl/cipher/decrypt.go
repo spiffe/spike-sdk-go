@@ -13,18 +13,20 @@ import (
 
 	"github.com/spiffe/spike-sdk-go/api/entity/v1/reqres"
 	apiErr "github.com/spiffe/spike-sdk-go/api/errors"
+	code "github.com/spiffe/spike-sdk-go/api/errors"
 	"github.com/spiffe/spike-sdk-go/api/url"
 	"github.com/spiffe/spike-sdk-go/log"
 )
 
 // DecryptStream decrypts data from a reader using streaming mode.
-// It sends the reader content as the request body with the specified content type
-// and returns the decrypted plaintext bytes.
+// It sends the reader content as the request body with the specified content
+// type and returns the decrypted plaintext bytes.
 //
 // Parameters:
 //   - source: X509Source for establishing mTLS connection to SPIKE Nexus
 //   - r: io.Reader containing the encrypted data
-//   - contentType: Content type for the request (defaults to "application/octet-stream" if empty)
+//   - contentType: Content type for the request (defaults to
+//     "application/octet-stream" if empty)
 //
 // Returns:
 //   - ([]byte, nil) containing the decrypted plaintext if successful
@@ -47,7 +49,7 @@ func DecryptStream(
 	source *workloadapi.X509Source, r io.Reader, contentType string,
 ) ([]byte, error) {
 	if source == nil {
-		return []byte{}, errors.New("nil X509Source")
+		return []byte{}, code.ErrNilX509Source
 	}
 
 	const fName = "decryptStream"
@@ -109,7 +111,7 @@ func DecryptJSON(
 	version byte, nonce, ciphertext []byte, algorithm string,
 ) ([]byte, error) {
 	if source == nil {
-		return []byte{}, errors.New("nil X509Source")
+		return []byte{}, code.ErrNilX509Source
 	}
 
 	client := createMTLSClient(source)

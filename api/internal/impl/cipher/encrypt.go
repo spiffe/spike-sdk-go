@@ -13,6 +13,7 @@ import (
 
 	"github.com/spiffe/spike-sdk-go/api/entity/v1/reqres"
 	apiErr "github.com/spiffe/spike-sdk-go/api/errors"
+	code "github.com/spiffe/spike-sdk-go/api/errors"
 	"github.com/spiffe/spike-sdk-go/api/url"
 	"github.com/spiffe/spike-sdk-go/log"
 	"github.com/spiffe/spike-sdk-go/net"
@@ -57,7 +58,7 @@ func EncryptStream(
 	source *workloadapi.X509Source, r io.Reader, contentType string,
 ) ([]byte, error) {
 	if source == nil {
-		return []byte{}, errors.New("nil X509Source")
+		return []byte{}, code.ErrNilX509Source
 	}
 
 	const fName = "encryptStream"
@@ -119,7 +120,7 @@ func EncryptJSON(
 	source *workloadapi.X509Source, plaintext []byte, algorithm string,
 ) ([]byte, error) {
 	if source == nil {
-		return []byte{}, errors.New("nil X509Source")
+		return []byte{}, code.ErrNilX509Source
 	}
 
 	client := createMTLSClient(source)

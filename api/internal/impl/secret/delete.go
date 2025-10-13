@@ -11,6 +11,7 @@ import (
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 
 	"github.com/spiffe/spike-sdk-go/api/entity/v1/reqres"
+	code "github.com/spiffe/spike-sdk-go/api/errors"
 	"github.com/spiffe/spike-sdk-go/api/url"
 	"github.com/spiffe/spike-sdk-go/net"
 )
@@ -38,7 +39,7 @@ func Delete(
 	path string, versions []int,
 ) error {
 	if source == nil {
-		return errors.New("nil X509Source")
+		return code.ErrNilX509Source
 	}
 
 	r := reqres.SecretDeleteRequest{

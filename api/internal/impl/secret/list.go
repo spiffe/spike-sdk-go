@@ -11,6 +11,7 @@ import (
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 
 	"github.com/spiffe/spike-sdk-go/api/entity/v1/reqres"
+	code "github.com/spiffe/spike-sdk-go/api/errors"
 	"github.com/spiffe/spike-sdk-go/api/url"
 	"github.com/spiffe/spike-sdk-go/net"
 )
@@ -32,7 +33,7 @@ func ListKeys(
 	source *workloadapi.X509Source,
 ) (*[]string, error) {
 	if source == nil {
-		return nil, errors.New("nil X509Source")
+		return nil, code.ErrNilX509Source
 	}
 
 	r := reqres.SecretListRequest{}
@@ -40,7 +41,7 @@ func ListKeys(
 	if err != nil {
 		return nil, errors.Join(
 			errors.New(
-				"listSecretKeys: I am having problem generating the payload",
+				"listSecretKeys: Having problem generating the payload",
 			),
 			err,
 		)
