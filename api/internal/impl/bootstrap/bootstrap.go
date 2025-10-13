@@ -173,7 +173,7 @@ func Verify(
 
 	// Send the verification request to SPIKE Nexus
 	nexusAPIRoot := env.NexusAPIRootVal()
-	verifyURL := url.NexusVerifyEndpoint(nexusAPIRoot)
+	verifyURL := url.NexusBootstrapVerifyEndpoint(nexusAPIRoot)
 
 	log.Log().Info(fName, "message",
 		"Sending verification request to SPIKE Nexus", "url", verifyURL)

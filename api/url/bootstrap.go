@@ -29,12 +29,12 @@ func KeeperBootstrapContributeEndpoint(keeperAPIRoot string) string {
 	return u
 }
 
-// NexusVerifyEndpoint constructs the full API endpoint URL for bootstrap
+// NexusBootstrapVerifyEndpoint constructs the full API endpoint URL for bootstrap
 // verification requests. It joins the provided Nexus API root URL with the
 // bootstrap verify path to create a complete endpoint URL for verifying that
 // Nexus has been properly initialized with the root key. The function will
 // terminate the program with exit code 1 if URL path joining fails.
-func NexusVerifyEndpoint(nexusAPIRoot string) string {
+func NexusBootstrapVerifyEndpoint(nexusAPIRoot string) string {
 	const fName = "nexusVerifyEndpoint"
 
 	u, err := url.JoinPath(nexusAPIRoot, string(NexusBootstrapVerify))
