@@ -12,7 +12,6 @@ import (
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 
 	"github.com/spiffe/spike-sdk-go/api/entity/v1/reqres"
-	apiErr "github.com/spiffe/spike-sdk-go/api/errors"
 	code "github.com/spiffe/spike-sdk-go/api/errors"
 	"github.com/spiffe/spike-sdk-go/api/url"
 	"github.com/spiffe/spike-sdk-go/log"
@@ -136,7 +135,7 @@ func EncryptJSON(
 	}
 	body, err := httpPost(client, url.CipherEncrypt(), mr)
 	if err != nil {
-		if errors.Is(err, apiErr.ErrNotFound) {
+		if errors.Is(err, code.ErrNotFound) {
 			return []byte{}, nil
 		}
 		return []byte{}, err
