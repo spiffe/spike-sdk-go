@@ -12,26 +12,23 @@ import (
 
 	"github.com/spiffe/spike-sdk-go/api/entity/data"
 	"github.com/spiffe/spike-sdk-go/api/entity/v1/reqres"
+	code "github.com/spiffe/spike-sdk-go/api/errors"
 	"github.com/spiffe/spike-sdk-go/api/url"
 	"github.com/spiffe/spike-sdk-go/net"
-	"github.com/spiffe/spike-sdk-go/predicate"
 )
 
 // ListPolicies retrieves policies from the system, optionally filtering by
-// SPIFFE ID and path patterns. It requires a SPIFFE X.509 source for
-// establishing a mutual TLS connection to make the list request.
+// SPIFFE ID and path patterns. It establishes a mutual TLS connection to
+// SPIKE Nexus using the X.509 source and sends a policy list request.
 //
-// The function takes:
-//   - source: A pointer to a workloadapi.X509Source for establishing mTLS
-//     connection
+// Parameters:
+//   - source: X509Source for establishing mTLS connection to SPIKE Nexus
 //   - SPIFFEIDPattern: The SPIFFE ID pattern to filter policies. An empty
 //     string matches all SPIFFE IDs.
 //   - pathPattern: The path pattern to filter policies. An empty string
 //     matches all paths.
-//   - allow: A predicate.Predicate that determines which server certificates
-//     to trust during the mTLS connection
 //
-// The function returns:
+// Returns:
 //   - (*[]data.Policy, nil) containing all matching policies if successful
 //   - (nil, nil) if no policies are found
 //   - (nil, error) if an error occurs during the operation
@@ -40,23 +37,16 @@ import (
 //
 //	policies := *result
 //
-// Errors can occur during:
-//   - Marshaling the policy list request
-//   - Creating the mTLS client
-//   - Making the HTTP POST request (except for not found cases)
-//   - Unmarshaling the response
-//   - Server-side policy listing (indicated in the response)
+// Example:
 //
-// Example usage:
-//
-//	source, err := workloadapi.NewX509Source(context.Background())
+//	source, err := workloadapi.NewX509Source(ctx)
 //	if err != nil {
 //	    log.Fatal(err)
 //	}
 //	defer source.Close()
 //
 //	// List all policies
-//	result, err := ListPolicies(source, "", "", predicate.AllowAll)
+//	result, err := ListPolicies(source, "", "")
 //	if err != nil {
 //	    log.Printf("Error listing policies: %v", err)
 //	    return
@@ -73,8 +63,11 @@ import (
 func ListPolicies(
 	source *workloadapi.X509Source,
 	SPIFFEIDPattern string, pathPattern string,
-	allow predicate.Predicate,
 ) (*[]data.Policy, error) {
+	if source == nil {
+		return nil, code.ErrNilX509Source
+	}
+
 	r := reqres.PolicyListRequest{
 		SPIFFEIDPattern: SPIFFEIDPattern,
 		PathPattern:     pathPattern,
@@ -89,10 +82,7 @@ func ListPolicies(
 		)
 	}
 
-	client, err := net.CreateMTLSClientWithPredicate(source, allow)
-	if err != nil {
-		return nil, err
-	}
+	client := net.CreateMTLSClientForNexus(source)
 
 	body, err := net.Post(client, url.PolicyList(), mr)
 	if err != nil {

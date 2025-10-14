@@ -11,7 +11,6 @@ import (
 	"testing"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
-	"github.com/spiffe/spike-sdk-go/predicate"
 )
 
 type rtFunc func(*http.Request) (*http.Response, error)
@@ -36,11 +35,11 @@ func TestEncryptOctetStream(t *testing.T) {
 
 	// stub client creation and streaming
 	createMTLSClient = func(
-		_ *workloadapi.X509Source, _ predicate.Predicate,
-	) (*http.Client, error) {
+		_ *workloadapi.X509Source,
+	) *http.Client {
 		return fakeClient(rtFunc(func(_ *http.Request) (*http.Response, error) {
 			return nil, nil
-		})), nil
+		}))
 	}
 	streamPostWithContentType = func(
 		_ *http.Client, path string, body io.Reader, ct string,
@@ -58,12 +57,12 @@ func TestEncryptOctetStream(t *testing.T) {
 		return io.NopCloser(bytes.NewReader([]byte("cipher"))), nil
 	}
 
-	out, err := Encrypt(
-		nil, ModeStream, bytes.NewReader([]byte("plain")),
-		"application/octet-stream", nil, "", predicate.AllowAll,
+	out, err := EncryptStream(
+		&workloadapi.X509Source{}, bytes.NewReader([]byte("plain")),
+		"application/octet-stream",
 	)
 	if err != nil {
-		t.Fatalf("Encrypt error: %v", err)
+		t.Fatalf("EncryptStream error: %v", err)
 	}
 	if string(out) != "cipher" {
 		t.Fatalf("unexpected out: %s", string(out))

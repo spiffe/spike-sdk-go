@@ -12,10 +12,10 @@ import (
 
 	"github.com/spiffe/spike-sdk-go/api/entity/data"
 	"github.com/spiffe/spike-sdk-go/api/entity/v1/reqres"
+	code "github.com/spiffe/spike-sdk-go/api/errors"
 	"github.com/spiffe/spike-sdk-go/api/url"
 	"github.com/spiffe/spike-sdk-go/log"
 	"github.com/spiffe/spike-sdk-go/net"
-	"github.com/spiffe/spike-sdk-go/predicate"
 	"github.com/spiffe/spike-sdk-go/spiffeid"
 )
 
@@ -44,6 +44,10 @@ import (
 func Restore(
 	source *workloadapi.X509Source, shardIndex int, shardValue *[32]byte,
 ) (*data.RestorationStatus, error) {
+	if source == nil {
+		return nil, code.ErrNilX509Source
+	}
+
 	const fName = "restore"
 
 	r := reqres.RestoreRequest{
@@ -82,16 +86,7 @@ func Restore(
 		)
 	}
 
-	client, err := net.CreateMTLSClientWithPredicate(
-		source, predicate.AllowNexus,
-	)
-	if err != nil {
-		// Security: Zero out mr before returning error
-		for i := range mr {
-			mr[i] = 0
-		}
-		return nil, err
-	}
+	client := net.CreateMTLSClientForNexus(source)
 
 	body, err := net.Post(client, url.Restore(), mr)
 	// Security: Zero out mr after the POST request is complete

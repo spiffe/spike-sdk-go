@@ -240,11 +240,12 @@ func CreateMTLSClientForNexus(source *workloadapi.X509Source) *http.Client {
 	return client
 }
 
-// CreateMTLSClientForKeeper creates an HTTP client configured for mutual TLS authentication
-// using the provided X509Source. The client is configured with a predicate that
-// validates peer IDs against the trusted keeper root. Only peers that pass the
-// spiffeid.IsKeeper validation will be accepted for connections. The function
-// will terminate the program with exit code 1 if client creation fails.
+// CreateMTLSClientForKeeper creates an HTTP client configured for mutual
+// TLS authentication using the provided X509Source. The client is configured
+// with a predicate that validates peer IDs against the trusted keeper root.
+// Only peers that pass the spiffeid.IsKeeper validation will be accepted for
+// connections. The function will terminate the program with exit code 1 if
+// client creation fails.
 func CreateMTLSClientForKeeper(source *workloadapi.X509Source) *http.Client {
 	const fName = "MTLSClient"
 	client, err := CreateMTLSClientWithPredicate(

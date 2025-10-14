@@ -4,6 +4,10 @@
 
 package auth
 
+// These paths are kv-store keys.
+// They are NOT Unix file paths.
+// They should NOT start with a trailing slash.
+
 const PathSystemPolicyAccess = "spike/system/acl"
 const PathSystemCipherEncrypt = "spike/system/cipher/encrypt"
 const PathSystemCipherDecrypt = "spike/system/cipher/decrypt"

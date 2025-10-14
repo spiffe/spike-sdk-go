@@ -19,9 +19,11 @@ const (
 	// Initial wait time between retries
 	defaultInitialInterval = 500 * time.Millisecond
 	// Maximum wait time between retries
-	defaultMaxInterval = 3 * time.Second
+	defaultMaxInterval = 60 * time.Second
 	// Maximum total time for all retry attempts
-	defaultMaxElapsedTime = 30 * time.Second
+	defaultMaxElapsedTime = 1200 * time.Second
+	// A zero max elapsed time means try forever.
+	forever = 0
 	// Factor by which the wait time increases
 	defaultMultiplier = 2.0
 )
@@ -147,7 +149,8 @@ func NewExponentialRetrier(opts ...RetrierOption) *ExponentialRetrier {
 //   - operation: The function to retry that returns an error
 //
 // Returns:
-//   - error: nil if the operation eventually succeeds, or the last error encountered
+//   - error: nil if the operation eventually succeeds, or the last error
+//     encountered
 func (r *ExponentialRetrier) RetryWithBackoff(
 	ctx context.Context,
 	operation func() error,
@@ -267,5 +270,61 @@ func Do[T any](
 ) (T, error) {
 	return NewTypedRetrier[T](
 		NewExponentialRetrier(options...),
+	).RetryWithBackoff(ctx, handler)
+}
+
+// Forever retries an operation indefinitely with exponential backoff until it
+// succeeds or the context is canceled. It sets MaxElapsedTime to 0, which means
+// the retry loop will continue forever (or until the context is canceled).
+//
+// This is a convenience function that sets up exponential backoff with sensible
+// defaults for infinite retry scenarios.
+//
+// Default settings:
+//   - InitialInterval: 500ms
+//   - MaxInterval: 60s
+//   - MaxElapsedTime: 0 (retry forever)
+//   - Multiplier: 2.0
+//
+// Parameters:
+//   - ctx: Context for cancellation control (the only way to stop retrying)
+//   - handler: The function to retry that returns a value and error
+//   - options: Optional configuration for retry behavior
+//
+// Note: User-provided options are applied AFTER the default settings and will
+// override them. If you pass WithBackOffOptions(WithMaxElapsedTime(...)), it
+// will override the "forever" behavior. This allows power users to customize
+// the retry behavior while keeping the convenience of preset defaults.
+//
+// Returns:
+//   - T: The result value from the successful operation
+//   - error: nil if successful, or the last error when context is canceled
+//
+// Example:
+//
+//		// Retry forever with custom notification
+//		result, err := Forever(ctx, func() (string, error) {
+//		    return fetchData()
+//		}, WithNotify(func(err error, d, total time.Duration) {
+//		    log.Printf("Retry failed: %v (attempt duration: %v, total: %v)",
+//		      err, d, total)
+//		}))
+//
+//		// Override behavior (will now stop after 1 minute
+//	 //	instead of retrying forever)
+//		result, err := Forever(ctx, func() (string, error) {
+//		    return fetchData()
+//		}, WithBackOffOptions(WithMaxElapsedTime(1 * time.Minute)))
+func Forever[T any](
+	ctx context.Context,
+	handler Handler[T],
+	options ...RetrierOption,
+) (T, error) {
+	ro := WithBackOffOptions(WithMaxElapsedTime(forever))
+	ros := []RetrierOption{ro}
+	ros = append(ros, options...)
+
+	return NewTypedRetrier[T](
+		NewExponentialRetrier(ros...),
 	).RetryWithBackoff(ctx, handler)
 }

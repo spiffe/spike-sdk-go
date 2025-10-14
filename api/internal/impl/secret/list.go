@@ -11,17 +11,15 @@ import (
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 
 	"github.com/spiffe/spike-sdk-go/api/entity/v1/reqres"
+	code "github.com/spiffe/spike-sdk-go/api/errors"
 	"github.com/spiffe/spike-sdk-go/api/url"
 	"github.com/spiffe/spike-sdk-go/net"
-	"github.com/spiffe/spike-sdk-go/predicate"
 )
 
-// ListKeys retrieves all secret keys using mTLS authentication.
+// ListKeys retrieves all secret keys.
 //
 // Parameters:
-//   - source: X509Source for mTLS client authentication
-//   - allow: A predicate.Predicate that determines which server certificates
-//     to trust during the mTLS connection
+//   - source: X509Source for establishing mTLS connection to SPIKE Nexus
 //
 // Returns:
 //   - []string: Array of secret keys if found, empty array if none found
@@ -30,25 +28,26 @@ import (
 //
 // Example:
 //
-//	keys, err := ListKeys(x509Source, predicate.AllowAll)
+//	keys, err := ListKeys(x509Source)
 func ListKeys(
-	source *workloadapi.X509Source, allow predicate.Predicate,
+	source *workloadapi.X509Source,
 ) (*[]string, error) {
+	if source == nil {
+		return nil, code.ErrNilX509Source
+	}
+
 	r := reqres.SecretListRequest{}
 	mr, err := json.Marshal(r)
 	if err != nil {
 		return nil, errors.Join(
 			errors.New(
-				"listSecretKeys: I am having problem generating the payload",
+				"listSecretKeys: Having problem generating the payload",
 			),
 			err,
 		)
 	}
 
-	client, err := net.CreateMTLSClientWithPredicate(source, allow)
-	if err != nil {
-		return nil, err
-	}
+	client := net.CreateMTLSClientForNexus(source)
 
 	body, err := net.Post(client, url.SecretList(), mr)
 	if err != nil {

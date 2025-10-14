@@ -12,154 +12,134 @@ import (
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 
 	"github.com/spiffe/spike-sdk-go/api/entity/v1/reqres"
-	apiErr "github.com/spiffe/spike-sdk-go/api/errors"
+	code "github.com/spiffe/spike-sdk-go/api/errors"
 	"github.com/spiffe/spike-sdk-go/api/url"
 	"github.com/spiffe/spike-sdk-go/log"
-	"github.com/spiffe/spike-sdk-go/predicate"
 )
 
-// Decrypt decrypts data using SPIKE's cipher service, supporting both streaming
-// and JSON modes. It requires a SPIFFE X.509 source for establishing a mutual
-// TLS connection to make the decryption request.
+// DecryptStream decrypts data from a reader using streaming mode.
+// It sends the reader content as the request body with the specified content
+// type and returns the decrypted plaintext bytes.
 //
-// The function supports two modes:
-//   - Stream mode: Sends the reader content as the request body with the
-//     specified content type. Returns decrypted plaintext bytes.
-//   - JSON mode: Sends structured data (version, nonce, ciphertext, algorithm)
-//     as JSON. Returns decrypted plaintext bytes.
-//
-// The function takes the following parameters:
-//   - source: A pointer to a workloadapi.X509Source for establishing mTLS
-//     connection
-//   - mode: The decryption mode (ModeStream or ModeJSON)
-//   - r: An io.Reader containing data to decrypt (used in stream mode)
-//   - contentType: The content type for stream mode (defaults to
+// Parameters:
+//   - source: X509Source for establishing mTLS connection to SPIKE Nexus
+//   - r: io.Reader containing the encrypted data
+//   - contentType: Content type for the request (defaults to
 //     "application/octet-stream" if empty)
-//   - version: The cipher version (used in JSON mode)
-//   - nonce: The nonce bytes (used in JSON mode)
-//   - ciphertext: The encrypted data bytes (used in JSON mode)
-//   - algorithm: The encryption algorithm name (used in JSON mode)
-//   - allow: A predicate.Predicate that determines which server certificates
-//     to trust during the mTLS connection
 //
-// The function returns:
+// Returns:
 //   - ([]byte, nil) containing the decrypted plaintext if successful
-//   - (nil, nil) if the data is not found (JSON mode only)
-//   - (nil, error) if an error occurs during the operation
+//   - (nil, error) if an error occurs during decryption
 //
-// Errors can occur during:
-//   - Creating the mTLS client
-//   - Marshaling the decryption request (JSON mode)
-//   - Making the HTTP POST request
-//   - Reading the response (stream mode)
-//   - Unmarshaling the response (JSON mode)
-//   - Server-side decryption (indicated in the response)
+// Example:
 //
-// Example usage (JSON mode):
-//
-//	source, err := workloadapi.NewX509Source(context.Background())
+//	source, err := workloadapi.NewX509Source(ctx)
 //	if err != nil {
 //	    log.Fatal(err)
 //	}
 //	defer source.Close()
 //
-//	plaintext, err := Decrypt(
-//	    source,
-//	    ModeJSON,
-//	    nil, // not used in JSON mode
-//	    "",  // not used in JSON mode
-//	    1,   // version
-//	    nonce,
-//	    ciphertext,
-//	    "AES-GCM",
-//	    predicate.AllowAll,
-//	)
-//	if err != nil {
-//	    log.Printf("Failed to decrypt: %v", err)
-//	    return
-//	}
-//
-// Example usage (Stream mode):
-//
 //	reader := bytes.NewReader(encryptedData)
-//	plaintext, err := Decrypt(
-//	    source,
-//	    ModeStream,
-//	    reader,
-//	    "application/octet-stream",
-//	    0,   // not used in stream mode
-//	    nil, // not used in stream mode
-//	    nil, // not used in stream mode
-//	    "",  // not used in stream mode
-//	    predicate.AllowAll,
-//	)
-func Decrypt(
-	source *workloadapi.X509Source,
-	mode Mode,
-	r io.Reader,
-	contentType string, version byte,
-	nonce, ciphertext []byte, algorithm string,
-	allow predicate.Predicate,
+//	plaintext, err := DecryptStream(source, reader, "application/octet-stream")
+//	if err != nil {
+//	    log.Printf("Decryption failed: %v", err)
+//	}
+func DecryptStream(
+	source *workloadapi.X509Source, r io.Reader, contentType string,
 ) ([]byte, error) {
-	const fName = "Decrypt"
+	if source == nil {
+		return []byte{}, code.ErrNilX509Source
+	}
 
-	client, err := createMTLSClient(source, allow)
+	const fName = "decryptStream"
+
+	client := createMTLSClient(source)
+
+	if contentType == "" {
+		contentType = "application/octet-stream"
+	}
+	rc, err := streamPostWithContentType(
+		client, url.CipherDecrypt(), r, contentType,
+	)
 	if err != nil {
-		return nil, err
+		return []byte{}, err
+	}
+	defer func(rc io.ReadCloser) {
+		err := rc.Close()
+		if err != nil {
+			log.Log().Error(fName, "err", err.Error())
+		}
+	}(rc)
+	b, err := io.ReadAll(rc)
+	if err != nil {
+		return []byte{}, err
+	}
+	return b, nil
+}
+
+// DecryptJSON decrypts data using JSON mode with structured parameters.
+// It sends version, nonce, ciphertext, and algorithm as JSON and returns
+// decrypted plaintext bytes.
+//
+// Parameters:
+//   - source: X509Source for establishing mTLS connection to SPIKE Nexus
+//   - version: The cipher version used during encryption
+//   - nonce: The nonce bytes used during encryption
+//   - ciphertext: The encrypted data to decrypt
+//   - algorithm: The encryption algorithm used (e.g., "AES-GCM")
+//
+// Returns:
+//   - ([]byte, nil) containing the decrypted plaintext if successful
+//   - ([]byte{}, nil) if the data is not found
+//   - (nil, error) if an error occurs during decryption
+//
+// Example:
+//
+//	source, err := workloadapi.NewX509Source(ctx)
+//	if err != nil {
+//	    log.Fatal(err)
+//	}
+//	defer source.Close()
+//
+//	plaintext, err := DecryptJSON(source, 1, nonce, ciphertext, "AES-GCM")
+//	if err != nil {
+//	    log.Printf("Decryption failed: %v", err)
+//	}
+func DecryptJSON(
+	source *workloadapi.X509Source,
+	version byte, nonce, ciphertext []byte, algorithm string,
+) ([]byte, error) {
+	if source == nil {
+		return []byte{}, code.ErrNilX509Source
 	}
 
-	switch mode {
-	case ModeStream:
-		if contentType == "" {
-			contentType = "application/octet-stream"
-		}
-		rc, err := streamPostWithContentType(
-			client, url.CipherDecrypt(), r, contentType,
-		)
-		if err != nil {
-			return nil, err
-		}
-		defer func(rc io.ReadCloser) {
-			err := rc.Close()
-			if err != nil {
-				log.Log().Error(fName, "err", err.Error())
-			}
-		}(rc)
-		b, err := io.ReadAll(rc)
-		if err != nil {
-			return nil, err
-		}
-		return b, nil
+	client := createMTLSClient(source)
 
-	case ModeJSON:
-		payload := reqres.CipherDecryptRequest{
-			Version:    version,
-			Nonce:      nonce,
-			Ciphertext: ciphertext,
-			Algorithm:  algorithm,
-		}
-		mr, err := json.Marshal(payload)
-		if err != nil {
-			return nil,
-				errors.Join(errors.New("cipher.Decrypt: marshal request"), err)
-		}
-		body, err := httpPost(client, url.CipherDecrypt(), mr)
-		if err != nil {
-			if errors.Is(err, apiErr.ErrNotFound) {
-				return nil, nil
-			}
-			return nil, err
-		}
-		var res reqres.CipherDecryptResponse
-		if err := json.Unmarshal(body, &res); err != nil {
-			return nil,
-				errors.Join(errors.New("cipher.Decrypt: unmarshal response"), err)
-		}
-		if res.Err != "" {
-			return nil, errors.New(string(res.Err))
-		}
-		return res.Plaintext, nil
+	payload := reqres.CipherDecryptRequest{
+		Version:    version,
+		Nonce:      nonce,
+		Ciphertext: ciphertext,
+		Algorithm:  algorithm,
 	}
-
-	return nil, errors.New("cipher.Decrypt: unsupported mode")
+	mr, err := json.Marshal(payload)
+	if err != nil {
+		return []byte{},
+			errors.Join(errors.New("cipher.DecryptJSON: marshal request"), err)
+	}
+	body, err := httpPost(client, url.CipherDecrypt(), mr)
+	if err != nil {
+		if errors.Is(err, code.ErrNotFound) {
+			return []byte{}, nil
+		}
+		return []byte{}, err
+	}
+	var res reqres.CipherDecryptResponse
+	if err := json.Unmarshal(body, &res); err != nil {
+		return []byte{},
+			errors.Join(errors.New("cipher.DecryptJSON: unmarshal response"), err)
+	}
+	if res.Err != "" {
+		return []byte{}, errors.New(string(res.Err))
+	}
+	return res.Plaintext, nil
 }

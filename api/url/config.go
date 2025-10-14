@@ -30,6 +30,8 @@ const NexusOperatorRestore APIURL = "/v1/operator/restore"
 const NexusCipherEncrypt APIURL = "/v1/cipher/encrypt"
 const NexusCipherDecrypt APIURL = "/v1/cipher/decrypt"
 
+const NexusBootstrapVerify APIURL = "/v1/bootstrap/verify"
+
 const KeeperKeep APIURL = "/v1/store/keep"
-const KeeperContribute APIURL = "/v1/store/contribute"
 const KeeperShard APIURL = "/v1/store/shard"
+const KeeperContribute APIURL = "/v1/store/contribute"

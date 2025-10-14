@@ -11,20 +11,18 @@ import (
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 
 	"github.com/spiffe/spike-sdk-go/api/entity/v1/reqres"
+	code "github.com/spiffe/spike-sdk-go/api/errors"
 	"github.com/spiffe/spike-sdk-go/api/url"
 	"github.com/spiffe/spike-sdk-go/net"
-	"github.com/spiffe/spike-sdk-go/predicate"
 )
 
 // Put creates or updates a secret at the specified path with the given
-// values using mTLS authentication.
+// values.
 //
 // Parameters:
-//   - source: X509Source for mTLS client authentication
+//   - source: X509Source for establishing mTLS connection to SPIKE Nexus
 //   - path: Path where the secret should be stored
 //   - values: Map of key-value pairs representing the secret data
-//   - allow: A predicate.Predicate that determines which server certificates
-//     to trust during the mTLS connection
 //
 // Returns:
 //   - error: nil on success, unauthorized error if not logged in, or
@@ -32,12 +30,16 @@ import (
 //
 // Example:
 //
-//		err := Put(x509Source, "secret/path",
-//	 	map[string]string{"key": "value"}, predicate.AllowAll)
-func Put(source *workloadapi.X509Source,
+//	err := Put(x509Source, "secret/path",
+//		map[string]string{"key": "value"})
+func Put(
+	source *workloadapi.X509Source,
 	path string, values map[string]string,
-	allow predicate.Predicate,
 ) error {
+	if source == nil {
+		return code.ErrNilX509Source
+	}
+
 	r := reqres.SecretPutRequest{
 		Path:   path,
 		Values: values,
@@ -51,10 +53,7 @@ func Put(source *workloadapi.X509Source,
 		)
 	}
 
-	client, err := net.CreateMTLSClientWithPredicate(source, allow)
-	if err != nil {
-		return err
-	}
+	client := net.CreateMTLSClientForNexus(source)
 
 	body, err := net.Post(client, url.SecretPut(), mr)
 	if err != nil {

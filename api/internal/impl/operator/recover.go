@@ -11,10 +11,10 @@ import (
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 
 	"github.com/spiffe/spike-sdk-go/api/entity/v1/reqres"
+	code "github.com/spiffe/spike-sdk-go/api/errors"
 	"github.com/spiffe/spike-sdk-go/api/url"
 	"github.com/spiffe/spike-sdk-go/log"
 	"github.com/spiffe/spike-sdk-go/net"
-	"github.com/spiffe/spike-sdk-go/predicate"
 	"github.com/spiffe/spike-sdk-go/spiffeid"
 )
 
@@ -38,6 +38,10 @@ import (
 //
 //	shards, err := Recover(x509Source)
 func Recover(source *workloadapi.X509Source) (map[int]*[32]byte, error) {
+	if source == nil {
+		return nil, code.ErrNilX509Source
+	}
+
 	const fName = "recover"
 
 	svid, err := source.GetX509SVID()
@@ -68,12 +72,7 @@ func Recover(source *workloadapi.X509Source) (map[int]*[32]byte, error) {
 		)
 	}
 
-	client, err := net.CreateMTLSClientWithPredicate(
-		source, predicate.AllowNexus,
-	)
-	if err != nil {
-		return nil, err
-	}
+	client := net.CreateMTLSClientForNexus(source)
 
 	body, err := net.Post(client, url.Recover(), mr)
 	if err != nil {

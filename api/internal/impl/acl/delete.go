@@ -10,48 +10,45 @@ import (
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 
+	code "github.com/spiffe/spike-sdk-go/api/errors"
+
 	"github.com/spiffe/spike-sdk-go/api/entity/v1/reqres"
 	"github.com/spiffe/spike-sdk-go/api/url"
 	"github.com/spiffe/spike-sdk-go/net"
-	"github.com/spiffe/spike-sdk-go/predicate"
 )
 
 // DeletePolicy removes an existing policy from the system using its ID.
-// It requires a SPIFFE X.509 source for establishing a mutual TLS connection
-// to make the deletion request.
+// It establishes a mutual TLS connection to SPIKE Nexus using the X.509 source
+// and sends a policy deletion request.
 //
-// The function takes the following parameters:
-//   - source: A pointer to a workloadapi.X509Source for establishing mTLS
-//     connection
+// Parameters:
+//   - source: X509Source for establishing mTLS connection to SPIKE Nexus
 //   - id: The unique identifier of the policy to be deleted
-//   - allow: A predicate.Predicate that determines which server certificates
-//     to trust during the mTLS connection
 //
-// The function returns an error if any of the following operations fail:
-//   - Marshaling the policy deletion request
-//   - Creating the mTLS client
-//   - Making the HTTP POST request
-//   - Unmarshaling the response
-//   - Server-side policy deletion (indicated in the response)
+// Returns:
+//   - nil if successful
+//   - error if marshaling, network request, or server-side deletion fails
 //
-// Example usage:
+// Example:
 //
-//	source, err := workloadapi.NewX509Source(context.Background())
+//	source, err := workloadapi.NewX509Source(ctx)
 //	if err != nil {
 //	    log.Fatal(err)
 //	}
 //	defer source.Close()
 //
-//	err = DeletePolicy(source, "policy-123", predicate.AllowAll)
+//	err = DeletePolicy(source, "policy-123")
 //	if err != nil {
 //	    log.Printf("Failed to delete policy: %v", err)
-//	    return
 //	}
 func DeletePolicy(
 	source *workloadapi.X509Source,
 	id string,
-	allow predicate.Predicate,
 ) error {
+	if source == nil {
+		return code.ErrNilX509Source
+	}
+
 	r := reqres.PolicyDeleteRequest{
 		ID: id,
 	}
@@ -66,10 +63,7 @@ func DeletePolicy(
 		)
 	}
 
-	client, err := net.CreateMTLSClientWithPredicate(source, allow)
-	if err != nil {
-		return err
-	}
+	client := net.CreateMTLSClientForNexus(source)
 
 	body, err := net.Post(client, url.PolicyDelete(), mr)
 	if err != nil {

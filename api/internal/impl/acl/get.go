@@ -12,43 +12,33 @@ import (
 
 	"github.com/spiffe/spike-sdk-go/api/entity/data"
 	"github.com/spiffe/spike-sdk-go/api/entity/v1/reqres"
+	code "github.com/spiffe/spike-sdk-go/api/errors"
 	"github.com/spiffe/spike-sdk-go/api/url"
 	"github.com/spiffe/spike-sdk-go/net"
-	"github.com/spiffe/spike-sdk-go/predicate"
 )
 
 // GetPolicy retrieves a policy from the system using its ID.
-// It requires a SPIFFE X.509 source for establishing a mutual TLS connection
-// to make the retrieval request.
+// It establishes a mutual TLS connection to SPIKE Nexus using the X.509 source
+// and sends a policy retrieval request.
 //
-// The function takes the following parameters:
-//   - source: A pointer to a workloadapi.X509Source for establishing mTLS
-//     connection
+// Parameters:
+//   - source: X509Source for establishing mTLS connection to SPIKE Nexus
 //   - id: The unique identifier of the policy to retrieve
-//   - allow: A predicate.Predicate that determines which server certificates
-//     to trust during the mTLS connection
 //
-// The function returns:
+// Returns:
 //   - (*data.Policy, nil) if the policy is found
 //   - (nil, nil) if the policy is not found
 //   - (nil, error) if an error occurs during the operation
 //
-// Errors can occur during:
-//   - Marshaling the policy retrieval request
-//   - Creating the mTLS client
-//   - Making the HTTP POST request (except for not found cases)
-//   - Unmarshaling the response
-//   - Server-side policy retrieval (indicated in the response)
+// Example:
 //
-// Example usage:
-//
-//	source, err := workloadapi.NewX509Source(context.Background())
+//	source, err := workloadapi.NewX509Source(ctx)
 //	if err != nil {
 //	    log.Fatal(err)
 //	}
 //	defer source.Close()
 //
-//	policy, err := GetPolicy(source, "policy-123", predicate.AllowAll)
+//	policy, err := GetPolicy(source, "policy-123")
 //	if err != nil {
 //	    log.Printf("Error retrieving policy: %v", err)
 //	    return
@@ -61,8 +51,11 @@ import (
 //	log.Printf("Found policy: %+v", policy)
 func GetPolicy(
 	source *workloadapi.X509Source, id string,
-	allow predicate.Predicate,
 ) (*data.Policy, error) {
+	if source == nil {
+		return nil, code.ErrNilX509Source
+	}
+
 	r := reqres.PolicyReadRequest{ID: id}
 
 	mr, err := json.Marshal(r)
@@ -73,10 +66,7 @@ func GetPolicy(
 		)
 	}
 
-	client, err := net.CreateMTLSClientWithPredicate(source, allow)
-	if err != nil {
-		return nil, err
-	}
+	client := net.CreateMTLSClientForNexus(source)
 
 	body, err := net.Post(client, url.PolicyGet(), mr)
 	if err != nil {
