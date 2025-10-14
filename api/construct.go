@@ -9,17 +9,16 @@ import (
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 
-	"github.com/spiffe/spike-sdk-go/predicate"
 	"github.com/spiffe/spike-sdk-go/spiffe"
 )
 
 // API is the SPIKE API.
 type API struct {
-	source    *workloadapi.X509Source
-	predicate predicate.Predicate
+	source *workloadapi.X509Source
 }
 
-// New creates and returns a new instance of API configured with a SPIFFE source.
+// New creates and returns a new instance of API configured with a SPIFFE
+// source.
 // It automatically discovers and connects to the SPIFFE Workload API endpoint
 // using the default socket path and creates an X.509 source for authentication.
 // The API client is configured to communicate exclusively with SPIKE Nexus.
@@ -51,8 +50,7 @@ func New() *API {
 		return nil
 	}
 
-	// API Client can only talk to SPIKE Nexus as a peer.
-	return &API{source: source, predicate: predicate.AllowNexus}
+	return &API{source: source}
 }
 
 // NewWithSource initializes a new API instance with a pre-configured
@@ -84,7 +82,5 @@ func New() *API {
 func NewWithSource(source *workloadapi.X509Source) *API {
 	return &API{
 		source: source,
-		// API Client can only talk to SPIKE Nexus as a peer.
-		predicate: predicate.AllowNexus,
 	}
 }
