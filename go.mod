@@ -1,6 +1,6 @@
 module github.com/spiffe/spike-sdk-go
 
-go 1.25.2
+go 1.25.3
 
 require (
 	github.com/cenkalti/backoff/v4 v4.3.0
