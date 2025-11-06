@@ -21,12 +21,15 @@ import (
 var logger *slog.Logger
 var loggerMutex sync.Mutex
 
-func panicWithArgs(fName string, args []any) {
-	ss := make([]string, len(args))
-	for i, arg := range args {
-		ss[i] = fmt.Sprint(arg)
+func fatalExit(fName string, args []any) {
+	if env.StackTracesOnLogFatalVal() {
+		ss := make([]string, len(args))
+		for i, arg := range args {
+			ss[i] = fmt.Sprint(arg)
+		}
+		panic(fName + " " + strings.Join(ss, ","))
 	}
-	panic(fName + " " + strings.Join(ss, ","))
+	os.Exit(1)
 }
 
 // Log returns a thread-safe singleton instance of slog.Logger configured for
@@ -58,10 +61,13 @@ func Log() *slog.Logger {
 // The fName parameter indicates the function name from which the call is made.
 // The args parameter contains the values to be logged, which will be formatted
 // and joined.
-// This function panics before exiting.
+//
+// By default, this function exits cleanly with status code 1 to avoid leaking
+// sensitive information through stack traces in production. To enable stack
+// traces for development and testing, set SPIKE_STACK_TRACES_ON_LOG_FATAL=true.
 func FatalLn(fName string, args ...any) {
 	Log().Error(fName, args...)
-	panicWithArgs(fName, args)
+	fatalExit(fName, args)
 }
 
 // Level returns the logging level for the SPIKE components.

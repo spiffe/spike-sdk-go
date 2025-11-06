@@ -51,3 +51,28 @@ func ShowMemoryWarningVal() bool {
 	}
 	return s == "true"
 }
+
+// StackTracesOnLogFatalVal returns whether to print stack traces when
+// `log.FatalLn` is called, based on the SPIKE_STACK_TRACES_ON_LOG_FATAL
+// environment variable.
+//
+// The function reads the SPIKE_STACK_TRACES_ON_LOG_FATAL environment variable
+// and returns:
+//   - false if the variable is not set (default behavior - clean exit)
+//   - true if the variable is set to "true" (case-insensitive - panic with stack trace)
+//   - false for any other value
+//
+// The environment variable value is trimmed of whitespace and converted to
+// lowercase before comparison.
+//
+// By default, log.FatalLn performs a clean exit to avoid leaking sensitive
+// information in production stack traces. Enable this for development and
+// testing purposes.
+func StackTracesOnLogFatalVal() bool {
+	s := os.Getenv(StackTracesOnLogFatal)
+	s = strings.ToLower(strings.TrimSpace(s))
+	if s == "" {
+		return false
+	}
+	return s == "true"
+}
