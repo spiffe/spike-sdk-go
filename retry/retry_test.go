@@ -115,6 +115,13 @@ func TestExponentialRetrier_Notification(t *testing.T) {
 			WithInitialInterval(100*time.Millisecond),
 			WithMaxInterval(500*time.Millisecond),
 			WithMaxElapsedTime(2000*time.Millisecond),
+			// Disable randomization (jitter) to ensure deterministic intervals
+			// for testing. By default, backoff uses a RandomizationFactor of 0.5,
+			// which randomizes intervals by ±50%. This can cause the second retry
+			// to have a shorter duration than the first (e.g., first retry: 150ms,
+			// second retry: 100ms), breaking the monotonically increasing assumption
+			// in our assertions below (lines 134-135).
+			WithRandomizationFactor(0),
 		),
 	)
 
