@@ -22,6 +22,11 @@ type PolicyCreateResponse struct {
 	Err data.ErrorCode `json:"err,omitempty"`
 }
 
+func (p PolicyCreateResponse) Success() PolicyCreateResponse {
+	p.Err = data.ErrSuccess
+	return p
+}
+
 // PolicyReadRequest to read a policy.
 type PolicyReadRequest struct {
 	ID string `json:"id"`
@@ -33,6 +38,11 @@ type PolicyReadResponse struct {
 	Err data.ErrorCode `json:"err,omitempty"`
 }
 
+func (p PolicyReadResponse) Success() PolicyReadResponse {
+	p.Err = data.ErrSuccess
+	return p
+}
+
 // PolicyDeleteRequest to delete a policy.
 type PolicyDeleteRequest struct {
 	ID string `json:"id"`
@@ -41,6 +51,11 @@ type PolicyDeleteRequest struct {
 // PolicyDeleteResponse to delete a policy.
 type PolicyDeleteResponse struct {
 	Err data.ErrorCode `json:"err,omitempty"`
+}
+
+func (p PolicyDeleteResponse) Success() PolicyDeleteResponse {
+	p.Err = data.ErrSuccess
+	return p
 }
 
 // PolicyListRequest to list policies.
@@ -55,6 +70,11 @@ type PolicyListResponse struct {
 	Err      data.ErrorCode `json:"err,omitempty"`
 }
 
+func (p PolicyListResponse) Success() PolicyListResponse {
+	p.Err = data.ErrSuccess
+	return p
+}
+
 // PolicyAccessCheckRequest to validate policy access.
 type PolicyAccessCheckRequest struct {
 	SPIFFEID string `json:"spiffeid"`
@@ -67,4 +87,9 @@ type PolicyAccessCheckResponse struct {
 	Allowed          bool           `json:"allowed"`
 	MatchingPolicies []string       `json:"matchingPolicies"`
 	Err              data.ErrorCode `json:"err,omitempty"`
+}
+
+func (p PolicyAccessCheckResponse) Success() PolicyAccessCheckResponse {
+	p.Err = data.ErrSuccess
+	return p
 }

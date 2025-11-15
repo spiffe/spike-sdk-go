@@ -26,6 +26,11 @@ type CipherEncryptResponse struct {
 	Err data.ErrorCode `json:"err,omitempty"`
 }
 
+func (c CipherEncryptResponse) Success() CipherEncryptResponse {
+	c.Err = data.ErrSuccess
+	return c
+}
+
 // CipherDecryptRequest for decrypting data
 type CipherDecryptRequest struct {
 	// Version byte to determine decryption method
@@ -44,4 +49,9 @@ type CipherDecryptResponse struct {
 	Plaintext []byte `json:"plaintext"`
 	// Error code if operation failed
 	Err data.ErrorCode `json:"err,omitempty"`
+}
+
+func (c CipherDecryptResponse) Success() CipherDecryptResponse {
+	c.Err = data.ErrSuccess
+	return c
 }

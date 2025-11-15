@@ -20,6 +20,11 @@ type SecretMetadataResponse struct {
 	Err data.ErrorCode `json:"err,omitempty"`
 }
 
+func (m SecretMetadataResponse) Success() SecretMetadataResponse {
+	m.Err = data.ErrSuccess
+	return m
+}
+
 // SecretPutRequest for creating/updating secrets
 type SecretPutRequest struct {
 	Path   string            `json:"path"`
@@ -30,6 +35,11 @@ type SecretPutRequest struct {
 // SecretPutResponse is after a successful secret write operation.
 type SecretPutResponse struct {
 	Err data.ErrorCode `json:"err,omitempty"`
+}
+
+func (s SecretPutResponse) Success() SecretPutResponse {
+	s.Err = data.ErrSuccess
+	return s
 }
 
 // SecretReadRequest is for getting secrets
@@ -44,6 +54,11 @@ type SecretReadResponse struct {
 	Err data.ErrorCode `json:"err,omitempty"`
 }
 
+func (s SecretReadResponse) Success() SecretReadResponse {
+	s.Err = data.ErrSuccess
+	return s
+}
+
 // SecretDeleteRequest for soft-deleting secret versions
 type SecretDeleteRequest struct {
 	Path     string `json:"path"`
@@ -53,6 +68,11 @@ type SecretDeleteRequest struct {
 // SecretDeleteResponse after soft-delete
 type SecretDeleteResponse struct {
 	Err data.ErrorCode `json:"err,omitempty"`
+}
+
+func (s SecretDeleteResponse) Success() SecretDeleteResponse {
+	s.Err = data.ErrSuccess
+	return s
 }
 
 // SecretUndeleteRequest for recovering soft-deleted versions
@@ -66,6 +86,11 @@ type SecretUndeleteResponse struct {
 	Err data.ErrorCode `json:"err,omitempty"`
 }
 
+func (s SecretUndeleteResponse) Success() SecretUndeleteResponse {
+	s.Err = data.ErrSuccess
+	return s
+}
+
 // SecretListRequest for listing secrets
 type SecretListRequest struct {
 }
@@ -74,4 +99,9 @@ type SecretListRequest struct {
 type SecretListResponse struct {
 	Keys []string       `json:"keys"`
 	Err  data.ErrorCode `json:"err,omitempty"`
+}
+
+func (s SecretListResponse) Success() SecretListResponse {
+	s.Err = data.ErrSuccess
+	return s
 }
