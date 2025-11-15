@@ -20,6 +20,11 @@ type ShardPutResponse struct {
 	Err data.ErrorCode `json:"err,omitempty"`
 }
 
+func (s ShardPutResponse) Success() ShardPutResponse {
+	s.Err = data.ErrSuccess
+	return s
+}
+
 // ShardGetRequest represents a request to get a Shamir shard.
 type ShardGetRequest struct {
 }
@@ -29,4 +34,9 @@ type ShardGetRequest struct {
 type ShardGetResponse struct {
 	Shard *[32]byte `json:"shard"`
 	Err   data.ErrorCode
+}
+
+func (s ShardGetResponse) Success() ShardGetResponse {
+	s.Err = data.ErrSuccess
+	return s
 }

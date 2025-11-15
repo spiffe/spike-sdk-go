@@ -18,6 +18,11 @@ type RestoreResponse struct {
 	Err data.ErrorCode `json:"err,omitempty"`
 }
 
+func (r RestoreResponse) Success() RestoreResponse {
+	r.Err = data.ErrSuccess
+	return r
+}
+
 // RecoverRequest for disaster recovery.
 type RecoverRequest struct {
 }
@@ -26,4 +31,9 @@ type RecoverRequest struct {
 type RecoverResponse struct {
 	Shards map[int]*[32]byte `json:"shards"`
 	Err    data.ErrorCode    `json:"err,omitempty"`
+}
+
+func (r RecoverResponse) Success() RecoverResponse {
+	r.Err = data.ErrSuccess
+	return r
 }

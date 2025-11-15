@@ -21,3 +21,8 @@ type BootstrapVerifyResponse struct {
 	// Error code if operation failed
 	Err data.ErrorCode `json:"err,omitempty"`
 }
+
+func (b BootstrapVerifyResponse) Success() BootstrapVerifyResponse {
+	b.Err = data.ErrSuccess
+	return b
+}
