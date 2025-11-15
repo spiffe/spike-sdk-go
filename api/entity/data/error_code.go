@@ -9,6 +9,7 @@ type ErrorCode string
 const ErrAlreadyInitialized = ErrorCode("already_initialized")
 const ErrBadInput = ErrorCode("bad_request")
 const ErrCreationFailed = ErrorCode("creation_failed")
+const ErrEmptyPayload = ErrorCode("empty_payload")
 const ErrInternal = ErrorCode("internal_error")
 const ErrLowEntropy = ErrorCode("low_entropy")
 const ErrNotAlive = ErrorCode("not_alive")
