@@ -8,6 +8,8 @@ import "errors"
 
 var ErrAlreadyInitialized = errors.New("already initialized")
 var ErrCipherDecryptionFailed = errors.New("cipher decryption failed")
+var ErrCipherFailedToReadNonce = errors.New("cipher failed to read nonce")
+var ErrCipherFailedToReadVersion = errors.New("cipher failed to read version")
 var ErrCipherNonceGenerationFailed = errors.New("cipher nonce generation failed")
 var ErrCipherNotAvailable = errors.New("cipher not available")
 var ErrCipherVerificationSuccess = errors.New("cipher verification success")
