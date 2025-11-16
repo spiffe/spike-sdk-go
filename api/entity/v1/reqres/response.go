@@ -24,6 +24,7 @@ var (
 	SecretReadUnauthorized = SecretReadResponse{Err: data.ErrUnauthorized}
 	SecretReadSuccess      = SecretReadResponse{Err: data.ErrSuccess}
 	SecretReadInternal     = SecretReadResponse{Err: data.ErrInternal}
+	SecretReadNotFound     = SecretReadResponse{Err: data.ErrNotFound}
 )
 
 // SecretDeleteResponse variants
@@ -47,6 +48,7 @@ var (
 	SecretListBadInput     = SecretListResponse{Err: data.ErrBadInput}
 	SecretListUnauthorized = SecretListResponse{Err: data.ErrUnauthorized}
 	SecretListInternal     = SecretListResponse{Err: data.ErrInternal}
+	SecretListNotFound     = SecretListResponse{Err: data.ErrNotFound}
 )
 
 // SecretPutResponse variants
@@ -62,6 +64,7 @@ var (
 	SecretMetadataBadInput     = SecretMetadataResponse{Err: data.ErrBadInput}
 	SecretMetadataUnauthorized = SecretMetadataResponse{Err: data.ErrUnauthorized}
 	SecretMetadataInternal     = SecretMetadataResponse{Err: data.ErrInternal}
+	SecretMetadataNotFound     = SecretMetadataResponse{Err: data.ErrNotFound}
 )
 
 // PolicyCreateResponse variants
@@ -78,6 +81,7 @@ var (
 	PolicyReadUnauthorized = PolicyReadResponse{Err: data.ErrUnauthorized}
 	PolicyReadSuccess      = PolicyReadResponse{Err: data.ErrSuccess}
 	PolicyReadInternal     = PolicyReadResponse{Err: data.ErrInternal}
+	PolicyReadNotFound     = PolicyReadResponse{Err: data.ErrNotFound}
 )
 
 // PolicyDeleteResponse variants
@@ -93,6 +97,7 @@ var (
 	PolicyListBadInput     = PolicyListResponse{Err: data.ErrBadInput}
 	PolicyListUnauthorized = PolicyListResponse{Err: data.ErrUnauthorized}
 	PolicyListInternal     = PolicyListResponse{Err: data.ErrInternal}
+	PolicyListNotFound     = PolicyListResponse{Err: data.ErrNotFound}
 )
 
 // CipherDecryptResponse variants
