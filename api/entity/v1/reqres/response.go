@@ -127,3 +127,10 @@ var (
 	RestoreUnauthorized = RestoreResponse{Err: data.ErrUnauthorized}
 	RestoreInternal     = RestoreResponse{Err: data.ErrInternal}
 )
+
+// BoostrapResponse variants
+var (
+	BootstrapBadInput     = BootstrapVerifyResponse{Err: data.ErrBadInput}
+	BootstrapUnauthorized = BootstrapVerifyResponse{Err: data.ErrUnauthorized}
+	BootstrapInternal     = BootstrapVerifyResponse{Err: data.ErrInternal}
+)
