@@ -8,6 +8,7 @@ import "errors"
 
 var ErrAlreadyInitialized = errors.New("already initialized")
 var ErrCreationFailed = errors.New("creation failed")
+var ErrDeletionFailed = errors.New("deletion failed")
 var ErrInvalidInput = errors.New("invalid input")
 var ErrInvalidPermission = errors.New("invalid permission")
 var ErrMarshalFailure = errors.New("failed to marshal response body")
