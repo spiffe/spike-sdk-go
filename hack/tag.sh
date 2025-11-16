@@ -4,7 +4,7 @@
 #  \\\\\ Copyright 2024-present SPIKE contributors.
 # \\\\\\\ SPDX-License-Identifier: Apache-2.0
 
-VERSION="v0.12.11"
+VERSION="v0.12.12"
 
 git tag -s "$VERSION" -m "$VERSION"
 git push origin --tags
