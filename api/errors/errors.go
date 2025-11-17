@@ -48,6 +48,8 @@ var ErrUnauthorized = errors.New("unauthorized")
 var ErrUndeleteFailed = errors.New("undeletion failed")
 var ErrUndeleteSuccess = errors.New("undeletion success")
 var ErrUnmarshalFailure = errors.New("failed to unmarshal request body")
+var ErrBackendInvalidConfiguration = errors.New("invalid backend configuration")
+var ErrBackendInvalidEncryptionKey = errors.New("invalid backend encryption key")
 
 // ErrFailedFor returns an error message indicating that an action failed
 // for a specific entity.
