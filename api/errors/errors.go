@@ -10,6 +10,7 @@ import (
 )
 
 var ErrAlreadyInitialized = errors.New("already initialized")
+var ErrInitializationFailed = errors.New("initialization failed")
 var ErrBackendInvalidConfiguration = errors.New("invalid backend configuration")
 var ErrBackendInvalidEncryptionKey = errors.New("invalid backend encryption key")
 var ErrCreationFailed = errors.New("creation failed")
