@@ -49,3 +49,12 @@ func ErrFailedFor(action, whatFailed, forWhat, identifier string) error {
 		action, whatFailed, forWhat, identifier,
 	)
 }
+
+// ErrInvalidFor returns an error message indicating that an entity is invalid
+// for a specific purpose.
+// i.e.: "[encoding] is invalid for [purpose]: [spiffe://spike.ist/]"
+func ErrInvalidFor(whatsInvalid, forWhat, identifier string) error {
+	return fmt.Errorf("%s is invalid for %s: '%s'",
+		whatsInvalid, forWhat, identifier,
+	)
+}
