@@ -11,6 +11,7 @@ import (
 
 var ErrAlreadyInitialized = errors.New("already initialized")
 var ErrCipherDecryptionFailed = errors.New("decryption failed")
+var ErrCipherEncryptionFailed = errors.New("encryption failed")
 var ErrCipherFailedToReadNonce = errors.New("failed to read nonce")
 var ErrCipherFailedToReadVersion = errors.New("failed to read version")
 var ErrCipherNonceGenerationFailed = errors.New("nonce generation failed")
