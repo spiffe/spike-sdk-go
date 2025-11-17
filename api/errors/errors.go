@@ -4,7 +4,10 @@
 
 package errors
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+)
 
 var ErrAlreadyInitialized = errors.New("already initialized")
 var ErrCipherDecryptionFailed = errors.New("cipher decryption failed")
@@ -37,3 +40,12 @@ var ErrDataLoadFailed = errors.New("failed to load data")
 var ErrDataQueryFailed = errors.New("failed to query data")
 var ErrFileCloseFailed = errors.New("file close failed")
 var ErrUnmarshalFailure = errors.New("failed to unmarshal request body")
+
+// ErrFailedFor returns an error message indicating that an action failed
+// for a specific entity.
+// i.e.: "[encoding] of [path] failed for [spiffeid]: [spiffe://spike.ist/]"
+func ErrFailedFor(action, whatFailed, forWhat, identifier string) error {
+	return fmt.Errorf("%s of %s failed for %s: '%s'",
+		action, whatFailed, forWhat, identifier,
+	)
+}
