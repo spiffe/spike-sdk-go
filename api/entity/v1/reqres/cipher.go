@@ -29,7 +29,7 @@ type CipherEncryptResponse struct {
 }
 
 func (c CipherEncryptResponse) Success() CipherEncryptResponse {
-	c.Err = errors.ErrCodeSuccess
+	c.Err = errors.ErrSuccess.Code
 	return c
 }
 
@@ -54,6 +54,6 @@ type CipherDecryptResponse struct {
 }
 
 func (c CipherDecryptResponse) Success() CipherDecryptResponse {
-	c.Err = errors.ErrCodeSuccess
+	c.Err = errors.ErrSuccess.Code
 	return c
 }

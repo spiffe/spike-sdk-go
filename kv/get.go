@@ -36,7 +36,7 @@ import sdkErrors "github.com/spiffe/spike-sdk-go/errors"
 func (kv *KV) Get(path string, version int) (map[string]string, error) {
 	secret, exists := kv.data[path]
 	if !exists {
-		return nil, sdkErrors.ErrStoreItemNotFound
+		return nil, sdkErrors.ErrEntityNotFound
 	}
 
 	// #region debug
@@ -75,7 +75,7 @@ func (kv *KV) Get(path string, version int) (map[string]string, error) {
 func (kv *KV) GetRawSecret(path string) (*Value, error) {
 	secret, exists := kv.data[path]
 	if !exists {
-		return nil, sdkErrors.ErrStoreItemNotFound
+		return nil, sdkErrors.ErrEntityNotFound
 	}
 
 	return secret, nil

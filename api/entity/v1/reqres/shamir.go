@@ -23,7 +23,7 @@ type ShardPutResponse struct {
 }
 
 func (s ShardPutResponse) Success() ShardPutResponse {
-	s.Err = sdkErrors.ErrCodeSuccess
+	s.Err = sdkErrors.ErrSuccess.Code
 	return s
 }
 
@@ -39,6 +39,6 @@ type ShardGetResponse struct {
 }
 
 func (s ShardGetResponse) Success() ShardGetResponse {
-	s.Err = sdkErrors.ErrCodeSuccess
+	s.Err = sdkErrors.ErrSuccess.Code
 	return s
 }

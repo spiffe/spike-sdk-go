@@ -22,7 +22,7 @@ type RestoreResponse struct {
 }
 
 func (r RestoreResponse) Success() RestoreResponse {
-	r.Err = errors.ErrCodeSuccess
+	r.Err = errors.ErrSuccess.Code
 	return r
 }
 
@@ -37,6 +37,6 @@ type RecoverResponse struct {
 }
 
 func (r RecoverResponse) Success() RecoverResponse {
-	r.Err = errors.ErrCodeSuccess
+	r.Err = errors.ErrSuccess.Code
 	return r
 }

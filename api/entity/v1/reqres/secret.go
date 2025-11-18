@@ -22,7 +22,7 @@ type SecretMetadataResponse struct {
 }
 
 func (m SecretMetadataResponse) Success() SecretMetadataResponse {
-	m.Err = sdkErrors.ErrCodeSuccess
+	m.Err = sdkErrors.ErrSuccess.Code
 	return m
 }
 
@@ -39,7 +39,7 @@ type SecretPutResponse struct {
 }
 
 func (s SecretPutResponse) Success() SecretPutResponse {
-	s.Err = sdkErrors.ErrCodeSuccess
+	s.Err = sdkErrors.ErrSuccess.Code
 	return s
 }
 
@@ -56,7 +56,7 @@ type SecretReadResponse struct {
 }
 
 func (s SecretReadResponse) Success() SecretReadResponse {
-	s.Err = sdkErrors.ErrCodeSuccess
+	s.Err = sdkErrors.ErrSuccess.Code
 	return s
 }
 
@@ -72,7 +72,7 @@ type SecretDeleteResponse struct {
 }
 
 func (s SecretDeleteResponse) Success() SecretDeleteResponse {
-	s.Err = sdkErrors.ErrCodeSuccess
+	s.Err = sdkErrors.ErrSuccess.Code
 	return s
 }
 
@@ -88,7 +88,7 @@ type SecretUndeleteResponse struct {
 }
 
 func (s SecretUndeleteResponse) Success() SecretUndeleteResponse {
-	s.Err = sdkErrors.ErrCodeSuccess
+	s.Err = sdkErrors.ErrSuccess.Code
 	return s
 }
 
@@ -103,6 +103,6 @@ type SecretListResponse struct {
 }
 
 func (s SecretListResponse) Success() SecretListResponse {
-	s.Err = sdkErrors.ErrCodeSuccess
+	s.Err = sdkErrors.ErrSuccess.Code
 	return s
 }

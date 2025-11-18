@@ -25,6 +25,6 @@ type BootstrapVerifyResponse struct {
 }
 
 func (b BootstrapVerifyResponse) Success() BootstrapVerifyResponse {
-	b.Err = errors.ErrCodeSuccess
+	b.Err = errors.ErrSuccess.Code
 	return b
 }
