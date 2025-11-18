@@ -68,6 +68,9 @@ var ErrStoreVersionNotFound = errors.New("version not found")
 var ErrStoreItemNotFound = errors.New("item not found")
 var ErrStoreItemSoftDeleted = errors.New("item marked as deleted")
 var ErrStoreInvalidVersion = errors.New("invalid version")
+var ErrPolicyNotFound = errors.New("policy not found")
+var ErrPolicyExists = errors.New("policy already exists")
+var ErrPolicyInvalid = errors.New("invalid policy")
 
 // FailedFor is a temporary function used until errors/sdk.go implements
 // proper error wrapping.
