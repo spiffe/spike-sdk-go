@@ -6,6 +6,7 @@ package reqres
 
 import (
 	"github.com/spiffe/spike-sdk-go/api/entity/data"
+	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
 )
 
 // SecretMetadataRequest for get secrets metadata
@@ -17,28 +18,28 @@ type SecretMetadataRequest struct {
 // SecretMetadataResponse for secrets versions and metadata
 type SecretMetadataResponse struct {
 	data.SecretMetadata
-	Err data.ErrorCode `json:"err,omitempty"`
+	Err sdkErrors.ErrorCode `json:"err,omitempty"`
 }
 
 func (m SecretMetadataResponse) Success() SecretMetadataResponse {
-	m.Err = data.ErrSuccess
+	m.Err = sdkErrors.ErrCodeSuccess
 	return m
 }
 
 // SecretPutRequest for creating/updating secrets
 type SecretPutRequest struct {
-	Path   string            `json:"path"`
-	Values map[string]string `json:"values"`
-	Err    data.ErrorCode    `json:"err,omitempty"`
+	Path   string              `json:"path"`
+	Values map[string]string   `json:"values"`
+	Err    sdkErrors.ErrorCode `json:"err,omitempty"`
 }
 
 // SecretPutResponse is after a successful secret write operation.
 type SecretPutResponse struct {
-	Err data.ErrorCode `json:"err,omitempty"`
+	Err sdkErrors.ErrorCode `json:"err,omitempty"`
 }
 
 func (s SecretPutResponse) Success() SecretPutResponse {
-	s.Err = data.ErrSuccess
+	s.Err = sdkErrors.ErrCodeSuccess
 	return s
 }
 
@@ -51,11 +52,11 @@ type SecretReadRequest struct {
 // SecretReadResponse is for getting secrets
 type SecretReadResponse struct {
 	data.Secret
-	Err data.ErrorCode `json:"err,omitempty"`
+	Err sdkErrors.ErrorCode `json:"err,omitempty"`
 }
 
 func (s SecretReadResponse) Success() SecretReadResponse {
-	s.Err = data.ErrSuccess
+	s.Err = sdkErrors.ErrCodeSuccess
 	return s
 }
 
@@ -67,11 +68,11 @@ type SecretDeleteRequest struct {
 
 // SecretDeleteResponse after soft-delete
 type SecretDeleteResponse struct {
-	Err data.ErrorCode `json:"err,omitempty"`
+	Err sdkErrors.ErrorCode `json:"err,omitempty"`
 }
 
 func (s SecretDeleteResponse) Success() SecretDeleteResponse {
-	s.Err = data.ErrSuccess
+	s.Err = sdkErrors.ErrCodeSuccess
 	return s
 }
 
@@ -83,11 +84,11 @@ type SecretUndeleteRequest struct {
 
 // SecretUndeleteResponse after recovery
 type SecretUndeleteResponse struct {
-	Err data.ErrorCode `json:"err,omitempty"`
+	Err sdkErrors.ErrorCode `json:"err,omitempty"`
 }
 
 func (s SecretUndeleteResponse) Success() SecretUndeleteResponse {
-	s.Err = data.ErrSuccess
+	s.Err = sdkErrors.ErrCodeSuccess
 	return s
 }
 
@@ -97,11 +98,11 @@ type SecretListRequest struct {
 
 // SecretListResponse for listing secrets
 type SecretListResponse struct {
-	Keys []string       `json:"keys"`
-	Err  data.ErrorCode `json:"err,omitempty"`
+	Keys []string            `json:"keys"`
+	Err  sdkErrors.ErrorCode `json:"err,omitempty"`
 }
 
 func (s SecretListResponse) Success() SecretListResponse {
-	s.Err = data.ErrSuccess
+	s.Err = sdkErrors.ErrCodeSuccess
 	return s
 }

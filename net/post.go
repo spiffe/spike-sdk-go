@@ -10,17 +10,9 @@ import (
 	"io"
 	"net/http"
 
+	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
 	"github.com/spiffe/spike-sdk-go/log"
 )
-
-func body(r *http.Response) (bod []byte, err error) {
-	body, err := io.ReadAll(r.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	return body, err
-}
 
 // Post performs an HTTP POST request with a JSON payload and returns the
 // response body. It handles the common cases of connection errors, non-200
@@ -92,20 +84,20 @@ func Post(client *http.Client, path string, mr []byte) ([]byte, error) {
 
 	if r.StatusCode != http.StatusOK {
 		if r.StatusCode == http.StatusNotFound {
-			return []byte{}, ErrNotFound
+			return []byte{}, sdkErrors.ErrNotFound
 		}
 
 		if r.StatusCode == http.StatusUnauthorized {
-			return []byte{}, ErrUnauthorized
+			return []byte{}, sdkErrors.ErrUnauthorized
 		}
 
 		if r.StatusCode == http.StatusBadRequest {
-			return []byte{}, ErrBadRequest
+			return []byte{}, sdkErrors.ErrBadRequest
 		}
 
 		// SPIKE Nexus is likely not initialized or in bad shape:
 		if r.StatusCode == http.StatusServiceUnavailable {
-			return []byte{}, ErrNotReady
+			return []byte{}, sdkErrors.ErrNotReady
 		}
 
 		return []byte{}, errors.New("post: Problem connecting to peer")

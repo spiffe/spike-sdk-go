@@ -12,8 +12,8 @@ import (
 
 	"github.com/spiffe/spike-sdk-go/api/entity/data"
 	"github.com/spiffe/spike-sdk-go/api/entity/v1/reqres"
-	code "github.com/spiffe/spike-sdk-go/api/errors"
 	"github.com/spiffe/spike-sdk-go/api/url"
+	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
 	"github.com/spiffe/spike-sdk-go/net"
 )
 
@@ -53,7 +53,7 @@ func GetPolicy(
 	source *workloadapi.X509Source, id string,
 ) (*data.Policy, error) {
 	if source == nil {
-		return nil, code.ErrNilX509Source
+		return nil, sdkErrors.ErrNilX509Source
 	}
 
 	r := reqres.PolicyReadRequest{ID: id}
@@ -70,7 +70,7 @@ func GetPolicy(
 
 	body, err := net.Post(client, url.PolicyGet(), mr)
 	if err != nil {
-		if errors.Is(err, net.ErrNotFound) {
+		if errors.Is(err, sdkErrors.ErrNotFound) {
 			return nil, nil
 		}
 		return nil, err

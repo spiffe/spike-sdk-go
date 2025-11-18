@@ -11,8 +11,8 @@ import (
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 
 	"github.com/spiffe/spike-sdk-go/api/entity/v1/reqres"
-	code "github.com/spiffe/spike-sdk-go/api/errors"
 	"github.com/spiffe/spike-sdk-go/api/url"
+	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
 	"github.com/spiffe/spike-sdk-go/log"
 	"github.com/spiffe/spike-sdk-go/net"
 	"github.com/spiffe/spike-sdk-go/spiffeid"
@@ -39,7 +39,7 @@ import (
 //	shards, err := Recover(x509Source)
 func Recover(source *workloadapi.X509Source) (map[int]*[32]byte, error) {
 	if source == nil {
-		return nil, code.ErrNilX509Source
+		return nil, sdkErrors.ErrNilX509Source
 	}
 
 	const fName = "recover"
@@ -76,7 +76,7 @@ func Recover(source *workloadapi.X509Source) (map[int]*[32]byte, error) {
 
 	body, err := net.Post(client, url.Recover(), mr)
 	if err != nil {
-		if errors.Is(err, net.ErrNotFound) {
+		if errors.Is(err, sdkErrors.ErrNotFound) {
 			return nil, nil
 		}
 		return nil, err

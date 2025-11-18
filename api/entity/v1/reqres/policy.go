@@ -6,6 +6,7 @@ package reqres
 
 import (
 	"github.com/spiffe/spike-sdk-go/api/entity/data"
+	"github.com/spiffe/spike-sdk-go/errors"
 )
 
 // PolicyCreateRequest for policy creation.
@@ -18,12 +19,12 @@ type PolicyCreateRequest struct {
 
 // PolicyCreateResponse for policy creation.
 type PolicyCreateResponse struct {
-	ID  string         `json:"id,omitempty"`
-	Err data.ErrorCode `json:"err,omitempty"`
+	ID  string           `json:"id,omitempty"`
+	Err errors.ErrorCode `json:"err,omitempty"`
 }
 
 func (p PolicyCreateResponse) Success() PolicyCreateResponse {
-	p.Err = data.ErrSuccess
+	p.Err = errors.ErrCodeSuccess
 	return p
 }
 
@@ -35,11 +36,11 @@ type PolicyReadRequest struct {
 // PolicyReadResponse to read a policy.
 type PolicyReadResponse struct {
 	data.Policy
-	Err data.ErrorCode `json:"err,omitempty"`
+	Err errors.ErrorCode `json:"err,omitempty"`
 }
 
 func (p PolicyReadResponse) Success() PolicyReadResponse {
-	p.Err = data.ErrSuccess
+	p.Err = errors.ErrCodeSuccess
 	return p
 }
 
@@ -50,11 +51,11 @@ type PolicyDeleteRequest struct {
 
 // PolicyDeleteResponse to delete a policy.
 type PolicyDeleteResponse struct {
-	Err data.ErrorCode `json:"err,omitempty"`
+	Err errors.ErrorCode `json:"err,omitempty"`
 }
 
 func (p PolicyDeleteResponse) Success() PolicyDeleteResponse {
-	p.Err = data.ErrSuccess
+	p.Err = errors.ErrCodeSuccess
 	return p
 }
 
@@ -66,12 +67,12 @@ type PolicyListRequest struct {
 
 // PolicyListResponse to list policies.
 type PolicyListResponse struct {
-	Policies []data.Policy  `json:"policies"`
-	Err      data.ErrorCode `json:"err,omitempty"`
+	Policies []data.Policy    `json:"policies"`
+	Err      errors.ErrorCode `json:"err,omitempty"`
 }
 
 func (p PolicyListResponse) Success() PolicyListResponse {
-	p.Err = data.ErrSuccess
+	p.Err = errors.ErrCodeSuccess
 	return p
 }
 
@@ -84,12 +85,12 @@ type PolicyAccessCheckRequest struct {
 
 // PolicyAccessCheckResponse to validate policy access.
 type PolicyAccessCheckResponse struct {
-	Allowed          bool           `json:"allowed"`
-	MatchingPolicies []string       `json:"matchingPolicies"`
-	Err              data.ErrorCode `json:"err,omitempty"`
+	Allowed          bool             `json:"allowed"`
+	MatchingPolicies []string         `json:"matchingPolicies"`
+	Err              errors.ErrorCode `json:"err,omitempty"`
 }
 
 func (p PolicyAccessCheckResponse) Success() PolicyAccessCheckResponse {
-	p.Err = data.ErrSuccess
+	p.Err = errors.ErrCodeSuccess
 	return p
 }

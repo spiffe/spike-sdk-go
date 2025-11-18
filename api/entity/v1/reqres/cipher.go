@@ -4,7 +4,9 @@
 
 package reqres
 
-import "github.com/spiffe/spike-sdk-go/api/entity/data"
+import (
+	"github.com/spiffe/spike-sdk-go/errors"
+)
 
 // CipherEncryptRequest for encrypting data
 type CipherEncryptRequest struct {
@@ -23,11 +25,11 @@ type CipherEncryptResponse struct {
 	// Encrypted ciphertext
 	Ciphertext []byte `json:"ciphertext"`
 	// Error code if operation failed
-	Err data.ErrorCode `json:"err,omitempty"`
+	Err errors.ErrorCode `json:"err,omitempty"`
 }
 
 func (c CipherEncryptResponse) Success() CipherEncryptResponse {
-	c.Err = data.ErrSuccess
+	c.Err = errors.ErrCodeSuccess
 	return c
 }
 
@@ -48,10 +50,10 @@ type CipherDecryptResponse struct {
 	// Decrypted plaintext data
 	Plaintext []byte `json:"plaintext"`
 	// Error code if operation failed
-	Err data.ErrorCode `json:"err,omitempty"`
+	Err errors.ErrorCode `json:"err,omitempty"`
 }
 
 func (c CipherDecryptResponse) Success() CipherDecryptResponse {
-	c.Err = data.ErrSuccess
+	c.Err = errors.ErrCodeSuccess
 	return c
 }

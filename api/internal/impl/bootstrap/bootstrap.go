@@ -1,3 +1,7 @@
+//    \\ SPIKE: Secure your secrets with SPIFFE. — https://spike.ist/
+//  \\\\\ Copyright 2024-present SPIKE contributors.
+// \\\\\\\ SPDX-License-Identifier: Apache-2.0
+
 package bootstrap
 
 import (
@@ -11,10 +15,10 @@ import (
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 
 	"github.com/spiffe/spike-sdk-go/api/entity/v1/reqres"
-	code "github.com/spiffe/spike-sdk-go/api/errors"
 	"github.com/spiffe/spike-sdk-go/api/url"
 	"github.com/spiffe/spike-sdk-go/config/env"
 	"github.com/spiffe/spike-sdk-go/crypto"
+	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
 	"github.com/spiffe/spike-sdk-go/log"
 	"github.com/spiffe/spike-sdk-go/net"
 	"github.com/spiffe/spike-sdk-go/security/mem"
@@ -58,7 +62,7 @@ func Contribute(
 	const fName = "Contribute"
 
 	if source == nil {
-		return code.ErrNilX509Source
+		return sdkErrors.ErrNilX509Source
 	}
 
 	contribution, err := keeperShare.Value.MarshalBinary()
@@ -152,7 +156,7 @@ func Verify(
 	const fName = "Verify"
 
 	if source == nil {
-		return code.ErrNilX509Source
+		return sdkErrors.ErrNilX509Source
 	}
 
 	client := net.CreateMTLSClientForNexus(source)

@@ -8,6 +8,8 @@ import (
 	"crypto/rand"
 	"runtime"
 	"unsafe"
+
+	"github.com/spiffe/spike-sdk-go/log"
 )
 
 // ClearRawBytes securely erases all bytes in the provided value by overwriting
@@ -122,6 +124,8 @@ func ClearRawBytes[T any](s *T) {
 // This method is provided for users with extreme security requirements or in
 // regulated environments where multiple-pass overwrite policies are mandated.
 func ClearRawBytesParanoid[T any](s *T) {
+	const fName = "ClearRawBytesParanoid"
+
 	if s == nil {
 		return
 	}
@@ -152,7 +156,7 @@ func ClearRawBytesParanoid[T any](s *T) {
 	// Fill with random data (third pass)
 	_, err := rand.Read(b)
 	if err != nil {
-		panic("")
+		log.FatalLn(fName)
 	}
 	runtime.KeepAlive(s)
 

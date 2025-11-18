@@ -6,6 +6,8 @@ package kv
 
 import (
 	"time"
+
+	"github.com/spiffe/spike-sdk-go/errors"
 )
 
 // Delete marks secret versions as deleted for a given path. If no versions are
@@ -16,7 +18,7 @@ import (
 func (kv *KV) Delete(path string, versions []int) error {
 	secret, exists := kv.data[path]
 	if !exists {
-		return ErrItemNotFound
+		return errors.ErrStoreItemNotFound
 	}
 
 	now := time.Now()

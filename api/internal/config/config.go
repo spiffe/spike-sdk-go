@@ -9,24 +9,29 @@ import (
 	"path/filepath"
 )
 
+const tmpRootDir = "/tmp"
+const dataRootDir = "/data"
+const dataDir = ".spike"
+
 // NexusDataFolder returns the path to the directory where Nexus stores
 // its encrypted backup for its secrets and other data.
 func NexusDataFolder() string {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
-		homeDir = "/tmp"
+		homeDir = tmpRootDir
 	}
 
-	sd := filepath.Join(homeDir, ".spike")
+	sd := filepath.Join(homeDir, dataDir)
+	sdr := filepath.Join(sd, dataRootDir)
 
 	// Create the directory if it doesn't exist
 	// 0700 because we want to restrict access to the directory
 	// but allow the user to create db files in it.
-	err = os.MkdirAll(sd+"/data", 0700)
+	err = os.MkdirAll(sdr, 0700)
 	if err != nil {
 		panic(err)
 	}
 
 	// The data dir is not configurable for security reasons.
-	return filepath.Join(sd, "/data")
+	return sdr
 }

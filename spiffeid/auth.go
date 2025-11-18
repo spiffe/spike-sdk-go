@@ -19,7 +19,8 @@ import (
 //
 // The function supports two formats:
 //   - Exact match: "spiffe://<trustRoot>/spike/pilot"
-//   - Extended match with metadata: "spiffe://<trustRoot>/spike/pilot/<metadata>"
+//   - Extended match with metadata:
+//     "spiffe://<trustRoot>/spike/pilot/<metadata>"
 //
 // This allows for instance-specific identifiers while maintaining compatibility
 // with the base pilot identity.

@@ -9,8 +9,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/spiffe/spike-sdk-go/api/entity/data"
-
-	"github.com/spiffe/spike-sdk-go/api/errors"
+	"github.com/spiffe/spike-sdk-go/errors"
 )
 
 const validNamePattern = `^[a-zA-Z0-9-_ ]+$`

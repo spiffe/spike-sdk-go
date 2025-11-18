@@ -4,6 +4,8 @@
 
 package kv
 
+import sdkErrors "github.com/spiffe/spike-sdk-go/errors"
+
 // Undelete restores previously deleted versions of a secret at the specified
 // path. It sets the DeletedTime to nil for each specified version that exists.
 //
@@ -19,7 +21,7 @@ package kv
 func (kv *KV) Undelete(path string, versions []int) error {
 	secret, exists := kv.data[path]
 	if !exists {
-		return ErrItemNotFound
+		return sdkErrors.ErrStoreItemNotFound
 	}
 
 	cv := secret.Metadata.CurrentVersion

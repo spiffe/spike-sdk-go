@@ -4,7 +4,10 @@
 
 package reqres
 
-import "github.com/spiffe/spike-sdk-go/api/entity/data"
+import (
+	"github.com/spiffe/spike-sdk-go/api/entity/data"
+	"github.com/spiffe/spike-sdk-go/errors"
+)
 
 // RestoreRequest for disaster recovery.
 type RestoreRequest struct {
@@ -15,11 +18,11 @@ type RestoreRequest struct {
 // RestoreResponse for disaster recovery.
 type RestoreResponse struct {
 	data.RestorationStatus
-	Err data.ErrorCode `json:"err,omitempty"`
+	Err errors.ErrorCode `json:"err,omitempty"`
 }
 
 func (r RestoreResponse) Success() RestoreResponse {
-	r.Err = data.ErrSuccess
+	r.Err = errors.ErrCodeSuccess
 	return r
 }
 
@@ -30,10 +33,10 @@ type RecoverRequest struct {
 // RecoverResponse for disaster recovery.
 type RecoverResponse struct {
 	Shards map[int]*[32]byte `json:"shards"`
-	Err    data.ErrorCode    `json:"err,omitempty"`
+	Err    errors.ErrorCode  `json:"err,omitempty"`
 }
 
 func (r RecoverResponse) Success() RecoverResponse {
-	r.Err = data.ErrSuccess
+	r.Err = errors.ErrCodeSuccess
 	return r
 }

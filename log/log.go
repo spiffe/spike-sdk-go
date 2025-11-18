@@ -9,28 +9,14 @@
 package log
 
 import (
-	"fmt"
 	"log/slog"
 	"os"
 	"strings"
 	"sync"
-
-	"github.com/spiffe/spike-sdk-go/config/env"
 )
 
 var logger *slog.Logger
 var loggerMutex sync.Mutex
-
-func fatalExit(fName string, args []any) {
-	if env.StackTracesOnLogFatalVal() {
-		ss := make([]string, len(args))
-		for i, arg := range args {
-			ss[i] = fmt.Sprint(arg)
-		}
-		panic(fName + " " + strings.Join(ss, ","))
-	}
-	os.Exit(1)
-}
 
 // Log returns a thread-safe singleton instance of slog.Logger configured for
 // JSON output. If the logger hasn't been initialized, it creates a new instance
@@ -70,6 +56,9 @@ func FatalLn(fName string, args ...any) {
 	fatalExit(fName, args)
 }
 
+// Cannot get from env.go because of circular dependency.
+const systemLogLevelEnvVar = "SPIKE_SYSTEM_LOG_LEVEL"
+
 // Level returns the logging level for the SPIKE components.
 //
 // It reads from the SPIKE_SYSTEM_LOG_LEVEL environment variable and
@@ -83,7 +72,7 @@ func FatalLn(fName string, args ...any) {
 // If the environment variable is not set or contains an invalid value,
 // it returns the default level slog.LevelWarn.
 func Level() slog.Level {
-	level := os.Getenv(env.SystemLogLevel)
+	level := os.Getenv(systemLogLevelEnvVar)
 	level = strings.ToUpper(level)
 
 	switch level {

@@ -6,6 +6,8 @@ package env
 
 import "os"
 
+const nexusDefaultAPIRoot = "https://localhost:8553"
+
 // NexusAPIRootVal retrieves the SPIKE Nexus API root URL from the environment.
 // It reads the value from the SPIKE_NEXUS_API_URL environment variable.
 //
@@ -16,7 +18,7 @@ import "os"
 func NexusAPIRootVal() string {
 	apiRoot := os.Getenv(NexusAPIURL)
 	if apiRoot == "" {
-		return "https://localhost:8553"
+		return nexusDefaultAPIRoot
 	}
 	return apiRoot
 }

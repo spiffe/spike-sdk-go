@@ -1,0 +1,46 @@
+//    \\ SPIKE: Secure your secrets with SPIFFE. — https://spike.ist/
+//  \\\\\ Copyright 2024-present SPIKE contributors.
+// \\\\\\\ SPDX-License-Identifier: Apache-2.0
+
+package errors
+
+type ErrorCode string
+
+const ErrCodeAlreadyInitialized = ErrorCode("already_initialized")
+const ErrCodeBadInput = ErrorCode("bad_request")
+const ErrCodeDeletionFailed = ErrorCode("deletion_failed")
+const ErrCodeDeletionSuccess = ErrorCode("deletion_success")
+const ErrCodeEmptyPayload = ErrorCode("empty_payload")
+const ErrCodeFound = ErrorCode("found")
+const ErrCodeInitializationFailed = ErrorCode("initialization_failed")
+const ErrCodeInternal = ErrorCode("internal_error")
+const ErrCodeLowEntropy = ErrorCode("low_entropy")
+const ErrCodeNilContext = ErrorCode("nil_context")
+const ErrCodeNotAlive = ErrorCode("not_alive")
+const ErrCodeNotFound = ErrorCode("not_found")
+const ErrCodeNotReady = ErrorCode("not_ready")
+const ErrCodeQueryFailure = ErrorCode("query_failed")
+const ErrCodeResultSetFailedToLoad = ErrorCode("result_set_failed_to_load")
+const ErrCodeRootKeyEmpty = ErrorCode("root_key_empty")
+const ErrCodeRootKeyNotEmpty = ErrorCode("root_key_not_empty")
+const ErrCodeRootKeySetSuccess = ErrorCode("root_key_set_success")
+const ErrCodeRootKeySkipCreationForInMemoryMode = ErrorCode("root_key_skip_creation_for_in_memory_mode")
+const ErrCodeRootKeyUpdateSkippedKeyEmpty = ErrorCode("root_key_update_skipped_key_empty")
+const ErrCodeServerFault = ErrorCode("server_fault")
+const ErrCodeShamirDuplicateIndex = ErrorCode("shamir_duplicate_index")
+const ErrCodeShamirEmptyShard = ErrorCode("shamir_empty_shard")
+const ErrCodeShamirInvalidIndex = ErrorCode("shamir_invalid_index")
+const ErrCodeShamirNilShard = ErrorCode("shamir_nil_shard")
+const ErrCodeShamirNotEnoughShards = ErrorCode("shamir_not_enough_shards")
+const ErrCodeSuccess = ErrorCode("success")
+const ErrCodeUnauthorized = ErrorCode("unauthorized")
+const ErrCodeUndeleteFailed = ErrorCode("undeletion_failed")
+const ErrCodeUndeleteSuccess = ErrorCode("undeletion_success")
+const ErrCodeCreationFailed = ErrorCode("creation_failed")
+const ErrCodeCryptoCipherNotAvailable = ErrorCode("crypto_cipher_not_available")
+const ErrCodeCryptoCipherVerificationSuccess = ErrorCode("crypto_cipher_verification_success")
+const ErrCodeCryptoDecryptionFailed = ErrorCode("crypto_decryption_failed")
+const ErrCodeCryptoEncryptionFailed = ErrorCode("crypto_encryption_failed")
+const ErrCodeCryptoFailedToReadNonce = ErrorCode("crypto_failed_to_read_nonce")
+const ErrCodeCryptoFailedToReadVersion = ErrorCode("crypto_failed_to_read_version")
+const ErrCodeCryptoNonceGenerationFailed = ErrorCode("crypto_nonce_generation_failed")
