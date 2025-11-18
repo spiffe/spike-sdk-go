@@ -28,7 +28,7 @@ func TestKV_Delete(t *testing.T) {
 			},
 			path:     "non/existent/path",
 			versions: nil,
-			wantErr:  sdkErrors.ErrStoreItemNotFound,
+			wantErr:  sdkErrors.ErrEntityNotFound,
 		},
 		{
 			name: "delete_current_version_no_versions_specified",

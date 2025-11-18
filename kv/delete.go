@@ -18,7 +18,7 @@ import (
 func (kv *KV) Delete(path string, versions []int) error {
 	secret, exists := kv.data[path]
 	if !exists {
-		return errors.ErrStoreItemNotFound
+		return errors.ErrEntityNotFound
 	}
 
 	now := time.Now()

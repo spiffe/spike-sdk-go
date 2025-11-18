@@ -85,7 +85,7 @@ func TestKV_Undelete(t *testing.T) {
 			path:     "path/undelete/notExist",
 			versions: []int{1},
 			values:   map[string]string{"key": "value"},
-			wantErr:  sdkErrors.ErrStoreItemNotFound,
+			wantErr:  sdkErrors.ErrEntityNotFound,
 		},
 		{
 			name: "skip non-existent versions",

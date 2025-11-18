@@ -21,7 +21,7 @@ import sdkErrors "github.com/spiffe/spike-sdk-go/errors"
 func (kv *KV) Undelete(path string, versions []int) error {
 	secret, exists := kv.data[path]
 	if !exists {
-		return sdkErrors.ErrStoreItemNotFound
+		return sdkErrors.ErrEntityNotFound
 	}
 
 	cv := secret.Metadata.CurrentVersion

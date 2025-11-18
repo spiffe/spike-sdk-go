@@ -24,7 +24,7 @@ type PolicyCreateResponse struct {
 }
 
 func (p PolicyCreateResponse) Success() PolicyCreateResponse {
-	p.Err = errors.ErrCodeSuccess
+	p.Err = errors.ErrSuccess.Code
 	return p
 }
 
@@ -40,7 +40,7 @@ type PolicyReadResponse struct {
 }
 
 func (p PolicyReadResponse) Success() PolicyReadResponse {
-	p.Err = errors.ErrCodeSuccess
+	p.Err = errors.ErrSuccess.Code
 	return p
 }
 
@@ -55,7 +55,7 @@ type PolicyDeleteResponse struct {
 }
 
 func (p PolicyDeleteResponse) Success() PolicyDeleteResponse {
-	p.Err = errors.ErrCodeSuccess
+	p.Err = errors.ErrSuccess.Code
 	return p
 }
 
@@ -72,7 +72,7 @@ type PolicyListResponse struct {
 }
 
 func (p PolicyListResponse) Success() PolicyListResponse {
-	p.Err = errors.ErrCodeSuccess
+	p.Err = errors.ErrSuccess.Code
 	return p
 }
 
@@ -91,6 +91,6 @@ type PolicyAccessCheckResponse struct {
 }
 
 func (p PolicyAccessCheckResponse) Success() PolicyAccessCheckResponse {
-	p.Err = errors.ErrCodeSuccess
+	p.Err = errors.ErrSuccess.Code
 	return p
 }
