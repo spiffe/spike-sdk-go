@@ -7,6 +7,8 @@ package kv
 import (
 	"errors"
 	"testing"
+
+	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
 )
 
 func TestKV_Delete(t *testing.T) {
@@ -26,7 +28,7 @@ func TestKV_Delete(t *testing.T) {
 			},
 			path:     "non/existent/path",
 			versions: nil,
-			wantErr:  ErrItemNotFound,
+			wantErr:  sdkErrors.ErrStoreItemNotFound,
 		},
 		{
 			name: "delete_current_version_no_versions_specified",

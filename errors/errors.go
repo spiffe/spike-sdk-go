@@ -10,9 +10,9 @@ import (
 )
 
 var ErrAlreadyInitialized = errors.New("already initialized")
-var ErrInitializationFailed = errors.New("initialization failed")
 var ErrBackendInvalidConfiguration = errors.New("invalid backend configuration")
 var ErrBackendInvalidEncryptionKey = errors.New("invalid backend encryption key")
+var ErrBadRequest = errors.New("bad request")
 var ErrCreationFailed = errors.New("creation failed")
 var ErrCryptoCipherNotAvailable = errors.New("cipher not available")
 var ErrCryptoCipherVerificationSuccess = errors.New("cipher verification success")
@@ -29,15 +29,25 @@ var ErrDataQueryFailed = errors.New("failed to query data")
 var ErrDataSaveFailed = errors.New("failed to save data")
 var ErrDeletionFailed = errors.New("deletion failed")
 var ErrDirectoryCreationFailed = errors.New("directory creation failed")
+var ErrFSFailedToCheckDirectory = errors.New("failed to check directory")
+var ErrFSFailedToCreateDirectory = errors.New("failed to create directory")
+var ErrFSFailedToResolvePath = errors.New("failed to resolve filesystem path")
+var ErrFSFileIsNotADirectory = errors.New("file is not a directory")
+var ErrFSInvalidDirectory = errors.New("invalid directory")
+var ErrFSParentDirectoryDoesNotExist = errors.New("parent directory does not exist")
+var ErrFSPathCannotBeEmpty = errors.New("filesystem path cannot be empty")
+var ErrFSPathRestricted = errors.New("filesystem path is restricted for security reasons")
 var ErrFileCloseFailed = errors.New("file close failed")
 var ErrFileOpenFailed = errors.New("file open failed")
 var ErrFound = errors.New("found")
+var ErrInitializationFailed = errors.New("initialization failed")
 var ErrInvalidInput = errors.New("invalid input")
 var ErrInvalidPermission = errors.New("invalid permission")
 var ErrMarshalFailure = errors.New("failed to marshal response body")
 var ErrMissingRootKey = errors.New("missing root key")
 var ErrNilX509Source = errors.New("nil X509Source")
 var ErrNotFound = errors.New("not found")
+var ErrNotReady = errors.New("not ready")
 var ErrParseFailure = errors.New("failed to parse request body")
 var ErrPeerConnection = errors.New("problem connecting to peer")
 var ErrQueryFailure = errors.New("failed to query for the requested data")
@@ -52,21 +62,40 @@ var ErrUnauthorized = errors.New("unauthorized")
 var ErrUndeleteFailed = errors.New("undeletion failed")
 var ErrUndeleteSuccess = errors.New("undeletion success")
 var ErrUnmarshalFailure = errors.New("failed to unmarshal request body")
+var ErrFailedForAReason = errors.New("failed for a reason: the reason is logged; and this will contained in a wrapped error in the future versions of the SDK")
+var ErrInvalidForAReason = errors.New("invalid for a reason: the reason is logged; and this will be contained in a wrapped error in the future versions of the SDK")
+var ErrStoreVersionNotFound = errors.New("version not found")
+var ErrStoreItemNotFound = errors.New("item not found")
+var ErrStoreItemSoftDeleted = errors.New("item marked as deleted")
+var ErrStoreInvalidVersion = errors.New("invalid version")
 
-// ErrFailedFor returns an error message indicating that an action failed
-// for a specific entity.
-// i.e.: "[encoding] of [path] failed for [spiffeid]: [spiffe://spike.ist/]"
-func ErrFailedFor(action, whatFailed, forWhat, identifier string) error {
-	return fmt.Errorf("%s of %s failed for %s: '%s'",
+// FailedFor is a temporary function used until errors/sdk.go implements
+// proper error wrapping.
+func FailedFor(action, whatFailed, forWhat, identifier string) string {
+	return fmt.Sprintf("%s of %s failed for %s: '%s'",
 		action, whatFailed, forWhat, identifier,
 	)
 }
 
-// ErrInvalidFor returns an error message indicating that an entity is invalid
-// for a specific purpose.
-// i.e.: "[encoding] is invalid for [purpose]: [spiffe://spike.ist/]"
-func ErrInvalidFor(whatsInvalid, forWhat, identifier string) error {
-	return fmt.Errorf("%s is invalid for %s: '%s'",
+// InvalidFor is a temporary function used until errors/sdk.go implements
+// proper error wrapping.
+func InvalidFor(whatsInvalid, forWhat, identifier string) string {
+	return fmt.Sprintf("%s is invalid for %s: '%s'",
 		whatsInvalid, forWhat, identifier,
 	)
+}
+
+// MaybeError converts an error to its string representation if the error is
+// not nil. If the error is nil, it returns an empty string.
+//
+// Parameters:
+//   - err: the error to convert to a string
+//
+// Returns:
+//   - string: the error message if err is non-nil, empty string otherwise
+func MaybeError(err error) string {
+	if err != nil {
+		return err.Error()
+	}
+	return ""
 }

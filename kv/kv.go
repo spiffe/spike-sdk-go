@@ -16,6 +16,9 @@ type Config struct {
 }
 
 // New creates a new KV instance
+//
+// Parameters:
+//   - config: KV Configuration
 func New(config Config) *KV {
 	return &KV{
 		maxSecretVersions: config.MaxSecretVersions,

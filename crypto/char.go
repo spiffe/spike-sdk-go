@@ -8,8 +8,22 @@ import (
 	"fmt"
 )
 
-// secureRandomStringFromCharClass generates a random string of specified
-// length using the given character class
+// secureRandomStringFromCharClass generates a cryptographically secure random
+// string of the specified length using characters from the given character
+// class.
+//
+// Parameters:
+//   - charClass: character class specification supporting:
+//   - Predefined classes: \w (word chars), \d (digits), \x (symbols)
+//   - Custom ranges: "A-Z", "a-z", "0-9", or combinations like "A-Za-z0-9"
+//   - Individual characters: any literal characters
+//   - length: number of characters in the resulting string
+//
+// Returns:
+//   - string: the generated random string
+//   - error: non-nil if the character class is empty, invalid, results in
+//     an empty character set, or if the cryptographic random number generator
+//     fails
 func secureRandomStringFromCharClass(
 	charClass string, length int,
 ) (string, error) {
@@ -35,7 +49,24 @@ func secureRandomStringFromCharClass(
 }
 
 // expandCharacterClass expands character class expressions into a string
-// of valid characters
+// containing all valid characters from the class. It handles both predefined
+// character classes and custom character ranges.
+//
+// Parameters:
+//   - charClass: character class expression supporting:
+//   - Predefined classes:
+//   - \w: word characters (a-z, A-Z, 0-9, and underscore)
+//   - \d: digits (0-9)
+//   - \x: symbols (printable ASCII excluding letters and digits)
+//   - Custom ranges:
+//   - Single characters: included as-is
+//   - Range notation: "A-Z" expands to all uppercase letters
+//   - Combined ranges: "A-Za-z0-9" expands to alphanumeric characters
+//
+// Returns:
+//   - string: expanded character set containing all characters from the class
+//   - error: non-nil if the character class is empty, contains invalid range
+//     specifications (e.g., "Z-A"), or results in an empty character set
 func expandCharacterClass(charClass string) (string, error) {
 	// Check for empty character class first
 	if len(charClass) == 0 {

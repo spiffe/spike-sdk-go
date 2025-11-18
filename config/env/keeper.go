@@ -5,10 +5,11 @@
 package env
 
 import (
-	"fmt"
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/spiffe/spike-sdk-go/log"
 )
 
 // KeepersVal retrieves and parses the keeper peer configurations from the
@@ -27,10 +28,16 @@ import (
 // Panics if:
 //   - SPIKE_NEXUS_KEEPER_PEERS is not set
 func KeepersVal() map[string]string {
+	const fName = "KeepersVal"
+
 	p := os.Getenv(NexusKeeperPeers)
 
 	if p == "" {
-		panic("SPIKE_NEXUS_KEEPER_PEERS has to be configured in the environment")
+		log.FatalLn(
+			fName,
+			"message",
+			"SPIKE_NEXUS_KEEPER_PEERS must be configured in the environment",
+		)
 	}
 
 	urls := strings.Split(p, ",")
@@ -40,20 +47,28 @@ func KeepersVal() map[string]string {
 	for i, u := range urls {
 		trimmedURL := strings.TrimSpace(u)
 		if trimmedURL == "" {
-			panic(fmt.Sprintf("Keepers: Empty URL found at position %d", i+1))
+			log.FatalLn(
+				fName,
+				"message", "empty url found",
+				"position", i+1,
+			)
 		}
 
 		// Validate URL format and security
 		if !validURL(trimmedURL) {
-			panic(
-				fmt.Sprintf(
-					"Invalid or insecure URL at position %d: %s", i+1,
-					trimmedURL),
+			log.FatalLn(
+				fName,
+				"message", "invalid url format",
+				"position", i+1,
 			)
 		}
 
 		if urlMap[trimmedURL] {
-			panic("Duplicate keeper URL detected: " + trimmedURL)
+			log.FatalLn(
+				fName,
+				"message", "duplicate url found",
+				"position", i+1,
+			)
 		}
 
 		urlMap[trimmedURL] = true

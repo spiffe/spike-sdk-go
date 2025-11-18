@@ -5,10 +5,10 @@
 package reqres
 
 import (
-	"github.com/spiffe/spike-sdk-go/api/entity/data"
+	"github.com/spiffe/spike-sdk-go/errors"
 )
 
 // FallbackResponse is a generic response for any error.
 type FallbackResponse struct {
-	Err data.ErrorCode `json:"err,omitempty"`
+	Err errors.ErrorCode `json:"err,omitempty"`
 }

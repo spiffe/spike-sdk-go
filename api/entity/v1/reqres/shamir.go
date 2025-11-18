@@ -4,7 +4,9 @@
 
 package reqres
 
-import "github.com/spiffe/spike-sdk-go/api/entity/data"
+import (
+	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
+)
 
 // ShardPutRequest represents a request to submit a shard contribution.
 // KeeperId specifies the identifier of the keeper responsible for the shard.
@@ -17,11 +19,11 @@ type ShardPutRequest struct {
 // ShardPutResponse represents the response structure for a shard
 // contribution.
 type ShardPutResponse struct {
-	Err data.ErrorCode `json:"err,omitempty"`
+	Err sdkErrors.ErrorCode `json:"err,omitempty"`
 }
 
 func (s ShardPutResponse) Success() ShardPutResponse {
-	s.Err = data.ErrSuccess
+	s.Err = sdkErrors.ErrCodeSuccess
 	return s
 }
 
@@ -33,10 +35,10 @@ type ShardGetRequest struct {
 // The struct includes the shard identifier and an associated error code.
 type ShardGetResponse struct {
 	Shard *[32]byte `json:"shard"`
-	Err   data.ErrorCode
+	Err   sdkErrors.ErrorCode
 }
 
 func (s ShardGetResponse) Success() ShardGetResponse {
-	s.Err = data.ErrSuccess
+	s.Err = sdkErrors.ErrCodeSuccess
 	return s
 }

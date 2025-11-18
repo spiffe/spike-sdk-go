@@ -27,7 +27,7 @@ const defaultTrustRoot = "spike.ist"
 func TrustRootFromEnv(trustRootEnvVar string) string {
 	// Validate that the environment variable follows the expected pattern.
 	// If the pattern does not match, return the default trust root.
-	if !strings.HasPrefix(trustRootEnvVar, "SPIKE_TRUST_ROOT") {
+	if !strings.HasPrefix(trustRootEnvVar, TrustRoot) {
 		return defaultTrustRoot
 	}
 

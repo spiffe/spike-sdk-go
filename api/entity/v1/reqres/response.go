@@ -1,136 +1,138 @@
 package reqres
 
-import "github.com/spiffe/spike-sdk-go/api/entity/data"
+import (
+	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
+)
 
 // SharPutResponse variants
 var (
-	ShardPutBadInput     = ShardPutResponse{Err: data.ErrBadInput}
-	ShardPutUnauthorized = ShardPutResponse{Err: data.ErrUnauthorized}
-	ShardPutSuccess      = ShardPutResponse{Err: data.ErrSuccess}
-	ShardPutInternal     = ShardPutResponse{Err: data.ErrInternal}
+	ShardPutBadInput     = ShardPutResponse{Err: sdkErrors.ErrCodeBadInput}
+	ShardPutUnauthorized = ShardPutResponse{Err: sdkErrors.ErrCodeUnauthorized}
+	ShardPutSuccess      = ShardPutResponse{Err: sdkErrors.ErrCodeSuccess}
+	ShardPutInternal     = ShardPutResponse{Err: sdkErrors.ErrCodeInternal}
 )
 
 // ShardGetResponse variants
 var (
-	ShardGetBadInput     = ShardGetResponse{Err: data.ErrBadInput}
-	ShardGetUnauthorized = ShardGetResponse{Err: data.ErrUnauthorized}
-	ShardGetSuccess      = ShardGetResponse{Err: data.ErrSuccess}
-	ShardGetInternal     = ShardGetResponse{Err: data.ErrInternal}
+	ShardGetBadInput     = ShardGetResponse{Err: sdkErrors.ErrCodeBadInput}
+	ShardGetUnauthorized = ShardGetResponse{Err: sdkErrors.ErrCodeUnauthorized}
+	ShardGetSuccess      = ShardGetResponse{Err: sdkErrors.ErrCodeSuccess}
+	ShardGetInternal     = ShardGetResponse{Err: sdkErrors.ErrCodeInternal}
 )
 
 // SecretReadResponse variants
 var (
-	SecretReadBadInput     = SecretReadResponse{Err: data.ErrBadInput}
-	SecretReadUnauthorized = SecretReadResponse{Err: data.ErrUnauthorized}
-	SecretReadSuccess      = SecretReadResponse{Err: data.ErrSuccess}
-	SecretReadInternal     = SecretReadResponse{Err: data.ErrInternal}
-	SecretReadNotFound     = SecretReadResponse{Err: data.ErrNotFound}
+	SecretReadBadInput     = SecretReadResponse{Err: sdkErrors.ErrCodeBadInput}
+	SecretReadUnauthorized = SecretReadResponse{Err: sdkErrors.ErrCodeUnauthorized}
+	SecretReadSuccess      = SecretReadResponse{Err: sdkErrors.ErrCodeSuccess}
+	SecretReadInternal     = SecretReadResponse{Err: sdkErrors.ErrCodeInternal}
+	SecretReadNotFound     = SecretReadResponse{Err: sdkErrors.ErrCodeNotFound}
 )
 
 // SecretDeleteResponse variants
 var (
-	SecretDeleteBadInput     = SecretDeleteResponse{Err: data.ErrBadInput}
-	SecretDeleteUnauthorized = SecretDeleteResponse{Err: data.ErrUnauthorized}
-	SecretDeleteSuccess      = SecretDeleteResponse{Err: data.ErrSuccess}
-	SecretDeleteInternal     = SecretDeleteResponse{Err: data.ErrInternal}
+	SecretDeleteBadInput     = SecretDeleteResponse{Err: sdkErrors.ErrCodeBadInput}
+	SecretDeleteUnauthorized = SecretDeleteResponse{Err: sdkErrors.ErrCodeUnauthorized}
+	SecretDeleteSuccess      = SecretDeleteResponse{Err: sdkErrors.ErrCodeSuccess}
+	SecretDeleteInternal     = SecretDeleteResponse{Err: sdkErrors.ErrCodeInternal}
 )
 
 // SecretUndeleteResponse variants
 var (
-	SecretUndeleteBadInput     = SecretUndeleteResponse{Err: data.ErrBadInput}
-	SecretUndeleteUnauthorized = SecretUndeleteResponse{Err: data.ErrUnauthorized}
-	SecretUndeleteSuccess      = SecretUndeleteResponse{Err: data.ErrSuccess}
-	SecretUndeleteInternal     = SecretUndeleteResponse{Err: data.ErrInternal}
+	SecretUndeleteBadInput     = SecretUndeleteResponse{Err: sdkErrors.ErrCodeBadInput}
+	SecretUndeleteUnauthorized = SecretUndeleteResponse{Err: sdkErrors.ErrCodeUnauthorized}
+	SecretUndeleteSuccess      = SecretUndeleteResponse{Err: sdkErrors.ErrCodeSuccess}
+	SecretUndeleteInternal     = SecretUndeleteResponse{Err: sdkErrors.ErrCodeInternal}
 )
 
 // SecretListResponse variants
 var (
-	SecretListBadInput     = SecretListResponse{Err: data.ErrBadInput}
-	SecretListUnauthorized = SecretListResponse{Err: data.ErrUnauthorized}
-	SecretListInternal     = SecretListResponse{Err: data.ErrInternal}
-	SecretListNotFound     = SecretListResponse{Err: data.ErrNotFound}
+	SecretListBadInput     = SecretListResponse{Err: sdkErrors.ErrCodeBadInput}
+	SecretListUnauthorized = SecretListResponse{Err: sdkErrors.ErrCodeUnauthorized}
+	SecretListInternal     = SecretListResponse{Err: sdkErrors.ErrCodeInternal}
+	SecretListNotFound     = SecretListResponse{Err: sdkErrors.ErrCodeNotFound}
 )
 
 // SecretPutResponse variants
 var (
-	SecretPutBadInput     = SecretPutResponse{Err: data.ErrBadInput}
-	SecretPutUnauthorized = SecretPutResponse{Err: data.ErrUnauthorized}
-	SecretPutSuccess      = SecretPutResponse{Err: data.ErrSuccess}
-	SecretPutInternal     = SecretPutResponse{Err: data.ErrInternal}
+	SecretPutBadInput     = SecretPutResponse{Err: sdkErrors.ErrCodeBadInput}
+	SecretPutUnauthorized = SecretPutResponse{Err: sdkErrors.ErrCodeUnauthorized}
+	SecretPutSuccess      = SecretPutResponse{Err: sdkErrors.ErrCodeSuccess}
+	SecretPutInternal     = SecretPutResponse{Err: sdkErrors.ErrCodeInternal}
 )
 
 // SecretMetadataResponse variants
 var (
-	SecretMetadataBadInput     = SecretMetadataResponse{Err: data.ErrBadInput}
-	SecretMetadataUnauthorized = SecretMetadataResponse{Err: data.ErrUnauthorized}
-	SecretMetadataInternal     = SecretMetadataResponse{Err: data.ErrInternal}
-	SecretMetadataNotFound     = SecretMetadataResponse{Err: data.ErrNotFound}
+	SecretMetadataBadInput     = SecretMetadataResponse{Err: sdkErrors.ErrCodeBadInput}
+	SecretMetadataUnauthorized = SecretMetadataResponse{Err: sdkErrors.ErrCodeUnauthorized}
+	SecretMetadataInternal     = SecretMetadataResponse{Err: sdkErrors.ErrCodeInternal}
+	SecretMetadataNotFound     = SecretMetadataResponse{Err: sdkErrors.ErrCodeNotFound}
 )
 
 // PolicyCreateResponse variants
 var (
-	PolicyCreateBadInput     = PolicyCreateResponse{Err: data.ErrBadInput}
-	PolicyCreateUnauthorized = PolicyCreateResponse{Err: data.ErrUnauthorized}
-	PolicyCreateSuccess      = PolicyCreateResponse{Err: data.ErrSuccess}
-	PolicyCreateInternal     = PolicyCreateResponse{Err: data.ErrInternal}
+	PolicyCreateBadInput     = PolicyCreateResponse{Err: sdkErrors.ErrCodeBadInput}
+	PolicyCreateUnauthorized = PolicyCreateResponse{Err: sdkErrors.ErrCodeUnauthorized}
+	PolicyCreateSuccess      = PolicyCreateResponse{Err: sdkErrors.ErrCodeSuccess}
+	PolicyCreateInternal     = PolicyCreateResponse{Err: sdkErrors.ErrCodeInternal}
 )
 
 // PolicyReadResponse variants
 var (
-	PolicyReadBadInput     = PolicyReadResponse{Err: data.ErrBadInput}
-	PolicyReadUnauthorized = PolicyReadResponse{Err: data.ErrUnauthorized}
-	PolicyReadSuccess      = PolicyReadResponse{Err: data.ErrSuccess}
-	PolicyReadInternal     = PolicyReadResponse{Err: data.ErrInternal}
-	PolicyReadNotFound     = PolicyReadResponse{Err: data.ErrNotFound}
+	PolicyReadBadInput     = PolicyReadResponse{Err: sdkErrors.ErrCodeBadInput}
+	PolicyReadUnauthorized = PolicyReadResponse{Err: sdkErrors.ErrCodeUnauthorized}
+	PolicyReadSuccess      = PolicyReadResponse{Err: sdkErrors.ErrCodeSuccess}
+	PolicyReadInternal     = PolicyReadResponse{Err: sdkErrors.ErrCodeInternal}
+	PolicyReadNotFound     = PolicyReadResponse{Err: sdkErrors.ErrCodeNotFound}
 )
 
 // PolicyDeleteResponse variants
 var (
-	PolicyDeleteBadInput     = PolicyDeleteResponse{Err: data.ErrBadInput}
-	PolicyDeleteUnauthorized = PolicyDeleteResponse{Err: data.ErrUnauthorized}
-	PolicyDeleteSuccess      = PolicyDeleteResponse{Err: data.ErrSuccess}
-	PolicyDeleteInternal     = PolicyDeleteResponse{Err: data.ErrInternal}
+	PolicyDeleteBadInput     = PolicyDeleteResponse{Err: sdkErrors.ErrCodeBadInput}
+	PolicyDeleteUnauthorized = PolicyDeleteResponse{Err: sdkErrors.ErrCodeUnauthorized}
+	PolicyDeleteSuccess      = PolicyDeleteResponse{Err: sdkErrors.ErrCodeSuccess}
+	PolicyDeleteInternal     = PolicyDeleteResponse{Err: sdkErrors.ErrCodeInternal}
 )
 
 // PolicyListResponse variants
 var (
-	PolicyListBadInput     = PolicyListResponse{Err: data.ErrBadInput}
-	PolicyListUnauthorized = PolicyListResponse{Err: data.ErrUnauthorized}
-	PolicyListInternal     = PolicyListResponse{Err: data.ErrInternal}
-	PolicyListNotFound     = PolicyListResponse{Err: data.ErrNotFound}
+	PolicyListBadInput     = PolicyListResponse{Err: sdkErrors.ErrCodeBadInput}
+	PolicyListUnauthorized = PolicyListResponse{Err: sdkErrors.ErrCodeUnauthorized}
+	PolicyListInternal     = PolicyListResponse{Err: sdkErrors.ErrCodeInternal}
+	PolicyListNotFound     = PolicyListResponse{Err: sdkErrors.ErrCodeNotFound}
 )
 
 // CipherDecryptResponse variants
 var (
-	CipherDecryptBadInput     = CipherDecryptResponse{Err: data.ErrBadInput}
-	CipherDecryptUnauthorized = CipherDecryptResponse{Err: data.ErrUnauthorized}
-	CipherDecryptInternal     = CipherDecryptResponse{Err: data.ErrInternal}
+	CipherDecryptBadInput     = CipherDecryptResponse{Err: sdkErrors.ErrCodeBadInput}
+	CipherDecryptUnauthorized = CipherDecryptResponse{Err: sdkErrors.ErrCodeUnauthorized}
+	CipherDecryptInternal     = CipherDecryptResponse{Err: sdkErrors.ErrCodeInternal}
 )
 
 // CipherEncryptResponse variants
 var (
-	CipherEncryptBadInput     = CipherEncryptResponse{Err: data.ErrBadInput}
-	CipherEncryptUnauthorized = CipherEncryptResponse{Err: data.ErrUnauthorized}
-	CipherEncryptInternal     = CipherEncryptResponse{Err: data.ErrInternal}
+	CipherEncryptBadInput     = CipherEncryptResponse{Err: sdkErrors.ErrCodeBadInput}
+	CipherEncryptUnauthorized = CipherEncryptResponse{Err: sdkErrors.ErrCodeUnauthorized}
+	CipherEncryptInternal     = CipherEncryptResponse{Err: sdkErrors.ErrCodeInternal}
 )
 
 // RecoverResponse variants
 var (
-	RecoverBadInput     = RecoverResponse{Err: data.ErrBadInput}
-	RecoverUnauthorized = RecoverResponse{Err: data.ErrUnauthorized}
-	RecoverInternal     = RecoverResponse{Err: data.ErrInternal}
+	RecoverBadInput     = RecoverResponse{Err: sdkErrors.ErrCodeBadInput}
+	RecoverUnauthorized = RecoverResponse{Err: sdkErrors.ErrCodeUnauthorized}
+	RecoverInternal     = RecoverResponse{Err: sdkErrors.ErrCodeInternal}
 )
 
 // RestoreResponse variants
 var (
-	RestoreBadInput     = RestoreResponse{Err: data.ErrBadInput}
-	RestoreUnauthorized = RestoreResponse{Err: data.ErrUnauthorized}
-	RestoreInternal     = RestoreResponse{Err: data.ErrInternal}
+	RestoreBadInput     = RestoreResponse{Err: sdkErrors.ErrCodeBadInput}
+	RestoreUnauthorized = RestoreResponse{Err: sdkErrors.ErrCodeUnauthorized}
+	RestoreInternal     = RestoreResponse{Err: sdkErrors.ErrCodeInternal}
 )
 
 // BoostrapResponse variants
 var (
-	BootstrapBadInput     = BootstrapVerifyResponse{Err: data.ErrBadInput}
-	BootstrapUnauthorized = BootstrapVerifyResponse{Err: data.ErrUnauthorized}
-	BootstrapInternal     = BootstrapVerifyResponse{Err: data.ErrInternal}
+	BootstrapBadInput     = BootstrapVerifyResponse{Err: sdkErrors.ErrCodeBadInput}
+	BootstrapUnauthorized = BootstrapVerifyResponse{Err: sdkErrors.ErrCodeUnauthorized}
+	BootstrapInternal     = BootstrapVerifyResponse{Err: sdkErrors.ErrCodeInternal}
 )

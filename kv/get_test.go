@@ -8,6 +8,8 @@ import (
 	"errors"
 	"testing"
 	"time"
+
+	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
 )
 
 func TestKV_Get(t *testing.T) {
@@ -29,7 +31,7 @@ func TestKV_Get(t *testing.T) {
 			path:    "non/existent/path",
 			version: 0,
 			want:    nil,
-			wantErr: ErrItemNotFound,
+			wantErr: sdkErrors.ErrStoreItemNotFound,
 		},
 		{
 			name: "get_current_version",
@@ -119,7 +121,7 @@ func TestKV_Get(t *testing.T) {
 			path:    "test/path",
 			version: 1,
 			want:    nil,
-			wantErr: ErrItemSoftDeleted,
+			wantErr: sdkErrors.ErrStoreItemSoftDeleted,
 		},
 		{
 			name: "non_existent_version",
@@ -145,7 +147,7 @@ func TestKV_Get(t *testing.T) {
 			path:    "test/path",
 			version: 999,
 			want:    nil,
-			wantErr: ErrItemSoftDeleted,
+			wantErr: sdkErrors.ErrStoreItemSoftDeleted,
 		},
 	}
 
@@ -191,7 +193,7 @@ func TestKV_GetRawSecret(t *testing.T) {
 			},
 			path:    "non/existent/path",
 			want:    nil,
-			wantErr: ErrItemNotFound,
+			wantErr: sdkErrors.ErrStoreItemNotFound,
 		},
 		{
 			name: "existing_secret",

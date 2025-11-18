@@ -4,7 +4,9 @@
 
 package reqres
 
-import "github.com/spiffe/spike-sdk-go/api/entity/data"
+import (
+	"github.com/spiffe/spike-sdk-go/errors"
+)
 
 // BootstrapVerifyRequest for verifying SPIKE Nexus initialization.
 type BootstrapVerifyRequest struct {
@@ -19,10 +21,10 @@ type BootstrapVerifyResponse struct {
 	// Hash of the decrypted plaintext
 	Hash string `json:"hash"`
 	// Error code if operation failed
-	Err data.ErrorCode `json:"err,omitempty"`
+	Err errors.ErrorCode `json:"err,omitempty"`
 }
 
 func (b BootstrapVerifyResponse) Success() BootstrapVerifyResponse {
-	b.Err = data.ErrSuccess
+	b.Err = errors.ErrCodeSuccess
 	return b
 }

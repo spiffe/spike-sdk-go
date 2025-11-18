@@ -12,8 +12,8 @@ import (
 
 	"github.com/spiffe/spike-sdk-go/api/entity/data"
 	"github.com/spiffe/spike-sdk-go/api/entity/v1/reqres"
-	code "github.com/spiffe/spike-sdk-go/api/errors"
 	"github.com/spiffe/spike-sdk-go/api/url"
+	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
 	"github.com/spiffe/spike-sdk-go/net"
 )
 
@@ -37,7 +37,7 @@ func Get(
 	path string, version int,
 ) (*data.Secret, error) {
 	if source == nil {
-		return nil, code.ErrNilX509Source
+		return nil, sdkErrors.ErrNilX509Source
 	}
 
 	r := reqres.SecretReadRequest{
@@ -57,7 +57,7 @@ func Get(
 
 	body, err := net.Post(client, url.SecretGet(), mr)
 	if err != nil {
-		if errors.Is(err, code.ErrNotFound) {
+		if errors.Is(err, sdkErrors.ErrNotFound) {
 			return nil, nil
 		}
 		return nil, err

@@ -11,8 +11,8 @@ import (
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 
 	"github.com/spiffe/spike-sdk-go/api/entity/v1/reqres"
-	code "github.com/spiffe/spike-sdk-go/api/errors"
 	"github.com/spiffe/spike-sdk-go/api/url"
+	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
 	"github.com/spiffe/spike-sdk-go/net"
 )
 
@@ -36,7 +36,7 @@ func Undelete(source *workloadapi.X509Source,
 	path string, versions []int,
 ) error {
 	if source == nil {
-		return code.ErrNilX509Source
+		return sdkErrors.ErrNilX509Source
 	}
 
 	var vv []int

@@ -222,10 +222,12 @@ func WithMultiplier(m float64) BackOffOption {
 }
 
 // WithRandomizationFactor sets the randomization factor for backoff intervals.
-// The actual interval will be randomized between [interval * (1 - factor), interval * (1 + factor)].
+// The actual interval will be randomized between
+// [interval * (1 - factor), interval * (1 + factor)].
 // A factor of 0 disables randomization (deterministic intervals).
 // A factor of 0.5 (the default) means intervals can vary by ±50%.
-// This randomization helps prevent thundering herd issues in distributed systems.
+// This randomization helps prevent thundering herd issues in distributed
+// systems.
 func WithRandomizationFactor(factor float64) BackOffOption {
 	return func(b *backoff.ExponentialBackOff) {
 		b.RandomizationFactor = factor

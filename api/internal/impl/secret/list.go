@@ -11,8 +11,8 @@ import (
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 
 	"github.com/spiffe/spike-sdk-go/api/entity/v1/reqres"
-	code "github.com/spiffe/spike-sdk-go/api/errors"
 	"github.com/spiffe/spike-sdk-go/api/url"
+	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
 	"github.com/spiffe/spike-sdk-go/net"
 )
 
@@ -33,7 +33,7 @@ func ListKeys(
 	source *workloadapi.X509Source,
 ) (*[]string, error) {
 	if source == nil {
-		return nil, code.ErrNilX509Source
+		return nil, sdkErrors.ErrNilX509Source
 	}
 
 	r := reqres.SecretListRequest{}
@@ -51,7 +51,7 @@ func ListKeys(
 
 	body, err := net.Post(client, url.SecretList(), mr)
 	if err != nil {
-		if errors.Is(err, net.ErrNotFound) {
+		if errors.Is(err, sdkErrors.ErrNotFound) {
 			return &[]string{}, nil
 		}
 		return nil, err

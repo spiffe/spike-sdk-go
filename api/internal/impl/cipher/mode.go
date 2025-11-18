@@ -8,6 +8,8 @@ package cipher
 type Mode string
 
 const (
+	// ModeStream encrypts/decrypts data as an io.Reader/io.Writer stream.
 	ModeStream Mode = "stream"
-	ModeJSON   Mode = "json"
+	// ModeJSON encrypts/decrypts data as a JSON REST request.
+	ModeJSON Mode = "json"
 )

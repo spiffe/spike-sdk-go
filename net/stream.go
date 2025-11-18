@@ -9,6 +9,7 @@ import (
 	"io"
 	"net/http"
 
+	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
 	"github.com/spiffe/spike-sdk-go/log"
 )
 
@@ -83,16 +84,16 @@ func StreamPostWithContentType(
 
 	if r.StatusCode != http.StatusOK {
 		if r.StatusCode == http.StatusNotFound {
-			return nil, ErrNotFound
+			return nil, sdkErrors.ErrNotFound
 		}
 		if r.StatusCode == http.StatusUnauthorized {
-			return nil, ErrUnauthorized
+			return nil, sdkErrors.ErrUnauthorized
 		}
 		if r.StatusCode == http.StatusBadRequest {
-			return nil, ErrBadRequest
+			return nil, sdkErrors.ErrBadRequest
 		}
 		if r.StatusCode == http.StatusServiceUnavailable {
-			return nil, ErrNotReady
+			return nil, sdkErrors.ErrNotReady
 		}
 		return nil, errors.New("streamPost: Problem connecting to peer")
 	}

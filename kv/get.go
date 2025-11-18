@@ -4,6 +4,8 @@
 
 package kv
 
+import "github.com/spiffe/spike-sdk-go/errors"
+
 // Get retrieves a versioned key-value data map from the store at the specified
 // path.
 //
@@ -34,7 +36,7 @@ package kv
 func (kv *KV) Get(path string, version int) (map[string]string, error) {
 	secret, exists := kv.data[path]
 	if !exists {
-		return nil, ErrItemNotFound
+		return nil, errors.ErrStoreItemNotFound
 	}
 
 	// #region debug
@@ -54,7 +56,7 @@ func (kv *KV) Get(path string, version int) (map[string]string, error) {
 
 	v, exists := secret.Versions[version]
 	if !exists || v.DeletedTime != nil {
-		return nil, ErrItemSoftDeleted
+		return nil, errors.ErrStoreItemSoftDeleted
 	}
 
 	return v.Data, nil
@@ -73,7 +75,7 @@ func (kv *KV) Get(path string, version int) (map[string]string, error) {
 func (kv *KV) GetRawSecret(path string) (*Value, error) {
 	secret, exists := kv.data[path]
 	if !exists {
-		return nil, ErrItemNotFound
+		return nil, errors.ErrStoreItemNotFound
 	}
 
 	return secret, nil

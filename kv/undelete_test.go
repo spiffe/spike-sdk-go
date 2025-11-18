@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -84,7 +85,7 @@ func TestKV_Undelete(t *testing.T) {
 			path:     "path/undelete/notExist",
 			versions: []int{1},
 			values:   map[string]string{"key": "value"},
-			wantErr:  ErrItemNotFound,
+			wantErr:  sdkErrors.ErrStoreItemNotFound,
 		},
 		{
 			name: "skip non-existent versions",
