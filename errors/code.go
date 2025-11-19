@@ -52,6 +52,7 @@ const errCodeShamirEmptyShard = ErrorCode("shamir_empty_shard")
 const errCodeShamirInvalidIndex = ErrorCode("shamir_invalid_index")
 const errCodeShamirNilShard = ErrorCode("shamir_nil_shard")
 const errCodeShamirNotEnoughShards = ErrorCode("shamir_not_enough_shards")
+const errCodeShamirReconstructionFailed = ErrorCode("shamir_reconstruction_failed")
 
 // Crypto operations
 const errCodeLowEntropy = ErrorCode("low_entropy")
