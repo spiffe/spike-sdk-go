@@ -15,6 +15,7 @@ const errCodeNilContext = ErrorCode("nil_context")
 const errCodeServerFault = ErrorCode("server_fault")
 const errCodeSuccess = ErrorCode("success")
 const errCodeNotFound = ErrorCode("not_found")
+const errCodePostFailed = ErrorCode("post_failed")
 
 // Entity operations
 const errCodeEntityExists = ErrorCode("entity_exists")
