@@ -45,6 +45,10 @@ const errCodeRootKeyNotEmpty = ErrorCode("root_key_not_empty")
 const errCodeRootKeySetSuccess = ErrorCode("root_key_set_success")
 const errCodeRootKeySkipCreationForInMemoryMode = ErrorCode("root_key_skip_creation_for_in_memory_mode")
 const errCodeRootKeyUpdateSkippedKeyEmpty = ErrorCode("root_key_update_skipped_key_empty")
+const errCodeGeneralFailure = ErrorCode("general_failure")
+
+// Cluster operations
+const errK8sReconciliationFailed = ErrorCode("cluster_reconciliation_failed")
 
 // Shamir-related
 const errCodeShamirDuplicateIndex = ErrorCode("shamir_duplicate_index")
