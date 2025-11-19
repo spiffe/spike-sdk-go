@@ -16,6 +16,7 @@ var ErrNilContext = New(errCodeNilContext, "nil context", nil)
 var ErrServerFault = New(errCodeServerFault, "server fault", nil)
 var ErrSuccess = New(errCodeSuccess, "success", nil)
 var ErrNotFound = New(errCodeNotFound, "not found", nil)
+var ErrPostFailed = New(errCodePostFailed, "post failed", nil)
 
 //
 // Entity operations
