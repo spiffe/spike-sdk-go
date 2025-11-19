@@ -39,7 +39,7 @@ func Delete(
 	path string, versions []int,
 ) error {
 	if source == nil {
-		return sdkErrors.ErrNilX509Source
+		return sdkErrors.ErrSPIFFENilX509Source
 	}
 
 	r := reqres.SecretDeleteRequest{
@@ -73,7 +73,7 @@ func Delete(
 		)
 	}
 	if res.Err != "" {
-		return errors.New(string(res.Err))
+		return sdkErrors.FromCode(res.Err)
 	}
 
 	return err

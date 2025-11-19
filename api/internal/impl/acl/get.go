@@ -6,7 +6,6 @@ package acl
 
 import (
 	"encoding/json"
-	"errors"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 
@@ -28,7 +27,13 @@ import (
 // Returns:
 //   - (*data.Policy, nil) if the policy is found
 //   - (nil, nil) if the policy is not found
-//   - (nil, error) if an error occurs during the operation
+//   - (nil, *sdkErrors.SDKError) if an error occurs:
+//   - ErrSPIFFENilX509Source: if source is nil
+//   - ErrMarshalFailure: if request serialization fails
+//   - ErrPostFailed: if the HTTP request fails
+//   - ErrUnmarshalFailure: if response parsing fails
+//   - Error from FromCode(): if the server returns an error (e.g.,
+//     ErrUnauthorized, ErrBadRequest, etc.)
 //
 // Example:
 //
@@ -51,26 +56,25 @@ import (
 //	log.Printf("Found policy: %+v", policy)
 func GetPolicy(
 	source *workloadapi.X509Source, id string,
-) (*data.Policy, error) {
+) (*data.Policy, *sdkErrors.SDKError) {
 	if source == nil {
-		return nil, sdkErrors.ErrNilX509Source
+		return nil, sdkErrors.ErrSPIFFENilX509Source
 	}
 
 	r := reqres.PolicyReadRequest{ID: id}
 
 	mr, err := json.Marshal(r)
 	if err != nil {
-		return nil, errors.Join(
-			errors.New("getPolicy: I am having problem generating the payload"),
-			err,
-		)
+		failErr := sdkErrors.ErrMarshalFailure.Wrap(err)
+		failErr.Msg = "problem generating the payload"
+		return nil, failErr
 	}
 
 	client := net.CreateMTLSClientForNexus(source)
 
 	body, err := net.Post(client, url.PolicyGet(), mr)
 	if err != nil {
-		if errors.Is(err, sdkErrors.ErrNotFound) {
+		if err.Is(sdkErrors.ErrNotFound) {
 			return nil, nil
 		}
 		return nil, err
@@ -79,13 +83,12 @@ func GetPolicy(
 	var res reqres.PolicyReadResponse
 	err = json.Unmarshal(body, &res)
 	if err != nil {
-		return nil, errors.Join(
-			errors.New("getPolicy: Problem parsing response body"),
-			err,
-		)
+		failErr := sdkErrors.ErrUnmarshalFailure.Wrap(err)
+		failErr.Msg = "problem parsing response body"
+		return nil, failErr
 	}
 	if res.Err != "" {
-		return nil, errors.New(string(res.Err))
+		return nil, sdkErrors.FromCode(res.Err)
 	}
 
 	return &res.Policy, nil

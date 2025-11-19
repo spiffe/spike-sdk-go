@@ -6,7 +6,6 @@ package secret
 
 import (
 	"encoding/json"
-	"errors"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 
@@ -26,17 +25,22 @@ import (
 //     attempts no restoration
 //
 // Returns:
-//   - error: nil on success, unauthorized error if not logged in, or
-//     wrapped error on request/parsing failure
+//   - *sdkErrors.SDKError: nil on success, or one of the following errors:
+//   - ErrSPIFFENilX509Source: if source is nil
+//   - ErrMarshalFailure: if request serialization fails
+//   - ErrPostFailed: if the HTTP request fails
+//   - ErrUnmarshalFailure: if response parsing fails
+//   - Error from FromCode(): if the server returns an error (e.g.,
+//     ErrUnauthorized, ErrNotFound, ErrBadRequest, etc.)
 //
 // Example:
 //
 //	err := Undelete(x509Source, "secret/path", []int{1, 2})
 func Undelete(source *workloadapi.X509Source,
 	path string, versions []int,
-) error {
+) *sdkErrors.SDKError {
 	if source == nil {
-		return sdkErrors.ErrNilX509Source
+		return sdkErrors.ErrSPIFFENilX509Source
 	}
 
 	var vv []int
@@ -44,37 +48,28 @@ func Undelete(source *workloadapi.X509Source,
 		vv = []int{}
 	}
 
-	r := reqres.SecretUndeleteRequest{
-		Path:     path,
-		Versions: vv,
-	}
+	r := reqres.SecretUndeleteRequest{Path: path, Versions: vv}
 
 	mr, err := json.Marshal(r)
 	if err != nil {
-		return errors.Join(
-			errors.New(
-				"undeleteSecret: I am having problem generating the payload",
-			),
-			err,
-		)
+		return sdkErrors.ErrMarshalFailure.Wrap(err)
 	}
 
 	client := net.CreateMTLSClientForNexus(source)
 	body, err := net.Post(client, url.SecretUndelete(), mr)
 	if err != nil {
-		return nil
+		return err
 	}
 
 	res := reqres.SecretUndeleteResponse{}
 	err = json.Unmarshal(body, &res)
 	if err != nil {
-		return errors.Join(
-			errors.New("undeleteSecret: Problem parsing response body"),
-			err,
-		)
+		failErr := sdkErrors.ErrUnmarshalFailure.Wrap(err)
+		failErr.Msg = "problem parsing response body"
+		return failErr
 	}
 	if res.Err != "" {
-		return errors.New(string(res.Err))
+		return sdkErrors.FromCode(res.Err)
 	}
 
 	return nil

@@ -197,3 +197,25 @@ func HTTPClientTLSHandshakeTimeoutVal() time.Duration {
 
 	return 10 * time.Second
 }
+
+// HTTPServerReadHeaderTimeoutVal returns the timeout for reading HTTP request
+// headers on the server side. It can be configured using the
+// SPIKE_HTTP_SERVER_READ_HEADER_TIMEOUT environment variable. The value should
+// be a valid Go duration string (e.g., "10s", "30s").
+//
+// This timeout helps prevent slowloris attacks by limiting how long the server
+// will wait for request headers to be sent by the client.
+//
+// If the environment variable is not set or contains an invalid duration,
+// it defaults to 10 seconds.
+func HTTPServerReadHeaderTimeoutVal() time.Duration {
+	p := os.Getenv(HTTPServerReadHeaderTimeout)
+	if p != "" {
+		d, err := time.ParseDuration(p)
+		if err == nil {
+			return d
+		}
+	}
+
+	return 10 * time.Second
+}

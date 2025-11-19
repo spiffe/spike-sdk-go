@@ -43,9 +43,9 @@ import (
 //	status, err := Restore(x509Source, shardIndex, shardValue)
 func Restore(
 	source *workloadapi.X509Source, shardIndex int, shardValue *[32]byte,
-) (*data.RestorationStatus, error) {
+) (*data.RestorationStatus, *sdkErrors.SDKError) {
 	if source == nil {
-		return nil, sdkErrors.ErrNilX509Source
+		return nil, sdkErrors.ErrSPIFFENilX509Source
 	}
 
 	const fName = "restore"
@@ -110,7 +110,7 @@ func Restore(
 		)
 	}
 	if res.Err != "" {
-		return nil, errors.New(string(res.Err))
+		return nil, sdkErrors.FromCode(res.Err)
 	}
 
 	return &data.RestorationStatus{

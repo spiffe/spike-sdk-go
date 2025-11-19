@@ -6,12 +6,10 @@ package net
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io"
 	"net"
 	"net/http"
-	"time"
 
 	"github.com/spiffe/go-spiffe/v2/spiffeid"
 	"github.com/spiffe/go-spiffe/v2/spiffetls/tlsconfig"
@@ -36,7 +34,8 @@ import (
 //
 // Returns:
 //   - bod: byte slice containing the full request body data
-//   - err: any error that occurred during reading or closing the body
+//   - err: *sdkErrors.SDKError with ErrReadingRequestBody or ErrStreamCloseFailed
+//     if an error occurred during reading or closing the body
 //
 // Example:
 //
@@ -66,6 +65,26 @@ func RequestBody(r *http.Request) (bod []byte, err *sdkErrors.SDKError) {
 	return body, err
 }
 
+// AuthorizerWithPredicate creates a TLS authorizer that validates SPIFFE IDs
+// using the provided predicate function.
+//
+// The authorizer checks each connecting peer's SPIFFE ID against the predicate.
+// If the predicate returns true, the connection is authorized. If false, the
+// connection is rejected with ErrUnauthorized.
+//
+// Parameters:
+//   - predicate: Function that takes a SPIFFE ID string and returns true to
+//     allow the connection, false to reject it
+//
+// Returns:
+//   - tlsconfig.Authorizer: A TLS authorizer that can be used with mTLS configs
+//
+// Example:
+//
+//	// Allow only production namespace
+//	authorizer := AuthorizerWithPredicate(func(id string) bool {
+//	    return strings.Contains(id, "/ns/production/")
+//	})
 func AuthorizerWithPredicate(predicate func(string) bool) tlsconfig.Authorizer {
 	return tlsconfig.AdaptMatcher(func(id spiffeid.ID) error {
 		if predicate(id.String()) {
@@ -95,24 +114,23 @@ func AuthorizerWithPredicate(predicate func(string) bool) tlsconfig.Authorizer {
 // Returns:
 //   - *http.Server: A configured HTTP server ready to be started with TLS
 //     enabled.
-//   - error: An error if the server configuration fails.
 //
 // The server uses the provided X509Source for both its own identity and for
 // validating client certificates. Client connections are only accepted if their
 // SPIFFE ID passes the provided predicate function.
 func CreateMTLSServerWithPredicate(source *workloadapi.X509Source,
 	tlsPort string,
-	predicate func(string) bool) (*http.Server, *sdkErrors.SDKError) {
+	predicate func(string) bool) *http.Server {
 	authorizer := AuthorizerWithPredicate(predicate)
 	tlsConfig := tlsconfig.MTLSServerConfig(source, source, authorizer)
 	server := &http.Server{
 		Addr:              tlsPort,
 		TLSConfig:         tlsConfig,
-		ReadHeaderTimeout: 10 * time.Second,
+		ReadHeaderTimeout: env.HTTPServerReadHeaderTimeoutVal(),
 		// ^ Timeout for reading request headers,
 		// it helps prevent slowloris attacks
 	}
-	return server, nil
+	return server
 }
 
 // CreateMTLSServer creates an HTTP server configured for mutual TLS (mTLS)
@@ -131,13 +149,12 @@ func CreateMTLSServerWithPredicate(source *workloadapi.X509Source,
 // Returns:
 //   - *http.Server: A configured HTTP server ready to be started with TLS
 //     enabled.
-//   - error: An error if the server configuration fails.
 //
 // The server uses the provided X509Source for both its own identity and for
 // validating client certificates. Client connections are accepted from ANY
 // client with a valid SPIFFE certificate.
 func CreateMTLSServer(source *workloadapi.X509Source,
-	tlsPort string) (*http.Server, *sdkErrors.SDKError) {
+	tlsPort string) *http.Server {
 	return CreateMTLSServerWithPredicate(source, tlsPort, predicate.AllowAll)
 }
 
@@ -155,7 +172,6 @@ func CreateMTLSServer(source *workloadapi.X509Source,
 // Returns:
 //   - *http.Client: A configured HTTP client that will use mTLS for all
 //     connections
-//   - error: An error if the client creation fails
 //
 // The returned client will:
 //   - Present its own client certificate from the X509Source to servers
@@ -166,14 +182,14 @@ func CreateMTLSServer(source *workloadapi.X509Source,
 //
 //	// This predicate allows the client to connect only to servers with
 //	// SPIFFE IDs in the "backend" service namespace
-//	client, err := CreateMTLSClientWithPredicate(source,
+//	client := CreateMTLSClientWithPredicate(source,
 //	 func(serverID string) bool {
 //	    return strings.Contains(serverID, "/ns/backend/")
 //	})
 func CreateMTLSClientWithPredicate(
 	source *workloadapi.X509Source,
 	predicate predicate.Predicate,
-) (*http.Client, *sdkErrors.SDKError) {
+) *http.Client {
 	authorizer := AuthorizerWithPredicate(predicate)
 	tlsConfig := tlsconfig.MTLSClientConfig(source, source, authorizer)
 	client := &http.Client{
@@ -194,7 +210,7 @@ func CreateMTLSClientWithPredicate(
 		Timeout: env.HTTPClientTimeoutVal(),
 	}
 
-	return client, nil
+	return client
 }
 
 // CreateMTLSClient creates an HTTP client configured for mutual TLS
@@ -211,13 +227,12 @@ func CreateMTLSClientWithPredicate(
 // Returns:
 //   - *http.Client: A configured HTTP client that will use mTLS for all
 //     connections
-//   - error: An error if the client creation fails
 //
 // The returned client will:
 //   - Present client certificates from the provided X509Source
 //   - Validate server certificates using the same X509Source
 //   - Accept connections to ANY server with a valid SPIFFE certificate
-func CreateMTLSClient(source *workloadapi.X509Source) (*http.Client, *sdkErrors.SDKError) {
+func CreateMTLSClient(source *workloadapi.X509Source) *http.Client {
 	return CreateMTLSClientWithPredicate(source, predicate.AllowAll)
 }
 
@@ -225,51 +240,61 @@ func CreateMTLSClient(source *workloadapi.X509Source) (*http.Client, *sdkErrors.
 // authentication with SPIKE Nexus using the provided X509Source. The client
 // is configured with a predicate that validates peer IDs against the trusted
 // Nexus root. Only peers that pass the spiffeid.IsNexus validation will be
-// accepted for connections. The function will terminate the program with exit
-// code 1 if client creation fails.
+// accepted for connections.
+//
+// Parameters:
+//   - source: An X509Source that provides the client's identity certificates
+//     and trusted roots
+//
+// Returns:
+//   - *http.Client: A configured HTTP client for connecting to SPIKE Nexus
 func CreateMTLSClientForNexus(source *workloadapi.X509Source) *http.Client {
-	const fName = "MTLSClientForNexus"
-	client, err := CreateMTLSClientWithPredicate(
-		source, predicate.AllowNexus,
-	)
-	if err != nil {
-		log.FatalLn(fName,
-			"message", "Failed to create mTLS client for Nexus",
-			"err", err)
-	}
-	return client
+	return CreateMTLSClientWithPredicate(source, predicate.AllowNexus)
 }
 
 // CreateMTLSClientForKeeper creates an HTTP client configured for mutual
 // TLS authentication using the provided X509Source. The client is configured
 // with a predicate that validates peer IDs against the trusted keeper root.
 // Only peers that pass the spiffeid.IsKeeper validation will be accepted for
-// connections. The function will terminate the program with exit code 1 if
-// client creation fails.
+// connections.
+//
+// Parameters:
+//   - source: An X509Source that provides the client's identity certificates
+//     and trusted roots
+//
+// Returns:
+//   - *http.Client: A configured HTTP client for connecting to SPIKE Keeper
 func CreateMTLSClientForKeeper(source *workloadapi.X509Source) *http.Client {
-	const fName = "MTLSClient"
-	client, err := CreateMTLSClientWithPredicate(
-		source, predicate.AllowKeeper,
-	)
-	if err != nil {
-		log.FatalLn(fName,
-			"message", "Failed to create mTLS client",
-			"err", err)
-	}
-	return client
+	return CreateMTLSClientWithPredicate(source, predicate.AllowKeeper)
 }
 
 // Source creates and returns a new SPIFFE X509Source for workload API
 // communication. It establishes a connection to the SPIFFE workload API using
-// the default endpoint socket. The function will terminate the program with
-// exit code 1 if the source creation fails.
+// the default endpoint socket with a configurable timeout to prevent indefinite
+// blocking on socket issues.
+//
+// The timeout can be configured using the SPIKE_SPIFFE_SOURCE_TIMEOUT
+// environment variable (default: 30s).
+//
+// The function will terminate the program with exit code 1 if the source
+// creation fails or times out.
+//
+// Returns:
+//   - *workloadapi.X509Source: A new X509Source for SPIFFE workload API
+//     communication
 func Source() *workloadapi.X509Source {
 	const fName = "Source"
-	source, _, err := spiffe.Source(
-		context.Background(), spiffe.EndpointSocket(),
+
+	ctx, cancel := context.WithTimeout(
+		context.Background(),
+		env.SPIFFESourceTimeoutVal(),
 	)
+	defer cancel()
+
+	source, _, err := spiffe.Source(ctx, spiffe.EndpointSocket())
 	if err != nil {
-		log.FatalLn(fName, "message", "Failed to create source", "err", err)
+		failErr := sdkErrors.ErrCreationFailed.Wrap(err)
+		log.FatalErr(fName, *failErr)
 	}
 	return source
 }
@@ -289,11 +314,11 @@ func Source() *workloadapi.X509Source {
 //     (e.g., ":8443").
 //
 // Returns:
-//   - error: Returns nil if the server starts successfully, otherwise returns
-//     an error explaining the failure. Specific error cases include:
-//   - If the source is nil
-//   - If server creation fails
-//   - If the server fails to start or encounters an error while running
+//   - *sdkErrors.SDKError: Returns nil if the server starts successfully,
+//     otherwise returns one of the following errors:
+//   - ErrSPIFFENilX509Source: if source is nil
+//   - ErrStreamOpenFailed: if the server fails to start or encounters an error
+//     while running
 //
 // The function uses empty strings for the certificate and key file parameters
 // in ListenAndServeTLS as the certificates are provided by the X509Source. The
@@ -303,21 +328,19 @@ func ServeWithPredicate(source *workloadapi.X509Source,
 	predicate func(string) bool,
 	tlsPort string) *sdkErrors.SDKError {
 	if source == nil {
-		return errors.New("serve: got nil source while trying to serve")
+		failErr := sdkErrors.ErrSPIFFENilX509Source
+		failErr.Msg = "got nil source while trying to serve"
+		return failErr
 	}
 
 	initializeRoutes()
 
-	server, err := CreateMTLSServerWithPredicate(source, tlsPort, predicate)
-	if err != nil {
-		return err
-	}
+	server := CreateMTLSServerWithPredicate(source, tlsPort, predicate)
 
 	if err := server.ListenAndServeTLS("", ""); err != nil {
-		return errors.Join(
-			err,
-			errors.New("serve: failed to listen and serve"),
-		)
+		failErr := sdkErrors.ErrStreamOpenFailed.Wrap(err)
+		failErr.Msg = "failed to listen and serve"
+		return failErr
 	}
 
 	return nil
@@ -341,11 +364,11 @@ func ServeWithPredicate(source *workloadapi.X509Source,
 //     (e.g., ":8443").
 //
 // Returns:
-//   - error: Returns nil if the server starts successfully, otherwise returns
-//     an error explaining the failure. Specific error cases include:
-//   - If `source` is nil
-//   - If server creation fails
-//   - If the server fails to start or encounters an error while running
+//   - *sdkErrors.SDKError: Returns nil if the server starts successfully,
+//     otherwise returns one of the following errors:
+//   - ErrSPIFFENilX509Source: if source is nil
+//   - ErrStreamOpenFailed: if the server fails to start or encounters an error
+//     while running
 //
 // The function uses empty strings for the certificate and key file parameters
 // in ListenAndServeTLS as the certificates are provided by the X509Source. The
@@ -356,5 +379,6 @@ func Serve(
 	tlsPort string) *sdkErrors.SDKError {
 	return ServeWithPredicate(
 		source, initializeRoutes,
-		predicate.AllowAll, tlsPort)
+		predicate.AllowAll, tlsPort,
+	)
 }

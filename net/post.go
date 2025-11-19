@@ -6,7 +6,6 @@ package net
 
 import (
 	"bytes"
-	"errors"
 	"io"
 	"net/http"
 
@@ -25,16 +24,17 @@ import (
 //   - mr: A byte slice containing the marshaled JSON request body.
 //
 // Returns:
-//   - []byte: The response body if the request is successful.
-//   - error: An error if any of the following occur:
-//   - Connection failure during POST request
-//   - Non-200 status code in response
-//   - Failure to read response body
-//   - Failure to close response body
+//   - []byte: The response body if the request is successful
+//   - *sdkErrors.SDKError: nil on success, or one of the following errors:
+//   - ErrBadRequest: if request creation fails or server returns 400
+//   - ErrPeerConnection: if connection to peer fails or unexpected status code
+//   - ErrNotFound: if server returns 404
+//   - ErrUnauthorized: if server returns 401
+//   - ErrNotReady: if server returns 503
+//   - ErrReadingResponseBody: if reading response body fails
 //
 // The function ensures proper cleanup by always attempting to close the
-// response body, even if an error occurs during reading. Any error from closing
-// the body is joined with any existing error using errors.Join.
+// response body, even if an error occurs during reading.
 //
 // Example:
 //
@@ -44,16 +44,17 @@ import (
 //	if err != nil {
 //	    log.Fatalf("failed to post: %v", err)
 //	}
-func Post(client *http.Client, path string, mr []byte) ([]byte, error) {
+func Post(
+	client *http.Client, path string, mr []byte,
+) ([]byte, *sdkErrors.SDKError) {
 	const fName = "Post"
 
 	// Create the request while preserving the mTLS client
 	req, err := http.NewRequest("POST", path, bytes.NewBuffer(mr))
 	if err != nil {
-		return nil, errors.Join(
-			errors.New("post: Failed to create request"),
-			err,
-		)
+		failErr := sdkErrors.ErrBadRequest.Wrap(err)
+		failErr.Msg = "failed to create request"
+		return nil, failErr
 	}
 
 	// Set headers
@@ -63,10 +64,8 @@ func Post(client *http.Client, path string, mr []byte) ([]byte, error) {
 	//nolint:bodyclose // Response body is properly closed in defer block
 	r, err := client.Do(req)
 	if err != nil {
-		return []byte{}, errors.Join(
-			errors.New("post: Problem connecting to peer"),
-			err,
-		)
+		failErr := sdkErrors.ErrPeerConnection.Wrap(err)
+		return []byte{}, failErr
 	}
 	defer func(b io.ReadCloser) {
 		if b == nil {
@@ -74,11 +73,9 @@ func Post(client *http.Client, path string, mr []byte) ([]byte, error) {
 		}
 		err := b.Close()
 		if err != nil {
-			log.Log().Info(
-				fName,
-				"msg", "Failed to close response body",
-				"err", err.Error(),
-			)
+			failErr := sdkErrors.ErrStreamCloseFailed.Wrap(err)
+			failErr.Msg = "failed to close response body"
+			log.WarnErr(fName, *failErr)
 		}
 	}(r.Body)
 
@@ -100,22 +97,28 @@ func Post(client *http.Client, path string, mr []byte) ([]byte, error) {
 			return []byte{}, sdkErrors.ErrNotReady
 		}
 
-		return []byte{}, errors.New("post: Problem connecting to peer")
+		failErr := sdkErrors.ErrPeerConnection
+		failErr.Msg = "unexpected status code from peer"
+		return []byte{}, failErr
 	}
 
 	b, err := body(r)
 	if err != nil {
-		return []byte{}, errors.Join(
-			errors.New("post: Problem reading response body"),
-			err,
-		)
+		failErr := sdkErrors.ErrStreamCloseFailed.Wrap(err)
+		failErr.Msg = "failed to close response body"
+		log.WarnErr(fName, *failErr)
 	}
 
 	defer func(b io.ReadCloser) {
 		if b == nil {
 			return
 		}
-		err = errors.Join(err, b.Close())
+		closeErr := b.Close()
+		if closeErr != nil {
+			failErr := sdkErrors.ErrStreamCloseFailed.Wrap(err)
+			failErr.Msg = "failed to close response body"
+			log.WarnErr(fName, *failErr)
+		}
 	}(r.Body)
 
 	return b, nil

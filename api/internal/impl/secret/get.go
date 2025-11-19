@@ -35,9 +35,9 @@ import (
 func Get(
 	source *workloadapi.X509Source,
 	path string, version int,
-) (*data.Secret, error) {
+) (*data.Secret, *sdkErrors.SDKError) {
 	if source == nil {
-		return nil, sdkErrors.ErrNilX509Source
+		return nil, sdkErrors.ErrSPIFFENilX509Source
 	}
 
 	r := reqres.SecretReadRequest{
@@ -72,7 +72,7 @@ func Get(
 		)
 	}
 	if res.Err != "" {
-		return nil, errors.New(string(res.Err))
+		return nil, sdkErrors.FromCode(res.Err)
 	}
 
 	return &data.Secret{Data: res.Data}, nil

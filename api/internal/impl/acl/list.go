@@ -6,7 +6,6 @@ package acl
 
 import (
 	"encoding/json"
-	"errors"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 
@@ -31,7 +30,13 @@ import (
 // Returns:
 //   - (*[]data.Policy, nil) containing all matching policies if successful
 //   - (nil, nil) if no policies are found
-//   - (nil, error) if an error occurs during the operation
+//   - (nil, *sdkErrors.SDKError) if an error occurs:
+//   - ErrSPIFFENilX509Source: if source is nil
+//   - ErrMarshalFailure: if request serialization fails
+//   - ErrPostFailed: if the HTTP request fails
+//   - ErrUnmarshalFailure: if response parsing fails
+//   - Error from FromCode(): if the server returns an error (e.g.,
+//     ErrUnauthorized, ErrBadRequest, etc.)
 //
 // Note: The returned slice pointer should be dereferenced before use:
 //
@@ -63,9 +68,9 @@ import (
 func ListPolicies(
 	source *workloadapi.X509Source,
 	SPIFFEIDPattern string, pathPattern string,
-) (*[]data.Policy, error) {
+) (*[]data.Policy, *sdkErrors.SDKError) {
 	if source == nil {
-		return nil, sdkErrors.ErrNilX509Source
+		return nil, sdkErrors.ErrSPIFFENilX509Source
 	}
 
 	r := reqres.PolicyListRequest{
@@ -74,19 +79,16 @@ func ListPolicies(
 	}
 	mr, err := json.Marshal(r)
 	if err != nil {
-		return nil, errors.Join(
-			errors.New(
-				"listPolicies: I am having problem generating the payload",
-			),
-			err,
-		)
+		failErr := sdkErrors.ErrMarshalFailure.Wrap(err)
+		failErr.Msg = "problem generating the payload"
+		return nil, failErr
 	}
 
 	client := net.CreateMTLSClientForNexus(source)
 
 	body, err := net.Post(client, url.PolicyList(), mr)
 	if err != nil {
-		if errors.Is(err, sdkErrors.ErrNotFound) {
+		if err.Is(sdkErrors.ErrNotFound) {
 			return nil, nil
 		}
 		return nil, err
@@ -95,13 +97,12 @@ func ListPolicies(
 	var res reqres.PolicyListResponse
 	err = json.Unmarshal(body, &res)
 	if err != nil {
-		return nil, errors.Join(
-			errors.New("listPolicies: Problem parsing response body"),
-			err,
-		)
+		failErr := sdkErrors.ErrUnmarshalFailure.Wrap(err)
+		failErr.Msg = "problem parsing response body"
+		return nil, failErr
 	}
 	if res.Err != "" {
-		return nil, errors.New(string(res.Err))
+		return nil, sdkErrors.FromCode(res.Err)
 	}
 
 	return &res.Policies, nil

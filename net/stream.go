@@ -5,7 +5,6 @@
 package net
 
 import (
-	"errors"
 	"io"
 	"net/http"
 
@@ -24,13 +23,13 @@ import (
 //   - client *http.Client: The HTTP client to use for the request
 //   - path string: The URL path to POST to
 //   - body io.Reader: The request body data stream
-//   - contentType string: The MIME type of the request body
-//     (e.g., "application/json", "text/plain")
+//   - contentType ContentType: The MIME type of the request body
+//     (e.g., ContentTypeJSON, ContentTypeTextPlain, ContentTypeOctetStream)
 //
 // Returns:
 //   - io.ReadCloser: The response body stream if successful
 //     (must be closed by caller)
-//   - error: nil on success, or one of the following well-known errors:
+//   - *sdkErrors.SDKError: nil on success, or one of the following well-known errors:
 //   - ErrNotFound (404): Resource not found
 //   - ErrUnauthorized (401): Authentication required
 //   - ErrBadRequest (400): Invalid request
@@ -48,26 +47,24 @@ import (
 //		defer response.Close()
 //		// Process streaming response...
 func StreamPostWithContentType(
-	client *http.Client, path string, body io.Reader, contentType string,
-) (io.ReadCloser, error) {
+	client *http.Client, path string, body io.Reader,
+	contentType ContentType,
+) (io.ReadCloser, *sdkErrors.SDKError) {
 	const fName = "StreamPostWithContentType"
 
 	req, err := http.NewRequest("POST", path, body)
 	if err != nil {
-		return nil, errors.Join(
-			errors.New("streamPost: Failed to create request"),
-			err,
-		)
+		failErr := sdkErrors.ErrPostFailed.Wrap(err)
+		failErr.Msg = "failed to create request"
+		return nil, failErr
 	}
-	req.Header.Set("Content-Type", contentType)
+	req.Header.Set("Content-Type", string(contentType))
 
 	//nolint:bodyclose // Response body is properly closed in defer block
 	r, err := client.Do(req)
 	if err != nil {
-		return nil, errors.Join(
-			errors.New("streamPost: Problem connecting to peer"),
-			err,
-		)
+		failErr := sdkErrors.ErrPeerConnection.Wrap(err)
+		return nil, failErr
 	}
 	defer func(b io.ReadCloser) {
 		if b == nil {
@@ -75,34 +72,33 @@ func StreamPostWithContentType(
 		}
 		err := b.Close()
 		if err != nil {
-			log.Log().Info(fName,
-				"message", "Failed to close response body",
-				"err", err.Error(),
-			)
+			failErr := sdkErrors.ErrStreamCloseFailed
+			failErr.Msg = "failed to close response body"
+			log.WarnErr(fName, *failErr)
 		}
 	}(r.Body)
 
 	if r.StatusCode != http.StatusOK {
-		if r.StatusCode == http.StatusNotFound {
+		switch r.StatusCode {
+		case http.StatusNotFound:
 			return nil, sdkErrors.ErrNotFound
-		}
-		if r.StatusCode == http.StatusUnauthorized {
+		case http.StatusUnauthorized:
 			return nil, sdkErrors.ErrUnauthorized
-		}
-		if r.StatusCode == http.StatusBadRequest {
+		case http.StatusBadRequest:
 			return nil, sdkErrors.ErrBadRequest
-		}
-		if r.StatusCode == http.StatusServiceUnavailable {
+		case http.StatusServiceUnavailable:
 			return nil, sdkErrors.ErrNotReady
+		default:
+			failErr := sdkErrors.ErrPeerConnection
+			return nil, failErr
 		}
-		return nil, errors.New("streamPost: Problem connecting to peer")
 	}
 
 	return r.Body, nil
 }
 
 // StreamPost is a convenience wrapper for StreamPostWithContentType that uses
-// the default content type "application/octet-stream".
+// the default content type ContentTypeOctetStream ("application/octet-stream").
 //
 // This function is ideal for posting binary data or when the specific content
 // type doesn't matter. The caller is responsible for closing the returned
@@ -116,7 +112,7 @@ func StreamPostWithContentType(
 // Returns:
 //   - io.ReadCloser: The response body stream if successful
 //     (must be closed by caller)
-//   - error: nil on success, or a well-known error
+//   - *sdkErrors.SDKError: nil on success, or a well-known error
 //     (see StreamPostWithContentType)
 //
 // Example:
@@ -130,8 +126,8 @@ func StreamPostWithContentType(
 //	// Process response...
 func StreamPost(
 	client *http.Client, path string, body io.Reader,
-) (io.ReadCloser, error) {
+) (io.ReadCloser, *sdkErrors.SDKError) {
 	return StreamPostWithContentType(
-		client, path, body, "application/octet-stream",
+		client, path, body, ContentTypeOctetStream,
 	)
 }

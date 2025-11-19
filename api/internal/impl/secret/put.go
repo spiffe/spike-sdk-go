@@ -6,7 +6,6 @@ package secret
 
 import (
 	"encoding/json"
-	"errors"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 
@@ -25,8 +24,13 @@ import (
 //   - values: Map of key-value pairs representing the secret data
 //
 // Returns:
-//   - error: nil on success, unauthorized error if not logged in, or
-//     wrapped error on request/parsing failure
+//   - *sdkErrors.SDKError: nil on success, or one of the following errors:
+//   - ErrSPIFFENilX509Source: if source is nil
+//   - ErrMarshalFailure: if request serialization fails
+//   - ErrPostFailed: if the HTTP request fails
+//   - ErrUnmarshalFailure: if response parsing fails
+//   - Error from FromCode(): if the server returns an error (e.g.,
+//     ErrUnauthorized, ErrNotFound, ErrBadRequest, etc.)
 //
 // Example:
 //
@@ -35,9 +39,9 @@ import (
 func Put(
 	source *workloadapi.X509Source,
 	path string, values map[string]string,
-) error {
+) *sdkErrors.SDKError {
 	if source == nil {
-		return sdkErrors.ErrNilX509Source
+		return sdkErrors.ErrSPIFFENilX509Source
 	}
 
 	r := reqres.SecretPutRequest{
@@ -47,29 +51,25 @@ func Put(
 
 	mr, err := json.Marshal(r)
 	if err != nil {
-		return errors.Join(
-			errors.New("putSecret: I am having problem generating the payload"),
-			err,
-		)
+		return sdkErrors.ErrMarshalFailure.Wrap(err)
 	}
 
 	client := net.CreateMTLSClientForNexus(source)
 
 	body, err := net.Post(client, url.SecretPut(), mr)
 	if err != nil {
-		return err
+		return sdkErrors.ErrPostFailed.Wrap(err)
 	}
 
 	res := reqres.SecretPutResponse{}
 	err = json.Unmarshal(body, &res)
 	if err != nil {
-		return errors.Join(
-			errors.New("putSecret: Problem parsing response body"),
-			err,
-		)
+		failErr := sdkErrors.ErrUnmarshalFailure.Wrap(err)
+		failErr.Msg = "problem parsing response body"
+		return failErr
 	}
 	if res.Err != "" {
-		return errors.New(string(res.Err))
+		return sdkErrors.FromCode(res.Err)
 	}
 
 	return nil

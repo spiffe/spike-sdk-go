@@ -8,6 +8,7 @@ import (
 	"path"
 	"strings"
 
+	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
 	"github.com/spiffe/spike-sdk-go/log"
 )
 
@@ -23,10 +24,12 @@ import (
 func Keeper(trustRoot string) string {
 	const fName = "Keeper"
 	if trustRoot == "" {
-		log.FatalLn(fName, "message", "Keeper: trustRoot cannot be an empty string")
+		failErr := sdkErrors.ErrSPIFFEEmptyTrustDomain
+		log.FatalErr(fName, *failErr)
 	}
 	if strings.Contains(trustRoot, ",") {
-		log.FatalLn(fName, "message", "Keeper: provide a single trust root")
+		failErr := sdkErrors.ErrSPIFFEMultipleTrustDomains
+		log.FatalErr(fName, *failErr)
 	}
 
 	return "spiffe://" + path.Join(trustRoot, "spike", "keeper")
@@ -44,10 +47,12 @@ func Keeper(trustRoot string) string {
 func Nexus(trustRoot string) string {
 	const fName = "Nexus"
 	if trustRoot == "" {
-		log.FatalLn(fName, "message", "Nexus: trustRoot cannot be an empty string")
+		failErr := sdkErrors.ErrSPIFFEEmptyTrustDomain
+		log.FatalErr(fName, *failErr)
 	}
 	if strings.Contains(trustRoot, ",") {
-		log.FatalLn(fName, "message", "Nexus: provide a single trust root")
+		failErr := sdkErrors.ErrSPIFFEMultipleTrustDomains
+		log.FatalErr(fName, *failErr)
 	}
 
 	return "spiffe://" + path.Join(trustRoot, "spike", "nexus")
@@ -65,10 +70,12 @@ func Nexus(trustRoot string) string {
 func Pilot(trustRoot string) string {
 	const fName = "Pilot"
 	if trustRoot == "" {
-		log.FatalLn(fName, "message", "Pilot: trustRoot cannot be an empty string")
+		failErr := sdkErrors.ErrSPIFFEEmptyTrustDomain
+		log.FatalErr(fName, *failErr)
 	}
 	if strings.Contains(trustRoot, ",") {
-		log.FatalLn(fName, "message", "Pilot: provide a single trust root")
+		failErr := sdkErrors.ErrSPIFFEMultipleTrustDomains
+		log.FatalErr(fName, *failErr)
 	}
 
 	return "spiffe://" + path.Join(trustRoot,
@@ -87,11 +94,12 @@ func Pilot(trustRoot string) string {
 func Bootstrap(trustRoot string) string {
 	const fName = "Bootstrap"
 	if trustRoot == "" {
-		log.FatalLn(fName,
-			"message", "Bootstrap: trustRoot cannot be an empty string")
+		failErr := sdkErrors.ErrSPIFFEEmptyTrustDomain
+		log.FatalErr(fName, *failErr)
 	}
 	if strings.Contains(trustRoot, ",") {
-		log.FatalLn(fName, "message", "Bootstrap: provide a single trust root")
+		failErr := sdkErrors.ErrSPIFFEMultipleTrustDomains
+		log.FatalErr(fName, *failErr)
 	}
 
 	return "spiffe://" + path.Join(trustRoot, "spike", "bootstrap")
@@ -109,11 +117,12 @@ func Bootstrap(trustRoot string) string {
 func LiteWorkload(trustRoot string) string {
 	const fName = "LiteWorkload"
 	if trustRoot == "" {
-		log.FatalLn(fName,
-			"message", "LiteWorkload: trustRoot cannot be an empty string")
+		failErr := sdkErrors.ErrSPIFFEEmptyTrustDomain
+		log.FatalErr(fName, *failErr)
 	}
 	if strings.Contains(trustRoot, ",") {
-		log.FatalLn(fName, "message", "LiteWorkload: provide a single trust root")
+		failErr := sdkErrors.ErrSPIFFEMultipleTrustDomains
+		log.FatalErr(fName, *failErr)
 	}
 
 	return "spiffe://" + path.Join(trustRoot, "spike", "workload", "role", "lite")
@@ -131,12 +140,12 @@ func LiteWorkload(trustRoot string) string {
 func PilotRecover(trustRoot string) string {
 	const fName = "PilotRecover"
 	if trustRoot == "" {
-		log.FatalLn(fName, "message",
-			"PilotRecover: trustRoot cannot be an empty string")
+		failErr := sdkErrors.ErrSPIFFEEmptyTrustDomain
+		log.FatalErr(fName, *failErr)
 	}
 	if strings.Contains(trustRoot, ",") {
-		log.FatalLn(fName, "message",
-			"PilotRecover: provide a single trust root")
+		failErr := sdkErrors.ErrSPIFFEMultipleTrustDomains
+		log.FatalErr(fName, *failErr)
 	}
 
 	return "spiffe://" + path.Join(trustRoot, "spike", "pilot", "role", "recover")
@@ -154,11 +163,12 @@ func PilotRecover(trustRoot string) string {
 func PilotRestore(trustRoot string) string {
 	const fName = "PilotRestore"
 	if trustRoot == "" {
-		log.FatalLn(fName, "message",
-			"PilotRestore: trustRoot cannot be an empty string")
+		failErr := sdkErrors.ErrSPIFFEEmptyTrustDomain
+		log.FatalErr(fName, *failErr)
 	}
 	if strings.Contains(trustRoot, ",") {
-		log.FatalLn(fName, "message", "PilotRestore: provide a single trust root")
+		failErr := sdkErrors.ErrSPIFFEMultipleTrustDomains
+		log.FatalErr(fName, *failErr)
 	}
 
 	return "spiffe://" + path.Join(trustRoot, "spike", "pilot", "role", "restore")

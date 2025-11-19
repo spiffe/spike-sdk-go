@@ -6,7 +6,6 @@ package acl
 
 import (
 	"encoding/json"
-	"errors"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 
@@ -29,8 +28,13 @@ import (
 //   - permissions: A slice of PolicyPermission defining the access rights
 //
 // Returns:
-//   - nil if successful
-//   - error if marshaling, network request, or server-side creation fails
+//   - *sdkErrors.SDKError: nil on success, or one of the following errors:
+//   - ErrSPIFFENilX509Source: if source is nil
+//   - ErrMarshalFailure: if request serialization fails
+//   - ErrPostFailed: if the HTTP request fails
+//   - ErrUnmarshalFailure: if response parsing fails
+//   - Error from FromCode(): if the server returns an error (e.g.,
+//     ErrUnauthorized, ErrBadRequest, etc.)
 //
 // Example:
 //
@@ -60,9 +64,9 @@ import (
 func CreatePolicy(source *workloadapi.X509Source,
 	name string, SPIFFEIDPattern string, pathPattern string,
 	permissions []data.PolicyPermission,
-) error {
+) *sdkErrors.SDKError {
 	if source == nil {
-		return sdkErrors.ErrNilX509Source
+		return sdkErrors.ErrSPIFFENilX509Source
 	}
 
 	r := reqres.PolicyCreateRequest{
@@ -74,12 +78,9 @@ func CreatePolicy(source *workloadapi.X509Source,
 
 	mr, err := json.Marshal(r)
 	if err != nil {
-		return errors.Join(
-			errors.New(
-				"createPolicy: I am having problem generating the payload",
-			),
-			err,
-		)
+		failErr := sdkErrors.ErrMarshalFailure.Wrap(err)
+		failErr.Msg = "problem generating the payload"
+		return failErr
 	}
 
 	client := net.CreateMTLSClientForNexus(source)
@@ -92,13 +93,12 @@ func CreatePolicy(source *workloadapi.X509Source,
 	res := reqres.PolicyCreateResponse{}
 	err = json.Unmarshal(body, &res)
 	if err != nil {
-		return errors.Join(
-			errors.New("createPolicy: Problem parsing response body"),
-			err,
-		)
+		failErr := sdkErrors.ErrUnmarshalFailure.Wrap(err)
+		failErr.Msg = "problem parsing response body"
+		return failErr
 	}
 	if res.Err != "" {
-		return errors.New(string(res.Err))
+		return sdkErrors.FromCode(res.Err)
 	}
 
 	return nil

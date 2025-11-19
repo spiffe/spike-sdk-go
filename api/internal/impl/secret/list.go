@@ -31,9 +31,9 @@ import (
 //	keys, err := ListKeys(x509Source)
 func ListKeys(
 	source *workloadapi.X509Source,
-) (*[]string, error) {
+) (*[]string, *sdkErrors.SDKError) {
 	if source == nil {
-		return nil, sdkErrors.ErrNilX509Source
+		return nil, sdkErrors.ErrSPIFFENilX509Source
 	}
 
 	r := reqres.SecretListRequest{}
@@ -66,7 +66,7 @@ func ListKeys(
 		)
 	}
 	if res.Err != "" {
-		return nil, errors.New(string(res.Err))
+		return nil, sdkErrors.FromCode(res.Err)
 	}
 
 	return &res.Keys, nil

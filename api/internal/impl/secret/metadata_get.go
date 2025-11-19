@@ -35,9 +35,9 @@ import (
 //	metadata, err := GetMetadata(x509Source, "secret/path", 1)
 func GetMetadata(
 	source *workloadapi.X509Source, path string, version int,
-) (*data.SecretMetadata, error) {
+) (*data.SecretMetadata, *sdkErrors.SDKError) {
 	if source == nil {
-		return nil, sdkErrors.ErrNilX509Source
+		return nil, sdkErrors.ErrSPIFFENilX509Source
 	}
 
 	r := reqres.SecretMetadataRequest{
@@ -72,7 +72,7 @@ func GetMetadata(
 		)
 	}
 	if res.Err != "" {
-		return nil, errors.New(string(res.Err))
+		return nil, sdkErrors.FromCode(res.Err)
 	}
 
 	return &data.SecretMetadata{

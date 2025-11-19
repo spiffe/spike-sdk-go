@@ -7,7 +7,8 @@ package crypto
 import (
 	"crypto/rand"
 	"encoding/hex"
-	"errors"
+
+	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
 )
 
 var reader = rand.Read
@@ -27,16 +28,15 @@ const AES256KeySize = 32
 // The function uses a cryptographically secure random number generator to ensure
 // the generated key is suitable for cryptographic use. The resulting hex string
 // can be decoded back to bytes using hex.DecodeString when needed for encryption.
-func AES256Seed() (string, error) {
+func AES256Seed() (string, *sdkErrors.SDKError) {
 	// Generate a 256-bit key
 	key := make([]byte, AES256KeySize)
 
 	_, err := reader(key)
 	if err != nil {
-		return "", errors.Join(
-			err,
-			errors.New("AES256Seed: failed to generate random key"),
-		)
+		failErr := sdkErrors.ErrCryptoFailedToCreateCipher.Wrap(err)
+		failErr.Msg = "failed to generate random key"
+		return "", failErr
 	}
 
 	return hex.EncodeToString(key), nil

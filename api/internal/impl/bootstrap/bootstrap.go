@@ -8,7 +8,6 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
-	"errors"
 	"fmt"
 
 	"github.com/cloudflare/circl/secretsharing"
@@ -39,8 +38,14 @@ import (
 //
 // Returns:
 //   - nil if successful
-//   - error if marshaling, validation, network request, or server-side
-//     processing fails
+//   - *sdkErrors.SDKError if an error occurs:
+//   - ErrSPIFFENilX509Source: if source is nil
+//   - Errors from net.Post(): if the HTTP request fails (e.g., ErrNotFound,
+//     ErrUnauthorized, ErrBadRequest, ErrNotReady, ErrPeerConnection)
+//
+// Note: The function will fatally crash (via log.FatalErr) for unrecoverable
+// errors such as marshal failures (ErrMarshalFailure) or invalid contribution
+// length (ErrCryptoInvalidEncryptionKeyLength).
 //
 // Example:
 //
@@ -58,23 +63,27 @@ func Contribute(
 	source *workloadapi.X509Source,
 	keeperShare secretsharing.Share,
 	keeperID string,
-) error {
+) *sdkErrors.SDKError {
 	const fName = "Contribute"
 
 	if source == nil {
-		return sdkErrors.ErrNilX509Source
+		return sdkErrors.ErrSPIFFENilX509Source
 	}
 
 	contribution, err := keeperShare.Value.MarshalBinary()
 	if err != nil {
-		log.FatalLn(fName, "message", "Failed to marshal share",
-			"err", err, "keeper_id", keeperID)
+		failErr := sdkErrors.ErrMarshalFailure.Wrap(err)
+		failErr.Msg = "failed to marshal share"
+		log.FatalErr(fName, *failErr)
 	}
 
 	if len(contribution) != crypto.AES256KeySize {
-		log.FatalLn(fName,
-			"message", "invalid contribution length",
-			"len", len(contribution), "keeper_id", keeperID)
+		failErr := sdkErrors.ErrCryptoInvalidEncryptionKeyLength
+		failErr.Msg = fmt.Sprintf(
+			"invalid contribution length: expected %d, got %d",
+			crypto.AES256KeySize, len(contribution),
+		)
+		log.FatalErr(fName, *failErr)
 	}
 
 	scr := reqres.ShardPutRequest{}
@@ -96,20 +105,15 @@ func Contribute(
 
 		md, err := json.Marshal(scr)
 		if err != nil {
-			log.FatalLn(fName,
-				"message", "Failed to marshal request",
-				"err", err, "keeper_id", keeperID)
+			failErr := sdkErrors.ErrMarshalFailure.Wrap(err)
+			failErr.Msg = "failed to marshal request"
+			log.FatalErr(fName, *failErr)
 		}
-
-		log.Log().Info(fName, "payload", fmt.Sprintf("%x", sha256.Sum256(md)))
 
 		u := url.KeeperBootstrapContributeEndpoint(keeperAPIRoot)
 
 		_, err = net.Post(client, u, md)
 		if err != nil {
-			log.Log().Info(fName, "message",
-				"Failed to post",
-				"err", err, "keeper_id", keeperID)
 			return err
 		}
 	}
@@ -134,7 +138,16 @@ func Contribute(
 //
 // Returns:
 //   - nil if verification succeeds (hash matches)
-//   - error if marshaling, network request, parsing, or hash verification fails
+//   - *sdkErrors.SDKError if an error occurs:
+//   - ErrSPIFFENilX509Source: if source is nil
+//   - Errors from net.Post(): if the HTTP request fails (e.g., ErrNotFound,
+//     ErrUnauthorized, ErrBadRequest, ErrNotReady, ErrPeerConnection)
+//
+// Note: The function will fatally crash (via log.FatalErr) for unrecoverable
+// errors such as marshal failures (ErrMarshalFailure), response parsing
+// failures (ErrUnmarshalFailure), or hash verification failures
+// (ErrCryptoCipherVerificationFailed). These indicate potential security
+// issues and the application should not continue.
 //
 // Example:
 //
@@ -152,11 +165,11 @@ func Verify(
 	source *workloadapi.X509Source,
 	randomText string,
 	nonce, ciphertext []byte,
-) error {
+) *sdkErrors.SDKError {
 	const fName = "Verify"
 
 	if source == nil {
-		return sdkErrors.ErrNilX509Source
+		return sdkErrors.ErrSPIFFENilX509Source
 	}
 
 	client := net.CreateMTLSClientForNexus(source)
@@ -168,25 +181,23 @@ func Verify(
 
 	md, err := json.Marshal(request)
 	if err != nil {
-		log.FatalLn(fName,
-			"message", "Failed to marshal verification request",
-			"err", err)
+		failErr := sdkErrors.ErrMarshalFailure.Wrap(err)
+		failErr.Msg = "failed to marshal verification request"
+		log.FatalErr(fName, *failErr)
 	}
-
-	log.Log().Info(fName, "payload", fmt.Sprintf("%x", sha256.Sum256(md)))
 
 	// Send the verification request to SPIKE Nexus
 	nexusAPIRoot := env.NexusAPIRootVal()
 	verifyURL := url.NexusBootstrapVerifyEndpoint(nexusAPIRoot)
 
-	log.Log().Info(fName, "message",
-		"Sending verification request to SPIKE Nexus", "url", verifyURL)
+	log.Info(
+		fName,
+		"message", "sending verification request to SPIKE Nexus",
+		"url", verifyURL,
+	)
 
 	responseBody, err := net.Post(client, verifyURL, md)
 	if err != nil {
-		log.Log().Error(fName, "message",
-			"Failed to post verification request",
-			"err", err)
 		return err
 	}
 
@@ -196,9 +207,11 @@ func Verify(
 		Err  string `json:"err"`
 	}
 	if err := json.Unmarshal(responseBody, &verifyResponse); err != nil {
-		log.Log().Error(fName, "message",
-			"Failed to parse verification response", "err", err.Error())
-		return err
+		failErr := sdkErrors.ErrUnmarshalFailure.Wrap(err)
+		failErr.Msg = "failed to parse verification response"
+		// If SPIKE Keeper is sending gibberish, it may be a malicious actor.
+		// Fatally crash here to prevent a possible compromise.
+		log.FatalErr(fName, *failErr)
 	}
 
 	// Compute the expected hash
@@ -207,11 +220,9 @@ func Verify(
 
 	// Verify the hash matches
 	if verifyResponse.Hash != expectedHashHex {
-		log.FatalLn(fName, "message",
-			"Verification failed: hash mismatch",
-			"expected", expectedHashHex,
-			"received", verifyResponse.Hash)
-		return errors.New("verification failed")
+		failErr := sdkErrors.ErrCryptoCipherVerificationFailed
+		failErr.Msg = "verification failed: hash mismatch"
+		log.FatalErr(fName, *failErr)
 	}
 
 	return nil

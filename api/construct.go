@@ -9,6 +9,7 @@ import (
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 
+	"github.com/spiffe/spike-sdk-go/config/env"
 	"github.com/spiffe/spike-sdk-go/spiffe"
 )
 
@@ -20,7 +21,12 @@ type API struct {
 // New creates and returns a new instance of API configured with a SPIFFE
 // source.
 // It automatically discovers and connects to the SPIFFE Workload API endpoint
-// using the default socket path and creates an X.509 source for authentication.
+// using the default socket path and creates an X.509 source for authentication
+// with a configurable timeout to prevent indefinite blocking on socket issues.
+//
+// The timeout can be configured using the SPIKE_SPIFFE_SOURCE_TIMEOUT
+// environment variable (default: 30s).
+//
 // The API client is configured to communicate exclusively with SPIKE Nexus.
 //
 // Returns:
@@ -30,7 +36,7 @@ type API struct {
 // The function will return nil if:
 //   - The SPIFFE Workload API is not available
 //   - The default endpoint socket cannot be accessed
-//   - The X.509 source creation fails
+//   - The X.509 source creation fails or times out
 //
 // Example usage:
 //
@@ -43,9 +49,13 @@ type API struct {
 func New() *API {
 	defaultEndpointSocket := spiffe.EndpointSocket()
 
-	source, _, err := spiffe.Source(
-		context.Background(), defaultEndpointSocket,
+	ctx, cancel := context.WithTimeout(
+		context.Background(),
+		env.SPIFFESourceTimeoutVal(),
 	)
+	defer cancel()
+
+	source, _, err := spiffe.Source(ctx, defaultEndpointSocket)
 	if err != nil {
 		return nil
 	}

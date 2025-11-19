@@ -37,9 +37,9 @@ import (
 // Example:
 //
 //	shards, err := Recover(x509Source)
-func Recover(source *workloadapi.X509Source) (map[int]*[32]byte, error) {
+func Recover(source *workloadapi.X509Source) (map[int]*[32]byte, *sdkErrors.SDKError) {
 	if source == nil {
-		return nil, sdkErrors.ErrNilX509Source
+		return nil, sdkErrors.ErrSPIFFENilX509Source
 	}
 
 	const fName = "recover"
@@ -91,7 +91,7 @@ func Recover(source *workloadapi.X509Source) (map[int]*[32]byte, error) {
 		)
 	}
 	if res.Err != "" {
-		return nil, errors.New(string(res.Err))
+		return nil, sdkErrors.FromCode(res.Err)
 	}
 
 	result := make(map[int]*[32]byte)
