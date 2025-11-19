@@ -13,6 +13,8 @@ import (
 	"os"
 	"strings"
 	"sync"
+
+	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
 )
 
 var logger *slog.Logger
@@ -54,6 +56,23 @@ func Log() *slog.Logger {
 func FatalLn(fName string, args ...any) {
 	Log().Error(fName, args...)
 	fatalExit(fName, args)
+}
+
+// FatalErr logs an SDK error at Fatal level and exits the program.
+// The fName parameter indicates the function name from which the call is made.
+// The err parameter is an SDKError that will be logged with its message, code,
+// and error text as structured fields.
+//
+// By default, this function exits cleanly with status code 1 to avoid leaking
+// sensitive information through stack traces in production. To enable stack
+// traces for development and testing, set SPIKE_STACK_TRACES_ON_LOG_FATAL=true.
+func FatalErr(fName string, err sdkErrors.SDKError) {
+	FatalLn(
+		fName,
+		"message", err.Msg,
+		"code", err.Code,
+		"err", err.Error(),
+	)
 }
 
 // Cannot get from env.go because of circular dependency.
