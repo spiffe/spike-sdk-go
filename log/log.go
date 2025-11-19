@@ -75,6 +75,45 @@ func FatalErr(fName string, err sdkErrors.SDKError) {
 	)
 }
 
+// InfoErr logs an SDK error at Info level.
+// The fName parameter indicates the function name from which the call is made.
+// The err parameter is an SDKError that will be logged with its message, code,
+// and error text as structured fields.
+func InfoErr(fName string, err sdkErrors.SDKError) {
+	Log().Info(
+		fName,
+		"message", err.Msg,
+		"code", err.Code,
+		"err", err.Error(),
+	)
+}
+
+// WarnErr logs an SDK error at Warn level.
+// The fName parameter indicates the function name from which the call is made.
+// The err parameter is an SDKError that will be logged with its message, code,
+// and error text as structured fields.
+func WarnErr(fName string, err sdkErrors.SDKError) {
+	Log().Warn(
+		fName,
+		"message", err.Msg,
+		"code", err.Code,
+		"err", err.Error(),
+	)
+}
+
+// ErrorErr logs an SDK error at Error level.
+// The fName parameter indicates the function name from which the call is made.
+// The err parameter is an SDKError that will be logged with its message, code,
+// and error text as structured fields.
+func ErrorErr(fName string, err sdkErrors.SDKError) {
+	Log().Error(
+		fName,
+		"message", err.Msg,
+		"code", err.Code,
+		"err", err.Error(),
+	)
+}
+
 // Cannot get from env.go because of circular dependency.
 const systemLogLevelEnvVar = "SPIKE_SYSTEM_LOG_LEVEL"
 
