@@ -45,6 +45,13 @@ func Log() *slog.Logger {
 	return logger
 }
 
+// Debug logs a message at Debug level.
+// The msg parameter should be the function name from which the call is made.
+// The args parameter contains key-value pairs to be logged as structured fields.
+func Debug(msg string, args ...any) {
+	Log().Debug(msg, args...)
+}
+
 // Info logs a message at Info level.
 // The msg parameter should be the function name from which the call is made.
 // The args parameter contains key-value pairs to be logged as structured fields.
@@ -66,13 +73,6 @@ func Error(msg string, args ...any) {
 	Log().Error(msg, args...)
 }
 
-// Debug logs a message at Debug level.
-// The msg parameter should be the function name from which the call is made.
-// The args parameter contains key-value pairs to be logged as structured fields.
-func Debug(msg string, args ...any) {
-	Log().Debug(msg, args...)
-}
-
 // FatalLn logs a message at Fatal level with a line feed.
 // The fName parameter indicates the function name from which the call is made.
 // The args parameter contains the values to be logged, which will be formatted
@@ -86,16 +86,12 @@ func FatalLn(fName string, args ...any) {
 	fatalExit(fName, args)
 }
 
-// FatalErr logs an SDK error at Fatal level and exits the program.
+// DebugErr logs an SDK error at Debug level.
 // The fName parameter indicates the function name from which the call is made.
 // The err parameter is an SDKError that will be logged with its message, code,
 // and error text as structured fields.
-//
-// By default, this function exits cleanly with status code 1 to avoid leaking
-// sensitive information through stack traces in production. To enable stack
-// traces for development and testing, set SPIKE_STACK_TRACES_ON_LOG_FATAL=true.
-func FatalErr(fName string, err sdkErrors.SDKError) {
-	FatalLn(
+func DebugErr(fName string, err sdkErrors.SDKError) {
+	Log().Debug(
 		fName,
 		"message", err.Msg,
 		"code", err.Code,
@@ -135,6 +131,23 @@ func WarnErr(fName string, err sdkErrors.SDKError) {
 // and error text as structured fields.
 func ErrorErr(fName string, err sdkErrors.SDKError) {
 	Log().Error(
+		fName,
+		"message", err.Msg,
+		"code", err.Code,
+		"err", err.Error(),
+	)
+}
+
+// FatalErr logs an SDK error at Fatal level and exits the program.
+// The fName parameter indicates the function name from which the call is made.
+// The err parameter is an SDKError that will be logged with its message, code,
+// and error text as structured fields.
+//
+// By default, this function exits cleanly with status code 1 to avoid leaking
+// sensitive information through stack traces in production. To enable stack
+// traces for development and testing, set SPIKE_STACK_TRACES_ON_LOG_FATAL=true.
+func FatalErr(fName string, err sdkErrors.SDKError) {
+	FatalLn(
 		fName,
 		"message", err.Msg,
 		"code", err.Code,

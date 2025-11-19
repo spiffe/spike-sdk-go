@@ -16,6 +16,7 @@ import (
 	"github.com/spiffe/go-spiffe/v2/spiffeid"
 	"github.com/spiffe/go-spiffe/v2/spiffetls/tlsconfig"
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
+	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
 
 	"github.com/spiffe/spike-sdk-go/config/env"
 	"github.com/spiffe/spike-sdk-go/log"
@@ -45,20 +46,37 @@ import (
 //	    return
 //	}
 //	// Process body data...
-func RequestBody(r *http.Request) (bod []byte, err error) {
-	body, err := io.ReadAll(r.Body)
-	if err != nil {
-		return nil, err
+func RequestBody(r *http.Request) (bod []byte, err *sdkErrors.SDKError) {
+	const fName = "RequestBody"
+
+	body, e := io.ReadAll(r.Body)
+	if e != nil {
+		failErr := sdkErrors.ErrReadingRequestBody.Wrap(e)
+		return nil, failErr
 	}
 
 	defer func(b io.ReadCloser) {
 		if b == nil {
 			return
 		}
-		err = errors.Join(err, b.Close())
+		failErr := sdkErrors.ErrStreamCloseFailed
+		log.WarnErr(fName, *failErr)
 	}(r.Body)
 
 	return body, err
+}
+
+func AuthorizerWithPredicate(predicate func(string) bool) tlsconfig.Authorizer {
+	return tlsconfig.AdaptMatcher(func(id spiffeid.ID) error {
+		if predicate(id.String()) {
+			return nil
+		}
+
+		failErr := sdkErrors.ErrUnauthorized
+		failErr.Msg = fmt.Sprintf("unauthorized spiffe id: '%s'", id.String())
+
+		return failErr
+	})
 }
 
 // CreateMTLSServerWithPredicate creates an HTTP server configured for mutual
@@ -84,17 +102,8 @@ func RequestBody(r *http.Request) (bod []byte, err error) {
 // SPIFFE ID passes the provided predicate function.
 func CreateMTLSServerWithPredicate(source *workloadapi.X509Source,
 	tlsPort string,
-	predicate func(string) bool) (*http.Server, error) {
-	authorizer := tlsconfig.AdaptMatcher(func(id spiffeid.ID) error {
-		if predicate(id.String()) {
-			return nil
-		}
-
-		return fmt.Errorf(
-			"authorizer: TLS Config: untrusted spiffe id: '%s'", id.String(),
-		)
-	})
-
+	predicate func(string) bool) (*http.Server, *sdkErrors.SDKError) {
+	authorizer := AuthorizerWithPredicate(predicate)
 	tlsConfig := tlsconfig.MTLSServerConfig(source, source, authorizer)
 	server := &http.Server{
 		Addr:              tlsPort,
@@ -128,7 +137,7 @@ func CreateMTLSServerWithPredicate(source *workloadapi.X509Source,
 // validating client certificates. Client connections are accepted from ANY
 // client with a valid SPIFFE certificate.
 func CreateMTLSServer(source *workloadapi.X509Source,
-	tlsPort string) (*http.Server, error) {
+	tlsPort string) (*http.Server, *sdkErrors.SDKError) {
 	return CreateMTLSServerWithPredicate(source, tlsPort, predicate.AllowAll)
 }
 
@@ -164,17 +173,8 @@ func CreateMTLSServer(source *workloadapi.X509Source,
 func CreateMTLSClientWithPredicate(
 	source *workloadapi.X509Source,
 	predicate predicate.Predicate,
-) (*http.Client, error) {
-	authorizer := tlsconfig.AdaptMatcher(func(id spiffeid.ID) error {
-		if predicate(id.String()) {
-			return nil
-		}
-
-		return fmt.Errorf(
-			"TLS Config: untrusted spiffe id: '%s'", id.String(),
-		)
-	})
-
+) (*http.Client, *sdkErrors.SDKError) {
+	authorizer := AuthorizerWithPredicate(predicate)
 	tlsConfig := tlsconfig.MTLSClientConfig(source, source, authorizer)
 	client := &http.Client{
 		Transport: &http.Transport{
@@ -217,7 +217,7 @@ func CreateMTLSClientWithPredicate(
 //   - Present client certificates from the provided X509Source
 //   - Validate server certificates using the same X509Source
 //   - Accept connections to ANY server with a valid SPIFFE certificate
-func CreateMTLSClient(source *workloadapi.X509Source) (*http.Client, error) {
+func CreateMTLSClient(source *workloadapi.X509Source) (*http.Client, *sdkErrors.SDKError) {
 	return CreateMTLSClientWithPredicate(source, predicate.AllowAll)
 }
 
@@ -301,7 +301,7 @@ func Source() *workloadapi.X509Source {
 func ServeWithPredicate(source *workloadapi.X509Source,
 	initializeRoutes func(),
 	predicate func(string) bool,
-	tlsPort string) error {
+	tlsPort string) *sdkErrors.SDKError {
 	if source == nil {
 		return errors.New("serve: got nil source while trying to serve")
 	}
@@ -353,7 +353,7 @@ func ServeWithPredicate(source *workloadapi.X509Source,
 func Serve(
 	source *workloadapi.X509Source,
 	initializeRoutes func(),
-	tlsPort string) error {
+	tlsPort string) *sdkErrors.SDKError {
 	return ServeWithPredicate(
 		source, initializeRoutes,
 		predicate.AllowAll, tlsPort)

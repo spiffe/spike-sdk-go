@@ -135,6 +135,7 @@ var ErrFSPathRestricted = New(errCodeFSPathRestricted, "filesystem path is restr
 //
 
 var ErrFileCloseFailed = New(errCodeFileCloseFailed, "file close failed", nil)
+var ErrStreamCloseFailed = New(errCodeStreamCloseFailed, "stream close failed", nil)
 var ErrFileOpenFailed = New(errCodeFileOpenFailed, "file open failed", nil)
 
 //
@@ -154,6 +155,7 @@ var ErrUnmarshalFailure = New(errCodeUnmarshalFailure, "failed to unmarshal requ
 
 var ErrPeerConnection = New(errCodePeerConnection, "problem connecting to peer", nil)
 var ErrReadingResponseBody = New(errCodeReadingResponseBody, "problem reading response body", nil)
+var ErrReadingRequestBody = New(errCodeReadingRequestBody, "problem reading requestbody", nil)
 
 //
 // Transaction operations

@@ -99,6 +99,7 @@ const errCodeFSPathRestricted = ErrorCode("fs_path_restricted")
 // File I/O
 const errCodeFileCloseFailed = ErrorCode("file_close_failed")
 const errCodeFileOpenFailed = ErrorCode("file_open_failed")
+const errCodeStreamCloseFailed = ErrorCode("stream_close_failed")
 
 // Input/Output
 const errCodeInvalidInput = ErrorCode("invalid_input")
@@ -111,6 +112,7 @@ const errCodeUnmarshalFailure = ErrorCode("unmarshal_failure")
 // Network/Peer
 const errCodePeerConnection = ErrorCode("peer_connection")
 const errCodeReadingResponseBody = ErrorCode("reading_response_body")
+const errCodeReadingRequestBody = ErrorCode("reading_request_body")
 
 // Transaction operations
 const errCodeTransactionBeginFailed = ErrorCode("transaction_begin_failed")
