@@ -45,6 +45,34 @@ func Log() *slog.Logger {
 	return logger
 }
 
+// Info logs a message at Info level.
+// The msg parameter should be the function name from which the call is made.
+// The args parameter contains key-value pairs to be logged as structured fields.
+func Info(msg string, args ...any) {
+	Log().Info(msg, args...)
+}
+
+// Warn logs a message at Warn level.
+// The msg parameter should be the function name from which the call is made.
+// The args parameter contains key-value pairs to be logged as structured fields.
+func Warn(msg string, args ...any) {
+	Log().Warn(msg, args...)
+}
+
+// Error logs a message at Error level.
+// The msg parameter should be the function name from which the call is made.
+// The args parameter contains key-value pairs to be logged as structured fields.
+func Error(msg string, args ...any) {
+	Log().Error(msg, args...)
+}
+
+// Debug logs a message at Debug level.
+// The msg parameter should be the function name from which the call is made.
+// The args parameter contains key-value pairs to be logged as structured fields.
+func Debug(msg string, args ...any) {
+	Log().Debug(msg, args...)
+}
+
 // FatalLn logs a message at Fatal level with a line feed.
 // The fName parameter indicates the function name from which the call is made.
 // The args parameter contains the values to be logged, which will be formatted
