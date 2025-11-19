@@ -71,6 +71,7 @@ var ErrShamirEmptyShard = New(errCodeShamirEmptyShard, "shamir empty shard", nil
 var ErrShamirInvalidIndex = New(errCodeShamirInvalidIndex, "shamir invalid index", nil)
 var ErrShamirNilShard = New(errCodeShamirNilShard, "shamir nil shard", nil)
 var ErrShamirNotEnoughShards = New(errCodeShamirNotEnoughShards, "shamir not enough shards", nil)
+var ErrShamirReconstructionFailed = New(errCodeShamirReconstructionFailed, "shamir reconstruction failed", nil)
 
 //
 // Crypto operations
