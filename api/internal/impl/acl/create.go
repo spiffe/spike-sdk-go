@@ -69,7 +69,7 @@ func CreatePolicy(source *workloadapi.X509Source,
 		return sdkErrors.ErrSPIFFENilX509Source
 	}
 
-	r := reqres.PolicyCreateRequest{
+	r := reqres.PolicyPutRequest{
 		Name:            name,
 		SPIFFEIDPattern: SPIFFEIDPattern,
 		PathPattern:     pathPattern,
@@ -90,7 +90,7 @@ func CreatePolicy(source *workloadapi.X509Source,
 		return err
 	}
 
-	res := reqres.PolicyCreateResponse{}
+	res := reqres.PolicyPutResponse{}
 	err = json.Unmarshal(body, &res)
 	if err != nil {
 		failErr := sdkErrors.ErrDataUnmarshalFailure.Wrap(err)

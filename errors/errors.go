@@ -74,10 +74,12 @@ var ErrK8sReconciliationFailed = register(New(errCodeK8sReconciliationFailed, "r
 const errCodeEntityExists = ErrorCode("entity_exists")
 const errCodeEntityInvalid = ErrorCode("entity_invalid")
 const errCodeEntityNotFound = ErrorCode("entity_not_found")
+const errCodeEntityResponseCodeInvalid = ErrorCode("entity_response_code_invalid")
 
 var ErrEntityExists = register(New(errCodeEntityExists, "entity already exists", nil))
 var ErrEntityInvalid = register(New(errCodeEntityInvalid, "entity is invalid", nil))
 var ErrEntityNotFound = register(New(errCodeEntityNotFound, "entity not found", nil))
+var ErrEntityResponseCodeInvalid = register(New(errCodeEntityResponseCodeInvalid, "entity response code is invalid", nil))
 
 //
 // State operations

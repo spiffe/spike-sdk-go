@@ -5,7 +5,8 @@
 package reqres
 
 import (
-	"github.com/spiffe/spike-sdk-go/errors"
+	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
+	"github.com/spiffe/spike-sdk-go/log"
 )
 
 // CipherEncryptRequest for encrypting data
@@ -25,12 +26,28 @@ type CipherEncryptResponse struct {
 	// Encrypted ciphertext
 	Ciphertext []byte `json:"ciphertext"`
 	// Error code if operation failed
-	Err errors.ErrorCode `json:"err,omitempty"`
+	Err sdkErrors.ErrorCode `json:"err,omitempty"`
 }
 
 func (c CipherEncryptResponse) Success() CipherEncryptResponse {
-	c.Err = errors.ErrSuccess.Code
+	c.Err = sdkErrors.ErrSuccess.Code
 	return c
+}
+func (s CipherEncryptResponse) NotFound() CipherEncryptResponse {
+	log.FatalErr("NotFound", *sdkErrors.ErrEntityResponseCodeInvalid)
+	return s
+}
+func (s CipherEncryptResponse) BadRequest() CipherEncryptResponse {
+	s.Err = sdkErrors.ErrBadRequest.Code
+	return s
+}
+func (s CipherEncryptResponse) Unauthorized() CipherEncryptResponse {
+	s.Err = sdkErrors.ErrAccessUnauthorized.Code
+	return s
+}
+func (s CipherEncryptResponse) Internal() CipherEncryptResponse {
+	s.Err = sdkErrors.ErrInternal.Code
+	return s
 }
 
 // CipherDecryptRequest for decrypting data
@@ -50,10 +67,26 @@ type CipherDecryptResponse struct {
 	// Decrypted plaintext data
 	Plaintext []byte `json:"plaintext"`
 	// Error code if operation failed
-	Err errors.ErrorCode `json:"err,omitempty"`
+	Err sdkErrors.ErrorCode `json:"err,omitempty"`
 }
 
 func (c CipherDecryptResponse) Success() CipherDecryptResponse {
-	c.Err = errors.ErrSuccess.Code
+	c.Err = sdkErrors.ErrSuccess.Code
 	return c
+}
+func (s CipherDecryptResponse) NotFound() CipherDecryptResponse {
+	log.FatalErr("NotFound", *sdkErrors.ErrEntityResponseCodeInvalid)
+	return s
+}
+func (s CipherDecryptResponse) BadRequest() CipherDecryptResponse {
+	s.Err = sdkErrors.ErrBadRequest.Code
+	return s
+}
+func (s CipherDecryptResponse) Unauthorized() CipherDecryptResponse {
+	s.Err = sdkErrors.ErrAccessUnauthorized.Code
+	return s
+}
+func (s CipherDecryptResponse) Internal() CipherDecryptResponse {
+	s.Err = sdkErrors.ErrInternal.Code
+	return s
 }

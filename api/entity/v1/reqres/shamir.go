@@ -6,6 +6,7 @@ package reqres
 
 import (
 	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
+	"github.com/spiffe/spike-sdk-go/log"
 )
 
 // ShardPutRequest represents a request to submit a shard contribution.
@@ -26,6 +27,22 @@ func (s ShardPutResponse) Success() ShardPutResponse {
 	s.Err = sdkErrors.ErrSuccess.Code
 	return s
 }
+func (s ShardPutResponse) NotFound() ShardPutResponse {
+	log.FatalErr("NotFound", *sdkErrors.ErrEntityResponseCodeInvalid)
+	return s
+}
+func (s ShardPutResponse) BadRequest() ShardPutResponse {
+	s.Err = sdkErrors.ErrBadRequest.Code
+	return s
+}
+func (s ShardPutResponse) Unauthorized() ShardPutResponse {
+	s.Err = sdkErrors.ErrAccessUnauthorized.Code
+	return s
+}
+func (s ShardPutResponse) Internal() ShardPutResponse {
+	s.Err = sdkErrors.ErrInternal.Code
+	return s
+}
 
 // ShardGetRequest represents a request to get a Shamir shard.
 type ShardGetRequest struct {
@@ -40,5 +57,21 @@ type ShardGetResponse struct {
 
 func (s ShardGetResponse) Success() ShardGetResponse {
 	s.Err = sdkErrors.ErrSuccess.Code
+	return s
+}
+func (s ShardGetResponse) NotFound() ShardGetResponse {
+	s.Err = sdkErrors.ErrNotFound.Code
+	return s
+}
+func (s ShardGetResponse) BadRequest() ShardGetResponse {
+	s.Err = sdkErrors.ErrBadRequest.Code
+	return s
+}
+func (s ShardGetResponse) Unauthorized() ShardGetResponse {
+	s.Err = sdkErrors.ErrAccessUnauthorized.Code
+	return s
+}
+func (s ShardGetResponse) Internal() ShardGetResponse {
+	s.Err = sdkErrors.ErrInternal.Code
 	return s
 }

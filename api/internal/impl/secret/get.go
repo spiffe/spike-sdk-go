@@ -45,7 +45,7 @@ func Get(
 		return nil, sdkErrors.ErrSPIFFENilX509Source
 	}
 
-	r := reqres.SecretReadRequest{Path: path, Version: version}
+	r := reqres.SecretGetRequest{Path: path, Version: version}
 
 	mr, err := json.Marshal(r)
 	if err != nil {
@@ -64,7 +64,7 @@ func Get(
 		return nil, err
 	}
 
-	var res reqres.SecretReadResponse
+	var res reqres.SecretGetResponse
 	err = json.Unmarshal(body, &res)
 	if err != nil {
 		failErr := sdkErrors.ErrDataUnmarshalFailure.Wrap(err)

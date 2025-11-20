@@ -7,6 +7,7 @@ package reqres
 import (
 	"github.com/spiffe/spike-sdk-go/api/entity/data"
 	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
+	"github.com/spiffe/spike-sdk-go/log"
 )
 
 // SecretMetadataRequest for get secrets metadata
@@ -25,6 +26,22 @@ func (m SecretMetadataResponse) Success() SecretMetadataResponse {
 	m.Err = sdkErrors.ErrSuccess.Code
 	return m
 }
+func (s SecretMetadataResponse) NotFound() SecretMetadataResponse {
+	s.Err = sdkErrors.ErrNotFound.Code
+	return s
+}
+func (s SecretMetadataResponse) BadRequest() SecretMetadataResponse {
+	s.Err = sdkErrors.ErrBadRequest.Code
+	return s
+}
+func (s SecretMetadataResponse) Unauthorized() SecretMetadataResponse {
+	s.Err = sdkErrors.ErrAccessUnauthorized.Code
+	return s
+}
+func (s SecretMetadataResponse) Internal() SecretMetadataResponse {
+	s.Err = sdkErrors.ErrInternal.Code
+	return s
+}
 
 // SecretPutRequest for creating/updating secrets
 type SecretPutRequest struct {
@@ -42,21 +59,53 @@ func (s SecretPutResponse) Success() SecretPutResponse {
 	s.Err = sdkErrors.ErrSuccess.Code
 	return s
 }
+func (s SecretPutResponse) NotFound() SecretPutResponse {
+	log.FatalErr("NotFound", *sdkErrors.ErrEntityResponseCodeInvalid)
+	return s
+}
+func (s SecretPutResponse) BadRequest() SecretPutResponse {
+	s.Err = sdkErrors.ErrBadRequest.Code
+	return s
+}
+func (s SecretPutResponse) Unauthorized() SecretPutResponse {
+	s.Err = sdkErrors.ErrAccessUnauthorized.Code
+	return s
+}
+func (s SecretPutResponse) Internal() SecretPutResponse {
+	s.Err = sdkErrors.ErrInternal.Code
+	return s
+}
 
-// SecretReadRequest is for getting secrets
-type SecretReadRequest struct {
+// SecretGetRequest is for getting secrets
+type SecretGetRequest struct {
 	Path    string `json:"path"`
 	Version int    `json:"version,omitempty"` // Optional specific version
 }
 
-// SecretReadResponse is for getting secrets
-type SecretReadResponse struct {
+// SecretGetResponse is for getting secrets
+type SecretGetResponse struct {
 	data.Secret
 	Err sdkErrors.ErrorCode `json:"err,omitempty"`
 }
 
-func (s SecretReadResponse) Success() SecretReadResponse {
+func (s SecretGetResponse) Success() SecretGetResponse {
 	s.Err = sdkErrors.ErrSuccess.Code
+	return s
+}
+func (s SecretGetResponse) NotFound() SecretGetResponse {
+	s.Err = sdkErrors.ErrNotFound.Code
+	return s
+}
+func (s SecretGetResponse) BadRequest() SecretGetResponse {
+	s.Err = sdkErrors.ErrBadRequest.Code
+	return s
+}
+func (s SecretGetResponse) Unauthorized() SecretGetResponse {
+	s.Err = sdkErrors.ErrAccessUnauthorized.Code
+	return s
+}
+func (s SecretGetResponse) Internal() SecretGetResponse {
+	s.Err = sdkErrors.ErrInternal.Code
 	return s
 }
 
@@ -69,6 +118,23 @@ type SecretDeleteRequest struct {
 // SecretDeleteResponse after soft-delete
 type SecretDeleteResponse struct {
 	Err sdkErrors.ErrorCode `json:"err,omitempty"`
+}
+
+func (s SecretDeleteResponse) NotFound() SecretDeleteResponse {
+	s.Err = sdkErrors.ErrNotFound.Code
+	return s
+}
+func (s SecretDeleteResponse) BadRequest() SecretDeleteResponse {
+	s.Err = sdkErrors.ErrBadRequest.Code
+	return s
+}
+func (s SecretDeleteResponse) Unauthorized() SecretDeleteResponse {
+	s.Err = sdkErrors.ErrAccessUnauthorized.Code
+	return s
+}
+func (s SecretDeleteResponse) Internal() SecretDeleteResponse {
+	s.Err = sdkErrors.ErrInternal.Code
+	return s
 }
 
 func (s SecretDeleteResponse) Success() SecretDeleteResponse {
@@ -91,6 +157,22 @@ func (s SecretUndeleteResponse) Success() SecretUndeleteResponse {
 	s.Err = sdkErrors.ErrSuccess.Code
 	return s
 }
+func (s SecretUndeleteResponse) NotFound() SecretUndeleteResponse {
+	s.Err = sdkErrors.ErrNotFound.Code
+	return s
+}
+func (s SecretUndeleteResponse) BadRequest() SecretUndeleteResponse {
+	s.Err = sdkErrors.ErrBadRequest.Code
+	return s
+}
+func (s SecretUndeleteResponse) Unauthorized() SecretUndeleteResponse {
+	s.Err = sdkErrors.ErrAccessUnauthorized.Code
+	return s
+}
+func (s SecretUndeleteResponse) Internal() SecretUndeleteResponse {
+	s.Err = sdkErrors.ErrInternal.Code
+	return s
+}
 
 // SecretListRequest for listing secrets
 type SecretListRequest struct {
@@ -104,5 +186,21 @@ type SecretListResponse struct {
 
 func (s SecretListResponse) Success() SecretListResponse {
 	s.Err = sdkErrors.ErrSuccess.Code
+	return s
+}
+func (s SecretListResponse) NotFound() SecretListResponse {
+	log.FatalErr("NotFound", *sdkErrors.ErrEntityResponseCodeInvalid)
+	return s
+}
+func (s SecretListResponse) BadRequest() SecretListResponse {
+	s.Err = sdkErrors.ErrBadRequest.Code
+	return s
+}
+func (s SecretListResponse) Unauthorized() SecretListResponse {
+	s.Err = sdkErrors.ErrAccessUnauthorized.Code
+	return s
+}
+func (s SecretListResponse) Internal() SecretListResponse {
+	s.Err = sdkErrors.ErrInternal.Code
 	return s
 }

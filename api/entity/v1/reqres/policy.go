@@ -6,25 +6,42 @@ package reqres
 
 import (
 	"github.com/spiffe/spike-sdk-go/api/entity/data"
-	"github.com/spiffe/spike-sdk-go/errors"
+	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
+	"github.com/spiffe/spike-sdk-go/log"
 )
 
-// PolicyCreateRequest for policy creation.
-type PolicyCreateRequest struct {
+// PolicyPutRequest for policy creation.
+type PolicyPutRequest struct {
 	Name            string                  `json:"name"`
 	SPIFFEIDPattern string                  `json:"spiffeidPattern"`
 	PathPattern     string                  `json:"pathPattern"`
 	Permissions     []data.PolicyPermission `json:"permissions"`
 }
 
-// PolicyCreateResponse for policy creation.
-type PolicyCreateResponse struct {
-	ID  string           `json:"id,omitempty"`
-	Err errors.ErrorCode `json:"err,omitempty"`
+// PolicyPutResponse for policy creation.
+type PolicyPutResponse struct {
+	ID  string              `json:"id,omitempty"`
+	Err sdkErrors.ErrorCode `json:"err,omitempty"`
 }
 
-func (p PolicyCreateResponse) Success() PolicyCreateResponse {
-	p.Err = errors.ErrSuccess.Code
+func (p PolicyPutResponse) Success() PolicyPutResponse {
+	log.FatalErr("NotFound", *sdkErrors.ErrEntityResponseCodeInvalid)
+	return p
+}
+func (p PolicyPutResponse) NotFound() PolicyPutResponse {
+	p.Err = sdkErrors.ErrNotFound.Code
+	return p
+}
+func (p PolicyPutResponse) BadRequest() PolicyPutResponse {
+	p.Err = sdkErrors.ErrBadRequest.Code
+	return p
+}
+func (p PolicyPutResponse) Unauthorized() PolicyPutResponse {
+	p.Err = sdkErrors.ErrAccessUnauthorized.Code
+	return p
+}
+func (p PolicyPutResponse) Internal() PolicyPutResponse {
+	p.Err = sdkErrors.ErrInternal.Code
 	return p
 }
 
@@ -36,12 +53,28 @@ type PolicyReadRequest struct {
 // PolicyReadResponse to read a policy.
 type PolicyReadResponse struct {
 	data.Policy
-	Err errors.ErrorCode `json:"err,omitempty"`
+	Err sdkErrors.ErrorCode `json:"err,omitempty"`
 }
 
-func (p PolicyReadResponse) Success() PolicyReadResponse {
-	p.Err = errors.ErrSuccess.Code
-	return p
+func (s PolicyReadResponse) Success() PolicyReadResponse {
+	s.Err = sdkErrors.ErrSuccess.Code
+	return s
+}
+func (s PolicyReadResponse) NotFound() PolicyReadResponse {
+	s.Err = sdkErrors.ErrNotFound.Code
+	return s
+}
+func (s PolicyReadResponse) BadRequest() PolicyReadResponse {
+	s.Err = sdkErrors.ErrBadRequest.Code
+	return s
+}
+func (s PolicyReadResponse) Unauthorized() PolicyReadResponse {
+	s.Err = sdkErrors.ErrAccessUnauthorized.Code
+	return s
+}
+func (s PolicyReadResponse) Internal() PolicyReadResponse {
+	s.Err = sdkErrors.ErrInternal.Code
+	return s
 }
 
 // PolicyDeleteRequest to delete a policy.
@@ -51,12 +84,28 @@ type PolicyDeleteRequest struct {
 
 // PolicyDeleteResponse to delete a policy.
 type PolicyDeleteResponse struct {
-	Err errors.ErrorCode `json:"err,omitempty"`
+	Err sdkErrors.ErrorCode `json:"err,omitempty"`
 }
 
 func (p PolicyDeleteResponse) Success() PolicyDeleteResponse {
-	p.Err = errors.ErrSuccess.Code
+	p.Err = sdkErrors.ErrSuccess.Code
 	return p
+}
+func (s PolicyDeleteResponse) NotFound() PolicyDeleteResponse {
+	s.Err = sdkErrors.ErrNotFound.Code
+	return s
+}
+func (s PolicyDeleteResponse) BadRequest() PolicyDeleteResponse {
+	s.Err = sdkErrors.ErrBadRequest.Code
+	return s
+}
+func (s PolicyDeleteResponse) Unauthorized() PolicyDeleteResponse {
+	s.Err = sdkErrors.ErrAccessUnauthorized.Code
+	return s
+}
+func (s PolicyDeleteResponse) Internal() PolicyDeleteResponse {
+	s.Err = sdkErrors.ErrInternal.Code
+	return s
 }
 
 // PolicyListRequest to list policies.
@@ -67,13 +116,29 @@ type PolicyListRequest struct {
 
 // PolicyListResponse to list policies.
 type PolicyListResponse struct {
-	Policies []data.Policy    `json:"policies"`
-	Err      errors.ErrorCode `json:"err,omitempty"`
+	Policies []data.Policy       `json:"policies"`
+	Err      sdkErrors.ErrorCode `json:"err,omitempty"`
 }
 
 func (p PolicyListResponse) Success() PolicyListResponse {
-	p.Err = errors.ErrSuccess.Code
+	p.Err = sdkErrors.ErrSuccess.Code
 	return p
+}
+func (s PolicyListResponse) NotFound() PolicyListResponse {
+	log.FatalErr("NotFound", *sdkErrors.ErrEntityResponseCodeInvalid)
+	return s
+}
+func (s PolicyListResponse) BadRequest() PolicyListResponse {
+	s.Err = sdkErrors.ErrBadRequest.Code
+	return s
+}
+func (s PolicyListResponse) Unauthorized() PolicyListResponse {
+	s.Err = sdkErrors.ErrAccessUnauthorized.Code
+	return s
+}
+func (s PolicyListResponse) Internal() PolicyListResponse {
+	s.Err = sdkErrors.ErrInternal.Code
+	return s
 }
 
 // PolicyAccessCheckRequest to validate policy access.
@@ -85,12 +150,28 @@ type PolicyAccessCheckRequest struct {
 
 // PolicyAccessCheckResponse to validate policy access.
 type PolicyAccessCheckResponse struct {
-	Allowed          bool             `json:"allowed"`
-	MatchingPolicies []string         `json:"matchingPolicies"`
-	Err              errors.ErrorCode `json:"err,omitempty"`
+	Allowed          bool                `json:"allowed"`
+	MatchingPolicies []string            `json:"matchingPolicies"`
+	Err              sdkErrors.ErrorCode `json:"err,omitempty"`
 }
 
 func (p PolicyAccessCheckResponse) Success() PolicyAccessCheckResponse {
-	p.Err = errors.ErrSuccess.Code
+	p.Err = sdkErrors.ErrSuccess.Code
 	return p
+}
+func (s PolicyAccessCheckResponse) NotFound() PolicyAccessCheckResponse {
+	s.Err = sdkErrors.ErrNotFound.Code
+	return s
+}
+func (s PolicyAccessCheckResponse) BadRequest() PolicyAccessCheckResponse {
+	s.Err = sdkErrors.ErrBadRequest.Code
+	return s
+}
+func (s PolicyAccessCheckResponse) Unauthorized() PolicyAccessCheckResponse {
+	s.Err = sdkErrors.ErrAccessUnauthorized.Code
+	return s
+}
+func (s PolicyAccessCheckResponse) Internal() PolicyAccessCheckResponse {
+	s.Err = sdkErrors.ErrInternal.Code
+	return s
 }
