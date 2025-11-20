@@ -6,7 +6,6 @@ package operator
 
 import (
 	"encoding/json"
-	"errors"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 
@@ -25,80 +24,82 @@ import (
 //   - source: X509Source used for mTLS client authentication
 //
 // Returns:
-//   - map[int]*[32]byte: Map of shard indices to shard byte arrays if
-//     successful, nil if not found
-//   - error: nil on success, error if:
-//   - Failed to marshal recover request
-//   - Failed to create mTLS client
-//   - Request failed (except for the "not found" case)
-//   - Failed to parse response body
-//   - Server returned error in response
+//   - map[int]*[32]byte: Map of shard indices to shard byte arrays if successful
+//   - *sdkErrors.SDKError: nil on success, or one of the following errors:
+//   - ErrSPIFFENilX509Source: if source is nil
+//   - ErrDataMarshalFailure: if request serialization fails
+//   - Errors from net.Post(): if the HTTP request fails
+//   - ErrDataUnmarshalFailure: if response parsing fails
+//   - Error from FromCode(): if the server returns an error
+//
+// Note: The function will fatally crash (via log.FatalErr) if:
+//   - SVID acquisition fails
+//   - SVID is nil
+//   - Caller is not SPIKE Pilot (security requirement)
 //
 // Example:
 //
 //	shards, err := Recover(x509Source)
 func Recover(source *workloadapi.X509Source) (map[int]*[32]byte, *sdkErrors.SDKError) {
+	const fName = "recover"
+
 	if source == nil {
 		return nil, sdkErrors.ErrSPIFFENilX509Source
 	}
 
-	const fName = "recover"
-
 	svid, err := source.GetX509SVID()
 	if err != nil {
-		log.FatalLn(fName, "message", "Could not acquire SVID", "err", err.Error())
+		failErr := sdkErrors.ErrSPIFFEFailedToExtractX509SVID.Wrap(err)
+		failErr.Msg = "could not acquire SVID"
+		log.FatalErr(fName, *failErr)
+		return nil, failErr // To make linter happy.
 	}
 	if svid == nil {
-		log.FatalLn(fName, "message", "no X509SVID in source")
+		failErr := sdkErrors.ErrSPIFFEFailedToExtractX509SVID
+		failErr.Msg = "no X509SVID in source"
+		log.FatalErr(fName, *failErr)
+		return nil, failErr // To make linter happy.
 	}
-	if svid != nil {
-		selfSPIFFEID := svid.ID.String()
-		// Security: Recovery and Restoration can ONLY be done via SPIKE Pilot.
-		if !spiffeid.IsPilot(selfSPIFFEID) {
-			log.FatalLn(fName,
-				"message",
-				"You can recover only from SPIKE Pilot: spiffeid is not SPIKE Pilot",
-			)
-		}
+
+	selfSPIFFEID := svid.ID.String()
+
+	// Security: Recovery and Restoration can ONLY be done via SPIKE Pilot.
+	if !spiffeid.IsPilot(selfSPIFFEID) {
+		failErr := sdkErrors.ErrAccessUnauthorized
+		failErr.Msg = "recovery can only be performed from SPIKE Pilot"
+		log.FatalErr(fName, *failErr)
 	}
 
 	r := reqres.RecoverRequest{}
 
 	mr, err := json.Marshal(r)
 	if err != nil {
-		return nil, errors.Join(
-			errors.New("recover: failed to marshal recover request"),
-			err,
-		)
+		failErr := sdkErrors.ErrDataMarshalFailure.Wrap(err)
+		failErr.Msg = "failed to marshal recover request"
+		return nil, failErr
 	}
 
 	client := net.CreateMTLSClientForNexus(source)
 
 	body, err := net.Post(client, url.Recover(), mr)
 	if err != nil {
-		if errors.Is(err, sdkErrors.ErrNotFound) {
-			return nil, nil
-		}
 		return nil, err
 	}
 
 	var res reqres.RecoverResponse
 	err = json.Unmarshal(body, &res)
 	if err != nil {
-		return nil, errors.Join(
-			errors.New("recover: Problem parsing response body"),
-			err,
-		)
+		failErr := sdkErrors.ErrDataUnmarshalFailure.Wrap(err)
+		failErr.Msg = "problem parsing response body"
+		return nil, failErr
 	}
 	if res.Err != "" {
 		return nil, sdkErrors.FromCode(res.Err)
 	}
 
 	result := make(map[int]*[32]byte)
-
 	for i, shard := range res.Shards {
 		result[i] = shard
 	}
-
 	return result, nil
 }

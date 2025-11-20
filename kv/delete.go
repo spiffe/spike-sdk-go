@@ -13,9 +13,31 @@ import (
 // Delete marks secret versions as deleted for a given path. If no versions are
 // specified, it marks only the current version as deleted. If specific versions
 // are provided, it marks each existing version in the list as deleted. The
-// deletion is performed by setting the DeletedTime to the current time. If the
-// path doesn't exist, the function returns without making any changes.
-func (kv *KV) Delete(path string, versions []int) error {
+// deletion is performed by setting the DeletedTime to the current time.
+//
+// Parameters:
+//   - path: Path to the secret to delete
+//   - versions: Array of version numbers to delete (empty array deletes current
+//     version only, 0 in the array represents current version)
+//
+// Returns:
+//   - *errors.SDKError: nil on success, or one of the following errors:
+//   - ErrEntityNotFound: if the path doesn't exist
+//
+// Example:
+//
+//	// Delete current version only
+//	err := kv.Delete("secret/path", []int{})
+//	if err != nil {
+//	    log.Printf("Failed to delete secret: %v", err)
+//	}
+//
+//	// Delete specific versions
+//	err = kv.Delete("secret/path", []int{1, 2, 3})
+//	if err != nil {
+//	    log.Printf("Failed to delete versions: %v", err)
+//	}
+func (kv *KV) Delete(path string, versions []int) *errors.SDKError {
 	secret, exists := kv.data[path]
 	if !exists {
 		return errors.ErrEntityNotFound
@@ -30,6 +52,7 @@ func (kv *KV) Delete(path string, versions []int) error {
 			v.DeletedTime = &now // Mark as deleted.
 			secret.Versions[cv] = v
 		}
+
 		return nil
 	}
 
@@ -51,5 +74,6 @@ func (kv *KV) Delete(path string, versions []int) error {
 			secret.Versions[version] = v
 		}
 	}
+
 	return nil
 }

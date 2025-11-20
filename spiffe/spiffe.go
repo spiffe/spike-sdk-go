@@ -128,14 +128,14 @@ func IDFromRequest(r *http.Request) (*spiffeid.ID, *sdkErrors.SDKError) {
 //
 // Returns:
 //   - *sdkErrors.SDKError: nil if successful or source is nil,
-//     ErrSPIFFEFailedToCreateX509Source if closure fails
+//     ErrSPIFFEFailedToCloseX509Source if closure fails
 func CloseSource(source *workloadapi.X509Source) *sdkErrors.SDKError {
 	if source == nil {
 		return nil
 	}
 
 	if err := source.Close(); err != nil {
-		return sdkErrors.ErrSPIFFEFailedToCreateX509Source.Wrap(err)
+		return sdkErrors.ErrSPIFFEFailedToCloseX509Source.Wrap(err)
 	}
 
 	return nil

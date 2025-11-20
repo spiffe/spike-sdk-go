@@ -9,16 +9,35 @@ import sdkErrors "github.com/spiffe/spike-sdk-go/errors"
 // Undelete restores previously deleted versions of a secret at the specified
 // path. It sets the DeletedTime to nil for each specified version that exists.
 //
+// The function supports flexible version restoration with the following behavior:
+//   - If versions is empty, restores only the current version
+//   - If versions contains specific numbers, restores those versions
+//   - Version 0 in the array represents the current version
+//   - Non-existent versions are silently skipped without error
+//
 // Parameters:
 //   - path: The location of the secret in the store
-//   - versions: A slice of version numbers to undelete
+//   - versions: Array of version numbers to restore (empty array restores
+//     current version only, 0 in the array represents current version)
 //
 // Returns:
-//   - error: ErrItemNotFound if the path doesn't exist, nil on success
+//   - *sdkErrors.SDKError: nil on success, or one of the following errors:
+//   - ErrEntityNotFound: if the path doesn't exist
 //
-// If a version number in the `versions` slice doesn't exist, it is silently
-// skipped without returning an error. Only existing versions are modified.
-func (kv *KV) Undelete(path string, versions []int) error {
+// Example:
+//
+//	// Restore current version only
+//	err := kv.Undelete("secret/path", []int{})
+//	if err != nil {
+//	    log.Printf("Failed to undelete secret: %v", err)
+//	}
+//
+//	// Restore specific versions
+//	err = kv.Undelete("secret/path", []int{1, 2, 3})
+//	if err != nil {
+//	    log.Printf("Failed to undelete versions: %v", err)
+//	}
+func (kv *KV) Undelete(path string, versions []int) *sdkErrors.SDKError {
 	secret, exists := kv.data[path]
 	if !exists {
 		return sdkErrors.ErrEntityNotFound

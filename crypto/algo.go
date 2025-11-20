@@ -21,13 +21,15 @@ const AES256KeySize = 32
 // string.
 //
 // Returns:
-//   - string: A 64-character hexadecimal string representing the 256-bit key.
-//   - error: Returns nil on successful key generation, or an error if the random
-//     number generation fails.
+//   - string: A 64-character hexadecimal string representing the 256-bit key,
+//     empty string on error
+//   - *sdkErrors.SDKError: nil on success, or one of the following errors:
+//   - ErrCryptoFailedToCreateCipher: if random key generation fails
 //
-// The function uses a cryptographically secure random number generator to ensure
-// the generated key is suitable for cryptographic use. The resulting hex string
-// can be decoded back to bytes using hex.DecodeString when needed for encryption.
+// The function uses a cryptographically secure random number generator to
+// ensure the generated key is suitable for cryptographic use. The resulting hex
+// string can be decoded back to bytes using hex.DecodeString when needed for
+// encryption.
 func AES256Seed() (string, *sdkErrors.SDKError) {
 	// Generate a 256-bit key
 	key := make([]byte, AES256KeySize)

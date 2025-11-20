@@ -6,7 +6,6 @@ package secret
 
 import (
 	"encoding/json"
-	"errors"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 
@@ -25,9 +24,15 @@ import (
 //   - version: Version number of the secret to retrieve
 //
 // Returns:
-//   - *Secret: Secret data if found, nil if secret not found
-//   - error: nil on success, unauthorized error if not logged in, or
-//     wrapped error on request/parsing failure
+//   - *data.Secret: Secret data if found, nil if secret not found
+//   - *sdkErrors.SDKError: nil on success, or one of the following errors:
+//   - ErrSPIFFENilX509Source: if source is nil
+//   - ErrDataMarshalFailure: if request serialization fails
+//   - Errors from net.Post(): if the HTTP request fails (except ErrNotFound)
+//   - ErrDataUnmarshalFailure: if response parsing fails
+//   - Error from FromCode(): if the server returns an error
+//
+// Note: Returns (nil, nil) if the secret is not found (ErrNotFound)
 //
 // Example:
 //
@@ -40,24 +45,20 @@ func Get(
 		return nil, sdkErrors.ErrSPIFFENilX509Source
 	}
 
-	r := reqres.SecretReadRequest{
-		Path:    path,
-		Version: version,
-	}
+	r := reqres.SecretReadRequest{Path: path, Version: version}
 
 	mr, err := json.Marshal(r)
 	if err != nil {
-		return nil, errors.Join(
-			errors.New("getSecret: I am having problem generating the payload"),
-			err,
-		)
+		failErr := sdkErrors.ErrDataMarshalFailure.Wrap(err)
+		failErr.Msg = "problem generating the payload"
+		return nil, failErr
 	}
 
 	client := net.CreateMTLSClientForNexus(source)
 
 	body, err := net.Post(client, url.SecretGet(), mr)
 	if err != nil {
-		if errors.Is(err, sdkErrors.ErrNotFound) {
+		if err.Is(sdkErrors.ErrNotFound) {
 			return nil, nil
 		}
 		return nil, err
@@ -66,10 +67,9 @@ func Get(
 	var res reqres.SecretReadResponse
 	err = json.Unmarshal(body, &res)
 	if err != nil {
-		return nil, errors.Join(
-			errors.New("getSecret: Problem parsing response body"),
-			err,
-		)
+		failErr := sdkErrors.ErrDataUnmarshalFailure.Wrap(err)
+		failErr.Msg = "problem parsing response body"
+		return nil, failErr
 	}
 	if res.Err != "" {
 		return nil, sdkErrors.FromCode(res.Err)

@@ -26,11 +26,10 @@ import (
 // Returns:
 //   - *sdkErrors.SDKError: nil on success, or one of the following errors:
 //   - ErrSPIFFENilX509Source: if source is nil
-//   - ErrMarshalFailure: if request serialization fails
-//   - ErrPostFailed: if the HTTP request fails
-//   - ErrUnmarshalFailure: if response parsing fails
-//   - Error from FromCode(): if the server returns an error (e.g.,
-//     ErrUnauthorized, ErrNotFound, ErrBadRequest, etc.)
+//   - ErrDataMarshalFailure: if request serialization fails
+//   - Errors from net.Post(): if the HTTP request fails
+//   - ErrDataUnmarshalFailure: if response parsing fails
+//   - Error from FromCode(): if the server returns an error
 //
 // Example:
 //
@@ -44,27 +43,26 @@ func Put(
 		return sdkErrors.ErrSPIFFENilX509Source
 	}
 
-	r := reqres.SecretPutRequest{
-		Path:   path,
-		Values: values,
-	}
+	r := reqres.SecretPutRequest{Path: path, Values: values}
 
 	mr, err := json.Marshal(r)
 	if err != nil {
-		return sdkErrors.ErrMarshalFailure.Wrap(err)
+		failErr := sdkErrors.ErrDataMarshalFailure.Wrap(err)
+		failErr.Msg = "problem generating the payload"
+		return failErr
 	}
 
 	client := net.CreateMTLSClientForNexus(source)
 
 	body, err := net.Post(client, url.SecretPut(), mr)
 	if err != nil {
-		return sdkErrors.ErrPostFailed.Wrap(err)
+		return err
 	}
 
 	res := reqres.SecretPutResponse{}
 	err = json.Unmarshal(body, &res)
 	if err != nil {
-		failErr := sdkErrors.ErrUnmarshalFailure.Wrap(err)
+		failErr := sdkErrors.ErrDataUnmarshalFailure.Wrap(err)
 		failErr.Msg = "problem parsing response body"
 		return failErr
 	}

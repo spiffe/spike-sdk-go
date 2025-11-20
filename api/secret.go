@@ -7,41 +7,54 @@ package api
 import (
 	"github.com/spiffe/spike-sdk-go/api/entity/data"
 	"github.com/spiffe/spike-sdk-go/api/internal/impl/secret"
+	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
 )
 
 // DeleteSecretVersions deletes specified versions of a secret at the given
-// path
-//
-// It constructs a delete request and sends it to the secrets API endpoint.
+// path.
 //
 // Parameters:
-//   - path string: Path to the secret to delete
-//   - versions []int: Array of version numbers to delete
+//   - path: Path to the secret to delete
+//   - versions: Array of version numbers to delete
 //
 // Returns:
-//   - error: nil on success, unauthorized error if not logged in, or wrapped
-//     error on request/parsing failure
+//   - *sdkErrors.SDKError: nil on success, or one of the following errors:
+//   - ErrSPIFFENilX509Source: if the X509 source is nil
+//   - ErrDataMarshalFailure: if request serialization fails
+//   - Errors from net.Post(): if the HTTP request fails
+//   - ErrDataUnmarshalFailure: if response parsing fails
+//   - Error from FromCode(): if the server returns an error
 //
 // Example:
 //
 //	err := api.DeleteSecretVersions("secret/path", []int{1, 2})
-func (a *API) DeleteSecretVersions(path string, versions []int) error {
+//	if err != nil {
+//	    log.Printf("Failed to delete secret versions: %v", err)
+//	}
+func (a *API) DeleteSecretVersions(path string, versions []int) *sdkErrors.SDKError {
 	return secret.Delete(a.source, path, versions)
 }
 
-// DeleteSecret deletes the entire secret at the given path
+// DeleteSecret deletes the entire secret at the given path.
 //
 // Parameters:
-//   - path string: Path to the secret to delete
+//   - path: Path to the secret to delete
 //
 // Returns:
-//   - error: nil on success, unauthorized error if not logged in, or wrapped
-//     error on request/parsing failure
+//   - *sdkErrors.SDKError: nil on success, or one of the following errors:
+//   - ErrSPIFFENilX509Source: if the X509 source is nil
+//   - ErrDataMarshalFailure: if request serialization fails
+//   - Errors from net.Post(): if the HTTP request fails
+//   - ErrDataUnmarshalFailure: if response parsing fails
+//   - Error from FromCode(): if the server returns an error
 //
 // Example:
 //
 //	err := api.DeleteSecret("secret/path")
-func (a *API) DeleteSecret(path string) error {
+//	if err != nil {
+//	    log.Printf("Failed to delete secret: %v", err)
+//	}
+func (a *API) DeleteSecret(path string) *sdkErrors.SDKError {
 	return secret.Delete(a.source, path, []int{})
 }
 
@@ -49,51 +62,93 @@ func (a *API) DeleteSecret(path string) error {
 // path.
 //
 // Parameters:
-//   - path string: Path to the secret to retrieve
-//   - version int: Version number of the secret to retrieve
+//   - path: Path to the secret to retrieve
+//   - version: Version number of the secret to retrieve
 //
 // Returns:
-//   - *data.Secret: Secret data if found, nil if secret not found
-//   - error: nil on success, unauthorized error if not logged in, or
-//     wrapped error on request/parsing failure
+//   - *data.Secret: Secret data if found, nil if not found or on error
+//   - *sdkErrors.SDKError: nil on success, or one of the following errors:
+//   - ErrSPIFFENilX509Source: if the X509 source is nil
+//   - ErrDataMarshalFailure: if request serialization fails
+//   - Errors from net.Post(): if the HTTP request fails (except ErrNotFound)
+//   - ErrDataUnmarshalFailure: if response parsing fails
+//   - Error from FromCode(): if the server returns an error
+//
+// Note: Returns (nil, nil) if the secret is not found (ErrNotFound)
 //
 // Example:
 //
 //	secret, err := api.GetSecretVersion("secret/path", 1)
+//	if err != nil {
+//	    log.Printf("Error retrieving secret: %v", err)
+//	    return
+//	}
+//	if secret == nil {
+//	    log.Printf("Secret not found")
+//	    return
+//	}
 func (a *API) GetSecretVersion(
 	path string, version int,
-) (*data.Secret, error) {
+) (*data.Secret, *sdkErrors.SDKError) {
 	return secret.Get(a.source, path, version)
 }
 
 // GetSecret retrieves the latest version of the secret at the given path.
 //
 // Parameters:
-//   - path string: Path to the secret to retrieve
+//   - path: Path to the secret to retrieve
 //
 // Returns:
-//   - *data.Secret: Secret data if found, nil if secret not found
-//   - error: nil on success, unauthorized error if not logged in, or
-//     wrapped error on request/parsing failure
+//   - *data.Secret: Secret data if found, nil if not found or on error
+//   - *sdkErrors.SDKError: nil on success, or one of the following errors:
+//   - ErrSPIFFENilX509Source: if the X509 source is nil
+//   - ErrDataMarshalFailure: if request serialization fails
+//   - Errors from net.Post(): if the HTTP request fails (except ErrNotFound)
+//   - ErrDataUnmarshalFailure: if response parsing fails
+//   - Error from FromCode(): if the server returns an error
+//
+// Note: Returns (nil, nil) if the secret is not found (ErrNotFound)
 //
 // Example:
 //
 //	secret, err := api.GetSecret("secret/path")
-func (a *API) GetSecret(path string) (*data.Secret, error) {
+//	if err != nil {
+//	    log.Printf("Error retrieving secret: %v", err)
+//	    return
+//	}
+//	if secret == nil {
+//	    log.Printf("Secret not found")
+//	    return
+//	}
+func (a *API) GetSecret(path string) (*data.Secret, *sdkErrors.SDKError) {
 	return secret.Get(a.source, path, 0)
 }
 
 // ListSecretKeys retrieves all secret keys.
 //
 // Returns:
-//   - *[]string: Pointer to an array of secret keys if found, nil if none found
-//   - error: nil on success, unauthorized error if not logged in, or
-//     wrapped error on request-parsing failure
+//   - *[]string: Array of secret keys if found, empty array if none found,
+//     nil on error
+//   - *sdkErrors.SDKError: nil on success, or one of the following errors:
+//   - ErrSPIFFENilX509Source: if the X509 source is nil
+//   - ErrDataMarshalFailure: if request serialization fails
+//   - Errors from net.Post(): if the HTTP request fails (except ErrNotFound)
+//   - ErrDataUnmarshalFailure: if response parsing fails
+//   - Error from FromCode(): if the server returns an error
+//
+// Note: Returns (&[]string{}, nil) if no secrets are found (ErrNotFound)
 //
 // Example:
 //
 //	keys, err := api.ListSecretKeys()
-func (a *API) ListSecretKeys() (*[]string, error) {
+//	if err != nil {
+//	    log.Printf("Error listing keys: %v", err)
+//	    return
+//	}
+//	for _, key := range *keys {
+//	    log.Printf("Found key: %s", key)
+//	}
+func (a *API) ListSecretKeys() (*[]string, *sdkErrors.SDKError) {
 	return secret.ListKeys(a.source)
 }
 
@@ -101,20 +156,35 @@ func (a *API) ListSecretKeys() (*[]string, error) {
 // the given path.
 //
 // Parameters:
-//   - path string: Path to the secret to retrieve metadata for
-//   - version int: Version number of the secret to retrieve metadata for
+//   - path: Path to the secret to retrieve metadata for
+//   - version: Version number of the secret to retrieve metadata for
 //
 // Returns:
-//   - *data.SecretMetadata: Secret metadata if found, nil if secret not found
-//   - error: nil on success, unauthorized error if not logged in, or
-//     wrapped error on request-parsing failure
+//   - *data.SecretMetadata: Secret metadata if found, nil if not found or on
+//     error
+//   - *sdkErrors.SDKError: nil on success, or one of the following errors:
+//   - ErrSPIFFENilX509Source: if the X509 source is nil
+//   - ErrDataMarshalFailure: if request serialization fails
+//   - Errors from net.Post(): if the HTTP request fails (except ErrNotFound)
+//   - ErrDataUnmarshalFailure: if response parsing fails
+//   - Error from FromCode(): if the server returns an error
+//
+// Note: Returns (nil, nil) if the secret metadata is not found (ErrNotFound)
 //
 // Example:
 //
 //	metadata, err := api.GetSecretMetadata("secret/path", 1)
+//	if err != nil {
+//	    log.Printf("Error retrieving metadata: %v", err)
+//	    return
+//	}
+//	if metadata == nil {
+//	    log.Printf("Metadata not found")
+//	    return
+//	}
 func (a *API) GetSecretMetadata(
 	path string, version int,
-) (*data.SecretMetadata, error) {
+) (*data.SecretMetadata, *sdkErrors.SDKError) {
 	return secret.GetMetadata(a.source, path, version)
 }
 
@@ -122,18 +192,26 @@ func (a *API) GetSecretMetadata(
 // values.
 //
 // Parameters:
-//   - path string: Path where the secret should be stored
-//   - data map[string]string: Map of key-value pairs representing the secret
-//     data
+//   - path: Path where the secret should be stored
+//   - data: Map of key-value pairs representing the secret data
 //
 // Returns:
-//   - error: nil on success, unauthorized error if not logged in, or
-//     wrapped error on request-parsing failure
+//   - *sdkErrors.SDKError: nil on success, or one of the following errors:
+//   - ErrSPIFFENilX509Source: if the X509 source is nil
+//   - ErrDataMarshalFailure: if request serialization fails
+//   - Errors from net.Post(): if the HTTP request fails
+//   - ErrDataUnmarshalFailure: if response parsing fails
+//   - Error from FromCode(): if the server returns an error
 //
 // Example:
 //
 //	err := api.PutSecret("secret/path", map[string]string{"key": "value"})
-func (a *API) PutSecret(path string, data map[string]string) error {
+//	if err != nil {
+//	    log.Printf("Failed to put secret: %v", err)
+//	}
+func (a *API) PutSecret(
+	path string, data map[string]string,
+) *sdkErrors.SDKError {
 	return secret.Put(a.source, path, data)
 }
 
@@ -141,17 +219,24 @@ func (a *API) PutSecret(path string, data map[string]string) error {
 // specified path.
 //
 // Parameters:
-//   - path string: Path to the secret to restore
-//   - versions []int: Array of version numbers to restore. Empty array
-//     attempts no restoration
+//   - path: Path to the secret to restore
+//   - versions: Array of version numbers to restore (empty array attempts no
+//     restoration)
 //
 // Returns:
-//   - error: nil on success, unauthorized error if not logged in, or
-//     wrapped error on request-parsing failure
+//   - *sdkErrors.SDKError: nil on success, or one of the following errors:
+//   - ErrSPIFFENilX509Source: if the X509 source is nil
+//   - ErrDataMarshalFailure: if request serialization fails
+//   - Errors from net.Post(): if the HTTP request fails
+//   - ErrDataUnmarshalFailure: if response parsing fails
+//   - Error from FromCode(): if the server returns an error
 //
 // Example:
 //
 //	err := api.UndeleteSecret("secret/path", []int{1, 2})
-func (a *API) UndeleteSecret(path string, versions []int) error {
+//	if err != nil {
+//	    log.Printf("Failed to undelete secret: %v", err)
+//	}
+func (a *API) UndeleteSecret(path string, versions []int) *sdkErrors.SDKError {
 	return secret.Undelete(a.source, path, versions)
 }

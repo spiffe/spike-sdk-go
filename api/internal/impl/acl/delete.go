@@ -26,11 +26,11 @@ import (
 // Returns:
 //   - *sdkErrors.SDKError: nil on success, or one of the following errors:
 //   - ErrSPIFFENilX509Source: if source is nil
-//   - ErrMarshalFailure: if request serialization fails
+//   - ErrDataMarshalFailure: if request serialization fails
 //   - ErrPostFailed: if the HTTP request fails
-//   - ErrUnmarshalFailure: if response parsing fails
+//   - ErrDataUnmarshalFailure: if response parsing fails
 //   - Error from FromCode(): if the server returns an error (e.g.,
-//     ErrUnauthorized, ErrNotFound, ErrBadRequest, etc.)
+//     ErrAccessUnauthorized, ErrNotFound, ErrBadRequest, etc.)
 //
 // Example:
 //
@@ -56,7 +56,7 @@ func DeletePolicy(
 
 	mr, err := json.Marshal(r)
 	if err != nil {
-		failErr := sdkErrors.ErrMarshalFailure.Wrap(err)
+		failErr := sdkErrors.ErrDataMarshalFailure.Wrap(err)
 		failErr.Msg = "problem generating the payload"
 		return failErr
 	}
@@ -71,7 +71,7 @@ func DeletePolicy(
 	res := reqres.PolicyDeleteResponse{}
 	err = json.Unmarshal(body, &res)
 	if err != nil {
-		failErr := sdkErrors.ErrUnmarshalFailure.Wrap(err)
+		failErr := sdkErrors.ErrDataUnmarshalFailure.Wrap(err)
 		failErr.Msg = "problem parsing response body"
 		return failErr
 	}

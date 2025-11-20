@@ -10,6 +10,7 @@ import (
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 
 	"github.com/spiffe/spike-sdk-go/config/env"
+	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
 	"github.com/spiffe/spike-sdk-go/spiffe"
 )
 
@@ -20,6 +21,7 @@ type API struct {
 
 // New creates and returns a new instance of API configured with a SPIFFE
 // source.
+//
 // It automatically discovers and connects to the SPIFFE Workload API endpoint
 // using the default socket path and creates an X.509 source for authentication
 // with a configurable timeout to prevent indefinite blocking on socket issues.
@@ -30,23 +32,19 @@ type API struct {
 // The API client is configured to communicate exclusively with SPIKE Nexus.
 //
 // Returns:
-//   - *API: A configured API instance ready for use, or nil if initialization
-//     fails
+//   - *API: A configured API instance ready for use, nil on error
+//   - *sdkErrors.SDKError: nil on success, or one of the following errors:
+//   - ErrSPIFFEFailedToCreateX509Source: if X509Source creation fails
+//   - ErrSPIFFEUnableToFetchX509Source: if initial SVID fetch fails
 //
-// The function will return nil if:
-//   - The SPIFFE Workload API is not available
-//   - The default endpoint socket cannot be accessed
-//   - The X.509 source creation fails or times out
+// Example:
 //
-// Example usage:
-//
-//	// Create API client that connects to SPIKE Nexus
-//	api := New()
-//	if api == nil {
-//	    log.Fatal("Failed to initialize SPIKE API")
+//	api, err := New()
+//	if err != nil {
+//	    log.Fatalf("Failed to initialize SPIKE API: %v", err)
 //	}
 //	defer api.Close()
-func New() *API {
+func New() (*API, *sdkErrors.SDKError) {
 	defaultEndpointSocket := spiffe.EndpointSocket()
 
 	ctx, cancel := context.WithTimeout(
@@ -57,10 +55,10 @@ func New() *API {
 
 	source, _, err := spiffe.Source(ctx, defaultEndpointSocket)
 	if err != nil {
-		return nil
+		return nil, err
 	}
 
-	return &API{source: source}
+	return &API{source: source}, nil
 }
 
 // NewWithSource initializes a new API instance with a pre-configured

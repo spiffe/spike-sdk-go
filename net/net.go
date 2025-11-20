@@ -34,8 +34,9 @@ import (
 //
 // Returns:
 //   - bod: byte slice containing the full request body data
-//   - err: *sdkErrors.SDKError with ErrReadingRequestBody or ErrStreamCloseFailed
-//     if an error occurred during reading or closing the body
+//   - err: *sdkErrors.SDKError with ErrNetReadingRequestBody or
+//     ErrFSStreamCloseFailed if an error occurred during reading or
+//     closing the body
 //
 // Example:
 //
@@ -50,7 +51,7 @@ func RequestBody(r *http.Request) (bod []byte, err *sdkErrors.SDKError) {
 
 	body, e := io.ReadAll(r.Body)
 	if e != nil {
-		failErr := sdkErrors.ErrReadingRequestBody.Wrap(e)
+		failErr := sdkErrors.ErrNetReadingRequestBody.Wrap(e)
 		return nil, failErr
 	}
 
@@ -58,7 +59,7 @@ func RequestBody(r *http.Request) (bod []byte, err *sdkErrors.SDKError) {
 		if b == nil {
 			return
 		}
-		failErr := sdkErrors.ErrStreamCloseFailed
+		failErr := sdkErrors.ErrFSStreamCloseFailed
 		log.WarnErr(fName, *failErr)
 	}(r.Body)
 
@@ -70,7 +71,7 @@ func RequestBody(r *http.Request) (bod []byte, err *sdkErrors.SDKError) {
 //
 // The authorizer checks each connecting peer's SPIFFE ID against the predicate.
 // If the predicate returns true, the connection is authorized. If false, the
-// connection is rejected with ErrUnauthorized.
+// connection is rejected with ErrAccessUnauthorized.
 //
 // Parameters:
 //   - predicate: Function that takes a SPIFFE ID string and returns true to
@@ -91,7 +92,7 @@ func AuthorizerWithPredicate(predicate func(string) bool) tlsconfig.Authorizer {
 			return nil
 		}
 
-		failErr := sdkErrors.ErrUnauthorized
+		failErr := sdkErrors.ErrAccessUnauthorized
 		failErr.Msg = fmt.Sprintf("unauthorized spiffe id: '%s'", id.String())
 
 		return failErr
@@ -293,7 +294,7 @@ func Source() *workloadapi.X509Source {
 
 	source, _, err := spiffe.Source(ctx, spiffe.EndpointSocket())
 	if err != nil {
-		failErr := sdkErrors.ErrCreationFailed.Wrap(err)
+		failErr := sdkErrors.ErrObjectCreationFailed.Wrap(err)
 		log.FatalErr(fName, *failErr)
 	}
 	return source
@@ -317,7 +318,7 @@ func Source() *workloadapi.X509Source {
 //   - *sdkErrors.SDKError: Returns nil if the server starts successfully,
 //     otherwise returns one of the following errors:
 //   - ErrSPIFFENilX509Source: if source is nil
-//   - ErrStreamOpenFailed: if the server fails to start or encounters an error
+//   - ErrFSStreamOpenFailed: if the server fails to start or encounters an error
 //     while running
 //
 // The function uses empty strings for the certificate and key file parameters
@@ -338,7 +339,7 @@ func ServeWithPredicate(source *workloadapi.X509Source,
 	server := CreateMTLSServerWithPredicate(source, tlsPort, predicate)
 
 	if err := server.ListenAndServeTLS("", ""); err != nil {
-		failErr := sdkErrors.ErrStreamOpenFailed.Wrap(err)
+		failErr := sdkErrors.ErrFSStreamOpenFailed.Wrap(err)
 		failErr.Msg = "failed to listen and serve"
 		return failErr
 	}
@@ -367,7 +368,7 @@ func ServeWithPredicate(source *workloadapi.X509Source,
 //   - *sdkErrors.SDKError: Returns nil if the server starts successfully,
 //     otherwise returns one of the following errors:
 //   - ErrSPIFFENilX509Source: if source is nil
-//   - ErrStreamOpenFailed: if the server fails to start or encounters an error
+//   - ErrFSStreamOpenFailed: if the server fails to start or encounters an error
 //     while running
 //
 // The function uses empty strings for the certificate and key file parameters

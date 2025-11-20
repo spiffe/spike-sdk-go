@@ -29,11 +29,11 @@ import (
 //   - (nil, nil) if the policy is not found
 //   - (nil, *sdkErrors.SDKError) if an error occurs:
 //   - ErrSPIFFENilX509Source: if source is nil
-//   - ErrMarshalFailure: if request serialization fails
+//   - ErrDataMarshalFailure: if request serialization fails
 //   - ErrPostFailed: if the HTTP request fails
-//   - ErrUnmarshalFailure: if response parsing fails
+//   - ErrDataUnmarshalFailure: if response parsing fails
 //   - Error from FromCode(): if the server returns an error (e.g.,
-//     ErrUnauthorized, ErrBadRequest, etc.)
+//     ErrAccessUnauthorized, ErrBadRequest, etc.)
 //
 // Example:
 //
@@ -65,7 +65,7 @@ func GetPolicy(
 
 	mr, err := json.Marshal(r)
 	if err != nil {
-		failErr := sdkErrors.ErrMarshalFailure.Wrap(err)
+		failErr := sdkErrors.ErrDataMarshalFailure.Wrap(err)
 		failErr.Msg = "problem generating the payload"
 		return nil, failErr
 	}
@@ -83,7 +83,7 @@ func GetPolicy(
 	var res reqres.PolicyReadResponse
 	err = json.Unmarshal(body, &res)
 	if err != nil {
-		failErr := sdkErrors.ErrUnmarshalFailure.Wrap(err)
+		failErr := sdkErrors.ErrDataUnmarshalFailure.Wrap(err)
 		failErr.Msg = "problem parsing response body"
 		return nil, failErr
 	}

@@ -41,10 +41,10 @@ import (
 //   - *sdkErrors.SDKError if an error occurs:
 //   - ErrSPIFFENilX509Source: if source is nil
 //   - Errors from net.Post(): if the HTTP request fails (e.g., ErrNotFound,
-//     ErrUnauthorized, ErrBadRequest, ErrNotReady, ErrPeerConnection)
+//     ErrAccessUnauthorized, ErrBadRequest, ErrStateNotReady, ErrNetPeerConnection)
 //
 // Note: The function will fatally crash (via log.FatalErr) for unrecoverable
-// errors such as marshal failures (ErrMarshalFailure) or invalid contribution
+// errors such as marshal failures (ErrDataMarshalFailure) or invalid contribution
 // length (ErrCryptoInvalidEncryptionKeyLength).
 //
 // Example:
@@ -72,7 +72,7 @@ func Contribute(
 
 	contribution, err := keeperShare.Value.MarshalBinary()
 	if err != nil {
-		failErr := sdkErrors.ErrMarshalFailure.Wrap(err)
+		failErr := sdkErrors.ErrDataMarshalFailure.Wrap(err)
 		failErr.Msg = "failed to marshal share"
 		log.FatalErr(fName, *failErr)
 	}
@@ -105,7 +105,7 @@ func Contribute(
 
 		md, err := json.Marshal(scr)
 		if err != nil {
-			failErr := sdkErrors.ErrMarshalFailure.Wrap(err)
+			failErr := sdkErrors.ErrDataMarshalFailure.Wrap(err)
 			failErr.Msg = "failed to marshal request"
 			log.FatalErr(fName, *failErr)
 		}
@@ -141,11 +141,11 @@ func Contribute(
 //   - *sdkErrors.SDKError if an error occurs:
 //   - ErrSPIFFENilX509Source: if source is nil
 //   - Errors from net.Post(): if the HTTP request fails (e.g., ErrNotFound,
-//     ErrUnauthorized, ErrBadRequest, ErrNotReady, ErrPeerConnection)
+//     ErrAccessUnauthorized, ErrBadRequest, ErrStateNotReady, ErrNetPeerConnection)
 //
 // Note: The function will fatally crash (via log.FatalErr) for unrecoverable
-// errors such as marshal failures (ErrMarshalFailure), response parsing
-// failures (ErrUnmarshalFailure), or hash verification failures
+// errors such as marshal failures (ErrDataMarshalFailure), response parsing
+// failures (ErrDataUnmarshalFailure), or hash verification failures
 // (ErrCryptoCipherVerificationFailed). These indicate potential security
 // issues and the application should not continue.
 //
@@ -181,7 +181,7 @@ func Verify(
 
 	md, err := json.Marshal(request)
 	if err != nil {
-		failErr := sdkErrors.ErrMarshalFailure.Wrap(err)
+		failErr := sdkErrors.ErrDataMarshalFailure.Wrap(err)
 		failErr.Msg = "failed to marshal verification request"
 		log.FatalErr(fName, *failErr)
 	}
@@ -207,7 +207,7 @@ func Verify(
 		Err  string `json:"err"`
 	}
 	if err := json.Unmarshal(responseBody, &verifyResponse); err != nil {
-		failErr := sdkErrors.ErrUnmarshalFailure.Wrap(err)
+		failErr := sdkErrors.ErrDataUnmarshalFailure.Wrap(err)
 		failErr.Msg = "failed to parse verification response"
 		// If SPIKE Keeper is sending gibberish, it may be a malicious actor.
 		// Fatally crash here to prevent a possible compromise.

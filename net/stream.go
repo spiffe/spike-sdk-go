@@ -29,11 +29,12 @@ import (
 // Returns:
 //   - io.ReadCloser: The response body stream if successful
 //     (must be closed by caller)
-//   - *sdkErrors.SDKError: nil on success, or one of the following well-known errors:
+//   - *sdkErrors.SDKError: nil on success, or one of the following well-known
+//     errors:
 //   - ErrNotFound (404): Resource not found
-//   - ErrUnauthorized (401): Authentication required
+//   - ErrAccessUnauthorized (401): Authentication required
 //   - ErrBadRequest (400): Invalid request
-//   - ErrNotReady (503): Service unavailable
+//   - ErrStateNotReady (503): Service unavailable
 //   - Generic error for other non-200 status codes
 //
 // Example:
@@ -63,7 +64,7 @@ func StreamPostWithContentType(
 	//nolint:bodyclose // Response body is properly closed in defer block
 	r, err := client.Do(req)
 	if err != nil {
-		failErr := sdkErrors.ErrPeerConnection.Wrap(err)
+		failErr := sdkErrors.ErrNetPeerConnection.Wrap(err)
 		return nil, failErr
 	}
 	defer func(b io.ReadCloser) {
@@ -72,7 +73,7 @@ func StreamPostWithContentType(
 		}
 		err := b.Close()
 		if err != nil {
-			failErr := sdkErrors.ErrStreamCloseFailed
+			failErr := sdkErrors.ErrFSStreamCloseFailed
 			failErr.Msg = "failed to close response body"
 			log.WarnErr(fName, *failErr)
 		}
@@ -83,13 +84,13 @@ func StreamPostWithContentType(
 		case http.StatusNotFound:
 			return nil, sdkErrors.ErrNotFound
 		case http.StatusUnauthorized:
-			return nil, sdkErrors.ErrUnauthorized
+			return nil, sdkErrors.ErrAccessUnauthorized
 		case http.StatusBadRequest:
 			return nil, sdkErrors.ErrBadRequest
 		case http.StatusServiceUnavailable:
-			return nil, sdkErrors.ErrNotReady
+			return nil, sdkErrors.ErrStateNotReady
 		default:
-			failErr := sdkErrors.ErrPeerConnection
+			failErr := sdkErrors.ErrNetPeerConnection
 			return nil, failErr
 		}
 	}

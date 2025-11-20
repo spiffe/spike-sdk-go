@@ -27,11 +27,10 @@ import (
 // Returns:
 //   - *sdkErrors.SDKError: nil on success, or one of the following errors:
 //   - ErrSPIFFENilX509Source: if source is nil
-//   - ErrMarshalFailure: if request serialization fails
-//   - ErrPostFailed: if the HTTP request fails
-//   - ErrUnmarshalFailure: if response parsing fails
-//   - Error from FromCode(): if the server returns an error (e.g.,
-//     ErrUnauthorized, ErrNotFound, ErrBadRequest, etc.)
+//   - ErrDataMarshalFailure: if request serialization fails
+//   - Errors from net.Post(): if the HTTP request fails
+//   - ErrDataUnmarshalFailure: if response parsing fails
+//   - Error from FromCode(): if the server returns an error
 //
 // Example:
 //
@@ -52,7 +51,9 @@ func Undelete(source *workloadapi.X509Source,
 
 	mr, err := json.Marshal(r)
 	if err != nil {
-		return sdkErrors.ErrMarshalFailure.Wrap(err)
+		failErr := sdkErrors.ErrDataMarshalFailure.Wrap(err)
+		failErr.Msg = "problem generating the payload"
+		return failErr
 	}
 
 	client := net.CreateMTLSClientForNexus(source)
@@ -64,7 +65,7 @@ func Undelete(source *workloadapi.X509Source,
 	res := reqres.SecretUndeleteResponse{}
 	err = json.Unmarshal(body, &res)
 	if err != nil {
-		failErr := sdkErrors.ErrUnmarshalFailure.Wrap(err)
+		failErr := sdkErrors.ErrDataUnmarshalFailure.Wrap(err)
 		failErr.Msg = "problem parsing response body"
 		return failErr
 	}

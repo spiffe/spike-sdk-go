@@ -7,46 +7,77 @@ package api
 import (
 	"github.com/spiffe/spike-sdk-go/api/entity/data"
 	"github.com/spiffe/spike-sdk-go/api/internal/impl/operator"
+	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
 )
 
 // Recover returns recovery partitions for SPIKE Nexus to be used in a
-// break-the-glass recovery operation if the SPIKE Nexus auto-recovery mechanism
-// isn't successful.
+// break-the-glass recovery operation.
 //
-// The returned shards are sensitive and should be securely stored out-of-band
-// in encrypted form.
+// This should be used when the SPIKE Nexus auto-recovery mechanism isn't
+// successful. The returned shards are sensitive and should be securely stored
+// out-of-band in encrypted form.
 //
 // Returns:
-//   - *[][32]byte: Pointer to an array of recovery shards as 32-byte arrays
-//   - error: nil on success, unauthorized error if not authorized, or
-//     wrapped error on request-parsing failure
+//   - map[int]*[32]byte: Map of shard indices to shard byte arrays if
+//     successful, nil on error
+//   - *sdkErrors.SDKError: nil on success, or one of the following errors:
+//   - ErrSPIFFENilX509Source: if the X509 source is nil
+//   - ErrDataMarshalFailure: if request serialization fails
+//   - Errors from net.Post(): if the HTTP request fails
+//   - ErrDataUnmarshalFailure: if response parsing fails
+//   - Error from FromCode(): if the server returns an error
+//
+// Note: The function will fatally crash (via log.FatalErr) if:
+//   - SVID acquisition fails
+//   - SVID is nil
+//   - Caller is not SPIKE Pilot (security requirement)
 //
 // Example:
 //
 //	shards, err := api.Recover()
-func (a *API) Recover() (map[int]*[32]byte, error) {
+//	if err != nil {
+//	    log.Fatalf("Failed to recover shards: %v", err)
+//	}
+func (a *API) Recover() (map[int]*[32]byte, *sdkErrors.SDKError) {
 	return operator.Recover(a.source)
 }
 
-// Restore SPIKE Nexus backing using recovery shards when SPIKE Keepers cannot
-// provide adequate shards and SPIKE Nexus cannot recall its root key either.
+// Restore submits a recovery shard to continue the SPIKE Nexus restoration
+// process.
 //
-// This is a break-the-glass superuser-only operation that a well-architected
-// SPIKE deployment should not need.
+// This is used when SPIKE Keepers cannot provide adequate shards and SPIKE
+// Nexus cannot recall its root key. This is a break-the-glass superuser-only
+// operation that a well-architected SPIKE deployment should not need.
 //
 // Parameters:
-//   - shard *[32]byte: Pointer to a 32-byte array containing the shard to seed
+//   - index: Index of the recovery shard
+//   - shard: Pointer to a 32-byte array containing the recovery shard
 //
 // Returns:
-//   - *data.RestorationStatus: Status of the restoration process if successful
-//   - error: nil on success, unauthorized error if not authorized, or
-//     wrapped error on request-parsing failure
+//   - *data.RestorationStatus: Status containing shards collected, remaining,
+//     and restoration state if successful, nil on error
+//   - *sdkErrors.SDKError: nil on success, or one of the following errors:
+//   - ErrSPIFFENilX509Source: if the X509 source is nil
+//   - ErrDataMarshalFailure: if request serialization fails
+//   - Errors from net.Post(): if the HTTP request fails
+//   - ErrDataUnmarshalFailure: if response parsing fails
+//   - Error from FromCode(): if the server returns an error
+//
+// Note: The function will fatally crash (via log.FatalErr) if:
+//   - SVID acquisition fails
+//   - SVID is nil
+//   - Caller is not SPIKE Pilot (security requirement)
 //
 // Example:
 //
-//	status, err := api.Restore(shardPtr)
+//	status, err := api.Restore(shardIndex, shardPtr)
+//	if err != nil {
+//	    log.Fatalf("Failed to restore shard: %v", err)
+//	}
+//	log.Printf("Shards collected: %d, remaining: %d",
+//	    status.ShardsCollected, status.ShardsRemaining)
 func (a *API) Restore(
 	index int, shard *[32]byte,
-) (*data.RestorationStatus, error) {
+) (*data.RestorationStatus, *sdkErrors.SDKError) {
 	return operator.Restore(a.source, index, shard)
 }

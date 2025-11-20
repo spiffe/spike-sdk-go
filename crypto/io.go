@@ -4,7 +4,9 @@
 
 package crypto
 
-import "crypto/sha256"
+import (
+	"crypto/sha256"
+)
 
 // DeterministicReader implements io.Reader to generate deterministic
 // pseudo-random data based on a seed. It uses SHA-256 hashing to create a
@@ -21,12 +23,16 @@ type DeterministicReader struct {
 // a new block by hashing the current data. This ensures a continuous,
 // deterministic stream of data.
 //
+// This implementation properly satisfies the io.Reader interface contract.
+// The error return is always nil since deterministic hashing operations cannot
+// fail, but is required for io.Reader interface compliance.
+//
 // Parameters:
 //   - p []byte: Buffer to read data into
 //
 // Returns:
 //   - n int: Number of bytes read
-//   - err error: Always nil as reads never fail
+//   - err error: Always nil (deterministic reads never fail)
 func (r *DeterministicReader) Read(p []byte) (n int, err error) {
 	if r.pos >= len(r.data) {
 		// Generate more deterministic data if needed

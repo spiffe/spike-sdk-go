@@ -6,7 +6,6 @@ package secret
 
 import (
 	"encoding/json"
-	"errors"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 
@@ -22,9 +21,15 @@ import (
 //   - source: X509Source for establishing mTLS connection to SPIKE Nexus
 //
 // Returns:
-//   - []string: Array of secret keys if found, empty array if none found
-//   - error: nil on success, unauthorized error if not logged in, or
-//     wrapped error on request/parsing failure
+//   - *[]string: Array of secret keys if found, empty array if no secrets exist
+//   - *sdkErrors.SDKError: nil on success, or one of the following errors:
+//   - ErrSPIFFENilX509Source: if source is nil
+//   - ErrDataMarshalFailure: if request serialization fails
+//   - Errors from net.Post(): if the HTTP request fails (except ErrNotFound)
+//   - ErrDataUnmarshalFailure: if response parsing fails
+//   - Error from FromCode(): if the server returns an error
+//
+// Note: Returns (*[]string{}, nil) if no secrets are found (ErrNotFound)
 //
 // Example:
 //
@@ -39,19 +44,16 @@ func ListKeys(
 	r := reqres.SecretListRequest{}
 	mr, err := json.Marshal(r)
 	if err != nil {
-		return nil, errors.Join(
-			errors.New(
-				"listSecretKeys: Having problem generating the payload",
-			),
-			err,
-		)
+		failErr := sdkErrors.ErrDataMarshalFailure.Wrap(err)
+		failErr.Msg = "problem generating the payload"
+		return nil, failErr
 	}
 
 	client := net.CreateMTLSClientForNexus(source)
 
 	body, err := net.Post(client, url.SecretList(), mr)
 	if err != nil {
-		if errors.Is(err, sdkErrors.ErrNotFound) {
+		if err.Is(sdkErrors.ErrNotFound) {
 			return &[]string{}, nil
 		}
 		return nil, err
@@ -60,10 +62,9 @@ func ListKeys(
 	var res reqres.SecretListResponse
 	err = json.Unmarshal(body, &res)
 	if err != nil {
-		return nil, errors.Join(
-			errors.New("getSecret: Problem parsing response body"),
-			err,
-		)
+		failErr := sdkErrors.ErrDataUnmarshalFailure.Wrap(err)
+		failErr.Msg = "problem parsing response body"
+		return nil, failErr
 	}
 	if res.Err != "" {
 		return nil, sdkErrors.FromCode(res.Err)

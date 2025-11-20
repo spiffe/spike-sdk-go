@@ -12,42 +12,41 @@ import sdkErrors "github.com/spiffe/spike-sdk-go/errors"
 // The function supports versioned data retrieval with the following behavior:
 //   - If version is 0, returns the current version of the data
 //   - If version is specified, returns that specific version if it exists
-//   - Returns nil and false if the path doesn't exist
-//   - Returns nil and false if the specified version doesn't exist
-//   - Returns nil and false if the version has been deleted
-//     (DeletedTime is set)
+//   - Returns nil if the path doesn't exist
+//   - Returns nil if the specified version doesn't exist
+//   - Returns nil if the version has been deleted (DeletedTime is set)
 //
 // Parameters:
 //   - path: The path to retrieve data from
 //   - version: The specific version to retrieve (0 for current version)
 //
 // Returns:
-//   - map[string]string: The key-value data at the specified path and version
-//   - bool: true if data was found and is valid, false otherwise
+//   - map[string]string: The key-value data at the specified path and version,
+//     nil on error
+//   - *sdkErrors.SDKError: nil on success, or one of the following errors:
+//   - ErrEntityNotFound: if the path doesn't exist
+//   - ErrStoreItemSoftDeleted: if the version doesn't exist or has been deleted
 //
-// Example usage:
+// Example:
 //
-//	kv := &KV{}
 //	// Get current version
-//	data, exists := kv.Get("secret/myapp", 0)
+//	data, err := kv.Get("secret/myapp", 0)
+//	if err != nil {
+//	    log.Printf("Failed to get secret: %v", err)
+//	    return
+//	}
 //
 //	// Get specific version
-//	historicalData, exists := kv.Get("secret/myapp", 2)
-func (kv *KV) Get(path string, version int) (map[string]string, error) {
+//	historicalData, err := kv.Get("secret/myapp", 2)
+//	if err != nil {
+//	    log.Printf("Failed to get version 2: %v", err)
+//	    return
+//	}
+func (kv *KV) Get(path string, version int) (map[string]string, *sdkErrors.SDKError) {
 	secret, exists := kv.data[path]
 	if !exists {
 		return nil, sdkErrors.ErrEntityNotFound
 	}
-
-	// #region debug
-	// fmt.Println("########")
-	// vv := secret.Versions
-	// for i, v := range vv {
-	// 	fmt.Println("version", i, "version:", v.Version, "created:",
-	// 		v.CreatedTime, "deleted:", v.DeletedTime, "data:", v.Data)
-	// }
-	// fmt.Println("########")
-	// #endregion
 
 	// If the version not specified, use the current version:
 	if version == 0 {
@@ -64,15 +63,26 @@ func (kv *KV) Get(path string, version int) (map[string]string, error) {
 
 // GetRawSecret retrieves a raw secret from the store at the specified path.
 // This function is similar to Get, but it returns the raw Value object instead
-// of the key-value data map.
+// of the key-value data map, providing access to all versions and metadata.
 //
 // Parameters:
-// - path: The path to retrieve the secret from
+//   - path: The path to retrieve the secret from
 //
 // Returns:
-//   - *Value: The secret at the specified path, or nil if it doesn't exist
-//     or has been deleted.
-func (kv *KV) GetRawSecret(path string) (*Value, error) {
+//   - *Value: The complete secret object with all versions and metadata, nil
+//     on error
+//   - *sdkErrors.SDKError: nil on success, or one of the following errors:
+//   - ErrEntityNotFound: if the path doesn't exist
+//
+// Example:
+//
+//	secret, err := kv.GetRawSecret("secret/myapp")
+//	if err != nil {
+//	    log.Printf("Failed to get raw secret: %v", err)
+//	    return
+//	}
+//	log.Printf("Current version: %d", secret.Metadata.CurrentVersion)
+func (kv *KV) GetRawSecret(path string) (*Value, *sdkErrors.SDKError) {
 	secret, exists := kv.data[path]
 	if !exists {
 		return nil, sdkErrors.ErrEntityNotFound

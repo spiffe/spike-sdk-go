@@ -5,21 +5,30 @@
 package kv
 
 // ImportSecrets hydrates the key-value store with secrets loaded from
-// persistent storage or a similar medium. It takes a map of the path to secret
+// persistent storage or a similar medium. It takes a map of path to secret
 // values and adds them to the in-memory store. This is typically used during
 // initialization or recovery after a system crash.
 //
-// If a secret already exists in the store, it will be overwritten with the
-// imported value. The method preserves all version history and metadata from
-// the imported secrets.
+// The method performs a deep copy of all imported secrets to avoid sharing
+// memory between the source data and the KV store. If a secret already exists
+// in the store, it will be overwritten with the imported value. All version
+// history and metadata from the imported secrets are preserved.
 //
-// Example usage:
+// Parameters:
+//   - secrets: Map of secret paths to their complete Value objects (including
+//     all versions and metadata)
+//
+// Returns:
+//   - None
+//
+// Example:
 //
 //	secrets, err := persistentStore.LoadAllSecrets(context.Background())
 //	if err != nil {
 //	    log.Fatalf("Failed to load secrets: %v", err)
 //	}
-//	kvStore.ImportSecrets(secrets)
+//	kv.ImportSecrets(secrets)
+//	log.Printf("Imported %d secrets", len(secrets))
 func (kv *KV) ImportSecrets(secrets map[string]*Value) {
 	for path, secret := range secrets {
 		// Create a deep copy of the secret to avoid sharing memory

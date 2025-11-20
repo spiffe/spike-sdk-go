@@ -6,7 +6,6 @@ package secret
 
 import (
 	"encoding/json"
-	"errors"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 
@@ -28,8 +27,12 @@ import (
 //   - versions: Integer array of version numbers to delete
 //
 // Returns:
-//   - error: nil on success, unauthorized error if not logged in, or wrapped
-//     error on request/parsing failure
+//   - *sdkErrors.SDKError: nil on success, or one of the following errors:
+//   - ErrSPIFFENilX509Source: if source is nil
+//   - ErrDataMarshalFailure: if request serialization fails
+//   - Errors from net.Post(): if the HTTP request fails
+//   - ErrDataUnmarshalFailure: if response parsing fails
+//   - Error from FromCode(): if the server returns an error
 //
 // Example:
 //
@@ -37,24 +40,18 @@ import (
 func Delete(
 	source *workloadapi.X509Source,
 	path string, versions []int,
-) error {
+) *sdkErrors.SDKError {
 	if source == nil {
 		return sdkErrors.ErrSPIFFENilX509Source
 	}
 
-	r := reqres.SecretDeleteRequest{
-		Path:     path,
-		Versions: versions,
-	}
+	r := reqres.SecretDeleteRequest{Path: path, Versions: versions}
 
 	mr, err := json.Marshal(r)
 	if err != nil {
-		return errors.Join(
-			errors.New(
-				"deleteSecret: I am having problem generating the payload",
-			),
-			err,
-		)
+		failErr := sdkErrors.ErrDataMarshalFailure.Wrap(err)
+		failErr.Msg = "problem generating the payload"
+		return failErr
 	}
 
 	client := net.CreateMTLSClientForNexus(source)
@@ -67,14 +64,13 @@ func Delete(
 	res := reqres.SecretDeleteResponse{}
 	err = json.Unmarshal(body, &res)
 	if err != nil {
-		return errors.Join(
-			errors.New("deleteSecret: Problem parsing response body"),
-			err,
-		)
+		failErr := sdkErrors.ErrDataUnmarshalFailure.Wrap(err)
+		failErr.Msg = "problem parsing response body"
+		return failErr
 	}
 	if res.Err != "" {
 		return sdkErrors.FromCode(res.Err)
 	}
 
-	return err
+	return nil
 }

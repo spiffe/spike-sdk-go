@@ -6,7 +6,6 @@ package cipher
 
 import (
 	"encoding/json"
-	"errors"
 	"io"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
@@ -34,7 +33,10 @@ import (
 //
 // Returns:
 //   - ([]byte, nil) containing the decrypted plaintext if successful
-//   - (nil, error) if an error occurs during decryption
+//   - (nil, *sdkErrors.SDKError) if an error occurs:
+//   - ErrSPIFFENilX509Source: if source is nil
+//   - Errors from streamPost(): if the streaming request fails
+//   - ErrNetReadingResponseBody: if reading the response fails
 //
 // Example:
 //
@@ -50,7 +52,7 @@ import (
 //	    log.Printf("Decryption failed: %v", err)
 //	}
 func DecryptStream(
-	source *workloadapi.X509Source, r io.Reader, contentType string,
+	source *workloadapi.X509Source, r io.Reader, contentType net.ContentType,
 ) ([]byte, *sdkErrors.SDKError) {
 	return NewCipher().DecryptStream(source, r, contentType)
 }
@@ -67,7 +69,10 @@ func DecryptStream(
 //
 // Returns:
 //   - ([]byte, nil) containing the decrypted plaintext if successful
-//   - (nil, error) if an error occurs during decryption
+//   - (nil, *sdkErrors.SDKError) if an error occurs:
+//   - ErrSPIFFENilX509Source: if source is nil
+//   - Errors from streamPost(): if the streaming request fails
+//   - ErrNetReadingResponseBody: if reading the response fails
 //
 // Example:
 //
@@ -80,33 +85,42 @@ func DecryptStream(
 func (c *Cipher) DecryptStream(
 	source *workloadapi.X509Source, r io.Reader, contentType net.ContentType,
 ) ([]byte, *sdkErrors.SDKError) {
-	if source == nil {
-		return []byte{}, sdkErrors.ErrSPIFFENilX509Source
-	}
+	const fName = "DecryptStream"
 
-	const fName = "decryptStream"
+	if source == nil {
+		return nil, sdkErrors.ErrSPIFFENilX509Source
+	}
 
 	client := c.createMTLSHTTPClientFromSource(source)
 
 	if contentType == "" {
 		contentType = net.ContentTypeOctetStream
 	}
-	rc, err := c.streamPost(
-		client, url.CipherDecrypt(), r, contentType,
-	)
+
+	rc, err := c.streamPost(client, url.CipherDecrypt(), r, contentType)
 	if err != nil {
-		return []byte{}, err
+		return nil, err
 	}
+
 	defer func(rc io.ReadCloser) {
+		if rc == nil {
+			return
+		}
 		err := rc.Close()
 		if err != nil {
-			log.Log().Error(fName, "err", err.Error())
+			failErr := sdkErrors.ErrFSStreamCloseFailed.Wrap(err)
+			failErr.Msg = "failed to close response body"
+			log.WarnErr(fName, *failErr)
 		}
 	}(rc)
+
 	b, err := io.ReadAll(rc)
 	if err != nil {
-		return []byte{}, err
+		failErr := sdkErrors.ErrNetReadingResponseBody.Wrap(err)
+		failErr.Msg = "failed to read response body"
+		return nil, failErr
 	}
+
 	return b, nil
 }
 
@@ -127,8 +141,13 @@ func (c *Cipher) DecryptStream(
 //
 // Returns:
 //   - ([]byte, nil) containing the decrypted plaintext if successful
-//   - ([]byte{}, nil) if the data is not found
-//   - (nil, error) if an error occurs during decryption
+//   - (nil, *sdkErrors.SDKError) if an error occurs:
+//   - ErrSPIFFENilX509Source: if source is nil
+//   - ErrDataMarshalFailure: if request serialization fails
+//   - Errors from httpPost(): if the HTTP request fails (e.g., ErrNotFound,
+//     ErrAccessUnauthorized, ErrBadRequest, ErrStateNotReady, ErrNetPeerConnection)
+//   - ErrDataUnmarshalFailure: if response parsing fails
+//   - Error from FromCode(): if the server returns an error
 //
 // Example:
 //
@@ -162,8 +181,13 @@ func DecryptJSON(
 //
 // Returns:
 //   - ([]byte, nil) containing the decrypted plaintext if successful
-//   - ([]byte{}, nil) if the data is not found
-//   - (nil, error) if an error occurs during decryption
+//   - (nil, *sdkErrors.SDKError) if an error occurs:
+//   - ErrSPIFFENilX509Source: if source is nil
+//   - ErrDataMarshalFailure: if request serialization fails
+//   - Errors from httpPost(): if the HTTP request fails (e.g., ErrNotFound,
+//     ErrAccessUnauthorized, ErrBadRequest, ErrStateNotReady, ErrNetPeerConnection)
+//   - ErrDataUnmarshalFailure: if response parsing fails
+//   - Error from FromCode(): if the server returns an error
 //
 // Example:
 //
@@ -177,7 +201,7 @@ func (c *Cipher) DecryptJSON(
 	version byte, nonce, ciphertext []byte, algorithm string,
 ) ([]byte, *sdkErrors.SDKError) {
 	if source == nil {
-		return []byte{}, sdkErrors.ErrSPIFFENilX509Source
+		return nil, sdkErrors.ErrSPIFFENilX509Source
 	}
 
 	client := c.createMTLSHTTPClientFromSource(source)
@@ -188,25 +212,27 @@ func (c *Cipher) DecryptJSON(
 		Ciphertext: ciphertext,
 		Algorithm:  algorithm,
 	}
+
 	mr, err := json.Marshal(payload)
 	if err != nil {
-		return []byte{},
-			errors.Join(errors.New("cipher.DecryptJSON: marshal request"), err)
+		failErr := sdkErrors.ErrDataMarshalFailure.Wrap(err)
+		failErr.Msg = "problem generating the payload"
+		return nil, failErr
 	}
+
 	body, err := c.httpPost(client, url.CipherDecrypt(), mr)
 	if err != nil {
-		if errors.Is(err, sdkErrors.ErrNotFound) {
-			return []byte{}, nil
-		}
-		return []byte{}, err
+		return nil, err
 	}
+
 	var res reqres.CipherDecryptResponse
 	if err := json.Unmarshal(body, &res); err != nil {
-		return []byte{},
-			errors.Join(errors.New("cipher.DecryptJSON: unmarshal response"), err)
+		failErr := sdkErrors.ErrDataUnmarshalFailure.Wrap(err)
+		failErr.Msg = "problem parsing response body"
+		return nil, failErr
 	}
 	if res.Err != "" {
-		return []byte{}, sdkErrors.FromCode(res.Err)
+		return nil, sdkErrors.FromCode(res.Err)
 	}
 	return res.Plaintext, nil
 }

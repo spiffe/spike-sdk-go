@@ -27,11 +27,12 @@ import (
 //   - []byte: The response body if the request is successful
 //   - *sdkErrors.SDKError: nil on success, or one of the following errors:
 //   - ErrBadRequest: if request creation fails or server returns 400
-//   - ErrPeerConnection: if connection to peer fails or unexpected status code
+//   - ErrNetPeerConnection: if connection to peer fails or unexpected status
+//     code
 //   - ErrNotFound: if server returns 404
-//   - ErrUnauthorized: if server returns 401
-//   - ErrNotReady: if server returns 503
-//   - ErrReadingResponseBody: if reading response body fails
+//   - ErrAccessUnauthorized: if server returns 401
+//   - ErrStateNotReady: if server returns 503
+//   - ErrNetReadingResponseBody: if reading response body fails
 //
 // The function ensures proper cleanup by always attempting to close the
 // response body, even if an error occurs during reading.
@@ -64,7 +65,7 @@ func Post(
 	//nolint:bodyclose // Response body is properly closed in defer block
 	r, err := client.Do(req)
 	if err != nil {
-		failErr := sdkErrors.ErrPeerConnection.Wrap(err)
+		failErr := sdkErrors.ErrNetPeerConnection.Wrap(err)
 		return []byte{}, failErr
 	}
 	defer func(b io.ReadCloser) {
@@ -73,7 +74,7 @@ func Post(
 		}
 		err := b.Close()
 		if err != nil {
-			failErr := sdkErrors.ErrStreamCloseFailed.Wrap(err)
+			failErr := sdkErrors.ErrFSStreamCloseFailed.Wrap(err)
 			failErr.Msg = "failed to close response body"
 			log.WarnErr(fName, *failErr)
 		}
@@ -85,7 +86,7 @@ func Post(
 		}
 
 		if r.StatusCode == http.StatusUnauthorized {
-			return []byte{}, sdkErrors.ErrUnauthorized
+			return []byte{}, sdkErrors.ErrAccessUnauthorized
 		}
 
 		if r.StatusCode == http.StatusBadRequest {
@@ -94,17 +95,17 @@ func Post(
 
 		// SPIKE Nexus is likely not initialized or in bad shape:
 		if r.StatusCode == http.StatusServiceUnavailable {
-			return []byte{}, sdkErrors.ErrNotReady
+			return []byte{}, sdkErrors.ErrStateNotReady
 		}
 
-		failErr := sdkErrors.ErrPeerConnection
+		failErr := sdkErrors.ErrNetPeerConnection
 		failErr.Msg = "unexpected status code from peer"
 		return []byte{}, failErr
 	}
 
 	b, err := body(r)
 	if err != nil {
-		failErr := sdkErrors.ErrStreamCloseFailed.Wrap(err)
+		failErr := sdkErrors.ErrFSStreamCloseFailed.Wrap(err)
 		failErr.Msg = "failed to close response body"
 		log.WarnErr(fName, *failErr)
 	}
@@ -115,7 +116,7 @@ func Post(
 		}
 		closeErr := b.Close()
 		if closeErr != nil {
-			failErr := sdkErrors.ErrStreamCloseFailed.Wrap(err)
+			failErr := sdkErrors.ErrFSStreamCloseFailed.Wrap(err)
 			failErr.Msg = "failed to close response body"
 			log.WarnErr(fName, *failErr)
 		}
