@@ -30,10 +30,10 @@ import (
 //   - (nil, *sdkErrors.SDKError) if an error occurs:
 //   - ErrSPIFFENilX509Source: if source is nil
 //   - ErrDataMarshalFailure: if request serialization fails
-//   - ErrPostFailed: if the HTTP request fails
+//   - ErrAPIPostFailed: if the HTTP request fails
 //   - ErrDataUnmarshalFailure: if response parsing fails
 //   - Error from FromCode(): if the server returns an error (e.g.,
-//     ErrAccessUnauthorized, ErrBadRequest, etc.)
+//     ErrAccessUnauthorized, ErrAPIBadRequest, etc.)
 //
 // Example:
 //
@@ -73,7 +73,7 @@ func GetPolicy(
 	res, postErr := net.PostAndUnmarshal[reqres.PolicyReadResponse](
 		source, url.PolicyGet(), mr)
 	if postErr != nil {
-		if postErr.Is(sdkErrors.ErrNotFound) {
+		if postErr.Is(sdkErrors.ErrAPINotFound) {
 			return nil, nil
 		}
 		return nil, postErr

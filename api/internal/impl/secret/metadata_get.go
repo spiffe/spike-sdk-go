@@ -29,11 +29,11 @@ import (
 //   - *sdkErrors.SDKError: nil on success, or one of the following errors:
 //   - ErrSPIFFENilX509Source: if source is nil
 //   - ErrDataMarshalFailure: if request serialization fails
-//   - Errors from net.Post(): if the HTTP request fails (except ErrNotFound)
+//   - Errors from net.Post(): if the HTTP request fails (except ErrAPINotFound)
 //   - ErrDataUnmarshalFailure: if response parsing fails
 //   - Error from FromCode(): if the server returns an error
 //
-// Note: Returns (nil, nil) if the secret metadata is not found (ErrNotFound)
+// Note: Returns (nil, nil) if the secret metadata is not found (ErrAPINotFound)
 //
 // Example:
 //
@@ -57,7 +57,7 @@ func GetMetadata(
 	res, postErr := net.PostAndUnmarshal[reqres.SecretMetadataResponse](
 		source, url.SecretMetadataGet(), mr)
 	if postErr != nil {
-		if postErr.Is(sdkErrors.ErrNotFound) {
+		if postErr.Is(sdkErrors.ErrAPINotFound) {
 			return nil, nil
 		}
 		return nil, postErr

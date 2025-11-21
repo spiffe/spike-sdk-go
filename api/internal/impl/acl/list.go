@@ -33,10 +33,10 @@ import (
 //   - (nil, *sdkErrors.SDKError) if an error occurs:
 //   - ErrSPIFFENilX509Source: if source is nil
 //   - ErrDataMarshalFailure: if request serialization fails
-//   - ErrPostFailed: if the HTTP request fails
+//   - ErrAPIPostFailed: if the HTTP request fails
 //   - ErrDataUnmarshalFailure: if response parsing fails
 //   - Error from FromCode(): if the server returns an error (e.g.,
-//     ErrAccessUnauthorized, ErrBadRequest, etc.)
+//     ErrAccessUnauthorized, ErrAPIBadRequest, etc.)
 //
 // Note: The returned slice pointer should be dereferenced before use:
 //
@@ -87,7 +87,7 @@ func ListPolicies(
 	res, postErr := net.PostAndUnmarshal[reqres.PolicyListResponse](
 		source, url.PolicyList(), mr)
 	if postErr != nil {
-		if postErr.Is(sdkErrors.ErrNotFound) {
+		if postErr.Is(sdkErrors.ErrAPINotFound) {
 			return &([]data.Policy{}), nil
 		}
 		return nil, postErr

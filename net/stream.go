@@ -31,9 +31,9 @@ import (
 //     (must be closed by caller)
 //   - *sdkErrors.SDKError: nil on success, or one of the following well-known
 //     errors:
-//   - ErrNotFound (404): Resource not found
+//   - ErrAPINotFound (404): Resource not found
 //   - ErrAccessUnauthorized (401): Authentication required
-//   - ErrBadRequest (400): Invalid request
+//   - ErrAPIBadRequest (400): Invalid request
 //   - ErrStateNotReady (503): Service unavailable
 //   - Generic error for other non-200 status codes
 //
@@ -55,7 +55,7 @@ func StreamPostWithContentType(
 
 	req, err := http.NewRequest("POST", path, body)
 	if err != nil {
-		failErr := sdkErrors.ErrPostFailed.Wrap(err)
+		failErr := sdkErrors.ErrAPIPostFailed.Wrap(err)
 		failErr.Msg = "failed to create request"
 		return nil, failErr
 	}
@@ -82,11 +82,11 @@ func StreamPostWithContentType(
 	if r.StatusCode != http.StatusOK {
 		switch r.StatusCode {
 		case http.StatusNotFound:
-			return nil, sdkErrors.ErrNotFound
+			return nil, sdkErrors.ErrAPINotFound
 		case http.StatusUnauthorized:
 			return nil, sdkErrors.ErrAccessUnauthorized
 		case http.StatusBadRequest:
-			return nil, sdkErrors.ErrBadRequest
+			return nil, sdkErrors.ErrAPIBadRequest
 		case http.StatusServiceUnavailable:
 			return nil, sdkErrors.ErrStateNotReady
 		default:

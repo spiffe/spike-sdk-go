@@ -23,15 +23,15 @@ type SecretMetadataResponse struct {
 }
 
 func (r SecretMetadataResponse) Success() SecretMetadataResponse {
-	r.Err = sdkErrors.ErrSuccess.Code
+	r.Err = sdkErrors.ErrAPISuccess.Code
 	return r
 }
 func (r SecretMetadataResponse) NotFound() SecretMetadataResponse {
-	r.Err = sdkErrors.ErrNotFound.Code
+	r.Err = sdkErrors.ErrAPINotFound.Code
 	return r
 }
 func (r SecretMetadataResponse) BadRequest() SecretMetadataResponse {
-	r.Err = sdkErrors.ErrBadRequest.Code
+	r.Err = sdkErrors.ErrAPIBadRequest.Code
 	return r
 }
 func (r SecretMetadataResponse) Unauthorized() SecretMetadataResponse {
@@ -39,7 +39,7 @@ func (r SecretMetadataResponse) Unauthorized() SecretMetadataResponse {
 	return r
 }
 func (r SecretMetadataResponse) Internal() SecretMetadataResponse {
-	r.Err = sdkErrors.ErrInternal.Code
+	r.Err = sdkErrors.ErrAPIInternal.Code
 	return r
 }
 func (r SecretMetadataResponse) ErrorCode() sdkErrors.ErrorCode {
@@ -59,15 +59,15 @@ type SecretPutResponse struct {
 }
 
 func (r SecretPutResponse) Success() SecretPutResponse {
-	r.Err = sdkErrors.ErrSuccess.Code
+	r.Err = sdkErrors.ErrAPISuccess.Code
 	return r
 }
 func (r SecretPutResponse) NotFound() SecretPutResponse {
-	log.FatalErr("NotFound", *sdkErrors.ErrEntityResponseCodeInvalid)
+	log.FatalErr("NotFound", *sdkErrors.ErrAPIResponseCodeInvalid)
 	return r
 }
 func (r SecretPutResponse) BadRequest() SecretPutResponse {
-	r.Err = sdkErrors.ErrBadRequest.Code
+	r.Err = sdkErrors.ErrAPIBadRequest.Code
 	return r
 }
 func (r SecretPutResponse) Unauthorized() SecretPutResponse {
@@ -75,7 +75,7 @@ func (r SecretPutResponse) Unauthorized() SecretPutResponse {
 	return r
 }
 func (r SecretPutResponse) Internal() SecretPutResponse {
-	r.Err = sdkErrors.ErrInternal.Code
+	r.Err = sdkErrors.ErrAPIInternal.Code
 	return r
 }
 func (r SecretPutResponse) ErrorCode() sdkErrors.ErrorCode {
@@ -95,15 +95,15 @@ type SecretGetResponse struct {
 }
 
 func (r SecretGetResponse) Success() SecretGetResponse {
-	r.Err = sdkErrors.ErrSuccess.Code
+	r.Err = sdkErrors.ErrAPISuccess.Code
 	return r
 }
 func (r SecretGetResponse) NotFound() SecretGetResponse {
-	r.Err = sdkErrors.ErrNotFound.Code
+	r.Err = sdkErrors.ErrAPINotFound.Code
 	return r
 }
 func (r SecretGetResponse) BadRequest() SecretGetResponse {
-	r.Err = sdkErrors.ErrBadRequest.Code
+	r.Err = sdkErrors.ErrAPIBadRequest.Code
 	return r
 }
 func (r SecretGetResponse) Unauthorized() SecretGetResponse {
@@ -111,7 +111,7 @@ func (r SecretGetResponse) Unauthorized() SecretGetResponse {
 	return r
 }
 func (r SecretGetResponse) Internal() SecretGetResponse {
-	r.Err = sdkErrors.ErrInternal.Code
+	r.Err = sdkErrors.ErrAPIInternal.Code
 	return r
 }
 func (r SecretGetResponse) ErrorCode() sdkErrors.ErrorCode {
@@ -130,11 +130,11 @@ type SecretDeleteResponse struct {
 }
 
 func (r SecretDeleteResponse) NotFound() SecretDeleteResponse {
-	r.Err = sdkErrors.ErrNotFound.Code
+	r.Err = sdkErrors.ErrAPINotFound.Code
 	return r
 }
 func (r SecretDeleteResponse) BadRequest() SecretDeleteResponse {
-	r.Err = sdkErrors.ErrBadRequest.Code
+	r.Err = sdkErrors.ErrAPIBadRequest.Code
 	return r
 }
 func (r SecretDeleteResponse) Unauthorized() SecretDeleteResponse {
@@ -142,12 +142,12 @@ func (r SecretDeleteResponse) Unauthorized() SecretDeleteResponse {
 	return r
 }
 func (r SecretDeleteResponse) Internal() SecretDeleteResponse {
-	r.Err = sdkErrors.ErrInternal.Code
+	r.Err = sdkErrors.ErrAPIInternal.Code
 	return r
 }
 
 func (r SecretDeleteResponse) Success() SecretDeleteResponse {
-	r.Err = sdkErrors.ErrSuccess.Code
+	r.Err = sdkErrors.ErrAPISuccess.Code
 	return r
 }
 func (r SecretDeleteResponse) ErrorCode() sdkErrors.ErrorCode {
@@ -166,15 +166,15 @@ type SecretUndeleteResponse struct {
 }
 
 func (r SecretUndeleteResponse) Success() SecretUndeleteResponse {
-	r.Err = sdkErrors.ErrSuccess.Code
+	r.Err = sdkErrors.ErrAPISuccess.Code
 	return r
 }
 func (r SecretUndeleteResponse) NotFound() SecretUndeleteResponse {
-	r.Err = sdkErrors.ErrNotFound.Code
+	r.Err = sdkErrors.ErrAPINotFound.Code
 	return r
 }
 func (r SecretUndeleteResponse) BadRequest() SecretUndeleteResponse {
-	r.Err = sdkErrors.ErrBadRequest.Code
+	r.Err = sdkErrors.ErrAPIBadRequest.Code
 	return r
 }
 func (r SecretUndeleteResponse) Unauthorized() SecretUndeleteResponse {
@@ -182,7 +182,7 @@ func (r SecretUndeleteResponse) Unauthorized() SecretUndeleteResponse {
 	return r
 }
 func (r SecretUndeleteResponse) Internal() SecretUndeleteResponse {
-	r.Err = sdkErrors.ErrInternal.Code
+	r.Err = sdkErrors.ErrAPIInternal.Code
 	return r
 }
 func (r SecretUndeleteResponse) ErrorCode() sdkErrors.ErrorCode {
@@ -200,15 +200,15 @@ type SecretListResponse struct {
 }
 
 func (r SecretListResponse) Success() SecretListResponse {
-	r.Err = sdkErrors.ErrSuccess.Code
+	r.Err = sdkErrors.ErrAPISuccess.Code
 	return r
 }
 func (r SecretListResponse) NotFound() SecretListResponse {
-	log.FatalErr("NotFound", *sdkErrors.ErrEntityResponseCodeInvalid)
+	log.FatalErr("NotFound", *sdkErrors.ErrAPIResponseCodeInvalid)
 	return r
 }
 func (r SecretListResponse) BadRequest() SecretListResponse {
-	r.Err = sdkErrors.ErrBadRequest.Code
+	r.Err = sdkErrors.ErrAPIBadRequest.Code
 	return r
 }
 func (r SecretListResponse) Unauthorized() SecretListResponse {
@@ -216,7 +216,7 @@ func (r SecretListResponse) Unauthorized() SecretListResponse {
 	return r
 }
 func (r SecretListResponse) Internal() SecretListResponse {
-	r.Err = sdkErrors.ErrInternal.Code
+	r.Err = sdkErrors.ErrAPIInternal.Code
 	return r
 }
 func (r SecretListResponse) ErrorCode() sdkErrors.ErrorCode {

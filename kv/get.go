@@ -25,7 +25,7 @@ import sdkErrors "github.com/spiffe/spike-sdk-go/errors"
 //     nil on error
 //   - *sdkErrors.SDKError: nil on success, or one of the following errors:
 //   - ErrEntityNotFound: if the path doesn't exist
-//   - ErrStoreItemSoftDeleted: if the version doesn't exist or has been deleted
+//   - ErrEntityDeleted: if the version doesn't exist or has been deleted
 //
 // Example:
 //
@@ -55,7 +55,7 @@ func (kv *KV) Get(path string, version int) (map[string]string, *sdkErrors.SDKEr
 
 	v, exists := secret.Versions[version]
 	if !exists || v.DeletedTime != nil {
-		return nil, sdkErrors.ErrStoreItemSoftDeleted
+		return nil, sdkErrors.ErrEntityDeleted
 	}
 
 	return v.Data, nil

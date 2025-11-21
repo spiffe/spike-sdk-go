@@ -72,11 +72,11 @@ func (a *API) DeleteSecret(path string) *sdkErrors.SDKError {
 //   - *sdkErrors.SDKError: nil on success, or one of the following errors:
 //   - ErrSPIFFENilX509Source: if the X509 source is nil
 //   - ErrDataMarshalFailure: if request serialization fails
-//   - Errors from net.Post(): if the HTTP request fails (except ErrNotFound)
+//   - Errors from net.Post(): if the HTTP request fails (except ErrAPINotFound)
 //   - ErrDataUnmarshalFailure: if response parsing fails
 //   - Error from FromCode(): if the server returns an error
 //
-// Note: Returns (nil, nil) if the secret is not found (ErrNotFound)
+// Note: Returns (nil, nil) if the secret is not found (ErrAPINotFound)
 //
 // Example:
 //
@@ -105,11 +105,11 @@ func (a *API) GetSecretVersion(
 //   - *sdkErrors.SDKError: nil on success, or one of the following errors:
 //   - ErrSPIFFENilX509Source: if the X509 source is nil
 //   - ErrDataMarshalFailure: if request serialization fails
-//   - Errors from net.Post(): if the HTTP request fails (except ErrNotFound)
+//   - Errors from net.Post(): if the HTTP request fails (except ErrAPINotFound)
 //   - ErrDataUnmarshalFailure: if response parsing fails
 //   - Error from FromCode(): if the server returns an error
 //
-// Note: Returns (nil, nil) if the secret is not found (ErrNotFound)
+// Note: Returns (nil, nil) if the secret is not found (ErrAPINotFound)
 //
 // Example:
 //
@@ -134,11 +134,11 @@ func (a *API) GetSecret(path string) (*data.Secret, *sdkErrors.SDKError) {
 //   - *sdkErrors.SDKError: nil on success, or one of the following errors:
 //   - ErrSPIFFENilX509Source: if the X509 source is nil
 //   - ErrDataMarshalFailure: if request serialization fails
-//   - Errors from net.Post(): if the HTTP request fails (except ErrNotFound)
+//   - Errors from net.Post(): if the HTTP request fails (except ErrAPINotFound)
 //   - ErrDataUnmarshalFailure: if response parsing fails
 //   - Error from FromCode(): if the server returns an error
 //
-// Note: Returns (&[]string{}, nil) if no secrets are found (ErrNotFound)
+// Note: Returns (&[]string{}, nil) if no secrets are found (ErrAPINotFound)
 //
 // Example:
 //
@@ -167,11 +167,11 @@ func (a *API) ListSecretKeys() (*[]string, *sdkErrors.SDKError) {
 //   - *sdkErrors.SDKError: nil on success, or one of the following errors:
 //   - ErrSPIFFENilX509Source: if the X509 source is nil
 //   - ErrDataMarshalFailure: if request serialization fails
-//   - Errors from net.Post(): if the HTTP request fails (except ErrNotFound)
+//   - Errors from net.Post(): if the HTTP request fails (except ErrAPINotFound)
 //   - ErrDataUnmarshalFailure: if response parsing fails
 //   - Error from FromCode(): if the server returns an error
 //
-// Note: Returns (nil, nil) if the secret metadata is not found (ErrNotFound)
+// Note: Returns (nil, nil) if the secret metadata is not found (ErrAPINotFound)
 //
 // Example:
 //

@@ -26,10 +26,10 @@ import (
 // Returns:
 //   - []byte: The response body if the request is successful
 //   - *sdkErrors.SDKError: nil on success, or one of the following errors:
-//   - ErrBadRequest: if request creation fails or server returns 400
+//   - ErrAPIBadRequest: if request creation fails or server returns 400
 //   - ErrNetPeerConnection: if connection to peer fails or unexpected status
 //     code
-//   - ErrNotFound: if server returns 404
+//   - ErrAPINotFound: if server returns 404
 //   - ErrAccessUnauthorized: if server returns 401
 //   - ErrStateNotReady: if server returns 503
 //   - ErrNetReadingResponseBody: if reading response body fails
@@ -53,7 +53,7 @@ func Post(
 	// Create the request while preserving the mTLS client
 	req, err := http.NewRequest("POST", path, bytes.NewBuffer(mr))
 	if err != nil {
-		failErr := sdkErrors.ErrBadRequest.Wrap(err)
+		failErr := sdkErrors.ErrAPIBadRequest.Wrap(err)
 		failErr.Msg = "failed to create request"
 		return nil, failErr
 	}
@@ -82,7 +82,7 @@ func Post(
 
 	if r.StatusCode != http.StatusOK {
 		if r.StatusCode == http.StatusNotFound {
-			return []byte{}, sdkErrors.ErrNotFound
+			return []byte{}, sdkErrors.ErrAPINotFound
 		}
 
 		if r.StatusCode == http.StatusUnauthorized {
@@ -90,7 +90,7 @@ func Post(
 		}
 
 		if r.StatusCode == http.StatusBadRequest {
-			return []byte{}, sdkErrors.ErrBadRequest
+			return []byte{}, sdkErrors.ErrAPIBadRequest
 		}
 
 		// SPIKE Nexus is likely not initialized or in bad shape:

@@ -23,15 +23,15 @@ type RestoreResponse struct {
 }
 
 func (r RestoreResponse) Success() RestoreResponse {
-	r.Err = sdkErrors.ErrSuccess.Code
+	r.Err = sdkErrors.ErrAPISuccess.Code
 	return r
 }
 func (r RestoreResponse) NotFound() RestoreResponse {
-	log.FatalErr("NotFound", *sdkErrors.ErrEntityResponseCodeInvalid)
+	log.FatalErr("NotFound", *sdkErrors.ErrAPIResponseCodeInvalid)
 	return r
 }
 func (r RestoreResponse) BadRequest() RestoreResponse {
-	r.Err = sdkErrors.ErrBadRequest.Code
+	r.Err = sdkErrors.ErrAPIBadRequest.Code
 	return r
 }
 func (r RestoreResponse) Unauthorized() RestoreResponse {
@@ -39,7 +39,7 @@ func (r RestoreResponse) Unauthorized() RestoreResponse {
 	return r
 }
 func (r RestoreResponse) Internal() RestoreResponse {
-	r.Err = sdkErrors.ErrInternal.Code
+	r.Err = sdkErrors.ErrAPIInternal.Code
 	return r
 }
 func (r RestoreResponse) ErrorCode() sdkErrors.ErrorCode {
@@ -57,15 +57,15 @@ type RecoverResponse struct {
 }
 
 func (r RecoverResponse) Success() RecoverResponse {
-	r.Err = sdkErrors.ErrSuccess.Code
+	r.Err = sdkErrors.ErrAPISuccess.Code
 	return r
 }
 func (r RecoverResponse) NotFound() RecoverResponse {
-	log.FatalErr("NotFound", *sdkErrors.ErrEntityResponseCodeInvalid)
+	log.FatalErr("NotFound", *sdkErrors.ErrAPIResponseCodeInvalid)
 	return r
 }
 func (r RecoverResponse) BadRequest() RecoverResponse {
-	r.Err = sdkErrors.ErrBadRequest.Code
+	r.Err = sdkErrors.ErrAPIBadRequest.Code
 	return r
 }
 func (r RecoverResponse) Unauthorized() RecoverResponse {
@@ -73,7 +73,7 @@ func (r RecoverResponse) Unauthorized() RecoverResponse {
 	return r
 }
 func (r RecoverResponse) Internal() RecoverResponse {
-	r.Err = sdkErrors.ErrInternal.Code
+	r.Err = sdkErrors.ErrAPIInternal.Code
 	return r
 }
 func (r RecoverResponse) ErrorCode() sdkErrors.ErrorCode {

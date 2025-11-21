@@ -8,16 +8,8 @@ package errors
 // General error codes
 //
 
-var ErrBadRequest = register("gen_bad_request", "bad request", nil)
-var ErrEmptyPayload = register("gen_empty_payload", "empty payload", nil)
-var ErrFound = register("gen_found", "found", nil)
 var ErrGeneralFailure = register("gen_general_failure", "general failure", nil)
-var ErrInternal = register("gen_internal_error", "internal error", nil)
 var ErrNilContext = register("gen_nil_context", "nil context", nil)
-var ErrNotFound = register("gen_not_found", "not found", nil)
-var ErrPostFailed = register("gen_post_failed", "post failed", nil)
-var ErrServerFault = register("gen_server_fault", "server fault", nil)
-var ErrSuccess = register("gen_success", "success", nil)
 
 //
 // Cluster operations
@@ -26,13 +18,32 @@ var ErrSuccess = register("gen_success", "success", nil)
 var ErrK8sReconciliationFailed = register("k8s_reconciliation_failed", "reconciliation failed", nil)
 
 //
+// API/HTTP operations
+//
+
+var ErrAPIBadRequest = register("api_bad_request", "bad request", nil)
+var ErrAPIEmptyPayload = register("api_empty_payload", "empty payload", nil)
+var ErrAPIFound = register("api_found", "found", nil)
+var ErrAPIInternal = register("api_internal_error", "internal error", nil)
+var ErrAPINotFound = register("api_not_found", "not found", nil)
+var ErrAPIPostFailed = register("api_post_failed", "post failed", nil)
+var ErrAPIResponseCodeInvalid = register("api_response_code_invalid", "invalid API response code", nil)
+var ErrAPIServerFault = register("api_server_fault", "server fault", nil)
+var ErrAPISuccess = register("api_success", "success", nil)
+
+//
 // Entity operations
 //
 
+var ErrEntityDeleted = register("entity_deleted", "entity marked as deleted", nil)
 var ErrEntityExists = register("entity_exists", "entity already exists", nil)
 var ErrEntityInvalid = register("entity_invalid", "entity is invalid", nil)
+var ErrEntityLoadFailed = register("entity_load_failed", "failed to load entity", nil)
 var ErrEntityNotFound = register("entity_not_found", "entity not found", nil)
-var ErrEntityResponseCodeInvalid = register("entity_response_code_invalid", "entity response code is invalid", nil)
+var ErrEntityQueryFailed = register("entity_query_failed", "failed to query entities", nil)
+var ErrEntitySaveFailed = register("entity_save_failed", "failed to save entity", nil)
+var ErrEntityVersionInvalid = register("entity_version_invalid", "invalid version", nil)
+var ErrEntityVersionNotFound = register("entity_version_not_found", "version not found", nil)
 
 //
 // State operations
@@ -101,19 +112,12 @@ var ErrCryptoNonceGenerationFailed = register("crypto_nonce_generation_failed", 
 var ErrCryptoRandomGenerationFailed = register("crypto_random_generation_failed", "random generation failed", nil)
 
 //
-// Backing store configuration and operations
+// Backing store infrastructure (internal store operations)
 //
 
 var ErrStoreInvalidConfiguration = register("store_invalid_configuration", "invalid store configuration", nil)
 var ErrStoreInvalidEncryptionKey = register("store_invalid_encryption_key", "invalid store encryption key", nil)
-var ErrStoreInvalidVersion = register("store_invalid_version", "invalid version", nil)
-var ErrStoreItemSoftDeleted = register("store_item_soft_deleted", "item marked as deleted", nil)
-var ErrStoreLoadFailed = register("store_load_failed", "failed to load data", nil)
-var ErrStoreQueryFailed = register("store_query_failed", "failed to query data", nil)
-var ErrStoreQueryFailure = register("store_query_failure", "failed to query for the requested data", nil)
 var ErrStoreResultSetFailedToLoad = register("store_result_set_failed_to_load", "result set failed to load", nil)
-var ErrStoreSaveFailed = register("store_save_failed", "failed to save data", nil)
-var ErrStoreVersionNotFound = register("store_version_not_found", "version not found", nil)
 
 //
 // Filesystem operations

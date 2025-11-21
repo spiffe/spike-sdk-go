@@ -101,8 +101,8 @@ func (c *Cipher) EncryptStream(
 //   - (nil, *sdkErrors.SDKError) if an error occurs:
 //   - ErrSPIFFENilX509Source: if source is nil
 //   - ErrDataMarshalFailure: if request serialization fails
-//   - Errors from httpPost(): if the HTTP request fails (e.g., ErrNotFound,
-//     ErrAccessUnauthorized, ErrBadRequest, ErrStateNotReady,
+//   - Errors from httpPost(): if the HTTP request fails (e.g., ErrAPINotFound,
+//     ErrAccessUnauthorized, ErrAPIBadRequest, ErrStateNotReady,
 //     ErrNetPeerConnection)
 //   - ErrDataUnmarshalFailure: if response parsing fails
 //   - Error from FromCode(): if the server returns an error
@@ -140,8 +140,8 @@ func Encrypt(
 //   - (nil, *sdkErrors.SDKError) if an error occurs:
 //   - ErrSPIFFENilX509Source: if source is nil
 //   - ErrDataMarshalFailure: if request serialization fails
-//   - Errors from httpPost(): if the HTTP request fails (e.g., ErrNotFound,
-//     ErrAccessUnauthorized, ErrBadRequest, ErrStateNotReady,
+//   - Errors from httpPost(): if the HTTP request fails (e.g., ErrAPINotFound,
+//     ErrAccessUnauthorized, ErrAPIBadRequest, ErrStateNotReady,
 //     ErrNetPeerConnection)
 //   - ErrDataUnmarshalFailure: if response parsing fails
 //   - Error from FromCode(): if the server returns an error

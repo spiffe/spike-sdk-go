@@ -84,11 +84,11 @@ func (a *API) DeletePolicy(name string) *sdkErrors.SDKError {
 //   - *sdkErrors.SDKError: nil on success, or one of the following errors:
 //   - ErrSPIFFENilX509Source: if the X509 source is nil
 //   - ErrDataMarshalFailure: if request serialization fails
-//   - Errors from net.Post(): if the HTTP request fails (except ErrNotFound)
+//   - Errors from net.Post(): if the HTTP request fails (except ErrAPINotFound)
 //   - ErrDataUnmarshalFailure: if response parsing fails
 //   - Error from FromCode(): if the server returns an error
 //
-// Note: Returns (nil, nil) if the policy is not found (ErrNotFound)
+// Note: Returns (nil, nil) if the policy is not found (ErrAPINotFound)
 //
 // Example:
 //
@@ -121,11 +121,11 @@ func (a *API) GetPolicy(name string) (*data.Policy, *sdkErrors.SDKError) {
 //   - *sdkErrors.SDKError: nil on success, or one of the following errors:
 //   - ErrSPIFFENilX509Source: if the X509 source is nil
 //   - ErrDataMarshalFailure: if request serialization fails
-//   - Errors from net.Post(): if the HTTP request fails (except ErrNotFound)
+//   - Errors from net.Post(): if the HTTP request fails (except ErrAPINotFound)
 //   - ErrDataUnmarshalFailure: if response parsing fails
 //   - Error from FromCode(): if the server returns an error
 //
-// Note: Returns (&[]data.Policy{}, nil) if no policies are found (ErrNotFound)
+// Note: Returns (&[]data.Policy{}, nil) if no policies are found (ErrAPINotFound)
 //
 // Example:
 //

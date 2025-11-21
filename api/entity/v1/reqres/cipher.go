@@ -30,15 +30,15 @@ type CipherEncryptResponse struct {
 }
 
 func (r CipherEncryptResponse) Success() CipherEncryptResponse {
-	r.Err = sdkErrors.ErrSuccess.Code
+	r.Err = sdkErrors.ErrAPISuccess.Code
 	return r
 }
 func (r CipherEncryptResponse) NotFound() CipherEncryptResponse {
-	log.FatalErr("NotFound", *sdkErrors.ErrEntityResponseCodeInvalid)
+	log.FatalErr("NotFound", *sdkErrors.ErrAPIResponseCodeInvalid)
 	return r
 }
 func (r CipherEncryptResponse) BadRequest() CipherEncryptResponse {
-	r.Err = sdkErrors.ErrBadRequest.Code
+	r.Err = sdkErrors.ErrAPIBadRequest.Code
 	return r
 }
 func (r CipherEncryptResponse) Unauthorized() CipherEncryptResponse {
@@ -46,7 +46,7 @@ func (r CipherEncryptResponse) Unauthorized() CipherEncryptResponse {
 	return r
 }
 func (r CipherEncryptResponse) Internal() CipherEncryptResponse {
-	r.Err = sdkErrors.ErrInternal.Code
+	r.Err = sdkErrors.ErrAPIInternal.Code
 	return r
 }
 func (r CipherEncryptResponse) ErrorCode() sdkErrors.ErrorCode {
@@ -74,15 +74,15 @@ type CipherDecryptResponse struct {
 }
 
 func (r CipherDecryptResponse) Success() CipherDecryptResponse {
-	r.Err = sdkErrors.ErrSuccess.Code
+	r.Err = sdkErrors.ErrAPISuccess.Code
 	return r
 }
 func (r CipherDecryptResponse) NotFound() CipherDecryptResponse {
-	log.FatalErr("NotFound", *sdkErrors.ErrEntityResponseCodeInvalid)
+	log.FatalErr("NotFound", *sdkErrors.ErrAPIResponseCodeInvalid)
 	return r
 }
 func (r CipherDecryptResponse) BadRequest() CipherDecryptResponse {
-	r.Err = sdkErrors.ErrBadRequest.Code
+	r.Err = sdkErrors.ErrAPIBadRequest.Code
 	return r
 }
 func (r CipherDecryptResponse) Unauthorized() CipherDecryptResponse {
@@ -90,7 +90,7 @@ func (r CipherDecryptResponse) Unauthorized() CipherDecryptResponse {
 	return r
 }
 func (r CipherDecryptResponse) Internal() CipherDecryptResponse {
-	r.Err = sdkErrors.ErrInternal.Code
+	r.Err = sdkErrors.ErrAPIInternal.Code
 	return r
 }
 func (r CipherDecryptResponse) ErrorCode() sdkErrors.ErrorCode {

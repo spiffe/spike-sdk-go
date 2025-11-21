@@ -33,7 +33,7 @@ type ResponseWithError interface {
 // Returns:
 //   - (*T, nil) containing the unmarshaled response if successful
 //   - (nil, *sdkErrors.SDKError) if an error occurs:
-//   - Errors from Post(): including ErrNotFound, ErrAccessUnauthorized, etc.
+//   - Errors from Post(): including ErrAPINotFound, ErrAccessUnauthorized, etc.
 //   - ErrDataUnmarshalFailure: if response parsing fails
 //   - Error from FromCode(): if the response contains an error code
 //
@@ -41,7 +41,7 @@ type ResponseWithError interface {
 //
 //	response, err := net.PostAndUnmarshal[MyResponse](source, url, body)
 //	if err != nil {
-//	    if err.Is(sdkErrors.ErrNotFound) {
+//	    if err.Is(sdkErrors.ErrAPINotFound) {
 //	        // Handle not found case (e.g., return empty slice for lists)
 //	        return &[]MyType{}, nil
 //	    }

@@ -26,15 +26,15 @@ type BootstrapVerifyResponse struct {
 }
 
 func (r BootstrapVerifyResponse) Success() BootstrapVerifyResponse {
-	r.Err = sdkErrors.ErrSuccess.Code
+	r.Err = sdkErrors.ErrAPISuccess.Code
 	return r
 }
 func (r BootstrapVerifyResponse) NotFound() BootstrapVerifyResponse {
-	log.FatalErr("NotFound", *sdkErrors.ErrEntityResponseCodeInvalid)
+	log.FatalErr("NotFound", *sdkErrors.ErrAPIResponseCodeInvalid)
 	return r
 }
 func (r BootstrapVerifyResponse) BadRequest() BootstrapVerifyResponse {
-	r.Err = sdkErrors.ErrBadRequest.Code
+	r.Err = sdkErrors.ErrAPIBadRequest.Code
 	return r
 }
 func (r BootstrapVerifyResponse) Unauthorized() BootstrapVerifyResponse {
@@ -42,7 +42,7 @@ func (r BootstrapVerifyResponse) Unauthorized() BootstrapVerifyResponse {
 	return r
 }
 func (r BootstrapVerifyResponse) Internal() BootstrapVerifyResponse {
-	r.Err = sdkErrors.ErrInternal.Code
+	r.Err = sdkErrors.ErrAPIInternal.Code
 	return r
 }
 func (r BootstrapVerifyResponse) ErrorCode() sdkErrors.ErrorCode {

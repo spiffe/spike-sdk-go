@@ -25,15 +25,15 @@ type PolicyPutResponse struct {
 }
 
 func (r PolicyPutResponse) Success() PolicyPutResponse {
-	log.FatalErr("NotFound", *sdkErrors.ErrEntityResponseCodeInvalid)
+	log.FatalErr("NotFound", *sdkErrors.ErrAPIResponseCodeInvalid)
 	return r
 }
 func (r PolicyPutResponse) NotFound() PolicyPutResponse {
-	r.Err = sdkErrors.ErrNotFound.Code
+	r.Err = sdkErrors.ErrAPINotFound.Code
 	return r
 }
 func (r PolicyPutResponse) BadRequest() PolicyPutResponse {
-	r.Err = sdkErrors.ErrBadRequest.Code
+	r.Err = sdkErrors.ErrAPIBadRequest.Code
 	return r
 }
 func (r PolicyPutResponse) Unauthorized() PolicyPutResponse {
@@ -41,7 +41,7 @@ func (r PolicyPutResponse) Unauthorized() PolicyPutResponse {
 	return r
 }
 func (r PolicyPutResponse) Internal() PolicyPutResponse {
-	r.Err = sdkErrors.ErrInternal.Code
+	r.Err = sdkErrors.ErrAPIInternal.Code
 	return r
 }
 func (r PolicyPutResponse) ErrorCode() sdkErrors.ErrorCode {
@@ -60,15 +60,15 @@ type PolicyReadResponse struct {
 }
 
 func (r PolicyReadResponse) Success() PolicyReadResponse {
-	r.Err = sdkErrors.ErrSuccess.Code
+	r.Err = sdkErrors.ErrAPISuccess.Code
 	return r
 }
 func (r PolicyReadResponse) NotFound() PolicyReadResponse {
-	r.Err = sdkErrors.ErrNotFound.Code
+	r.Err = sdkErrors.ErrAPINotFound.Code
 	return r
 }
 func (r PolicyReadResponse) BadRequest() PolicyReadResponse {
-	r.Err = sdkErrors.ErrBadRequest.Code
+	r.Err = sdkErrors.ErrAPIBadRequest.Code
 	return r
 }
 func (r PolicyReadResponse) Unauthorized() PolicyReadResponse {
@@ -76,7 +76,7 @@ func (r PolicyReadResponse) Unauthorized() PolicyReadResponse {
 	return r
 }
 func (r PolicyReadResponse) Internal() PolicyReadResponse {
-	r.Err = sdkErrors.ErrInternal.Code
+	r.Err = sdkErrors.ErrAPIInternal.Code
 	return r
 }
 func (r PolicyReadResponse) ErrorCode() sdkErrors.ErrorCode {
@@ -94,15 +94,15 @@ type PolicyDeleteResponse struct {
 }
 
 func (r PolicyDeleteResponse) Success() PolicyDeleteResponse {
-	r.Err = sdkErrors.ErrSuccess.Code
+	r.Err = sdkErrors.ErrAPISuccess.Code
 	return r
 }
 func (r PolicyDeleteResponse) NotFound() PolicyDeleteResponse {
-	r.Err = sdkErrors.ErrNotFound.Code
+	r.Err = sdkErrors.ErrAPINotFound.Code
 	return r
 }
 func (r PolicyDeleteResponse) BadRequest() PolicyDeleteResponse {
-	r.Err = sdkErrors.ErrBadRequest.Code
+	r.Err = sdkErrors.ErrAPIBadRequest.Code
 	return r
 }
 func (r PolicyDeleteResponse) Unauthorized() PolicyDeleteResponse {
@@ -110,7 +110,7 @@ func (r PolicyDeleteResponse) Unauthorized() PolicyDeleteResponse {
 	return r
 }
 func (r PolicyDeleteResponse) Internal() PolicyDeleteResponse {
-	r.Err = sdkErrors.ErrInternal.Code
+	r.Err = sdkErrors.ErrAPIInternal.Code
 	return r
 }
 func (r PolicyDeleteResponse) ErrorCode() sdkErrors.ErrorCode {
@@ -130,15 +130,15 @@ type PolicyListResponse struct {
 }
 
 func (r PolicyListResponse) Success() PolicyListResponse {
-	r.Err = sdkErrors.ErrSuccess.Code
+	r.Err = sdkErrors.ErrAPISuccess.Code
 	return r
 }
 func (r PolicyListResponse) NotFound() PolicyListResponse {
-	log.FatalErr("NotFound", *sdkErrors.ErrEntityResponseCodeInvalid)
+	log.FatalErr("NotFound", *sdkErrors.ErrAPIResponseCodeInvalid)
 	return r
 }
 func (r PolicyListResponse) BadRequest() PolicyListResponse {
-	r.Err = sdkErrors.ErrBadRequest.Code
+	r.Err = sdkErrors.ErrAPIBadRequest.Code
 	return r
 }
 func (r PolicyListResponse) Unauthorized() PolicyListResponse {
@@ -146,7 +146,7 @@ func (r PolicyListResponse) Unauthorized() PolicyListResponse {
 	return r
 }
 func (r PolicyListResponse) Internal() PolicyListResponse {
-	r.Err = sdkErrors.ErrInternal.Code
+	r.Err = sdkErrors.ErrAPIInternal.Code
 	return r
 }
 func (r PolicyListResponse) ErrorCode() sdkErrors.ErrorCode {
@@ -168,15 +168,15 @@ type PolicyAccessCheckResponse struct {
 }
 
 func (r PolicyAccessCheckResponse) Success() PolicyAccessCheckResponse {
-	r.Err = sdkErrors.ErrSuccess.Code
+	r.Err = sdkErrors.ErrAPISuccess.Code
 	return r
 }
 func (r PolicyAccessCheckResponse) NotFound() PolicyAccessCheckResponse {
-	r.Err = sdkErrors.ErrNotFound.Code
+	r.Err = sdkErrors.ErrAPINotFound.Code
 	return r
 }
 func (r PolicyAccessCheckResponse) BadRequest() PolicyAccessCheckResponse {
-	r.Err = sdkErrors.ErrBadRequest.Code
+	r.Err = sdkErrors.ErrAPIBadRequest.Code
 	return r
 }
 func (r PolicyAccessCheckResponse) Unauthorized() PolicyAccessCheckResponse {
@@ -184,7 +184,7 @@ func (r PolicyAccessCheckResponse) Unauthorized() PolicyAccessCheckResponse {
 	return r
 }
 func (r PolicyAccessCheckResponse) Internal() PolicyAccessCheckResponse {
-	r.Err = sdkErrors.ErrInternal.Code
+	r.Err = sdkErrors.ErrAPIInternal.Code
 	return r
 }
 func (r PolicyAccessCheckResponse) ErrorCode() sdkErrors.ErrorCode {

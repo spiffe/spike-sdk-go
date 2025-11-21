@@ -25,11 +25,11 @@ import (
 //   - *sdkErrors.SDKError: nil on success, or one of the following errors:
 //   - ErrSPIFFENilX509Source: if source is nil
 //   - ErrDataMarshalFailure: if request serialization fails
-//   - Errors from net.Post(): if the HTTP request fails (except ErrNotFound)
+//   - Errors from net.Post(): if the HTTP request fails (except ErrAPINotFound)
 //   - ErrDataUnmarshalFailure: if response parsing fails
 //   - Error from FromCode(): if the server returns an error
 //
-// Note: Returns (*[]string{}, nil) if no secrets are found (ErrNotFound)
+// Note: Returns (*[]string{}, nil) if no secrets are found (ErrAPINotFound)
 //
 // Example:
 //
@@ -52,7 +52,7 @@ func ListKeys(
 	res, postErr := net.PostAndUnmarshal[reqres.SecretListResponse](
 		source, url.SecretList(), mr)
 	if postErr != nil {
-		if postErr.Is(sdkErrors.ErrNotFound) {
+		if postErr.Is(sdkErrors.ErrAPINotFound) {
 			return &[]string{}, nil
 		}
 		return nil, postErr

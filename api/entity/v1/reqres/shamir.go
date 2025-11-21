@@ -24,15 +24,15 @@ type ShardPutResponse struct {
 }
 
 func (r ShardPutResponse) Success() ShardPutResponse {
-	r.Err = sdkErrors.ErrSuccess.Code
+	r.Err = sdkErrors.ErrAPISuccess.Code
 	return r
 }
 func (r ShardPutResponse) NotFound() ShardPutResponse {
-	log.FatalErr("NotFound", *sdkErrors.ErrEntityResponseCodeInvalid)
+	log.FatalErr("NotFound", *sdkErrors.ErrAPIResponseCodeInvalid)
 	return r
 }
 func (r ShardPutResponse) BadRequest() ShardPutResponse {
-	r.Err = sdkErrors.ErrBadRequest.Code
+	r.Err = sdkErrors.ErrAPIBadRequest.Code
 	return r
 }
 func (r ShardPutResponse) Unauthorized() ShardPutResponse {
@@ -40,7 +40,7 @@ func (r ShardPutResponse) Unauthorized() ShardPutResponse {
 	return r
 }
 func (r ShardPutResponse) Internal() ShardPutResponse {
-	r.Err = sdkErrors.ErrInternal.Code
+	r.Err = sdkErrors.ErrAPIInternal.Code
 	return r
 }
 func (r ShardPutResponse) ErrorCode() sdkErrors.ErrorCode {
@@ -59,15 +59,15 @@ type ShardGetResponse struct {
 }
 
 func (r ShardGetResponse) Success() ShardGetResponse {
-	r.Err = sdkErrors.ErrSuccess.Code
+	r.Err = sdkErrors.ErrAPISuccess.Code
 	return r
 }
 func (r ShardGetResponse) NotFound() ShardGetResponse {
-	r.Err = sdkErrors.ErrNotFound.Code
+	r.Err = sdkErrors.ErrAPINotFound.Code
 	return r
 }
 func (r ShardGetResponse) BadRequest() ShardGetResponse {
-	r.Err = sdkErrors.ErrBadRequest.Code
+	r.Err = sdkErrors.ErrAPIBadRequest.Code
 	return r
 }
 func (r ShardGetResponse) Unauthorized() ShardGetResponse {
@@ -75,7 +75,7 @@ func (r ShardGetResponse) Unauthorized() ShardGetResponse {
 	return r
 }
 func (r ShardGetResponse) Internal() ShardGetResponse {
-	r.Err = sdkErrors.ErrInternal.Code
+	r.Err = sdkErrors.ErrAPIInternal.Code
 	return r
 }
 func (r ShardGetResponse) ErrorCode() sdkErrors.ErrorCode {

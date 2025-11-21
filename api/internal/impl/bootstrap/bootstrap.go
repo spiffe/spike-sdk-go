@@ -40,8 +40,8 @@ import (
 //   - nil if successful
 //   - *sdkErrors.SDKError if an error occurs:
 //   - ErrSPIFFENilX509Source: if source is nil
-//   - Errors from net.Post(): if the HTTP request fails (e.g., ErrNotFound,
-//     ErrAccessUnauthorized, ErrBadRequest, ErrStateNotReady, ErrNetPeerConnection)
+//   - Errors from net.Post(): if the HTTP request fails (e.g., ErrAPINotFound,
+//     ErrAccessUnauthorized, ErrAPIBadRequest, ErrStateNotReady, ErrNetPeerConnection)
 //
 // Note: The function will fatally crash (via log.FatalErr) for unrecoverable
 // errors such as marshal failures (ErrDataMarshalFailure) or invalid contribution
@@ -140,8 +140,8 @@ func Contribute(
 //   - nil if verification succeeds (hash matches)
 //   - *sdkErrors.SDKError if an error occurs:
 //   - ErrSPIFFENilX509Source: if source is nil
-//   - Errors from net.Post(): if the HTTP request fails (e.g., ErrNotFound,
-//     ErrAccessUnauthorized, ErrBadRequest, ErrStateNotReady, ErrNetPeerConnection)
+//   - Errors from net.Post(): if the HTTP request fails (e.g., ErrAPINotFound,
+//     ErrAccessUnauthorized, ErrAPIBadRequest, ErrStateNotReady, ErrNetPeerConnection)
 //
 // Note: The function will fatally crash (via log.FatalErr) for unrecoverable
 // errors such as marshal failures (ErrDataMarshalFailure), response parsing

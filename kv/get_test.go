@@ -121,7 +121,7 @@ func TestKV_Get(t *testing.T) {
 			path:    "test/path",
 			version: 1,
 			want:    nil,
-			wantErr: sdkErrors.ErrStoreItemSoftDeleted,
+			wantErr: sdkErrors.ErrEntityDeleted,
 		},
 		{
 			name: "non_existent_version",
@@ -147,7 +147,7 @@ func TestKV_Get(t *testing.T) {
 			path:    "test/path",
 			version: 999,
 			want:    nil,
-			wantErr: sdkErrors.ErrStoreItemSoftDeleted,
+			wantErr: sdkErrors.ErrEntityDeleted,
 		},
 	}
 

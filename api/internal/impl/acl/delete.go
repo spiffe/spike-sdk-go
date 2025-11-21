@@ -27,10 +27,10 @@ import (
 //   - *sdkErrors.SDKError: nil on success, or one of the following errors:
 //   - ErrSPIFFENilX509Source: if source is nil
 //   - ErrDataMarshalFailure: if request serialization fails
-//   - ErrPostFailed: if the HTTP request fails
+//   - ErrAPIPostFailed: if the HTTP request fails
 //   - ErrDataUnmarshalFailure: if response parsing fails
 //   - Error from FromCode(): if the server returns an error (e.g.,
-//     ErrAccessUnauthorized, ErrNotFound, ErrBadRequest, etc.)
+//     ErrAccessUnauthorized, ErrAPINotFound, ErrAPIBadRequest, etc.)
 //
 // Example:
 //
