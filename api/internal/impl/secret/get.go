@@ -47,32 +47,20 @@ func Get(
 
 	r := reqres.SecretGetRequest{Path: path, Version: version}
 
-	mr, err := json.Marshal(r)
-	if err != nil {
-		failErr := sdkErrors.ErrDataMarshalFailure.Wrap(err)
+	mr, marshalErr := json.Marshal(r)
+	if marshalErr != nil {
+		failErr := sdkErrors.ErrDataMarshalFailure.Wrap(marshalErr)
 		failErr.Msg = "problem generating the payload"
 		return nil, failErr
 	}
 
-	client := net.CreateMTLSClientForNexus(source)
-
-	body, err := net.Post(client, url.SecretGet(), mr)
-	if err != nil {
-		if err.Is(sdkErrors.ErrNotFound) {
+	res, postErr := net.PostAndUnmarshal[reqres.SecretGetResponse](
+		source, url.SecretGet(), mr)
+	if postErr != nil {
+		if postErr.Is(sdkErrors.ErrNotFound) {
 			return nil, nil
 		}
-		return nil, err
-	}
-
-	var res reqres.SecretGetResponse
-	err = json.Unmarshal(body, &res)
-	if err != nil {
-		failErr := sdkErrors.ErrDataUnmarshalFailure.Wrap(err)
-		failErr.Msg = "problem parsing response body"
-		return nil, failErr
-	}
-	if res.Err != "" {
-		return nil, sdkErrors.FromCode(res.Err)
+		return nil, postErr
 	}
 
 	return &data.Secret{Data: res.Data}, nil

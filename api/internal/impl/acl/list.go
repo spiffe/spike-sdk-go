@@ -77,32 +77,20 @@ func ListPolicies(
 		SPIFFEIDPattern: SPIFFEIDPattern,
 		PathPattern:     pathPattern,
 	}
-	mr, err := json.Marshal(r)
-	if err != nil {
-		failErr := sdkErrors.ErrDataMarshalFailure.Wrap(err)
+	mr, marshalErr := json.Marshal(r)
+	if marshalErr != nil {
+		failErr := sdkErrors.ErrDataMarshalFailure.Wrap(marshalErr)
 		failErr.Msg = "problem generating the payload"
 		return nil, failErr
 	}
 
-	client := net.CreateMTLSClientForNexus(source)
-
-	body, err := net.Post(client, url.PolicyList(), mr)
-	if err != nil {
-		if err.Is(sdkErrors.ErrNotFound) {
-			return nil, nil
+	res, postErr := net.PostAndUnmarshal[reqres.PolicyListResponse](
+		source, url.PolicyList(), mr)
+	if postErr != nil {
+		if postErr.Is(sdkErrors.ErrNotFound) {
+			return &([]data.Policy{}), nil
 		}
-		return nil, err
-	}
-
-	var res reqres.PolicyListResponse
-	err = json.Unmarshal(body, &res)
-	if err != nil {
-		failErr := sdkErrors.ErrDataUnmarshalFailure.Wrap(err)
-		failErr.Msg = "problem parsing response body"
-		return nil, failErr
-	}
-	if res.Err != "" {
-		return nil, sdkErrors.FromCode(res.Err)
+		return nil, postErr
 	}
 
 	return &res.Policies, nil

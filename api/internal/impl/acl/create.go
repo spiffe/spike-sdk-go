@@ -76,30 +76,16 @@ func CreatePolicy(source *workloadapi.X509Source,
 		Permissions:     permissions,
 	}
 
-	mr, err := json.Marshal(r)
-	if err != nil {
-		failErr := sdkErrors.ErrDataMarshalFailure.Wrap(err)
+	var mr []byte
+
+	mr, marshalErr := json.Marshal(r)
+	if marshalErr != nil {
+		failErr := sdkErrors.ErrDataMarshalFailure.Wrap(marshalErr)
 		failErr.Msg = "problem generating the payload"
 		return failErr
 	}
 
-	client := net.CreateMTLSClientForNexus(source)
-
-	body, err := net.Post(client, url.PolicyCreate(), mr)
-	if err != nil {
-		return err
-	}
-
-	res := reqres.PolicyPutResponse{}
-	err = json.Unmarshal(body, &res)
-	if err != nil {
-		failErr := sdkErrors.ErrDataUnmarshalFailure.Wrap(err)
-		failErr.Msg = "problem parsing response body"
-		return failErr
-	}
-	if res.Err != "" {
-		return sdkErrors.FromCode(res.Err)
-	}
-
-	return nil
+	_, postErr := net.PostAndUnmarshal[reqres.PolicyPutResponse](
+		source, url.PolicyCreate(), mr)
+	return postErr
 }

@@ -9,27 +9,53 @@ import (
 )
 
 // Put stores a new version of key-value pairs at the specified path in the
-// store. It implements automatic versioning with a maximum of 3 versions per
-// path.
+// store. It implements automatic versioning as a bounded cache with a
+// configurable maximum number of versions per path.
 //
 // When storing values:
-//   - If the path doesn't exist, it creates a new secret with initial metadata
+//   - If the path doesn't exist, it creates new data with initial metadata
 //   - Each put operation creates a new version with an incremented version
 //     number
-//   - Old versions are automatically pruned when exceeding MaxVersions
-//     (default: 10)
+//   - Old versions are automatically pruned when they fall outside the version
+//     window (CurrentVersion - MaxVersions)
+//   - All versions exceeding MaxVersions are pruned in a single operation,
+//     maintaining the most recent MaxVersions versions
 //   - Timestamps are updated for both creation and modification times
 //
+// Version pruning behavior (bounded cache):
+//   - Pruning occurs on each Put when versions exceed MaxVersions
+//   - All versions older than (CurrentVersion - MaxVersions) are deleted
+//   - Example: If CurrentVersion=15 and MaxVersions=10, versions 1-5 are
+//     deleted, keeping versions 6-15
+//   - This ensures O(n) pruning where n is the number of excess versions,
+//     providing predictable performance
+//
 // Parameters:
-//   - path: The location where the secret will be stored
+//   - path: The location where the data will be stored
 //   - values: A map of key-value pairs to store at this path
 //
+// Example:
+//
+//	kv := New(Config{MaxSecretVersions: 10})
+//	kv.Put("app/config", map[string]string{
+//	    "api_key": "secret123",
+//	    "timeout": "30s",
+//	})
+//	// Creates version 1 at path "app/config"
+//
+//	kv.Put("app/config", map[string]string{
+//	    "api_key": "newsecret456",
+//	    "timeout": "60s",
+//	})
+//	// Creates version 2, version 1 is still available
+//
 // The function maintains metadata including:
-//   - CreatedTime: When the secret was first created
+//   - CreatedTime: When the data at this path was first created
 //   - UpdatedTime: When the most recent version was added
 //   - CurrentVersion: The latest version number
-//   - OldestVersion: The oldest available version number
-//   - MaxVersions: Maximum number of versions to keep (fixed at 10)
+//   - OldestVersion: The oldest available version number after pruning
+//   - MaxVersions: Maximum number of versions to keep (configurable at KV
+//     creation)
 func (kv *KV) Put(path string, values map[string]string) {
 	rightNow := time.Now()
 

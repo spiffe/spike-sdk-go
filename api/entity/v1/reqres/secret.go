@@ -22,25 +22,28 @@ type SecretMetadataResponse struct {
 	Err sdkErrors.ErrorCode `json:"err,omitempty"`
 }
 
-func (m SecretMetadataResponse) Success() SecretMetadataResponse {
-	m.Err = sdkErrors.ErrSuccess.Code
-	return m
+func (r SecretMetadataResponse) Success() SecretMetadataResponse {
+	r.Err = sdkErrors.ErrSuccess.Code
+	return r
 }
-func (s SecretMetadataResponse) NotFound() SecretMetadataResponse {
-	s.Err = sdkErrors.ErrNotFound.Code
-	return s
+func (r SecretMetadataResponse) NotFound() SecretMetadataResponse {
+	r.Err = sdkErrors.ErrNotFound.Code
+	return r
 }
-func (s SecretMetadataResponse) BadRequest() SecretMetadataResponse {
-	s.Err = sdkErrors.ErrBadRequest.Code
-	return s
+func (r SecretMetadataResponse) BadRequest() SecretMetadataResponse {
+	r.Err = sdkErrors.ErrBadRequest.Code
+	return r
 }
-func (s SecretMetadataResponse) Unauthorized() SecretMetadataResponse {
-	s.Err = sdkErrors.ErrAccessUnauthorized.Code
-	return s
+func (r SecretMetadataResponse) Unauthorized() SecretMetadataResponse {
+	r.Err = sdkErrors.ErrAccessUnauthorized.Code
+	return r
 }
-func (s SecretMetadataResponse) Internal() SecretMetadataResponse {
-	s.Err = sdkErrors.ErrInternal.Code
-	return s
+func (r SecretMetadataResponse) Internal() SecretMetadataResponse {
+	r.Err = sdkErrors.ErrInternal.Code
+	return r
+}
+func (r SecretMetadataResponse) ErrorCode() sdkErrors.ErrorCode {
+	return r.Err
 }
 
 // SecretPutRequest for creating/updating secrets
@@ -55,25 +58,28 @@ type SecretPutResponse struct {
 	Err sdkErrors.ErrorCode `json:"err,omitempty"`
 }
 
-func (s SecretPutResponse) Success() SecretPutResponse {
-	s.Err = sdkErrors.ErrSuccess.Code
-	return s
+func (r SecretPutResponse) Success() SecretPutResponse {
+	r.Err = sdkErrors.ErrSuccess.Code
+	return r
 }
-func (s SecretPutResponse) NotFound() SecretPutResponse {
+func (r SecretPutResponse) NotFound() SecretPutResponse {
 	log.FatalErr("NotFound", *sdkErrors.ErrEntityResponseCodeInvalid)
-	return s
+	return r
 }
-func (s SecretPutResponse) BadRequest() SecretPutResponse {
-	s.Err = sdkErrors.ErrBadRequest.Code
-	return s
+func (r SecretPutResponse) BadRequest() SecretPutResponse {
+	r.Err = sdkErrors.ErrBadRequest.Code
+	return r
 }
-func (s SecretPutResponse) Unauthorized() SecretPutResponse {
-	s.Err = sdkErrors.ErrAccessUnauthorized.Code
-	return s
+func (r SecretPutResponse) Unauthorized() SecretPutResponse {
+	r.Err = sdkErrors.ErrAccessUnauthorized.Code
+	return r
 }
-func (s SecretPutResponse) Internal() SecretPutResponse {
-	s.Err = sdkErrors.ErrInternal.Code
-	return s
+func (r SecretPutResponse) Internal() SecretPutResponse {
+	r.Err = sdkErrors.ErrInternal.Code
+	return r
+}
+func (r SecretPutResponse) ErrorCode() sdkErrors.ErrorCode {
+	return r.Err
 }
 
 // SecretGetRequest is for getting secrets
@@ -88,25 +94,28 @@ type SecretGetResponse struct {
 	Err sdkErrors.ErrorCode `json:"err,omitempty"`
 }
 
-func (s SecretGetResponse) Success() SecretGetResponse {
-	s.Err = sdkErrors.ErrSuccess.Code
-	return s
+func (r SecretGetResponse) Success() SecretGetResponse {
+	r.Err = sdkErrors.ErrSuccess.Code
+	return r
 }
-func (s SecretGetResponse) NotFound() SecretGetResponse {
-	s.Err = sdkErrors.ErrNotFound.Code
-	return s
+func (r SecretGetResponse) NotFound() SecretGetResponse {
+	r.Err = sdkErrors.ErrNotFound.Code
+	return r
 }
-func (s SecretGetResponse) BadRequest() SecretGetResponse {
-	s.Err = sdkErrors.ErrBadRequest.Code
-	return s
+func (r SecretGetResponse) BadRequest() SecretGetResponse {
+	r.Err = sdkErrors.ErrBadRequest.Code
+	return r
 }
-func (s SecretGetResponse) Unauthorized() SecretGetResponse {
-	s.Err = sdkErrors.ErrAccessUnauthorized.Code
-	return s
+func (r SecretGetResponse) Unauthorized() SecretGetResponse {
+	r.Err = sdkErrors.ErrAccessUnauthorized.Code
+	return r
 }
-func (s SecretGetResponse) Internal() SecretGetResponse {
-	s.Err = sdkErrors.ErrInternal.Code
-	return s
+func (r SecretGetResponse) Internal() SecretGetResponse {
+	r.Err = sdkErrors.ErrInternal.Code
+	return r
+}
+func (r SecretGetResponse) ErrorCode() sdkErrors.ErrorCode {
+	return r.Err
 }
 
 // SecretDeleteRequest for soft-deleting secret versions
@@ -120,26 +129,29 @@ type SecretDeleteResponse struct {
 	Err sdkErrors.ErrorCode `json:"err,omitempty"`
 }
 
-func (s SecretDeleteResponse) NotFound() SecretDeleteResponse {
-	s.Err = sdkErrors.ErrNotFound.Code
-	return s
+func (r SecretDeleteResponse) NotFound() SecretDeleteResponse {
+	r.Err = sdkErrors.ErrNotFound.Code
+	return r
 }
-func (s SecretDeleteResponse) BadRequest() SecretDeleteResponse {
-	s.Err = sdkErrors.ErrBadRequest.Code
-	return s
+func (r SecretDeleteResponse) BadRequest() SecretDeleteResponse {
+	r.Err = sdkErrors.ErrBadRequest.Code
+	return r
 }
-func (s SecretDeleteResponse) Unauthorized() SecretDeleteResponse {
-	s.Err = sdkErrors.ErrAccessUnauthorized.Code
-	return s
+func (r SecretDeleteResponse) Unauthorized() SecretDeleteResponse {
+	r.Err = sdkErrors.ErrAccessUnauthorized.Code
+	return r
 }
-func (s SecretDeleteResponse) Internal() SecretDeleteResponse {
-	s.Err = sdkErrors.ErrInternal.Code
-	return s
+func (r SecretDeleteResponse) Internal() SecretDeleteResponse {
+	r.Err = sdkErrors.ErrInternal.Code
+	return r
 }
 
-func (s SecretDeleteResponse) Success() SecretDeleteResponse {
-	s.Err = sdkErrors.ErrSuccess.Code
-	return s
+func (r SecretDeleteResponse) Success() SecretDeleteResponse {
+	r.Err = sdkErrors.ErrSuccess.Code
+	return r
+}
+func (r SecretDeleteResponse) ErrorCode() sdkErrors.ErrorCode {
+	return r.Err
 }
 
 // SecretUndeleteRequest for recovering soft-deleted versions
@@ -153,25 +165,28 @@ type SecretUndeleteResponse struct {
 	Err sdkErrors.ErrorCode `json:"err,omitempty"`
 }
 
-func (s SecretUndeleteResponse) Success() SecretUndeleteResponse {
-	s.Err = sdkErrors.ErrSuccess.Code
-	return s
+func (r SecretUndeleteResponse) Success() SecretUndeleteResponse {
+	r.Err = sdkErrors.ErrSuccess.Code
+	return r
 }
-func (s SecretUndeleteResponse) NotFound() SecretUndeleteResponse {
-	s.Err = sdkErrors.ErrNotFound.Code
-	return s
+func (r SecretUndeleteResponse) NotFound() SecretUndeleteResponse {
+	r.Err = sdkErrors.ErrNotFound.Code
+	return r
 }
-func (s SecretUndeleteResponse) BadRequest() SecretUndeleteResponse {
-	s.Err = sdkErrors.ErrBadRequest.Code
-	return s
+func (r SecretUndeleteResponse) BadRequest() SecretUndeleteResponse {
+	r.Err = sdkErrors.ErrBadRequest.Code
+	return r
 }
-func (s SecretUndeleteResponse) Unauthorized() SecretUndeleteResponse {
-	s.Err = sdkErrors.ErrAccessUnauthorized.Code
-	return s
+func (r SecretUndeleteResponse) Unauthorized() SecretUndeleteResponse {
+	r.Err = sdkErrors.ErrAccessUnauthorized.Code
+	return r
 }
-func (s SecretUndeleteResponse) Internal() SecretUndeleteResponse {
-	s.Err = sdkErrors.ErrInternal.Code
-	return s
+func (r SecretUndeleteResponse) Internal() SecretUndeleteResponse {
+	r.Err = sdkErrors.ErrInternal.Code
+	return r
+}
+func (r SecretUndeleteResponse) ErrorCode() sdkErrors.ErrorCode {
+	return r.Err
 }
 
 // SecretListRequest for listing secrets
@@ -184,23 +199,26 @@ type SecretListResponse struct {
 	Err  sdkErrors.ErrorCode `json:"err,omitempty"`
 }
 
-func (s SecretListResponse) Success() SecretListResponse {
-	s.Err = sdkErrors.ErrSuccess.Code
-	return s
+func (r SecretListResponse) Success() SecretListResponse {
+	r.Err = sdkErrors.ErrSuccess.Code
+	return r
 }
-func (s SecretListResponse) NotFound() SecretListResponse {
+func (r SecretListResponse) NotFound() SecretListResponse {
 	log.FatalErr("NotFound", *sdkErrors.ErrEntityResponseCodeInvalid)
-	return s
+	return r
 }
-func (s SecretListResponse) BadRequest() SecretListResponse {
-	s.Err = sdkErrors.ErrBadRequest.Code
-	return s
+func (r SecretListResponse) BadRequest() SecretListResponse {
+	r.Err = sdkErrors.ErrBadRequest.Code
+	return r
 }
-func (s SecretListResponse) Unauthorized() SecretListResponse {
-	s.Err = sdkErrors.ErrAccessUnauthorized.Code
-	return s
+func (r SecretListResponse) Unauthorized() SecretListResponse {
+	r.Err = sdkErrors.ErrAccessUnauthorized.Code
+	return r
 }
-func (s SecretListResponse) Internal() SecretListResponse {
-	s.Err = sdkErrors.ErrInternal.Code
-	return s
+func (r SecretListResponse) Internal() SecretListResponse {
+	r.Err = sdkErrors.ErrInternal.Code
+	return r
+}
+func (r SecretListResponse) ErrorCode() sdkErrors.ErrorCode {
+	return r.Err
 }

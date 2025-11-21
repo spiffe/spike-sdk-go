@@ -80,39 +80,25 @@ func Restore(
 		return nil, failErr // To make linter happy.
 	}
 
-	mr, err := json.Marshal(r)
+	mr, marshalErr := json.Marshal(r)
 	// Security: Zero out r.Shard as soon as we're done with it
 	for i := range r.Shard {
 		r.Shard[i] = 0
 	}
-
-	if err != nil {
-		failErr := sdkErrors.ErrDataMarshalFailure.Wrap(err)
+	if marshalErr != nil {
+		failErr := sdkErrors.ErrDataMarshalFailure.Wrap(marshalErr)
 		failErr.Msg = "failed to marshal restore request"
 		return nil, failErr
 	}
 
-	client := net.CreateMTLSClientForNexus(source)
-
-	body, err := net.Post(client, url.Restore(), mr)
+	res, postErr := net.PostAndUnmarshal[reqres.RestoreResponse](
+		source, url.Restore(), mr)
 	// Security: Zero out mr after the POST request is complete
 	for i := range mr {
 		mr[i] = 0
 	}
-
-	if err != nil {
-		return nil, err
-	}
-
-	var res reqres.RestoreResponse
-	err = json.Unmarshal(body, &res)
-	if err != nil {
-		failErr := sdkErrors.ErrDataUnmarshalFailure.Wrap(err)
-		failErr.Msg = "problem parsing response body"
-		return nil, failErr
-	}
-	if res.Err != "" {
-		return nil, sdkErrors.FromCode(res.Err)
+	if postErr != nil {
+		return nil, postErr
 	}
 
 	return &data.RestorationStatus{

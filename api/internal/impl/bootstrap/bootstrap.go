@@ -103,18 +103,18 @@ func Contribute(
 			continue
 		}
 
-		md, err := json.Marshal(scr)
-		if err != nil {
-			failErr := sdkErrors.ErrDataMarshalFailure.Wrap(err)
+		md, marshalErr := json.Marshal(scr)
+		if marshalErr != nil {
+			failErr := sdkErrors.ErrDataMarshalFailure.Wrap(marshalErr)
 			failErr.Msg = "failed to marshal request"
 			log.FatalErr(fName, *failErr)
 		}
 
 		u := url.KeeperBootstrapContributeEndpoint(keeperAPIRoot)
 
-		_, err = net.Post(client, u, md)
-		if err != nil {
-			return err
+		_, sdkErr := net.Post(client, u, md)
+		if sdkErr != nil {
+			return sdkErr
 		}
 	}
 
@@ -179,9 +179,9 @@ func Verify(
 		Ciphertext: ciphertext,
 	}
 
-	md, err := json.Marshal(request)
-	if err != nil {
-		failErr := sdkErrors.ErrDataMarshalFailure.Wrap(err)
+	md, marshalErr := json.Marshal(request)
+	if marshalErr != nil {
+		failErr := sdkErrors.ErrDataMarshalFailure.Wrap(marshalErr)
 		failErr.Msg = "failed to marshal verification request"
 		log.FatalErr(fName, *failErr)
 	}
@@ -206,8 +206,10 @@ func Verify(
 		Hash string `json:"hash"`
 		Err  string `json:"err"`
 	}
-	if err := json.Unmarshal(responseBody, &verifyResponse); err != nil {
-		failErr := sdkErrors.ErrDataUnmarshalFailure.Wrap(err)
+	if unmarshalErr := json.Unmarshal(
+		responseBody, &verifyResponse,
+	); unmarshalErr != nil {
+		failErr := sdkErrors.ErrDataUnmarshalFailure.Wrap(unmarshalErr)
 		failErr.Msg = "failed to parse verification response"
 		// If SPIKE Keeper is sending gibberish, it may be a malicious actor.
 		// Fatally crash here to prevent a possible compromise.

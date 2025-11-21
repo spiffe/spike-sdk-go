@@ -72,29 +72,17 @@ func Recover(source *workloadapi.X509Source) (map[int]*[32]byte, *sdkErrors.SDKE
 
 	r := reqres.RecoverRequest{}
 
-	mr, err := json.Marshal(r)
-	if err != nil {
-		failErr := sdkErrors.ErrDataMarshalFailure.Wrap(err)
+	mr, marshalErr := json.Marshal(r)
+	if marshalErr != nil {
+		failErr := sdkErrors.ErrDataMarshalFailure.Wrap(marshalErr)
 		failErr.Msg = "failed to marshal recover request"
 		return nil, failErr
 	}
 
-	client := net.CreateMTLSClientForNexus(source)
-
-	body, err := net.Post(client, url.Recover(), mr)
-	if err != nil {
-		return nil, err
-	}
-
-	var res reqres.RecoverResponse
-	err = json.Unmarshal(body, &res)
-	if err != nil {
-		failErr := sdkErrors.ErrDataUnmarshalFailure.Wrap(err)
-		failErr.Msg = "problem parsing response body"
-		return nil, failErr
-	}
-	if res.Err != "" {
-		return nil, sdkErrors.FromCode(res.Err)
+	res, postErr := net.PostAndUnmarshal[reqres.RecoverResponse](
+		source, url.Recover(), mr)
+	if postErr != nil {
+		return nil, postErr
 	}
 
 	result := make(map[int]*[32]byte)

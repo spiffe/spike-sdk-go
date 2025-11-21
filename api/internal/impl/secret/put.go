@@ -45,30 +45,14 @@ func Put(
 
 	r := reqres.SecretPutRequest{Path: path, Values: values}
 
-	mr, err := json.Marshal(r)
-	if err != nil {
-		failErr := sdkErrors.ErrDataMarshalFailure.Wrap(err)
+	mr, marshalErr := json.Marshal(r)
+	if marshalErr != nil {
+		failErr := sdkErrors.ErrDataMarshalFailure.Wrap(marshalErr)
 		failErr.Msg = "problem generating the payload"
 		return failErr
 	}
 
-	client := net.CreateMTLSClientForNexus(source)
-
-	body, err := net.Post(client, url.SecretPut(), mr)
-	if err != nil {
-		return err
-	}
-
-	res := reqres.SecretPutResponse{}
-	err = json.Unmarshal(body, &res)
-	if err != nil {
-		failErr := sdkErrors.ErrDataUnmarshalFailure.Wrap(err)
-		failErr.Msg = "problem parsing response body"
-		return failErr
-	}
-	if res.Err != "" {
-		return sdkErrors.FromCode(res.Err)
-	}
-
-	return nil
+	_, postErr := net.PostAndUnmarshal[reqres.SecretPutResponse](
+		source, url.SecretPut(), mr)
+	return postErr
 }

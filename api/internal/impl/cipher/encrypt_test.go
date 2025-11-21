@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
+	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
 )
 
 type rtFunc func(*http.Request) (*http.Response, error)
@@ -31,12 +32,9 @@ func TestEncryptOctetStream(t *testing.T) {
 				return nil, nil
 			}))
 		},
-		streamPost: func(_ *http.Client, path string, body io.Reader, ct string) (io.ReadCloser, error) {
+		streamPost: func(_ *http.Client, path string, body io.Reader) (io.ReadCloser, *sdkErrors.SDKError) {
 			if path == "" {
 				t.Fatalf("empty path")
-			}
-			if ct != "application/octet-stream" {
-				t.Fatalf("unexpected ct: %s", ct)
 			}
 			b, _ := io.ReadAll(body)
 			if string(b) != "plain" {
@@ -44,14 +42,13 @@ func TestEncryptOctetStream(t *testing.T) {
 			}
 			return io.NopCloser(bytes.NewReader([]byte("cipher"))), nil
 		},
-		httpPost: func(_ *http.Client, _ string, _ []byte) ([]byte, error) {
+		httpPost: func(_ *http.Client, _ string, _ []byte) ([]byte, *sdkErrors.SDKError) {
 			return nil, nil
 		},
 	}
 
 	out, err := cipher.EncryptStream(
 		&workloadapi.X509Source{}, bytes.NewReader([]byte("plain")),
-		"application/octet-stream",
 	)
 	if err != nil {
 		t.Fatalf("EncryptStream error: %v", err)

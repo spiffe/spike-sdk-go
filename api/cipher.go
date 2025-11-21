@@ -13,12 +13,12 @@ import (
 
 // CipherEncryptStream encrypts data from a reader using streaming mode.
 //
-// It sends the reader content as the request body with the specified content
-// type to SPIKE Nexus for encryption.
+// It sends the reader content as the request body to SPIKE Nexus for encryption.
+// The data is treated as binary (application/octet-stream) regardless of its
+// original format, as encryption operates on raw bytes.
 //
 // Parameters:
 //   - reader: The data source to encrypt
-//   - contentType: The MIME type of the data (e.g., "application/json")
 //
 // Returns:
 //   - []byte: The encrypted ciphertext if successful, nil on error
@@ -30,16 +30,16 @@ import (
 // Example:
 //
 //	reader := strings.NewReader("sensitive data")
-//	encrypted, err := api.CipherEncryptStream(reader, "text/plain")
+//	encrypted, err := api.CipherEncryptStream(reader)
 func (a *API) CipherEncryptStream(
-	reader io.Reader, contentType string,
+	reader io.Reader,
 ) ([]byte, *sdkErrors.SDKError) {
-	return cipher.EncryptStream(a.source, reader, contentType)
+	return cipher.EncryptStream(a.source, reader)
 }
 
-// CipherEncryptJSON encrypts data using JSON mode with structured parameters.
+// CipherEncrypt encrypts data with structured parameters.
 //
-// It sends plaintext and algorithm as JSON to SPIKE Nexus and returns the
+// It sends plaintext and algorithm to SPIKE Nexus and returns the
 // encrypted ciphertext bytes.
 //
 // Parameters:
@@ -58,21 +58,21 @@ func (a *API) CipherEncryptStream(
 // Example:
 //
 //	data := []byte("secret message")
-//	encrypted, err := api.CipherEncryptJSON(data, "AES-GCM")
-func (a *API) CipherEncryptJSON(
+//	encrypted, err := api.CipherEncrypt(data, "AES-GCM")
+func (a *API) CipherEncrypt(
 	plaintext []byte, algorithm string,
 ) ([]byte, *sdkErrors.SDKError) {
-	return cipher.EncryptJSON(a.source, plaintext, algorithm)
+	return cipher.Encrypt(a.source, plaintext, algorithm)
 }
 
 // CipherDecryptStream decrypts data from a reader using streaming mode.
 //
-// It sends the reader content as the request body with the specified content
-// type to SPIKE Nexus for decryption.
+// It sends the reader content as the request body to SPIKE Nexus for decryption.
+// The data is treated as binary (application/octet-stream) as decryption
+// operates on raw encrypted bytes.
 //
 // Parameters:
 //   - reader: The encrypted data source to decrypt
-//   - contentType: The MIME type of the data (e.g., "application/octet-stream")
 //
 // Returns:
 //   - []byte: The decrypted plaintext if successful, nil on error
@@ -84,16 +84,16 @@ func (a *API) CipherEncryptJSON(
 // Example:
 //
 //	reader := bytes.NewReader(encryptedData)
-//	plaintext, err := api.CipherDecryptStream(reader, "application/octet-stream")
+//	plaintext, err := api.CipherDecryptStream(reader)
 func (a *API) CipherDecryptStream(
-	reader io.Reader, contentType string,
+	reader io.Reader,
 ) ([]byte, *sdkErrors.SDKError) {
-	return cipher.DecryptStream(a.source, reader, contentType)
+	return cipher.DecryptStream(a.source, reader)
 }
 
-// CipherDecryptJSON decrypts data using JSON mode with structured parameters.
+// CipherDecrypt decrypts data with structured parameters.
 //
-// It sends version, nonce, ciphertext, and algorithm as JSON to SPIKE Nexus
+// It sends version, nonce, ciphertext, and algorithm to SPIKE Nexus
 // and returns the decrypted plaintext.
 //
 // Parameters:
@@ -113,9 +113,9 @@ func (a *API) CipherDecryptStream(
 //
 // Example:
 //
-//	plaintext, err := api.CipherDecryptJSON(1, nonce, ciphertext, "AES-GCM")
-func (a *API) CipherDecryptJSON(
+//	plaintext, err := api.CipherDecrypt(1, nonce, ciphertext, "AES-GCM")
+func (a *API) CipherDecrypt(
 	version byte, nonce, ciphertext []byte, algorithm string,
 ) ([]byte, *sdkErrors.SDKError) {
-	return cipher.DecryptJSON(a.source, version, nonce, ciphertext, algorithm)
+	return cipher.Decrypt(a.source, version, nonce, ciphertext, algorithm)
 }

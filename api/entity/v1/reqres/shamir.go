@@ -23,25 +23,28 @@ type ShardPutResponse struct {
 	Err sdkErrors.ErrorCode `json:"err,omitempty"`
 }
 
-func (s ShardPutResponse) Success() ShardPutResponse {
-	s.Err = sdkErrors.ErrSuccess.Code
-	return s
+func (r ShardPutResponse) Success() ShardPutResponse {
+	r.Err = sdkErrors.ErrSuccess.Code
+	return r
 }
-func (s ShardPutResponse) NotFound() ShardPutResponse {
+func (r ShardPutResponse) NotFound() ShardPutResponse {
 	log.FatalErr("NotFound", *sdkErrors.ErrEntityResponseCodeInvalid)
-	return s
+	return r
 }
-func (s ShardPutResponse) BadRequest() ShardPutResponse {
-	s.Err = sdkErrors.ErrBadRequest.Code
-	return s
+func (r ShardPutResponse) BadRequest() ShardPutResponse {
+	r.Err = sdkErrors.ErrBadRequest.Code
+	return r
 }
-func (s ShardPutResponse) Unauthorized() ShardPutResponse {
-	s.Err = sdkErrors.ErrAccessUnauthorized.Code
-	return s
+func (r ShardPutResponse) Unauthorized() ShardPutResponse {
+	r.Err = sdkErrors.ErrAccessUnauthorized.Code
+	return r
 }
-func (s ShardPutResponse) Internal() ShardPutResponse {
-	s.Err = sdkErrors.ErrInternal.Code
-	return s
+func (r ShardPutResponse) Internal() ShardPutResponse {
+	r.Err = sdkErrors.ErrInternal.Code
+	return r
+}
+func (r ShardPutResponse) ErrorCode() sdkErrors.ErrorCode {
+	return r.Err
 }
 
 // ShardGetRequest represents a request to get a Shamir shard.
@@ -55,23 +58,26 @@ type ShardGetResponse struct {
 	Err   sdkErrors.ErrorCode
 }
 
-func (s ShardGetResponse) Success() ShardGetResponse {
-	s.Err = sdkErrors.ErrSuccess.Code
-	return s
+func (r ShardGetResponse) Success() ShardGetResponse {
+	r.Err = sdkErrors.ErrSuccess.Code
+	return r
 }
-func (s ShardGetResponse) NotFound() ShardGetResponse {
-	s.Err = sdkErrors.ErrNotFound.Code
-	return s
+func (r ShardGetResponse) NotFound() ShardGetResponse {
+	r.Err = sdkErrors.ErrNotFound.Code
+	return r
 }
-func (s ShardGetResponse) BadRequest() ShardGetResponse {
-	s.Err = sdkErrors.ErrBadRequest.Code
-	return s
+func (r ShardGetResponse) BadRequest() ShardGetResponse {
+	r.Err = sdkErrors.ErrBadRequest.Code
+	return r
 }
-func (s ShardGetResponse) Unauthorized() ShardGetResponse {
-	s.Err = sdkErrors.ErrAccessUnauthorized.Code
-	return s
+func (r ShardGetResponse) Unauthorized() ShardGetResponse {
+	r.Err = sdkErrors.ErrAccessUnauthorized.Code
+	return r
 }
-func (s ShardGetResponse) Internal() ShardGetResponse {
-	s.Err = sdkErrors.ErrInternal.Code
-	return s
+func (r ShardGetResponse) Internal() ShardGetResponse {
+	r.Err = sdkErrors.ErrInternal.Code
+	return r
+}
+func (r ShardGetResponse) ErrorCode() sdkErrors.ErrorCode {
+	return r.Err
 }

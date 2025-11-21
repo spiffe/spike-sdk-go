@@ -5,22 +5,20 @@
 package cipher
 
 import (
-	"encoding/json"
 	"io"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
-	"github.com/spiffe/spike-sdk-go/net"
 
 	"github.com/spiffe/spike-sdk-go/api/entity/v1/reqres"
 	"github.com/spiffe/spike-sdk-go/api/url"
 	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
-	"github.com/spiffe/spike-sdk-go/log"
 )
 
 // DecryptStream decrypts data from a reader using streaming mode using the
 // default Cipher instance.
-// It sends the reader content as the request body with the specified content
-// type and returns the decrypted plaintext bytes.
+// It sends the reader content as the request body and returns the decrypted
+// plaintext bytes. The data is treated as binary (application/octet-stream)
+// as decryption operates on raw encrypted bytes.
 //
 // This is a convenience function that uses the default Cipher instance.
 // For testing or custom configuration, create a Cipher instance directly.
@@ -28,8 +26,6 @@ import (
 // Parameters:
 //   - source: X509Source for establishing mTLS connection to SPIKE Nexus
 //   - r: io.Reader containing the encrypted data
-//   - contentType: Content type for the request (defaults to
-//     "application/octet-stream" if empty)
 //
 // Returns:
 //   - ([]byte, nil) containing the decrypted plaintext if successful
@@ -47,25 +43,24 @@ import (
 //	defer source.Close()
 //
 //	reader := bytes.NewReader(encryptedData)
-//	plaintext, err := DecryptStream(source, reader, "application/octet-stream")
+//	plaintext, err := DecryptStream(source, reader)
 //	if err != nil {
 //	    log.Printf("Decryption failed: %v", err)
 //	}
 func DecryptStream(
-	source *workloadapi.X509Source, r io.Reader, contentType net.ContentType,
+	source *workloadapi.X509Source, r io.Reader,
 ) ([]byte, *sdkErrors.SDKError) {
-	return NewCipher().DecryptStream(source, r, contentType)
+	return NewCipher().DecryptStream(source, r)
 }
 
 // DecryptStream decrypts data from a reader using streaming mode.
-// It sends the reader content as the request body with the specified content
-// type and returns the decrypted plaintext bytes.
+// It sends the reader content as the request body and returns the decrypted
+// plaintext bytes. The data is treated as binary (application/octet-stream)
+// as decryption operates on raw encrypted bytes.
 //
 // Parameters:
 //   - source: X509Source for establishing mTLS connection to SPIKE Nexus
 //   - r: io.Reader containing the encrypted data
-//   - contentType: Content type for the request (defaults to
-//     "application/octet-stream" if empty)
 //
 // Returns:
 //   - ([]byte, nil) containing the decrypted plaintext if successful
@@ -78,55 +73,19 @@ func DecryptStream(
 //
 //	cipher := NewCipher()
 //	reader := bytes.NewReader(encryptedData)
-//	plaintext, err := cipher.DecryptStream(source, reader, "application/octet-stream")
+//	plaintext, err := cipher.DecryptStream(source, reader)
 //	if err != nil {
 //	    log.Printf("Decryption failed: %v", err)
 //	}
 func (c *Cipher) DecryptStream(
-	source *workloadapi.X509Source, r io.Reader, contentType net.ContentType,
+	source *workloadapi.X509Source, r io.Reader,
 ) ([]byte, *sdkErrors.SDKError) {
-	const fName = "DecryptStream"
-
-	if source == nil {
-		return nil, sdkErrors.ErrSPIFFENilX509Source
-	}
-
-	client := c.createMTLSHTTPClientFromSource(source)
-
-	if contentType == "" {
-		contentType = net.ContentTypeOctetStream
-	}
-
-	rc, err := c.streamPost(client, url.CipherDecrypt(), r, contentType)
-	if err != nil {
-		return nil, err
-	}
-
-	defer func(rc io.ReadCloser) {
-		if rc == nil {
-			return
-		}
-		err := rc.Close()
-		if err != nil {
-			failErr := sdkErrors.ErrFSStreamCloseFailed.Wrap(err)
-			failErr.Msg = "failed to close response body"
-			log.WarnErr(fName, *failErr)
-		}
-	}(rc)
-
-	b, err := io.ReadAll(rc)
-	if err != nil {
-		failErr := sdkErrors.ErrNetReadingResponseBody.Wrap(err)
-		failErr.Msg = "failed to read response body"
-		return nil, failErr
-	}
-
-	return b, nil
+	return c.streamOperation(source, r, url.CipherDecrypt(), "DecryptStream")
 }
 
-// DecryptJSON decrypts data using JSON mode with structured parameters using
+// Decrypt decrypts data with structured parameters using
 // the default Cipher instance.
-// It sends version, nonce, ciphertext, and algorithm as JSON and returns
+// It sends version, nonce, ciphertext, and algorithm and returns
 // decrypted plaintext bytes.
 //
 // This is a convenience function that uses the default Cipher instance.
@@ -145,7 +104,8 @@ func (c *Cipher) DecryptStream(
 //   - ErrSPIFFENilX509Source: if source is nil
 //   - ErrDataMarshalFailure: if request serialization fails
 //   - Errors from httpPost(): if the HTTP request fails (e.g., ErrNotFound,
-//     ErrAccessUnauthorized, ErrBadRequest, ErrStateNotReady, ErrNetPeerConnection)
+//     ErrAccessUnauthorized, ErrBadRequest, ErrStateNotReady,
+//     ErrNetPeerConnection)
 //   - ErrDataUnmarshalFailure: if response parsing fails
 //   - Error from FromCode(): if the server returns an error
 //
@@ -157,19 +117,19 @@ func (c *Cipher) DecryptStream(
 //	}
 //	defer source.Close()
 //
-//	plaintext, err := DecryptJSON(source, 1, nonce, ciphertext, "AES-GCM")
+//	plaintext, err := Decrypt(source, 1, nonce, ciphertext, "AES-GCM")
 //	if err != nil {
 //	    log.Printf("Decryption failed: %v", err)
 //	}
-func DecryptJSON(
+func Decrypt(
 	source *workloadapi.X509Source,
 	version byte, nonce, ciphertext []byte, algorithm string,
 ) ([]byte, *sdkErrors.SDKError) {
-	return NewCipher().DecryptJSON(source, version, nonce, ciphertext, algorithm)
+	return NewCipher().Decrypt(source, version, nonce, ciphertext, algorithm)
 }
 
-// DecryptJSON decrypts data using JSON mode with structured parameters.
-// It sends version, nonce, ciphertext, and algorithm as JSON and returns
+// Decrypt decrypts data with structured parameters.
+// It sends version, nonce, ciphertext, and algorithm and returns
 // decrypted plaintext bytes.
 //
 // Parameters:
@@ -185,27 +145,22 @@ func DecryptJSON(
 //   - ErrSPIFFENilX509Source: if source is nil
 //   - ErrDataMarshalFailure: if request serialization fails
 //   - Errors from httpPost(): if the HTTP request fails (e.g., ErrNotFound,
-//     ErrAccessUnauthorized, ErrBadRequest, ErrStateNotReady, ErrNetPeerConnection)
+//     ErrAccessUnauthorized, ErrBadRequest, ErrStateNotReady,
+//     ErrNetPeerConnection)
 //   - ErrDataUnmarshalFailure: if response parsing fails
 //   - Error from FromCode(): if the server returns an error
 //
 // Example:
 //
 //	cipher := NewCipher()
-//	plaintext, err := cipher.DecryptJSON(source, 1, nonce, ciphertext, "AES-GCM")
+//	plaintext, err := cipher.Decrypt(source, 1, nonce, ciphertext, "AES-GCM")
 //	if err != nil {
 //	    log.Printf("Decryption failed: %v", err)
 //	}
-func (c *Cipher) DecryptJSON(
+func (c *Cipher) Decrypt(
 	source *workloadapi.X509Source,
 	version byte, nonce, ciphertext []byte, algorithm string,
 ) ([]byte, *sdkErrors.SDKError) {
-	if source == nil {
-		return nil, sdkErrors.ErrSPIFFENilX509Source
-	}
-
-	client := c.createMTLSHTTPClientFromSource(source)
-
 	payload := reqres.CipherDecryptRequest{
 		Version:    version,
 		Nonce:      nonce,
@@ -213,26 +168,12 @@ func (c *Cipher) DecryptJSON(
 		Algorithm:  algorithm,
 	}
 
-	mr, err := json.Marshal(payload)
-	if err != nil {
-		failErr := sdkErrors.ErrDataMarshalFailure.Wrap(err)
-		failErr.Msg = "problem generating the payload"
-		return nil, failErr
-	}
-
-	body, err := c.httpPost(client, url.CipherDecrypt(), mr)
-	if err != nil {
+	var res reqres.CipherDecryptResponse
+	if err := c.jsonOperation(
+		source, payload, url.CipherDecrypt(), &res,
+	); err != nil {
 		return nil, err
 	}
 
-	var res reqres.CipherDecryptResponse
-	if err := json.Unmarshal(body, &res); err != nil {
-		failErr := sdkErrors.ErrDataUnmarshalFailure.Wrap(err)
-		failErr.Msg = "problem parsing response body"
-		return nil, failErr
-	}
-	if res.Err != "" {
-		return nil, sdkErrors.FromCode(res.Err)
-	}
 	return res.Plaintext, nil
 }

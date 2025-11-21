@@ -12,3 +12,7 @@ import (
 type FallbackResponse struct {
 	Err errors.ErrorCode `json:"err,omitempty"`
 }
+
+func (r FallbackResponse) ErrorCode() errors.ErrorCode {
+	return r.Err
+}

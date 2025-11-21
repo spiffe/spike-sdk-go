@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
+	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
 )
 
 func TestDecrypt_OctetStream(t *testing.T) {
@@ -21,24 +22,20 @@ func TestDecrypt_OctetStream(t *testing.T) {
 				return nil, nil
 			}))
 		},
-		streamPost: func(_ *http.Client, _ string, body io.Reader, ct string) (io.ReadCloser, error) {
-			if ct != "application/octet-stream" {
-				t.Fatalf("unexpected ct: %s", ct)
-			}
+		streamPost: func(_ *http.Client, _ string, body io.Reader) (io.ReadCloser, *sdkErrors.SDKError) {
 			b, _ := io.ReadAll(body)
 			if string(b) != "cipher" {
 				t.Fatalf("unexpected body: %q", string(b))
 			}
 			return io.NopCloser(bytes.NewReader([]byte("plain"))), nil
 		},
-		httpPost: func(_ *http.Client, _ string, _ []byte) ([]byte, error) {
+		httpPost: func(_ *http.Client, _ string, _ []byte) ([]byte, *sdkErrors.SDKError) {
 			return nil, nil
 		},
 	}
 
 	out, err := cipher.DecryptStream(
 		&workloadapi.X509Source{}, bytes.NewReader([]byte("cipher")),
-		"application/octet-stream",
 	)
 	if err != nil {
 		t.Fatalf("DecryptStream error: %v", err)

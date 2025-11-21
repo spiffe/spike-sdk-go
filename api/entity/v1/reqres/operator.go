@@ -26,21 +26,24 @@ func (r RestoreResponse) Success() RestoreResponse {
 	r.Err = sdkErrors.ErrSuccess.Code
 	return r
 }
-func (s RestoreResponse) NotFound() RestoreResponse {
+func (r RestoreResponse) NotFound() RestoreResponse {
 	log.FatalErr("NotFound", *sdkErrors.ErrEntityResponseCodeInvalid)
-	return s
+	return r
 }
-func (s RestoreResponse) BadRequest() RestoreResponse {
-	s.Err = sdkErrors.ErrBadRequest.Code
-	return s
+func (r RestoreResponse) BadRequest() RestoreResponse {
+	r.Err = sdkErrors.ErrBadRequest.Code
+	return r
 }
-func (s RestoreResponse) Unauthorized() RestoreResponse {
-	s.Err = sdkErrors.ErrAccessUnauthorized.Code
-	return s
+func (r RestoreResponse) Unauthorized() RestoreResponse {
+	r.Err = sdkErrors.ErrAccessUnauthorized.Code
+	return r
 }
-func (s RestoreResponse) Internal() RestoreResponse {
-	s.Err = sdkErrors.ErrInternal.Code
-	return s
+func (r RestoreResponse) Internal() RestoreResponse {
+	r.Err = sdkErrors.ErrInternal.Code
+	return r
+}
+func (r RestoreResponse) ErrorCode() sdkErrors.ErrorCode {
+	return r.Err
 }
 
 // RecoverRequest for disaster recovery.
@@ -57,19 +60,22 @@ func (r RecoverResponse) Success() RecoverResponse {
 	r.Err = sdkErrors.ErrSuccess.Code
 	return r
 }
-func (s RecoverResponse) NotFound() RecoverResponse {
+func (r RecoverResponse) NotFound() RecoverResponse {
 	log.FatalErr("NotFound", *sdkErrors.ErrEntityResponseCodeInvalid)
-	return s
+	return r
 }
-func (s RecoverResponse) BadRequest() RecoverResponse {
-	s.Err = sdkErrors.ErrBadRequest.Code
-	return s
+func (r RecoverResponse) BadRequest() RecoverResponse {
+	r.Err = sdkErrors.ErrBadRequest.Code
+	return r
 }
-func (s RecoverResponse) Unauthorized() RecoverResponse {
-	s.Err = sdkErrors.ErrAccessUnauthorized.Code
-	return s
+func (r RecoverResponse) Unauthorized() RecoverResponse {
+	r.Err = sdkErrors.ErrAccessUnauthorized.Code
+	return r
 }
-func (s RecoverResponse) Internal() RecoverResponse {
-	s.Err = sdkErrors.ErrInternal.Code
-	return s
+func (r RecoverResponse) Internal() RecoverResponse {
+	r.Err = sdkErrors.ErrInternal.Code
+	return r
+}
+func (r RecoverResponse) ErrorCode() sdkErrors.ErrorCode {
+	return r.Err
 }

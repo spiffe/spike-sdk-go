@@ -5,11 +5,11 @@
 package kv
 
 import (
+	"errors"
 	"testing"
 	"time"
 
 	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestKV_Undelete(t *testing.T) {
@@ -165,20 +165,34 @@ func TestKV_Undelete(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			kv := tt.setup()
-			err := kv.Undelete(tt.path, tt.versions)
-			assert.Equal(t, tt.wantErr, err)
+			_, err := kv.Undelete(tt.path, tt.versions)
+
+			// Handle nil case explicitly to avoid typed nil vs untyped nil issues
+			if tt.wantErr == nil {
+				if err != nil {
+					t.Errorf("Undelete() error = %v, wantErr nil", err)
+					return
+				}
+			} else if !errors.Is(err, tt.wantErr) {
+				t.Errorf("Undelete() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
 
 			if err == nil {
 				secret, exist := kv.data[tt.path]
-				assert.True(t, exist)
+				if !exist {
+					t.Errorf("Secret should exist at path %s", tt.path)
+					return
+				}
 
 				for _, version := range tt.versions {
 					if version == 0 {
 						version = secret.Metadata.CurrentVersion
 					}
 					if v, exist := secret.Versions[version]; exist {
-						assert.True(t, exist)
-						assert.Nil(t, v.DeletedTime)
+						if v.DeletedTime != nil {
+							t.Errorf("Version %d should not be deleted", version)
+						}
 					}
 				}
 			}

@@ -25,23 +25,26 @@ type BootstrapVerifyResponse struct {
 	Err sdkErrors.ErrorCode `json:"err,omitempty"`
 }
 
-func (b BootstrapVerifyResponse) Success() BootstrapVerifyResponse {
-	b.Err = sdkErrors.ErrSuccess.Code
-	return b
+func (r BootstrapVerifyResponse) Success() BootstrapVerifyResponse {
+	r.Err = sdkErrors.ErrSuccess.Code
+	return r
 }
-func (s BootstrapVerifyResponse) NotFound() BootstrapVerifyResponse {
+func (r BootstrapVerifyResponse) NotFound() BootstrapVerifyResponse {
 	log.FatalErr("NotFound", *sdkErrors.ErrEntityResponseCodeInvalid)
-	return s
+	return r
 }
-func (s BootstrapVerifyResponse) BadRequest() BootstrapVerifyResponse {
-	s.Err = sdkErrors.ErrBadRequest.Code
-	return s
+func (r BootstrapVerifyResponse) BadRequest() BootstrapVerifyResponse {
+	r.Err = sdkErrors.ErrBadRequest.Code
+	return r
 }
-func (s BootstrapVerifyResponse) Unauthorized() BootstrapVerifyResponse {
-	s.Err = sdkErrors.ErrAccessUnauthorized.Code
-	return s
+func (r BootstrapVerifyResponse) Unauthorized() BootstrapVerifyResponse {
+	r.Err = sdkErrors.ErrAccessUnauthorized.Code
+	return r
 }
-func (s BootstrapVerifyResponse) Internal() BootstrapVerifyResponse {
-	s.Err = sdkErrors.ErrInternal.Code
-	return s
+func (r BootstrapVerifyResponse) Internal() BootstrapVerifyResponse {
+	r.Err = sdkErrors.ErrInternal.Code
+	return r
+}
+func (r BootstrapVerifyResponse) ErrorCode() sdkErrors.ErrorCode {
+	return r.Err
 }

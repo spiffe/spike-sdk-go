@@ -31,7 +31,9 @@ import (
 //	if err != nil {
 //	    log.Printf("Failed to delete secret versions: %v", err)
 //	}
-func (a *API) DeleteSecretVersions(path string, versions []int) *sdkErrors.SDKError {
+func (a *API) DeleteSecretVersions(
+	path string, versions []int,
+) *sdkErrors.SDKError {
 	return secret.Delete(a.source, path, versions)
 }
 

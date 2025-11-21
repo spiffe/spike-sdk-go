@@ -29,25 +29,28 @@ type CipherEncryptResponse struct {
 	Err sdkErrors.ErrorCode `json:"err,omitempty"`
 }
 
-func (c CipherEncryptResponse) Success() CipherEncryptResponse {
-	c.Err = sdkErrors.ErrSuccess.Code
-	return c
+func (r CipherEncryptResponse) Success() CipherEncryptResponse {
+	r.Err = sdkErrors.ErrSuccess.Code
+	return r
 }
-func (s CipherEncryptResponse) NotFound() CipherEncryptResponse {
+func (r CipherEncryptResponse) NotFound() CipherEncryptResponse {
 	log.FatalErr("NotFound", *sdkErrors.ErrEntityResponseCodeInvalid)
-	return s
+	return r
 }
-func (s CipherEncryptResponse) BadRequest() CipherEncryptResponse {
-	s.Err = sdkErrors.ErrBadRequest.Code
-	return s
+func (r CipherEncryptResponse) BadRequest() CipherEncryptResponse {
+	r.Err = sdkErrors.ErrBadRequest.Code
+	return r
 }
-func (s CipherEncryptResponse) Unauthorized() CipherEncryptResponse {
-	s.Err = sdkErrors.ErrAccessUnauthorized.Code
-	return s
+func (r CipherEncryptResponse) Unauthorized() CipherEncryptResponse {
+	r.Err = sdkErrors.ErrAccessUnauthorized.Code
+	return r
 }
-func (s CipherEncryptResponse) Internal() CipherEncryptResponse {
-	s.Err = sdkErrors.ErrInternal.Code
-	return s
+func (r CipherEncryptResponse) Internal() CipherEncryptResponse {
+	r.Err = sdkErrors.ErrInternal.Code
+	return r
+}
+func (r CipherEncryptResponse) ErrorCode() sdkErrors.ErrorCode {
+	return r.Err
 }
 
 // CipherDecryptRequest for decrypting data
@@ -70,23 +73,26 @@ type CipherDecryptResponse struct {
 	Err sdkErrors.ErrorCode `json:"err,omitempty"`
 }
 
-func (c CipherDecryptResponse) Success() CipherDecryptResponse {
-	c.Err = sdkErrors.ErrSuccess.Code
-	return c
+func (r CipherDecryptResponse) Success() CipherDecryptResponse {
+	r.Err = sdkErrors.ErrSuccess.Code
+	return r
 }
-func (s CipherDecryptResponse) NotFound() CipherDecryptResponse {
+func (r CipherDecryptResponse) NotFound() CipherDecryptResponse {
 	log.FatalErr("NotFound", *sdkErrors.ErrEntityResponseCodeInvalid)
-	return s
+	return r
 }
-func (s CipherDecryptResponse) BadRequest() CipherDecryptResponse {
-	s.Err = sdkErrors.ErrBadRequest.Code
-	return s
+func (r CipherDecryptResponse) BadRequest() CipherDecryptResponse {
+	r.Err = sdkErrors.ErrBadRequest.Code
+	return r
 }
-func (s CipherDecryptResponse) Unauthorized() CipherDecryptResponse {
-	s.Err = sdkErrors.ErrAccessUnauthorized.Code
-	return s
+func (r CipherDecryptResponse) Unauthorized() CipherDecryptResponse {
+	r.Err = sdkErrors.ErrAccessUnauthorized.Code
+	return r
 }
-func (s CipherDecryptResponse) Internal() CipherDecryptResponse {
-	s.Err = sdkErrors.ErrInternal.Code
-	return s
+func (r CipherDecryptResponse) Internal() CipherDecryptResponse {
+	r.Err = sdkErrors.ErrInternal.Code
+	return r
+}
+func (r CipherDecryptResponse) ErrorCode() sdkErrors.ErrorCode {
+	return r.Err
 }
