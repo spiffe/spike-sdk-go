@@ -20,6 +20,29 @@ import (
 // Recover makes a request to initiate recovery of secrets, returning the
 // recovery shards.
 //
+// SVID Acquisition Error Handling:
+//
+// This function attempts to acquire an X.509 SVID from the SPIFFE Workload API
+// via Unix domain socket. While UDS connections are generally more reliable than
+// network sockets, SVID acquisition can fail in both fatal and transient ways:
+//
+// Fatal failures (indicate misconfiguration):
+//   - Socket file doesn't exist (SPIRE agent never started)
+//   - Permission denied (deployment/configuration error)
+//   - Wrong socket path (configuration error)
+//
+// Transient failures (may succeed on retry):
+//   - SPIRE agent restarting (brief unavailability, recovers in seconds)
+//   - SVID not yet provisioned (startup race condition after attestation)
+//   - File descriptor exhaustion (resource pressure may clear)
+//   - SVID rotation failure (temporary SPIRE server issue)
+//   - Workload API connection lost after source creation (agent crash/restart)
+//
+// Since recovery is often performed during emergency procedures when
+// infrastructure may be unstable, this function returns errors rather than
+// crashing to allow retry logic. Callers can implement exponential backoff
+// or other retry strategies for transient failures.
+//
 // Parameters:
 //   - source: X509Source used for mTLS client authentication
 //
@@ -27,19 +50,24 @@ import (
 //   - map[int]*[32]byte: Map of shard indices to shard byte arrays if successful
 //   - *sdkErrors.SDKError: nil on success, or one of the following errors:
 //   - ErrSPIFFENilX509Source: if source is nil
+//   - ErrSPIFFEFailedToExtractX509SVID: if SVID acquisition fails (may be
+//     transient - see above for retry guidance)
 //   - ErrDataMarshalFailure: if request serialization fails
 //   - Errors from net.Post(): if the HTTP request fails
 //   - ErrDataUnmarshalFailure: if response parsing fails
 //   - Error from FromCode(): if the server returns an error
 //
-// Note: The function will fatally crash (via log.FatalErr) if:
-//   - SVID acquisition fails
-//   - SVID is nil
-//   - Caller is not SPIKE Pilot (security requirement)
+// Security Note: The function will fatally crash (via log.FatalErr) if the
+// caller is not SPIKE Pilot. This is a programming error, not a runtime
+// condition, as recovery operations must only be performed by Pilot roles.
 //
 // Example:
 //
 //	shards, err := Recover(x509Source)
+//	if err != nil {
+//	    // SVID acquisition failures may be transient - consider retry logic
+//	    return nil, err
+//	}
 func Recover(source *workloadapi.X509Source) (map[int]*[32]byte, *sdkErrors.SDKError) {
 	const fName = "recover"
 
@@ -51,14 +79,12 @@ func Recover(source *workloadapi.X509Source) (map[int]*[32]byte, *sdkErrors.SDKE
 	if err != nil {
 		failErr := sdkErrors.ErrSPIFFEFailedToExtractX509SVID.Wrap(err)
 		failErr.Msg = "could not acquire SVID"
-		log.FatalErr(fName, *failErr)
-		return nil, failErr // To make linter happy.
+		return nil, failErr
 	}
 	if svid == nil {
 		failErr := sdkErrors.ErrSPIFFEFailedToExtractX509SVID
 		failErr.Msg = "no X509SVID in source"
-		log.FatalErr(fName, *failErr)
-		return nil, failErr // To make linter happy.
+		return nil, failErr
 	}
 
 	selfSPIFFEID := svid.ID.String()

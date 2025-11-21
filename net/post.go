@@ -103,24 +103,10 @@ func Post(
 		return []byte{}, failErr
 	}
 
-	b, err := body(r)
-	if err != nil {
-		failErr := sdkErrors.ErrFSStreamCloseFailed.Wrap(err)
-		failErr.Msg = "failed to close response body"
-		log.WarnErr(fName, *failErr)
+	b, sdkErr := body(r)
+	if sdkErr != nil {
+		return nil, sdkErr
 	}
-
-	defer func(b io.ReadCloser) {
-		if b == nil {
-			return
-		}
-		closeErr := b.Close()
-		if closeErr != nil {
-			failErr := sdkErrors.ErrFSStreamCloseFailed.Wrap(err)
-			failErr.Msg = "failed to close response body"
-			log.WarnErr(fName, *failErr)
-		}
-	}(r.Body)
 
 	return b, nil
 }

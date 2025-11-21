@@ -72,7 +72,7 @@ func TestGetMetadata_NilSource(t *testing.T) {
 // TestGet_NotFound tests that Get returns (nil, nil) when secret is not found
 func TestGet_NotFound(t *testing.T) {
 	// Create a test server that returns 404
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 	}))
 	defer server.Close()
@@ -91,7 +91,7 @@ func TestGet_NotFound(t *testing.T) {
 // TestListKeys_NotFound tests that ListKeys returns empty array when no secrets exist
 func TestListKeys_NotFound(t *testing.T) {
 	// Create a test server that returns 404
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 	}))
 	defer server.Close()
@@ -105,7 +105,7 @@ func TestListKeys_NotFound(t *testing.T) {
 // TestGetMetadata_NotFound tests that GetMetadata returns (nil, nil) when metadata not found
 func TestGetMetadata_NotFound(t *testing.T) {
 	// Create a test server that returns 404
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 	}))
 	defer server.Close()

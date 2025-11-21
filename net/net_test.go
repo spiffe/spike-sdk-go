@@ -133,7 +133,7 @@ func TestAuthorizerWithPredicate_Allow(t *testing.T) {
 // TestAuthorizerWithPredicate_Deny tests authorizer denying connections
 func TestAuthorizerWithPredicate_Deny(t *testing.T) {
 	// Create a predicate that denies all IDs
-	predicate := func(id string) bool {
+	predicate := func(_ string) bool {
 		return false
 	}
 
@@ -165,7 +165,7 @@ func TestCreateMTLSServer_NilSource(t *testing.T) {
 
 // TestCreateMTLSServerWithPredicate_NilSource tests server creation with predicate and nil source
 func TestCreateMTLSServerWithPredicate_NilSource(t *testing.T) {
-	predicate := func(id string) bool { return true }
+	predicate := func(_ string) bool { return true }
 	server := CreateMTLSServerWithPredicate(nil, ":8443", predicate)
 	assert.NotNil(t, server)
 	assert.Equal(t, ":8443", server.Addr)
@@ -182,7 +182,7 @@ func TestCreateMTLSClient_NilSource(t *testing.T) {
 
 // TestCreateMTLSClientWithPredicate_NilSource tests client creation with predicate and nil source
 func TestCreateMTLSClientWithPredicate_NilSource(t *testing.T) {
-	predicate := func(id string) bool { return true }
+	predicate := func(_ string) bool { return true }
 	client := CreateMTLSClientWithPredicate(nil, predicate)
 	assert.NotNil(t, client)
 	assert.NotNil(t, client.Transport)
@@ -205,7 +205,7 @@ func TestCreateMTLSClientForKeeper_NilSource(t *testing.T) {
 // TestServeWithPredicate_NilSource tests serve function with nil source
 func TestServeWithPredicate_NilSource(t *testing.T) {
 	initializeRoutes := func() {}
-	predicate := func(id string) bool { return true }
+	predicate := func(_ string) bool { return true }
 
 	err := ServeWithPredicate(nil, initializeRoutes, predicate, ":8443")
 
@@ -271,9 +271,9 @@ func TestPost_ClientConfiguration(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(tt.statusCode)
-				w.Write([]byte(tt.responseBody))
+				_, _ = w.Write([]byte(tt.responseBody))
 			}))
 			defer server.Close()
 
@@ -305,7 +305,7 @@ func TestStreamPost_Success(t *testing.T) {
 		// Read and echo the request body
 		body, _ := io.ReadAll(r.Body)
 		w.WriteHeader(http.StatusOK)
-		w.Write(body)
+		_, _ = w.Write(body)
 	}))
 	defer server.Close()
 
@@ -329,7 +329,7 @@ func TestStreamPostWithContentType_CustomContentType(t *testing.T) {
 		assert.Equal(t, "application/json", r.Header.Get("Content-Type"))
 
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{"response":"ok"}`))
+		_, _ = w.Write([]byte(`{"response":"ok"}`))
 	}))
 	defer server.Close()
 
@@ -347,7 +347,7 @@ func TestStreamPostWithContentType_CustomContentType(t *testing.T) {
 
 // TestStreamPost_NotFound tests streaming POST with 404 response
 func TestStreamPost_NotFound(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 	}))
 	defer server.Close()

@@ -22,6 +22,7 @@ func TestNew(t *testing.T) {
 			verify: func(t *testing.T, kv *KV) {
 				if kv == nil {
 					t.Fatal("New() returned nil")
+					return
 				}
 				if kv.maxSecretVersions != 10 {
 					t.Errorf("maxSecretVersions = %d, want 10", kv.maxSecretVersions)

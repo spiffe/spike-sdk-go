@@ -16,9 +16,6 @@ import (
 	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
 )
 
-// mockReader is a mock function that replaces the package-level reader for testing
-type mockReaderFunc func([]byte) (int, error)
-
 // TestAES256Seed_Success tests successful AES-256 seed generation
 func TestAES256Seed_Success(t *testing.T) {
 	// Save original reader and restore after test
@@ -53,7 +50,7 @@ func TestAES256Seed_Error(t *testing.T) {
 	defer func() { reader = originalReader }()
 
 	// Mock reader that returns an error
-	reader = func(b []byte) (int, error) {
+	reader = func(_ []byte) (int, error) {
 		return 0, errors.New("mock random generation failure")
 	}
 
@@ -321,9 +318,11 @@ func TestDeterministicReader_DifferentSeeds(t *testing.T) {
 	buffer1 := make([]byte, 32)
 	buffer2 := make([]byte, 32)
 
-	reader1.Read(buffer1)
-	reader2.Read(buffer2)
+	_, err1 := reader1.Read(buffer1)
+	_, err2 := reader2.Read(buffer2)
 
+	require.NoError(t, err1)
+	require.NoError(t, err2)
 	assert.NotEqual(t, buffer1, buffer2, "Different seeds should produce different output")
 }
 
@@ -412,13 +411,15 @@ func TestDeterministicReader_ReproducibleStream(t *testing.T) {
 	// First stream
 	reader1 := NewDeterministicReader(seed)
 	stream1 := make([]byte, 200)
-	reader1.Read(stream1)
+	_, err1 := reader1.Read(stream1)
 
 	// Second stream with same seed
 	reader2 := NewDeterministicReader(seed)
 	stream2 := make([]byte, 200)
-	reader2.Read(stream2)
+	_, err2 := reader2.Read(stream2)
 
+	require.NoError(t, err1)
+	require.NoError(t, err2)
 	assert.Equal(t, stream1, stream2, "Stream should be reproducible with same seed")
 }
 

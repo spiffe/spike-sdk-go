@@ -37,7 +37,7 @@ func TestKV_Delete_ModifiedReturnValue(t *testing.T) {
 			setup: func() *KV {
 				kv := New(Config{MaxSecretVersions: 10})
 				kv.Put("test/path", map[string]string{"key": "value"})
-				kv.Delete("test/path", []int{1}) // Delete it first
+				_, _ = kv.Delete("test/path", []int{1}) // Delete it first
 				return kv
 			},
 			path:         "test/path",
@@ -105,7 +105,7 @@ func TestKV_Delete_ModifiedReturnValue(t *testing.T) {
 				kv.Put("test/path", map[string]string{"key": "v1"})
 				kv.Put("test/path", map[string]string{"key": "v2"})
 				kv.Put("test/path", map[string]string{"key": "v3"})
-				kv.Delete("test/path", []int{1}) // Pre-delete version 1
+				_, _ = kv.Delete("test/path", []int{1}) // Pre-delete version 1
 				return kv
 			},
 			path:         "test/path",
