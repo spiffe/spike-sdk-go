@@ -25,7 +25,7 @@ type PolicyPutResponse struct {
 }
 
 func (r PolicyPutResponse) Success() PolicyPutResponse {
-	log.FatalErr("NotFound", *sdkErrors.ErrAPIResponseCodeInvalid)
+	r.Err = sdkErrors.ErrAPISuccess.Code
 	return r
 }
 func (r PolicyPutResponse) NotFound() PolicyPutResponse {

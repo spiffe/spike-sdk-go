@@ -195,7 +195,11 @@ func (r *ExponentialRetrier) RetryWithBackoff(
 
 	// Wrap operation to convert SDKError to plain error for backoff library
 	wrappedOp := func() error {
-		return operation()
+		sdkErr := operation()
+		if sdkErr == nil {
+			return nil
+		}
+		return sdkErr
 	}
 
 	err := backoff.RetryNotify(

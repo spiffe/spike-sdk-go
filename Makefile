@@ -2,7 +2,7 @@
 #  \\\\\ Copyright 2024-present SPIKE contributors.
 # \\\\\\\ SPDX-License-Identifier: Apache-2.0
 
-.PHONY: test/cover test audit ci confirm no-dirty upgradeable tidy
+.PHONY: test/cover test audit ci confirm no-dirty upgradeable tidy coverage/publish
 
 # Run tests with coverage report and open HTML visualization
 # Usage: make test/cover
@@ -13,6 +13,14 @@
 test/cover:
 	go test -v -race -buildvcs -coverprofile=/tmp/coverage.out ./...
 	go tool cover -html=/tmp/coverage.out
+
+# Generate and publish HTML coverage report to documentation
+# Usage: make coverage/publish
+# Executes all tests with coverage profiling and generates an HTML report
+# The report is published to /home/volkan/WORKSPACE/spike/docs/sdk/coverage.html
+# This is useful for maintaining published documentation of test coverage
+coverage/publish:
+	@./hack/coverage-report.sh
 
 # Run all tests with race detection
 # Usage: make test
