@@ -96,10 +96,14 @@ func ValidateSPIFFEID(SPIFFEID string) *sdkErrors.SDKError {
 
 // ValidatePathPattern validates the given path pattern string for correctness.
 //
-// The path pattern must be between 1 and 500 characters and may include regex
-// special characters for matching multiple paths. Allowed characters include
-// alphanumeric, underscores, hyphens, forward slashes, periods, and regex
-// metacharacters.
+// This function is used for validating path patterns that may contain regex
+// metacharacters for matching multiple paths. The path pattern must be between
+// 1 and 500 characters and may include regex anchors (^, $) and other regex
+// special characters (?, +, *, |, [], {}, \, etc.) along with alphanumeric
+// characters, underscores, hyphens, forward slashes, and periods.
+//
+// Use ValidatePath instead if you need to validate literal paths without
+// regex anchors.
 //
 // Parameters:
 //   - pathPattern: The path pattern string to validate
@@ -125,9 +129,14 @@ func ValidatePathPattern(pathPattern string) *sdkErrors.SDKError {
 
 // ValidatePath checks if the given path is valid based on predefined rules.
 //
-// Unlike ValidatePathPattern, this function validates literal paths without
-// regex metacharacters (except those used in actual paths). The path must be
-// between 1 and 500 characters and contain only allowed characters.
+// This function validates paths that should not contain regex anchor
+// metacharacters (^ or $). Unlike ValidatePathPattern, this function is for
+// validating literal paths. The path must be between 1 and 500 characters.
+//
+// Note: While this function excludes regex anchors (^, $), it still allows
+// other special characters that may appear in actual paths such as ?, +, *,
+// |, [], {}, \, /, etc. Use ValidatePathPattern if you need to validate
+// patterns that include regex anchors.
 //
 // Parameters:
 //   - path: The path string to validate

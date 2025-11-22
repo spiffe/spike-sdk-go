@@ -16,8 +16,12 @@ import (
 // and a custom content type, returning the response body as a stream.
 //
 // This function is designed for streaming large amounts of data without loading
-// the entire payload into memory. The caller is responsible for closing the
-// returned io.ReadCloser.
+// the entire payload into memory.
+//
+// Resource Management: On success, returns an open io.ReadCloser that the caller
+// MUST close (typically with defer). On error, any response body is automatically
+// closed by this function and nil is returned, following the canonical Go pattern
+// of returning (zero-value, error) on failures.
 //
 // Parameters:
 //   - client *http.Client: The HTTP client to use for the request
@@ -27,10 +31,9 @@ import (
 //     (e.g., ContentTypeJSON, ContentTypeTextPlain, ContentTypeOctetStream)
 //
 // Returns:
-//   - io.ReadCloser: The response body stream if successful
-//     (must be closed by caller)
-//   - *sdkErrors.SDKError: nil on success, or one of the following well-known
-//     errors:
+//   - io.ReadCloser: The response body stream on success (must be closed by caller),
+//     nil on error (already closed by this function)
+//   - *sdkErrors.SDKError: nil on success, or one of the following errors:
 //   - ErrAPINotFound (404): Resource not found
 //   - ErrAccessUnauthorized (401): Authentication required
 //   - ErrAPIBadRequest (400): Invalid request
@@ -61,25 +64,23 @@ func StreamPostWithContentType(
 	}
 	req.Header.Set("Content-Type", string(contentType))
 
-	//nolint:bodyclose // Response body is properly closed in defer block
 	r, err := client.Do(req)
 	if err != nil {
 		failErr := sdkErrors.ErrNetPeerConnection.Wrap(err)
 		return nil, failErr
 	}
-	defer func(b io.ReadCloser) {
-		if b == nil {
-			return
-		}
-		err := b.Close()
-		if err != nil {
-			failErr := sdkErrors.ErrFSStreamCloseFailed
-			failErr.Msg = "failed to close response body"
-			log.WarnErr(fName, *failErr)
-		}
-	}(r.Body)
 
 	if r.StatusCode != http.StatusOK {
+		// Close body on error paths before returning
+		if r.Body != nil {
+			closeErr := r.Body.Close()
+			if closeErr != nil {
+				failErr := sdkErrors.ErrFSStreamCloseFailed
+				failErr.Msg = "failed to close response body on error path"
+				log.WarnErr(fName, *failErr)
+			}
+		}
+
 		switch r.StatusCode {
 		case http.StatusNotFound:
 			return nil, sdkErrors.ErrAPINotFound
@@ -95,6 +96,7 @@ func StreamPostWithContentType(
 		}
 	}
 
+	// Success: return open body for caller to close
 	return r.Body, nil
 }
 

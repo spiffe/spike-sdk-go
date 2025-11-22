@@ -51,10 +51,10 @@ func (a *API) CreatePolicy(
 		name, SPIFFEIDPattern, pathPattern, permissions)
 }
 
-// DeletePolicy removes an existing policy from the system using its name.
+// DeletePolicy removes an existing policy from the system using its unique ID.
 //
 // Parameters:
-//   - name: The name of the policy to be deleted
+//   - id: The unique identifier of the policy to be deleted
 //
 // Returns:
 //   - *sdkErrors.SDKError: nil on success, or one of the following errors:
@@ -66,44 +66,43 @@ func (a *API) CreatePolicy(
 //
 // Example:
 //
-//	err := api.DeletePolicy("doc-reader")
+//	err := api.DeletePolicy("policy-123")
 //	if err != nil {
 //	    log.Printf("Failed to delete policy: %v", err)
 //	}
-func (a *API) DeletePolicy(name string) *sdkErrors.SDKError {
-	return acl.DeletePolicy(a.source, name)
+func (a *API) DeletePolicy(id string) *sdkErrors.SDKError {
+	return acl.DeletePolicy(a.source, id)
 }
 
-// GetPolicy retrieves a policy from the system using its name.
+// GetPolicy retrieves a policy from the system using its unique ID.
 //
 // Parameters:
-//   - name: The name of the policy to retrieve
+//   - id: The unique identifier of the policy to retrieve
 //
 // Returns:
-//   - *data.Policy: The policy if found, nil if not found or on error
+//   - *data.Policy: The policy if found, nil on error
 //   - *sdkErrors.SDKError: nil on success, or one of the following errors:
 //   - ErrSPIFFENilX509Source: if the X509 source is nil
 //   - ErrDataMarshalFailure: if request serialization fails
-//   - Errors from net.Post(): if the HTTP request fails (except ErrAPINotFound)
+//   - ErrAPINotFound: if the policy is not found
+//   - Errors from net.Post(): if the HTTP request fails
 //   - ErrDataUnmarshalFailure: if response parsing fails
 //   - Error from FromCode(): if the server returns an error
 //
-// Note: Returns (nil, nil) if the policy is not found (ErrAPINotFound)
-//
 // Example:
 //
-//	policy, err := api.GetPolicy("doc-reader")
+//	policy, err := api.GetPolicy("policy-123")
 //	if err != nil {
+//	    if err.Is(sdkErrors.ErrAPINotFound) {
+//	        log.Printf("Policy not found")
+//	        return
+//	    }
 //	    log.Printf("Error retrieving policy: %v", err)
 //	    return
 //	}
-//	if policy == nil {
-//	    log.Printf("Policy not found")
-//	    return
-//	}
 //	log.Printf("Found policy: %+v", policy)
-func (a *API) GetPolicy(name string) (*data.Policy, *sdkErrors.SDKError) {
-	return acl.GetPolicy(a.source, name)
+func (a *API) GetPolicy(id string) (*data.Policy, *sdkErrors.SDKError) {
+	return acl.GetPolicy(a.source, id)
 }
 
 // ListPolicies retrieves policies from the system, optionally filtering by

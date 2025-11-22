@@ -26,17 +26,18 @@ import (
 // It reads all data from r.Body and ensures the body is properly closed
 // after reading, even if an error occurs during the read operation.
 //
-// The function uses errors.Join to combine any read error with potential
-// close errors, ensuring that close failures are not silently ignored.
+// Close errors are logged but not returned to the caller, as the primary
+// operation (reading the body data) has already completed. If reading fails,
+// the error is returned immediately.
 //
 // Parameters:
 //   - r: HTTP request containing the body to read
 //
 // Returns:
-//   - bod: byte slice containing the full request body data
-//   - err: *sdkErrors.SDKError with ErrNetReadingRequestBody or
-//     ErrFSStreamCloseFailed if an error occurred during reading or
-//     closing the body
+//   - bod: byte slice containing the full request body data on success, nil on
+//     error
+//   - err: *sdkErrors.SDKError with ErrNetReadingRequestBody if reading fails,
+//     nil on success (close errors are only logged)
 //
 // Example:
 //
@@ -106,7 +107,7 @@ func AuthorizerWithPredicate(predicate func(string) bool) tlsconfig.Authorizer {
 //
 // Parameters:
 //   - source: An X509Source that provides the server's identity credentials and
-//     validates client certificates. It must be initialized and valid.
+//     validates client certificates. Must not be nil.
 //   - tlsPort: The network address and port for the server to listen on
 //     (e.g., ":8443").
 //   - predicate: A function that takes a client SPIFFE ID string and returns
@@ -119,9 +120,20 @@ func AuthorizerWithPredicate(predicate func(string) bool) tlsconfig.Authorizer {
 // The server uses the provided X509Source for both its own identity and for
 // validating client certificates. Client connections are only accepted if their
 // SPIFFE ID passes the provided predicate function.
+//
+// Note: Terminates the program via log.FatalErr if source is nil, as this
+// indicates a critical configuration error that should be caught during development.
 func CreateMTLSServerWithPredicate(source *workloadapi.X509Source,
 	tlsPort string,
 	predicate func(string) bool) *http.Server {
+	const fName = "CreateMTLSServerWithPredicate"
+
+	if source == nil {
+		failErr := sdkErrors.ErrSPIFFENilX509Source
+		failErr.Msg = "source cannot be nil"
+		log.FatalErr(fName, *failErr)
+	}
+
 	authorizer := AuthorizerWithPredicate(predicate)
 	tlsConfig := tlsconfig.MTLSServerConfig(source, source, authorizer)
 	server := &http.Server{
@@ -143,7 +155,7 @@ func CreateMTLSServerWithPredicate(source *workloadapi.X509Source,
 //
 // Parameters:
 //   - source: An X509Source that provides the server's identity credentials and
-//     validates client certificates. It must be initialized and valid.
+//     validates client certificates. Must not be nil.
 //   - tlsPort: The network address and port for the server to listen on
 //     (e.g., ":8443").
 //
@@ -154,6 +166,9 @@ func CreateMTLSServerWithPredicate(source *workloadapi.X509Source,
 // The server uses the provided X509Source for both its own identity and for
 // validating client certificates. Client connections are accepted from ANY
 // client with a valid SPIFFE certificate.
+//
+// Note: Terminates the program via log.FatalErr if source is nil, as this
+// indicates a critical configuration error that should be caught during development.
 func CreateMTLSServer(source *workloadapi.X509Source,
 	tlsPort string) *http.Server {
 	return CreateMTLSServerWithPredicate(source, tlsPort, predicate.AllowAll)

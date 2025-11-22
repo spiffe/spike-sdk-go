@@ -24,15 +24,14 @@ import (
 //   - version: Version number of the secret to retrieve
 //
 // Returns:
-//   - *data.Secret: Secret data if found, nil if secret not found
+//   - *data.Secret: Secret data if found, nil on error
 //   - *sdkErrors.SDKError: nil on success, or one of the following errors:
 //   - ErrSPIFFENilX509Source: if source is nil
 //   - ErrDataMarshalFailure: if request serialization fails
-//   - Errors from net.Post(): if the HTTP request fails (except ErrAPINotFound)
+//   - ErrAPINotFound: if the secret is not found
+//   - Errors from net.Post(): if the HTTP request fails
 //   - ErrDataUnmarshalFailure: if response parsing fails
 //   - Error from FromCode(): if the server returns an error
-//
-// Note: Returns (nil, nil) if the secret is not found (ErrAPINotFound)
 //
 // Example:
 //
@@ -57,9 +56,6 @@ func Get(
 	res, postErr := net.PostAndUnmarshal[reqres.SecretGetResponse](
 		source, url.SecretGet(), mr)
 	if postErr != nil {
-		if postErr.Is(sdkErrors.ErrAPINotFound) {
-			return nil, nil
-		}
 		return nil, postErr
 	}
 

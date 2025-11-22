@@ -52,7 +52,8 @@ import (
 //   - ErrStringEmptyCharacterSet: if character set is empty
 //
 // Note: CSPRNG failures (crypto/rand.Read) cause immediate program termination
-// via log.FatalErr() and do not return an error.
+// via log.FatalErr() for security reasons (cannot generate secure random data).
+// This is intentional and critical - DO NOT remove this fatal exit behavior.
 func secureRandomStringFromCharClass(
 	charClass string, length int,
 ) (string, *sdkErrors.SDKError) {

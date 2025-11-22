@@ -25,11 +25,11 @@ import (
 //   - id: The unique identifier of the policy to retrieve
 //
 // Returns:
-//   - (*data.Policy, nil) if the policy is found
-//   - (nil, nil) if the policy is not found
-//   - (nil, *sdkErrors.SDKError) if an error occurs:
+//   - *data.Policy: The policy if found, nil on error
+//   - *sdkErrors.SDKError: nil on success, or one of the following errors:
 //   - ErrSPIFFENilX509Source: if source is nil
 //   - ErrDataMarshalFailure: if request serialization fails
+//   - ErrAPINotFound: if the policy is not found
 //   - ErrAPIPostFailed: if the HTTP request fails
 //   - ErrDataUnmarshalFailure: if response parsing fails
 //   - Error from FromCode(): if the server returns an error (e.g.,
@@ -45,11 +45,11 @@ import (
 //
 //	policy, err := GetPolicy(source, "policy-123")
 //	if err != nil {
+//	    if err.Is(sdkErrors.ErrAPINotFound) {
+//	        log.Printf("Policy not found")
+//	        return
+//	    }
 //	    log.Printf("Error retrieving policy: %v", err)
-//	    return
-//	}
-//	if policy == nil {
-//	    log.Printf("Policy not found")
 //	    return
 //	}
 //
@@ -73,9 +73,6 @@ func GetPolicy(
 	res, postErr := net.PostAndUnmarshal[reqres.PolicyReadResponse](
 		source, url.PolicyGet(), mr)
 	if postErr != nil {
-		if postErr.Is(sdkErrors.ErrAPINotFound) {
-			return nil, nil
-		}
 		return nil, postErr
 	}
 

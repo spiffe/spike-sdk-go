@@ -45,6 +45,8 @@ func Undelete(source *workloadapi.X509Source,
 	var vv []int
 	if len(versions) == 0 {
 		vv = []int{}
+	} else {
+		vv = versions
 	}
 
 	r := reqres.SecretUndeleteRequest{Path: path, Versions: vv}

@@ -37,15 +37,15 @@ import (
 //   - keeperID: The unique identifier of the target Keeper
 //
 // Returns:
-//   - nil if successful
-//   - *sdkErrors.SDKError if an error occurs:
+//   - *sdkErrors.SDKError: nil on success, or one of the following errors:
 //   - ErrSPIFFENilX509Source: if source is nil
 //   - Errors from net.Post(): if the HTTP request fails (e.g., ErrAPINotFound,
-//     ErrAccessUnauthorized, ErrAPIBadRequest, ErrStateNotReady, ErrNetPeerConnection)
+//     ErrAccessUnauthorized, ErrAPIBadRequest, ErrStateNotReady,
+//     ErrNetPeerConnection)
 //
 // Note: The function will fatally crash (via log.FatalErr) for unrecoverable
-// errors such as marshal failures (ErrDataMarshalFailure) or invalid contribution
-// length (ErrCryptoInvalidEncryptionKeyLength).
+// errors such as marshal failures (ErrDataMarshalFailure) or invalid
+// contribution length (ErrCryptoInvalidEncryptionKeyLength).
 //
 // Example:
 //
@@ -137,8 +137,7 @@ func Contribute(
 //   - ciphertext: The encrypted random text
 //
 // Returns:
-//   - nil if verification succeeds (hash matches)
-//   - *sdkErrors.SDKError if an error occurs:
+//   - *sdkErrors.SDKError: nil on success (hash matches), or one of the following errors:
 //   - ErrSPIFFENilX509Source: if source is nil
 //   - Errors from net.Post(): if the HTTP request fails (e.g., ErrAPINotFound,
 //     ErrAccessUnauthorized, ErrAPIBadRequest, ErrStateNotReady, ErrNetPeerConnection)

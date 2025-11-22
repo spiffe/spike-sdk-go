@@ -25,15 +25,14 @@ import (
 //   - version: Version number of the secret to retrieve
 //
 // Returns:
-//   - *data.SecretMetadata: Secret metadata if found, nil if not found
+//   - *data.SecretMetadata: Secret metadata if found, nil on error
 //   - *sdkErrors.SDKError: nil on success, or one of the following errors:
 //   - ErrSPIFFENilX509Source: if source is nil
 //   - ErrDataMarshalFailure: if request serialization fails
-//   - Errors from net.Post(): if the HTTP request fails (except ErrAPINotFound)
+//   - ErrAPINotFound: if the secret metadata is not found
+//   - Errors from net.Post(): if the HTTP request fails
 //   - ErrDataUnmarshalFailure: if response parsing fails
 //   - Error from FromCode(): if the server returns an error
-//
-// Note: Returns (nil, nil) if the secret metadata is not found (ErrAPINotFound)
 //
 // Example:
 //
@@ -57,9 +56,6 @@ func GetMetadata(
 	res, postErr := net.PostAndUnmarshal[reqres.SecretMetadataResponse](
 		source, url.SecretMetadataGet(), mr)
 	if postErr != nil {
-		if postErr.Is(sdkErrors.ErrAPINotFound) {
-			return nil, nil
-		}
 		return nil, postErr
 	}
 

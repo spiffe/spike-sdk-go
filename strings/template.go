@@ -130,7 +130,9 @@ import (
 //   - ErrStringEmptyCharacterSet: if character set is empty
 //
 // Note: CSPRNG failures (crypto/rand.Read) cause immediate program termination
-// via log.FatalErr() and do not return an error.
+// via log.FatalErr() for security reasons (cannot generate secure random data).
+// This is intentional and critical - see "Security: Fatal Exit on CSPRNG Failure"
+// section above for rationale.
 func StringFromTemplate(template string) (string, *sdkErrors.SDKError) {
 	// Regular expression to match generator expressions like [a-z]{5} or [\w]{3}
 	// Modified to capture any content in braces, not just digits
