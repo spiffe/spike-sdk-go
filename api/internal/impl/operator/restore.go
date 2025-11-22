@@ -6,7 +6,6 @@ package operator
 
 import (
 	"encoding/json"
-	"errors"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 
@@ -21,6 +20,29 @@ import (
 
 // Restore submits a recovery shard to continue the restoration process.
 //
+// SVID Acquisition Error Handling:
+//
+// This function attempts to acquire an X.509 SVID from the SPIFFE Workload API
+// via Unix domain socket. While UDS connections are generally more reliable than
+// network sockets, SVID acquisition can fail in both fatal and transient ways:
+//
+// Fatal failures (indicate misconfiguration):
+//   - Socket file doesn't exist (SPIRE agent never started)
+//   - Permission denied (deployment/configuration error)
+//   - Wrong socket path (configuration error)
+//
+// Transient failures (may succeed on retry):
+//   - SPIRE agent restarting (brief unavailability, recovers in seconds)
+//   - SVID not yet provisioned (startup race condition after attestation)
+//   - File descriptor exhaustion (resource pressure may clear)
+//   - SVID rotation failure (temporary SPIRE server issue)
+//   - Workload API connection lost after source creation (agent crash/restart)
+//
+// Since restoration is often performed during emergency procedures when
+// infrastructure may be unstable, this function returns errors rather than
+// crashing to allow retry logic. Callers can implement exponential backoff
+// or other retry strategies for transient failures.
+//
 // Parameters:
 //   - source *workloadapi.X509Source: X509Source used for mTLS client
 //     authentication
@@ -30,87 +52,78 @@ import (
 //
 // Returns:
 //   - *data.RestorationStatus: Status containing shards collected, remaining,
-//     and restoration state if successful, nil if not found
-//   - error: nil on success, error if:
-//   - Failed to marshal restore request
-//   - Failed to create mTLS client
-//   - Request failed (except for not found case)
-//   - Failed to parse response body
-//   - Server returned error in response
+//     and restoration state if successful
+//   - *sdkErrors.SDKError: nil on success, or one of the following errors:
+//   - ErrSPIFFENilX509Source: if source is nil
+//   - ErrSPIFFEFailedToExtractX509SVID: if SVID acquisition fails (may be
+//     transient - see above for retry guidance)
+//   - ErrDataMarshalFailure: if request serialization fails
+//   - Errors from net.Post(): if the HTTP request fails
+//   - ErrDataUnmarshalFailure: if response parsing fails
+//   - Error from FromCode(): if the server returns an error
+//
+// Security Note: The function will fatally crash (via log.FatalErr) if the
+// caller is not SPIKE Pilot. This is a programming error, not a runtime
+// condition, as restoration operations must only be performed by Pilot roles.
 //
 // Example:
 //
 //	status, err := Restore(x509Source, shardIndex, shardValue)
+//	if err != nil {
+//	    // SVID acquisition failures may be transient - consider retry logic
+//	    return nil, err
+//	}
 func Restore(
 	source *workloadapi.X509Source, shardIndex int, shardValue *[32]byte,
-) (*data.RestorationStatus, error) {
-	if source == nil {
-		return nil, sdkErrors.ErrNilX509Source
-	}
-
+) (*data.RestorationStatus, *sdkErrors.SDKError) {
 	const fName = "restore"
 
-	r := reqres.RestoreRequest{
-		ID:    shardIndex,
-		Shard: shardValue,
+	if source == nil {
+		return nil, sdkErrors.ErrSPIFFENilX509Source
 	}
+
+	r := reqres.RestoreRequest{ID: shardIndex, Shard: shardValue}
 
 	svid, err := source.GetX509SVID()
 	if err != nil {
-		log.FatalLn(fName, "message", "Problem acquiring SVID", "err", err.Error())
+		failErr := sdkErrors.ErrSPIFFEFailedToExtractX509SVID.Wrap(err)
+		failErr.Msg = "could not acquire SVID"
+		return nil, failErr
 	}
 	if svid == nil {
-		log.FatalLn("no X509SVID in source")
-	}
-	if svid != nil {
-		selfSPIFFEID := svid.ID.String()
-		// Security: Recovery and Restoration can ONLY be done via SPIKE Pilot.
-		if !spiffeid.IsPilot(selfSPIFFEID) {
-			log.FatalLn(fName,
-				"message",
-				"You can restore only from SPIKE Pilot: spiffeid is not SPIKE Pilot",
-			)
-		}
+		failErr := sdkErrors.ErrSPIFFEFailedToExtractX509SVID
+		failErr.Msg = "no X509SVID in source"
+		return nil, failErr
 	}
 
-	mr, err := json.Marshal(r)
+	selfSPIFFEID := svid.ID.String()
+
+	// Security: Recovery and Restoration can ONLY be done via SPIKE Pilot.
+	if !spiffeid.IsPilot(selfSPIFFEID) {
+		failErr := sdkErrors.ErrAccessUnauthorized
+		failErr.Msg = "restoration can only be performed from SPIKE Pilot"
+		log.FatalErr(fName, *failErr)
+	}
+
+	mr, marshalErr := json.Marshal(r)
 	// Security: Zero out r.Shard as soon as we're done with it
 	for i := range r.Shard {
 		r.Shard[i] = 0
 	}
-
-	if err != nil {
-		return nil, errors.Join(
-			errors.New("restore: failed to marshal recover request"),
-			err,
-		)
+	if marshalErr != nil {
+		failErr := sdkErrors.ErrDataMarshalFailure.Wrap(marshalErr)
+		failErr.Msg = "failed to marshal restore request"
+		return nil, failErr
 	}
 
-	client := net.CreateMTLSClientForNexus(source)
-
-	body, err := net.Post(client, url.Restore(), mr)
+	res, postErr := net.PostAndUnmarshal[reqres.RestoreResponse](
+		source, url.Restore(), mr)
 	// Security: Zero out mr after the POST request is complete
 	for i := range mr {
 		mr[i] = 0
 	}
-
-	if err != nil {
-		if errors.Is(err, sdkErrors.ErrNotFound) {
-			return nil, nil
-		}
-		return nil, err
-	}
-
-	var res reqres.RestoreResponse
-	err = json.Unmarshal(body, &res)
-	if err != nil {
-		return nil, errors.Join(
-			errors.New("recover: Problem parsing response body"),
-			err,
-		)
-	}
-	if res.Err != "" {
-		return nil, errors.New(string(res.Err))
+	if postErr != nil {
+		return nil, postErr
 	}
 
 	return &data.RestorationStatus{

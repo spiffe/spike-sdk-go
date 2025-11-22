@@ -14,10 +14,12 @@ import (
 const stackTracesOnLogFatalEnvVar = "SPIKE_STACK_TRACES_ON_LOG_FATAL"
 
 // stackTracesOnLogFatalVal checks if stack traces should be enabled for fatal
-// log calls by reading the SPIKE_STACK_TRACES_ON_LOG_FATAL environment variable.
+// log calls by reading the SPIKE_STACK_TRACES_ON_LOG_FATAL environment
+// variable.
 //
 // Returns:
-//   - bool: true if the environment variable is set to "true" (case-insensitive),
+//   - bool: true if the environment variable is set to "true"
+//     (case-insensitive),
 //     false otherwise or if the variable is empty/unset
 func stackTracesOnLogFatalVal() bool {
 	s := os.Getenv(stackTracesOnLogFatalEnvVar)

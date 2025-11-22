@@ -7,22 +7,44 @@ package net
 import (
 	"io"
 	"net/http"
+
+	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
 )
 
 // body reads and returns the entire response body from an HTTP response.
 // The response body is read completely and returned as a byte slice.
 //
+// This is an internal helper function used by the net package to process
+// HTTP responses.
+//
 // Parameters:
-//   - r: the HTTP response to read from
+//   - r: The HTTP response to read from
 //
 // Returns:
-//   - []byte: the complete response body
-//   - error: non-nil if reading the response body fails
-func body(r *http.Response) (bod []byte, err error) {
-	body, err := io.ReadAll(r.Body)
+//   - []byte: The complete response body, nil on error
+//   - *sdkErrors.SDKError: nil on success, or one of the following errors:
+//   - ErrNetReadingResponseBody: if reading the response body fails
+//
+// Example:
+//
+//	resp, err := http.Get(url)
+//	if err != nil {
+//	    return nil, err
+//	}
+//	defer resp.Body.Close()
+//
+//	bodyBytes, sdkErr := body(resp)
+//	if sdkErr != nil {
+//	    log.Printf("Failed to read response body: %v", sdkErr)
+//	    return nil, sdkErr
+//	}
+func body(r *http.Response) ([]byte, *sdkErrors.SDKError) {
+	bodyBytes, err := io.ReadAll(r.Body)
 	if err != nil {
-		return nil, err
+		failErr := sdkErrors.ErrNetReadingResponseBody.Wrap(err)
+		failErr.Msg = "failed to read HTTP response body"
+		return nil, failErr
 	}
 
-	return body, err
+	return bodyBytes, nil
 }

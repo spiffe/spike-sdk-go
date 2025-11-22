@@ -6,7 +6,6 @@ package acl
 
 import (
 	"encoding/json"
-	"errors"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 
@@ -26,9 +25,15 @@ import (
 //   - id: The unique identifier of the policy to retrieve
 //
 // Returns:
-//   - (*data.Policy, nil) if the policy is found
-//   - (nil, nil) if the policy is not found
-//   - (nil, error) if an error occurs during the operation
+//   - *data.Policy: The policy if found, nil on error
+//   - *sdkErrors.SDKError: nil on success, or one of the following errors:
+//   - ErrSPIFFENilX509Source: if source is nil
+//   - ErrDataMarshalFailure: if request serialization fails
+//   - ErrAPINotFound: if the policy is not found
+//   - ErrAPIPostFailed: if the HTTP request fails
+//   - ErrDataUnmarshalFailure: if response parsing fails
+//   - Error from FromCode(): if the server returns an error (e.g.,
+//     ErrAccessUnauthorized, ErrAPIBadRequest, etc.)
 //
 // Example:
 //
@@ -40,52 +45,35 @@ import (
 //
 //	policy, err := GetPolicy(source, "policy-123")
 //	if err != nil {
+//	    if err.Is(sdkErrors.ErrAPINotFound) {
+//	        log.Printf("Policy not found")
+//	        return
+//	    }
 //	    log.Printf("Error retrieving policy: %v", err)
-//	    return
-//	}
-//	if policy == nil {
-//	    log.Printf("Policy not found")
 //	    return
 //	}
 //
 //	log.Printf("Found policy: %+v", policy)
 func GetPolicy(
 	source *workloadapi.X509Source, id string,
-) (*data.Policy, error) {
+) (*data.Policy, *sdkErrors.SDKError) {
 	if source == nil {
-		return nil, sdkErrors.ErrNilX509Source
+		return nil, sdkErrors.ErrSPIFFENilX509Source
 	}
 
 	r := reqres.PolicyReadRequest{ID: id}
 
-	mr, err := json.Marshal(r)
-	if err != nil {
-		return nil, errors.Join(
-			errors.New("getPolicy: I am having problem generating the payload"),
-			err,
-		)
+	mr, marshalErr := json.Marshal(r)
+	if marshalErr != nil {
+		failErr := sdkErrors.ErrDataMarshalFailure.Wrap(marshalErr)
+		failErr.Msg = "problem generating the payload"
+		return nil, failErr
 	}
 
-	client := net.CreateMTLSClientForNexus(source)
-
-	body, err := net.Post(client, url.PolicyGet(), mr)
-	if err != nil {
-		if errors.Is(err, sdkErrors.ErrNotFound) {
-			return nil, nil
-		}
-		return nil, err
-	}
-
-	var res reqres.PolicyReadResponse
-	err = json.Unmarshal(body, &res)
-	if err != nil {
-		return nil, errors.Join(
-			errors.New("getPolicy: Problem parsing response body"),
-			err,
-		)
-	}
-	if res.Err != "" {
-		return nil, errors.New(string(res.Err))
+	res, postErr := net.PostAndUnmarshal[reqres.PolicyReadResponse](
+		source, url.PolicyGet(), mr)
+	if postErr != nil {
+		return nil, postErr
 	}
 
 	return &res.Policy, nil

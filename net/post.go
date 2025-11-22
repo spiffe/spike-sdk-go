@@ -6,7 +6,6 @@ package net
 
 import (
 	"bytes"
-	"errors"
 	"io"
 	"net/http"
 
@@ -25,16 +24,18 @@ import (
 //   - mr: A byte slice containing the marshaled JSON request body.
 //
 // Returns:
-//   - []byte: The response body if the request is successful.
-//   - error: An error if any of the following occur:
-//   - Connection failure during POST request
-//   - Non-200 status code in response
-//   - Failure to read response body
-//   - Failure to close response body
+//   - []byte: The response body if the request is successful
+//   - *sdkErrors.SDKError: nil on success, or one of the following errors:
+//   - ErrAPIBadRequest: if request creation fails or server returns 400
+//   - ErrNetPeerConnection: if connection to peer fails or unexpected status
+//     code
+//   - ErrAPINotFound: if server returns 404
+//   - ErrAccessUnauthorized: if server returns 401
+//   - ErrStateNotReady: if server returns 503
+//   - ErrNetReadingResponseBody: if reading response body fails
 //
 // The function ensures proper cleanup by always attempting to close the
-// response body, even if an error occurs during reading. Any error from closing
-// the body is joined with any existing error using errors.Join.
+// response body, even if an error occurs during reading.
 //
 // Example:
 //
@@ -44,16 +45,17 @@ import (
 //	if err != nil {
 //	    log.Fatalf("failed to post: %v", err)
 //	}
-func Post(client *http.Client, path string, mr []byte) ([]byte, error) {
+func Post(
+	client *http.Client, path string, mr []byte,
+) ([]byte, *sdkErrors.SDKError) {
 	const fName = "Post"
 
 	// Create the request while preserving the mTLS client
 	req, err := http.NewRequest("POST", path, bytes.NewBuffer(mr))
 	if err != nil {
-		return nil, errors.Join(
-			errors.New("post: Failed to create request"),
-			err,
-		)
+		failErr := sdkErrors.ErrAPIBadRequest.Wrap(err)
+		failErr.Msg = "failed to create request"
+		return nil, failErr
 	}
 
 	// Set headers
@@ -63,10 +65,8 @@ func Post(client *http.Client, path string, mr []byte) ([]byte, error) {
 	//nolint:bodyclose // Response body is properly closed in defer block
 	r, err := client.Do(req)
 	if err != nil {
-		return []byte{}, errors.Join(
-			errors.New("post: Problem connecting to peer"),
-			err,
-		)
+		failErr := sdkErrors.ErrNetPeerConnection.Wrap(err)
+		return []byte{}, failErr
 	}
 	defer func(b io.ReadCloser) {
 		if b == nil {
@@ -74,49 +74,39 @@ func Post(client *http.Client, path string, mr []byte) ([]byte, error) {
 		}
 		err := b.Close()
 		if err != nil {
-			log.Log().Info(
-				fName,
-				"msg", "Failed to close response body",
-				"err", err.Error(),
-			)
+			failErr := sdkErrors.ErrFSStreamCloseFailed.Wrap(err)
+			failErr.Msg = "failed to close response body"
+			log.WarnErr(fName, *failErr)
 		}
 	}(r.Body)
 
 	if r.StatusCode != http.StatusOK {
 		if r.StatusCode == http.StatusNotFound {
-			return []byte{}, sdkErrors.ErrNotFound
+			return []byte{}, sdkErrors.ErrAPINotFound
 		}
 
 		if r.StatusCode == http.StatusUnauthorized {
-			return []byte{}, sdkErrors.ErrUnauthorized
+			return []byte{}, sdkErrors.ErrAccessUnauthorized
 		}
 
 		if r.StatusCode == http.StatusBadRequest {
-			return []byte{}, sdkErrors.ErrBadRequest
+			return []byte{}, sdkErrors.ErrAPIBadRequest
 		}
 
 		// SPIKE Nexus is likely not initialized or in bad shape:
 		if r.StatusCode == http.StatusServiceUnavailable {
-			return []byte{}, sdkErrors.ErrNotReady
+			return []byte{}, sdkErrors.ErrStateNotReady
 		}
 
-		return []byte{}, errors.New("post: Problem connecting to peer")
+		failErr := sdkErrors.ErrNetPeerConnection
+		failErr.Msg = "unexpected status code from peer"
+		return []byte{}, failErr
 	}
 
-	b, err := body(r)
-	if err != nil {
-		return []byte{}, errors.Join(
-			errors.New("post: Problem reading response body"),
-			err,
-		)
+	b, sdkErr := body(r)
+	if sdkErr != nil {
+		return nil, sdkErr
 	}
-
-	defer func(b io.ReadCloser) {
-		if b == nil {
-			return
-		}
-		err = errors.Join(err, b.Close())
-	}(r.Body)
 
 	return b, nil
 }

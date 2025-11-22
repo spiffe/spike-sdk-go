@@ -8,22 +8,60 @@ import (
 	"net/url"
 
 	"github.com/spiffe/spike-sdk-go/config/env"
+	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
+	"github.com/spiffe/spike-sdk-go/log"
 )
 
-// Restore returns the URL for operator's restore endpoint.
+// Restore constructs the full API endpoint URL for operator restore requests.
+//
+// It joins the SPIKE Nexus API root URL (from environment configuration) with
+// the operator restore path to create a complete endpoint URL for submitting
+// recovery shards during the restoration process.
+//
+// Returns:
+//   - string: The complete endpoint URL for operator restore requests
+//
+// Note: The function will fatally crash (via log.FatalErr) if URL path joining
+// fails.
+//
+// Example:
+//
+//	endpoint := Restore()
 func Restore() string {
-	u, _ := url.JoinPath(
-		env.NexusAPIRootVal(),
-		string(NexusOperatorRestore),
-	)
+	const fName = "Restore"
+
+	u, err := url.JoinPath(env.NexusAPIRootVal(), string(NexusOperatorRestore))
+	if err != nil {
+		failErr := sdkErrors.ErrNetURLJoinPathFailed.Wrap(err)
+		failErr.Msg = "failed to join SPIKE Nexus operator restore path"
+		log.FatalErr(fName, *failErr)
+	}
 	return u
 }
 
-// Recover returns the URL for operator's recover endpoint.
+// Recover constructs the full API endpoint URL for operator recover requests.
+//
+// It joins the SPIKE Nexus API root URL (from environment configuration) with
+// the operator recover path to create a complete endpoint URL for initiating
+// the recovery process and retrieving recovery shards.
+//
+// Returns:
+//   - string: The complete endpoint URL for operator recover requests
+//
+// Note: The function will fatally crash (via log.FatalErr) if URL path joining
+// fails.
+//
+// Example:
+//
+//	endpoint := Recover()
 func Recover() string {
-	u, _ := url.JoinPath(
-		env.NexusAPIRootVal(),
-		string(NexusOperatorRecover),
-	)
+	const fName = "Recover"
+
+	u, err := url.JoinPath(env.NexusAPIRootVal(), string(NexusOperatorRecover))
+	if err != nil {
+		failErr := sdkErrors.ErrNetURLJoinPathFailed.Wrap(err)
+		failErr.Msg = "failed to join SPIKE Nexus operator recover path"
+		log.FatalErr(fName, *failErr)
+	}
 	return u
 }

@@ -6,7 +6,6 @@ package secret
 
 import (
 	"encoding/json"
-	"errors"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 
@@ -25,9 +24,14 @@ import (
 //   - version: Version number of the secret to retrieve
 //
 // Returns:
-//   - *Secret: Secret data if found, nil if secret not found
-//   - error: nil on success, unauthorized error if not logged in, or
-//     wrapped error on request/parsing failure
+//   - *data.Secret: Secret data if found, nil on error
+//   - *sdkErrors.SDKError: nil on success, or one of the following errors:
+//   - ErrSPIFFENilX509Source: if source is nil
+//   - ErrDataMarshalFailure: if request serialization fails
+//   - ErrAPINotFound: if the secret is not found
+//   - Errors from net.Post(): if the HTTP request fails
+//   - ErrDataUnmarshalFailure: if response parsing fails
+//   - Error from FromCode(): if the server returns an error
 //
 // Example:
 //
@@ -35,44 +39,24 @@ import (
 func Get(
 	source *workloadapi.X509Source,
 	path string, version int,
-) (*data.Secret, error) {
+) (*data.Secret, *sdkErrors.SDKError) {
 	if source == nil {
-		return nil, sdkErrors.ErrNilX509Source
+		return nil, sdkErrors.ErrSPIFFENilX509Source
 	}
 
-	r := reqres.SecretReadRequest{
-		Path:    path,
-		Version: version,
+	r := reqres.SecretGetRequest{Path: path, Version: version}
+
+	mr, marshalErr := json.Marshal(r)
+	if marshalErr != nil {
+		failErr := sdkErrors.ErrDataMarshalFailure.Wrap(marshalErr)
+		failErr.Msg = "problem generating the payload"
+		return nil, failErr
 	}
 
-	mr, err := json.Marshal(r)
-	if err != nil {
-		return nil, errors.Join(
-			errors.New("getSecret: I am having problem generating the payload"),
-			err,
-		)
-	}
-
-	client := net.CreateMTLSClientForNexus(source)
-
-	body, err := net.Post(client, url.SecretGet(), mr)
-	if err != nil {
-		if errors.Is(err, sdkErrors.ErrNotFound) {
-			return nil, nil
-		}
-		return nil, err
-	}
-
-	var res reqres.SecretReadResponse
-	err = json.Unmarshal(body, &res)
-	if err != nil {
-		return nil, errors.Join(
-			errors.New("getSecret: Problem parsing response body"),
-			err,
-		)
-	}
-	if res.Err != "" {
-		return nil, errors.New(string(res.Err))
+	res, postErr := net.PostAndUnmarshal[reqres.SecretGetResponse](
+		source, url.SecretGet(), mr)
+	if postErr != nil {
+		return nil, postErr
 	}
 
 	return &data.Secret{Data: res.Data}, nil

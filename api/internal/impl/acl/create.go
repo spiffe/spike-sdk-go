@@ -6,7 +6,6 @@ package acl
 
 import (
 	"encoding/json"
-	"errors"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 
@@ -29,8 +28,13 @@ import (
 //   - permissions: A slice of PolicyPermission defining the access rights
 //
 // Returns:
-//   - nil if successful
-//   - error if marshaling, network request, or server-side creation fails
+//   - *sdkErrors.SDKError: nil on success, or one of the following errors:
+//   - ErrSPIFFENilX509Source: if source is nil
+//   - ErrDataMarshalFailure: if request serialization fails
+//   - ErrAPIPostFailed: if the HTTP request fails
+//   - ErrDataUnmarshalFailure: if response parsing fails
+//   - Error from FromCode(): if the server returns an error (e.g.,
+//     ErrAccessUnauthorized, ErrAPIBadRequest, etc.)
 //
 // Example:
 //
@@ -60,46 +64,28 @@ import (
 func CreatePolicy(source *workloadapi.X509Source,
 	name string, SPIFFEIDPattern string, pathPattern string,
 	permissions []data.PolicyPermission,
-) error {
+) *sdkErrors.SDKError {
 	if source == nil {
-		return sdkErrors.ErrNilX509Source
+		return sdkErrors.ErrSPIFFENilX509Source
 	}
 
-	r := reqres.PolicyCreateRequest{
+	r := reqres.PolicyPutRequest{
 		Name:            name,
 		SPIFFEIDPattern: SPIFFEIDPattern,
 		PathPattern:     pathPattern,
 		Permissions:     permissions,
 	}
 
-	mr, err := json.Marshal(r)
-	if err != nil {
-		return errors.Join(
-			errors.New(
-				"createPolicy: I am having problem generating the payload",
-			),
-			err,
-		)
+	var mr []byte
+
+	mr, marshalErr := json.Marshal(r)
+	if marshalErr != nil {
+		failErr := sdkErrors.ErrDataMarshalFailure.Wrap(marshalErr)
+		failErr.Msg = "problem generating the payload"
+		return failErr
 	}
 
-	client := net.CreateMTLSClientForNexus(source)
-
-	body, err := net.Post(client, url.PolicyCreate(), mr)
-	if err != nil {
-		return err
-	}
-
-	res := reqres.PolicyCreateResponse{}
-	err = json.Unmarshal(body, &res)
-	if err != nil {
-		return errors.Join(
-			errors.New("createPolicy: Problem parsing response body"),
-			err,
-		)
-	}
-	if res.Err != "" {
-		return errors.New(string(res.Err))
-	}
-
-	return nil
+	_, postErr := net.PostAndUnmarshal[reqres.PolicyPutResponse](
+		source, url.PolicyCreate(), mr)
+	return postErr
 }

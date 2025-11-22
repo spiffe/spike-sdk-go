@@ -27,6 +27,9 @@ var loggerMutex sync.Mutex
 //
 // By convention, when using the returned logger, the first argument (msg)
 // should be the function name (fName) from which the logging call is made.
+//
+// Returns:
+//   - *slog.Logger: A thread-safe singleton logger instance
 func Log() *slog.Logger {
 	loggerMutex.Lock()
 	defer loggerMutex.Unlock()
@@ -45,57 +48,64 @@ func Log() *slog.Logger {
 	return logger
 }
 
+// Debug logs a message at Debug level.
+//
+// Parameters:
+//   - msg: The function name from which the call is made
+//   - args: Key-value pairs to be logged as structured fields
+func Debug(msg string, args ...any) {
+	Log().Debug(msg, args...)
+}
+
 // Info logs a message at Info level.
-// The msg parameter should be the function name from which the call is made.
-// The args parameter contains key-value pairs to be logged as structured fields.
+//
+// Parameters:
+//   - msg: The function name from which the call is made
+//   - args: Key-value pairs to be logged as structured fields
 func Info(msg string, args ...any) {
 	Log().Info(msg, args...)
 }
 
 // Warn logs a message at Warn level.
-// The msg parameter should be the function name from which the call is made.
-// The args parameter contains key-value pairs to be logged as structured fields.
+//
+// Parameters:
+//   - msg: The function name from which the call is made
+//   - args: Key-value pairs to be logged as structured fields
 func Warn(msg string, args ...any) {
 	Log().Warn(msg, args...)
 }
 
 // Error logs a message at Error level.
-// The msg parameter should be the function name from which the call is made.
-// The args parameter contains key-value pairs to be logged as structured fields.
+//
+// Parameters:
+//   - msg: The function name from which the call is made
+//   - args: Key-value pairs to be logged as structured fields
 func Error(msg string, args ...any) {
 	Log().Error(msg, args...)
 }
 
-// Debug logs a message at Debug level.
-// The msg parameter should be the function name from which the call is made.
-// The args parameter contains key-value pairs to be logged as structured fields.
-func Debug(msg string, args ...any) {
-	Log().Debug(msg, args...)
-}
-
 // FatalLn logs a message at Fatal level with a line feed.
-// The fName parameter indicates the function name from which the call is made.
-// The args parameter contains the values to be logged, which will be formatted
-// and joined.
 //
 // By default, this function exits cleanly with status code 1 to avoid leaking
 // sensitive information through stack traces in production. To enable stack
 // traces for development and testing, set SPIKE_STACK_TRACES_ON_LOG_FATAL=true.
+//
+// Parameters:
+//   - fName: The function name from which the call is made
+//   - args: The values to be logged, which will be formatted and joined
 func FatalLn(fName string, args ...any) {
 	Log().Error(fName, args...)
 	fatalExit(fName, args)
 }
 
-// FatalErr logs an SDK error at Fatal level and exits the program.
-// The fName parameter indicates the function name from which the call is made.
-// The err parameter is an SDKError that will be logged with its message, code,
-// and error text as structured fields.
+// DebugErr logs an SDK error at Debug level.
 //
-// By default, this function exits cleanly with status code 1 to avoid leaking
-// sensitive information through stack traces in production. To enable stack
-// traces for development and testing, set SPIKE_STACK_TRACES_ON_LOG_FATAL=true.
-func FatalErr(fName string, err sdkErrors.SDKError) {
-	FatalLn(
+// Parameters:
+//   - fName: The function name from which the call is made
+//   - err: An SDKError that will be logged with its message, code, and error
+//     text as structured fields
+func DebugErr(fName string, err sdkErrors.SDKError) {
+	Log().Debug(
 		fName,
 		"message", err.Msg,
 		"code", err.Code,
@@ -104,9 +114,11 @@ func FatalErr(fName string, err sdkErrors.SDKError) {
 }
 
 // InfoErr logs an SDK error at Info level.
-// The fName parameter indicates the function name from which the call is made.
-// The err parameter is an SDKError that will be logged with its message, code,
-// and error text as structured fields.
+//
+// Parameters:
+//   - fName: The function name from which the call is made
+//   - err: An SDKError that will be logged with its message, code, and error
+//     text as structured fields
 func InfoErr(fName string, err sdkErrors.SDKError) {
 	Log().Info(
 		fName,
@@ -117,9 +129,11 @@ func InfoErr(fName string, err sdkErrors.SDKError) {
 }
 
 // WarnErr logs an SDK error at Warn level.
-// The fName parameter indicates the function name from which the call is made.
-// The err parameter is an SDKError that will be logged with its message, code,
-// and error text as structured fields.
+//
+// Parameters:
+//   - fName: The function name from which the call is made
+//   - err: An SDKError that will be logged with its message, code, and error
+//     text as structured fields
 func WarnErr(fName string, err sdkErrors.SDKError) {
 	Log().Warn(
 		fName,
@@ -130,11 +144,32 @@ func WarnErr(fName string, err sdkErrors.SDKError) {
 }
 
 // ErrorErr logs an SDK error at Error level.
-// The fName parameter indicates the function name from which the call is made.
-// The err parameter is an SDKError that will be logged with its message, code,
-// and error text as structured fields.
+//
+// Parameters:
+//   - fName: The function name from which the call is made
+//   - err: An SDKError that will be logged with its message, code, and error
+//     text as structured fields
 func ErrorErr(fName string, err sdkErrors.SDKError) {
 	Log().Error(
+		fName,
+		"message", err.Msg,
+		"code", err.Code,
+		"err", err.Error(),
+	)
+}
+
+// FatalErr logs an SDK error at Fatal level and exits the program.
+//
+// By default, this function exits cleanly with status code 1 to avoid leaking
+// sensitive information through stack traces in production. To enable stack
+// traces for development and testing, set SPIKE_STACK_TRACES_ON_LOG_FATAL=true.
+//
+// Parameters:
+//   - fName: The function name from which the call is made
+//   - err: An SDKError that will be logged with its message, code, and error
+//     text as structured fields
+func FatalErr(fName string, err sdkErrors.SDKError) {
+	FatalLn(
 		fName,
 		"message", err.Msg,
 		"code", err.Code,
@@ -149,10 +184,12 @@ const systemLogLevelEnvVar = "SPIKE_SYSTEM_LOG_LEVEL"
 //
 // It reads from the SPIKE_SYSTEM_LOG_LEVEL environment variable and
 // converts it to the corresponding slog.Level value.
-// Valid values (case-insensitive) are:
+//
+// Returns:
+//   - slog.Level: The configured log level. Valid values (case-insensitive) are:
 //   - "DEBUG": returns slog.LevelDebug
 //   - "INFO": returns slog.LevelInfo
-//   - "WARN": returns slog.LevelWarn
+//   - "WARN": returns slog.LevelWarn (default)
 //   - "ERROR": returns slog.LevelError
 //
 // If the environment variable is not set or contains an invalid value,

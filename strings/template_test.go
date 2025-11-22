@@ -2,11 +2,11 @@
 //  \\\\\ Copyright 2024-present SPIKE contributors.
 // \\\\\\\ SPDX-License-Identifier: Apache-2.0
 
-package crypto
+package strings
 
 import (
 	"regexp"
-	"strings"
+	stdstrings "strings"
 	"testing"
 )
 
@@ -22,10 +22,10 @@ func TestStringFromTemplate(t *testing.T) {
 			name:     "simple word characters",
 			template: `football[\w]{8}bartender`,
 			validate: func(t *testing.T, result string) {
-				if !strings.HasPrefix(result, "football") {
+				if !stdstrings.HasPrefix(result, "football") {
 					t.Errorf("result should start with 'football', got: %s", result)
 				}
-				if !strings.HasSuffix(result, "bartender") {
+				if !stdstrings.HasSuffix(result, "bartender") {
 					t.Errorf("result should end with 'bartender', got: %s", result)
 				}
 				// Extract the middle part and check it's 8 word characters
@@ -43,7 +43,7 @@ func TestStringFromTemplate(t *testing.T) {
 			name:     "lowercase letters and digits",
 			template: `admin[a-z0-9]{3}`,
 			validate: func(t *testing.T, result string) {
-				if !strings.HasPrefix(result, "admin") {
+				if !stdstrings.HasPrefix(result, "admin") {
 					t.Errorf("result should start with 'admin', got: %s", result)
 				}
 				suffix := result[5:] // Everything after "admin"
@@ -65,10 +65,10 @@ func TestStringFromTemplate(t *testing.T) {
 				if len(result) != expectedLen {
 					t.Errorf("result should be %d characters, got %d: %s", expectedLen, len(result), result)
 				}
-				if !strings.HasPrefix(result, "admin") {
+				if !stdstrings.HasPrefix(result, "admin") {
 					t.Errorf("result should start with 'admin', got: %s", result)
 				}
-				if !strings.Contains(result, "something") {
+				if !stdstrings.Contains(result, "something") {
 					t.Errorf("result should contain 'something', got: %s", result)
 				}
 			},
@@ -77,7 +77,7 @@ func TestStringFromTemplate(t *testing.T) {
 			name:     "letters and digits mixed",
 			template: `pass[a-zA-Z0-9]{12}`,
 			validate: func(t *testing.T, result string) {
-				if !strings.HasPrefix(result, "pass") {
+				if !stdstrings.HasPrefix(result, "pass") {
 					t.Errorf("result should start with 'pass', got: %s", result)
 				}
 				suffix := result[4:]
@@ -99,7 +99,7 @@ func TestStringFromTemplate(t *testing.T) {
 			name:     "mixed case letters",
 			template: `pass[A-Za-z]{8}`,
 			validate: func(t *testing.T, result string) {
-				if !strings.HasPrefix(result, "pass") {
+				if !stdstrings.HasPrefix(result, "pass") {
 					t.Errorf("result should start with 'pass', got: %s", result)
 				}
 				suffix := result[4:]
@@ -116,10 +116,10 @@ func TestStringFromTemplate(t *testing.T) {
 			name:     "digits only",
 			template: `football[\d]{8}bartender`,
 			validate: func(t *testing.T, result string) {
-				if !strings.HasPrefix(result, "football") {
+				if !stdstrings.HasPrefix(result, "football") {
 					t.Errorf("result should start with 'football', got: %s", result)
 				}
-				if !strings.HasSuffix(result, "bartender") {
+				if !stdstrings.HasSuffix(result, "bartender") {
 					t.Errorf("result should end with 'bartender', got: %s", result)
 				}
 				middle := result[8 : len(result)-9]
@@ -136,7 +136,7 @@ func TestStringFromTemplate(t *testing.T) {
 			name:     "symbols only",
 			template: `football[\x]{4}`,
 			validate: func(t *testing.T, result string) {
-				if !strings.HasPrefix(result, "football") {
+				if !stdstrings.HasPrefix(result, "football") {
 					t.Errorf("result should start with 'football', got: %s", result)
 				}
 				suffix := result[8:]
@@ -155,7 +155,7 @@ func TestStringFromTemplate(t *testing.T) {
 			name:     "multiple different patterns",
 			template: `user[A-Z]{2}[0-9]{4}`,
 			validate: func(t *testing.T, result string) {
-				if !strings.HasPrefix(result, "user") {
+				if !stdstrings.HasPrefix(result, "user") {
 					t.Errorf("result should start with 'user', got: %s", result)
 				}
 				suffix := result[4:]
@@ -189,10 +189,10 @@ func TestStringFromTemplate(t *testing.T) {
 			name:     "pattern in middle",
 			template: `prefix[\w]{10}suffix`,
 			validate: func(t *testing.T, result string) {
-				if !strings.HasPrefix(result, "prefix") {
+				if !stdstrings.HasPrefix(result, "prefix") {
 					t.Errorf("result should start with 'prefix', got: %s", result)
 				}
-				if !strings.HasSuffix(result, "suffix") {
+				if !stdstrings.HasSuffix(result, "suffix") {
 					t.Errorf("result should end with 'suffix', got: %s", result)
 				}
 				middle := result[6 : len(result)-6] // prefix(6chars)suffix(6chars)
@@ -205,7 +205,7 @@ func TestStringFromTemplate(t *testing.T) {
 			name:     "hex characters",
 			template: `test[0-9a-fA-F]{8}`,
 			validate: func(t *testing.T, result string) {
-				if !strings.HasPrefix(result, "test") {
+				if !stdstrings.HasPrefix(result, "test") {
 					t.Errorf("result should start with 'test', got: %s", result)
 				}
 				suffix := result[4:]
@@ -222,10 +222,10 @@ func TestStringFromTemplate(t *testing.T) {
 			name:     "multiple small ranges",
 			template: `prefix[A-Ca-c1-3]{5}suffix`,
 			validate: func(t *testing.T, result string) {
-				if !strings.HasPrefix(result, "prefix") {
+				if !stdstrings.HasPrefix(result, "prefix") {
 					t.Errorf("result should start with 'prefix', got: %s", result)
 				}
-				if !strings.HasSuffix(result, "suffix") {
+				if !stdstrings.HasSuffix(result, "suffix") {
 					t.Errorf("result should end with 'suffix', got: %s", result)
 				}
 				middle := result[6 : len(result)-6]
@@ -323,7 +323,7 @@ func TestStringFromTemplateConsistency(t *testing.T) {
 			t.Fatalf("unexpected error on iteration %d: %v", i, err)
 		}
 
-		if !strings.HasPrefix(result, "test") {
+		if !stdstrings.HasPrefix(result, "test") {
 			t.Errorf("result should start with 'test', got: %s", result)
 		}
 

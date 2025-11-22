@@ -7,49 +7,89 @@ package kv
 import (
 	"time"
 
-	"github.com/spiffe/spike-sdk-go/errors"
+	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
 )
 
-// Delete marks secret versions as deleted for a given path. If no versions are
-// specified, it marks only the current version as deleted. If specific versions
-// are provided, it marks each existing version in the list as deleted. The
-// deletion is performed by setting the DeletedTime to the current time. If the
-// path doesn't exist, the function returns without making any changes.
-func (kv *KV) Delete(path string, versions []int) error {
+// Delete marks secret versions as deleted for a given path. The deletion is
+// performed by setting the DeletedTime to the current time.
+//
+// The function supports flexible version deletion with the following behavior:
+//   - If versions is empty, deletes only the current version
+//   - If versions contains specific numbers, deletes those versions
+//   - Version 0 in the array represents the current version
+//   - Non-existent versions are silently skipped without error
+//
+// This idempotent behavior is useful for batch operations where you want to
+// ensure certain versions are deleted without failing if some don't exist.
+//
+// Parameters:
+//   - path: Path to the secret to delete
+//   - versions: Array of version numbers to delete (empty array deletes current
+//     version only, 0 in the array represents current version)
+//
+// Returns:
+//   - []int: Array of version numbers that were actually modified (had their
+//     DeletedTime changed from nil to now). Already-deleted versions are not
+//     included in this list.
+//   - *errors.SDKError: nil on success, or one of the following sdkErrors:
+//   - ErrEntityNotFound: if the path doesn't exist
+//
+// Example:
+//
+//	// Delete current version only
+//	modified, err := kv.Delete("secret/path", []int{})
+//	if err != nil {
+//	    log.Printf("Failed to delete secret: %v", err)
+//	}
+//	log.Printf("Deleted %d version(s): %v", len(modified), modified)
+//
+//	// Delete specific versions
+//	modified, err = kv.Delete("secret/path", []int{1, 2, 3})
+//	if err != nil {
+//	    log.Printf("Failed to delete versions: %v", err)
+//	}
+//	log.Printf("Actually deleted: %v", modified)
+func (kv *KV) Delete(path string, versions []int) ([]int, *sdkErrors.SDKError) {
 	secret, exists := kv.data[path]
 	if !exists {
-		return errors.ErrEntityNotFound
+		return nil, sdkErrors.ErrEntityNotFound
 	}
 
 	now := time.Now()
 	cv := secret.Metadata.CurrentVersion
+	var modified []int
 
 	// If no versions specified, mark the latest version as deleted
 	if len(versions) == 0 {
-		if v, exists := secret.Versions[cv]; exists {
+		if v, exists := secret.Versions[cv]; exists && v.DeletedTime == nil {
 			v.DeletedTime = &now // Mark as deleted.
 			secret.Versions[cv] = v
+			modified = append(modified, cv)
 		}
-		return nil
+
+		return modified, nil
 	}
 
 	// Delete specific versions
 	for _, version := range versions {
 		if version == 0 {
 			v, exists := secret.Versions[cv]
-			if !exists {
+			if !exists || v.DeletedTime != nil {
 				continue
 			}
 
 			v.DeletedTime = &now // Mark as deleted.
 			secret.Versions[cv] = v
+			modified = append(modified, cv)
 			continue
 		}
 
-		if v, exists := secret.Versions[version]; exists {
+		if v, exists := secret.Versions[version]; exists && v.DeletedTime == nil {
 			v.DeletedTime = &now // Mark as deleted.
 			secret.Versions[version] = v
+			modified = append(modified, version)
 		}
 	}
-	return nil
+
+	return modified, nil
 }

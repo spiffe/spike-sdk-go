@@ -5,7 +5,8 @@
 package reqres
 
 import (
-	"github.com/spiffe/spike-sdk-go/errors"
+	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
+	"github.com/spiffe/spike-sdk-go/log"
 )
 
 // BootstrapVerifyRequest for verifying SPIKE Nexus initialization.
@@ -21,10 +22,29 @@ type BootstrapVerifyResponse struct {
 	// Hash of the decrypted plaintext
 	Hash string `json:"hash"`
 	// Error code if operation failed
-	Err errors.ErrorCode `json:"err,omitempty"`
+	Err sdkErrors.ErrorCode `json:"err,omitempty"`
 }
 
-func (b BootstrapVerifyResponse) Success() BootstrapVerifyResponse {
-	b.Err = errors.ErrSuccess.Code
-	return b
+func (r BootstrapVerifyResponse) Success() BootstrapVerifyResponse {
+	r.Err = sdkErrors.ErrAPISuccess.Code
+	return r
+}
+func (r BootstrapVerifyResponse) NotFound() BootstrapVerifyResponse {
+	log.FatalErr("NotFound", *sdkErrors.ErrAPIResponseCodeInvalid)
+	return r
+}
+func (r BootstrapVerifyResponse) BadRequest() BootstrapVerifyResponse {
+	r.Err = sdkErrors.ErrAPIBadRequest.Code
+	return r
+}
+func (r BootstrapVerifyResponse) Unauthorized() BootstrapVerifyResponse {
+	r.Err = sdkErrors.ErrAccessUnauthorized.Code
+	return r
+}
+func (r BootstrapVerifyResponse) Internal() BootstrapVerifyResponse {
+	r.Err = sdkErrors.ErrAPIInternal.Code
+	return r
+}
+func (r BootstrapVerifyResponse) ErrorCode() sdkErrors.ErrorCode {
+	return r.Err
 }

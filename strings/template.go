@@ -2,13 +2,14 @@
 //  \\\\\ Copyright 2024-present SPIKE contributors.
 // \\\\\\\ SPDX-License-Identifier: Apache-2.0
 
-package crypto
+package strings
 
 import (
-	"fmt"
 	"regexp"
 	"strconv"
-	"strings"
+	stdstrings "strings"
+
+	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
 )
 
 // StringFromTemplate creates a string based on a template with embedded
@@ -92,6 +93,24 @@ import (
 // The function prioritizes common use cases for password generation, API keys,
 // tokens, and identifiers while maintaining simplicity and predictability.
 //
+// # Security: Fatal Exit on CSPRNG Failure
+//
+// This function uses crypto/rand.Read() for generating random characters. If the
+// cryptographic random number generator fails, this function will terminate the
+// program with log.FatalErr() rather than returning an error.
+//
+// This design decision is intentional and critical for security:
+//
+//  1. CSPRNG failures indicate fundamental system compromise or misconfiguration
+//  2. This function is used for generating security-sensitive strings (passwords,
+//     tokens, API keys, secrets) where weak randomness would be catastrophic
+//  3. Silently falling back to weaker randomness or returning an error that could
+//     be ignored would create a false sense of security
+//  4. A CSPRNG failure is an exceptional, unrecoverable system-level error
+//
+// DO NOT modify this behavior to return errors for CSPRNG failures, as it would
+// compromise the security guarantees of all code using this function.
+//
 // # Parameters
 //
 // template: A string containing literal text and generator expressions.
@@ -100,10 +119,21 @@ import (
 //
 // # Returns
 //
-// Returns the generated string with all generator expressions replaced by
-// random characters matching their specifications, or an error if any
-// generator expression is invalid.
-func StringFromTemplate(template string) (string, error) {
+// Returns:
+//   - string: The generated string with all generator expressions replaced,
+//     empty on error
+//   - *sdkErrors.SDKError: nil on success, or one of the following errors:
+//   - ErrStringInvalidLength: if length specification is not a valid number
+//   - ErrStringNegativeLength: if length is negative
+//   - ErrStringEmptyCharacterClass: if character class is empty
+//   - ErrStringInvalidRange: if character range is invalid
+//   - ErrStringEmptyCharacterSet: if character set is empty
+//
+// Note: CSPRNG failures (crypto/rand.Read) cause immediate program termination
+// via log.FatalErr() for security reasons (cannot generate secure random data).
+// This is intentional and critical - see "Security: Fatal Exit on CSPRNG Failure"
+// section above for rationale.
+func StringFromTemplate(template string) (string, *sdkErrors.SDKError) {
 	// Regular expression to match generator expressions like [a-z]{5} or [\w]{3}
 	// Modified to capture any content in braces, not just digits
 	// Changed + to * to allow empty character classes like []
@@ -123,14 +153,18 @@ func StringFromTemplate(template string) (string, error) {
 		lengthStr := match[2]
 
 		// Parse length - this will now catch non-numeric values
-		length, err := strconv.Atoi(lengthStr)
-		if err != nil {
-			return "", fmt.Errorf("invalid length: %s", lengthStr)
+		length, parseErr := strconv.Atoi(lengthStr)
+		if parseErr != nil {
+			failErr := sdkErrors.ErrStringInvalidLength.Wrap(parseErr)
+			failErr.Msg = "invalid length specification in template"
+			return "", failErr
 		}
 
 		// Validate that length is non-negative
 		if length < 0 {
-			return "", fmt.Errorf("length cannot be negative: %d", length)
+			failErr := sdkErrors.ErrStringNegativeLength
+			failErr.Msg = "length cannot be negative in template"
+			return "", failErr
 		}
 
 		// Generate random string based on character class
@@ -140,7 +174,7 @@ func StringFromTemplate(template string) (string, error) {
 		}
 
 		// Replace the first occurrence of the pattern
-		result = strings.Replace(result, fullMatch, randomStr, 1)
+		result = stdstrings.Replace(result, fullMatch, randomStr, 1)
 	}
 
 	return result, nil

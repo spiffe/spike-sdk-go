@@ -6,7 +6,6 @@ package acl
 
 import (
 	"encoding/json"
-	"errors"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 
@@ -31,7 +30,13 @@ import (
 // Returns:
 //   - (*[]data.Policy, nil) containing all matching policies if successful
 //   - (nil, nil) if no policies are found
-//   - (nil, error) if an error occurs during the operation
+//   - (nil, *sdkErrors.SDKError) if an error occurs:
+//   - ErrSPIFFENilX509Source: if source is nil
+//   - ErrDataMarshalFailure: if request serialization fails
+//   - ErrAPIPostFailed: if the HTTP request fails
+//   - ErrDataUnmarshalFailure: if response parsing fails
+//   - Error from FromCode(): if the server returns an error (e.g.,
+//     ErrAccessUnauthorized, ErrAPIBadRequest, etc.)
 //
 // Note: The returned slice pointer should be dereferenced before use:
 //
@@ -63,45 +68,29 @@ import (
 func ListPolicies(
 	source *workloadapi.X509Source,
 	SPIFFEIDPattern string, pathPattern string,
-) (*[]data.Policy, error) {
+) (*[]data.Policy, *sdkErrors.SDKError) {
 	if source == nil {
-		return nil, sdkErrors.ErrNilX509Source
+		return nil, sdkErrors.ErrSPIFFENilX509Source
 	}
 
 	r := reqres.PolicyListRequest{
 		SPIFFEIDPattern: SPIFFEIDPattern,
 		PathPattern:     pathPattern,
 	}
-	mr, err := json.Marshal(r)
-	if err != nil {
-		return nil, errors.Join(
-			errors.New(
-				"listPolicies: I am having problem generating the payload",
-			),
-			err,
-		)
+	mr, marshalErr := json.Marshal(r)
+	if marshalErr != nil {
+		failErr := sdkErrors.ErrDataMarshalFailure.Wrap(marshalErr)
+		failErr.Msg = "problem generating the payload"
+		return nil, failErr
 	}
 
-	client := net.CreateMTLSClientForNexus(source)
-
-	body, err := net.Post(client, url.PolicyList(), mr)
-	if err != nil {
-		if errors.Is(err, sdkErrors.ErrNotFound) {
-			return nil, nil
+	res, postErr := net.PostAndUnmarshal[reqres.PolicyListResponse](
+		source, url.PolicyList(), mr)
+	if postErr != nil {
+		if postErr.Is(sdkErrors.ErrAPINotFound) {
+			return &([]data.Policy{}), nil
 		}
-		return nil, err
-	}
-
-	var res reqres.PolicyListResponse
-	err = json.Unmarshal(body, &res)
-	if err != nil {
-		return nil, errors.Join(
-			errors.New("listPolicies: Problem parsing response body"),
-			err,
-		)
-	}
-	if res.Err != "" {
-		return nil, errors.New(string(res.Err))
+		return nil, postErr
 	}
 
 	return &res.Policies, nil

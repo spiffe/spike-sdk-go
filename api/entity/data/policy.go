@@ -22,6 +22,9 @@ const PermissionWrite PolicyPermission = "write"
 // PermissionList gives permission to list available secrets or resources.
 const PermissionList PolicyPermission = "list"
 
+// TODO: verify proper usage of PermissionExecute in SPIKE code.
+// UPDATE CHANGELOG if behavior changes.
+
 // PermissionExecute grants the ability to execute specified resources.
 // One such resource is encryption and decryption operations that
 // don't necessarily persist anything but execute an internal command.

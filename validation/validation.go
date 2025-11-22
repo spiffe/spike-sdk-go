@@ -9,7 +9,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/spiffe/spike-sdk-go/api/entity/data"
-	"github.com/spiffe/spike-sdk-go/errors"
+	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
 )
 
 const validNamePattern = `^[a-zA-Z0-9-_ ]+$`
@@ -21,87 +21,177 @@ const validPathPattern = `^[a-zA-Z0-9._\-/^$()?+*|[\]{}\\]+$`
 const validPath = `^[a-zA-Z0-9._\-/()?+*|[\]{}\\]+$`
 
 // ValidateName checks if the provided name meets length and format constraints.
-// It returns an error if the name is invalid, otherwise it returns nil.
-func ValidateName(name string) error {
+//
+// The name must be between 1 and 250 characters and contain only alphanumeric
+// characters, hyphens, underscores, and spaces.
+//
+// Parameters:
+//   - name: The name string to validate
+//
+// Returns:
+//   - *sdkErrors.SDKError: nil if valid, or one of the following errors:
+//   - ErrDataInvalidInput: if name is empty, exceeds 250 characters, or
+//     contains invalid characters
+func ValidateName(name string) *sdkErrors.SDKError {
 	// Validate length
 	if len(name) == 0 || len(name) > maxNameLength {
-		return errors.ErrInvalidInput
+		return sdkErrors.ErrDataInvalidInput
 	}
 
 	// Validate format
 	if match, _ := regexp.MatchString(validNamePattern, name); !match {
-		return errors.ErrInvalidInput
+		return sdkErrors.ErrDataInvalidInput
 	}
 
 	return nil
 }
 
 // ValidateSPIFFEIDPattern validates whether the given SPIFFE ID pattern string
-// conforms to the expected format and returns an error if it does not.
-func ValidateSPIFFEIDPattern(SPIFFEIDPattern string) error {
+// conforms to the expected format.
+//
+// The pattern may include regex special characters for matching multiple
+// SPIFFE IDs.
+// It must start with "spiffe://" and follow the SPIFFE ID specification with
+// optional regex metacharacters.
+//
+// Parameters:
+//   - SPIFFEIDPattern: The SPIFFE ID pattern string to validate
+//
+// Returns:
+//   - *sdkErrors.SDKError: nil if valid, or one of the following errors:
+//   - ErrDataInvalidInput: if the pattern does not conform to the expected
+//     format
+func ValidateSPIFFEIDPattern(SPIFFEIDPattern string) *sdkErrors.SDKError {
 	// Validate SPIFFEIDPattern
 	if match, _ := regexp.MatchString(
 		validSPIFFEIDPattern, SPIFFEIDPattern); !match {
-		return errors.ErrInvalidInput
+		return sdkErrors.ErrDataInvalidInput
 	}
 
 	return nil
 }
 
-// ValidateSPIFFEID validates if the given SPIFFE ID matches the expected format.
-// Returns an error if the SPIFFE ID is invalid.
-func ValidateSPIFFEID(SPIFFEID string) error {
+// ValidateSPIFFEID validates if the given SPIFFE ID matches the expected
+// format.
+//
+// Unlike ValidateSPIFFEIDPattern, this function validates raw SPIFFE IDs
+// without regex metacharacters. The ID must strictly conform to the SPIFFE
+// specification:
+// "spiffe://<trust-domain>/<path>".
+//
+// Parameters:
+//   - SPIFFEID: The SPIFFE ID string to validate
+//
+// Returns:
+//   - *sdkErrors.SDKError: nil if valid, or one of the following errors:
+//   - ErrDataInvalidInput: if the SPIFFE ID does not conform to the expected
+//     format
+func ValidateSPIFFEID(SPIFFEID string) *sdkErrors.SDKError {
 	if match, _ := regexp.MatchString(
 		validRawSPIFFEIDPattern, SPIFFEID); !match {
-		return errors.ErrInvalidInput
+		return sdkErrors.ErrDataInvalidInput
 	}
 	return nil
 }
 
 // ValidatePathPattern validates the given path pattern string for correctness.
-// Returns an error if the pattern is empty, too long, or has invalid characters.
-func ValidatePathPattern(pathPattern string) error {
+//
+// This function is used for validating path patterns that may contain regex
+// metacharacters for matching multiple paths. The path pattern must be between
+// 1 and 500 characters and may include regex anchors (^, $) and other regex
+// special characters (?, +, *, |, [], {}, \, etc.) along with alphanumeric
+// characters, underscores, hyphens, forward slashes, and periods.
+//
+// Use ValidatePath instead if you need to validate literal paths without
+// regex anchors.
+//
+// Parameters:
+//   - pathPattern: The path pattern string to validate
+//
+// Returns:
+//   - *sdkErrors.SDKError: nil if valid, or one of the following errors:
+//   - ErrDataInvalidInput: if the pattern is empty, exceeds 500 characters, or
+//     contains invalid characters
+func ValidatePathPattern(pathPattern string) *sdkErrors.SDKError {
 	// Validate length
 	if len(pathPattern) == 0 || len(pathPattern) > maxPathPatternLength {
-		return errors.ErrInvalidInput
+		return sdkErrors.ErrDataInvalidInput
 	}
 
 	// Validate format
 	// Allow regex special characters along with alphanumeric and basic symbols
 	if match, _ := regexp.MatchString(validPathPattern, pathPattern); !match {
-		return errors.ErrInvalidInput
+		return sdkErrors.ErrDataInvalidInput
 	}
 
 	return nil
 }
 
 // ValidatePath checks if the given path is valid based on predefined rules.
-// It returns an error if the path is empty, too long, or contains invalid
-// characters.
-func ValidatePath(path string) error {
+//
+// This function validates paths that should not contain regex anchor
+// metacharacters (^ or $). Unlike ValidatePathPattern, this function is for
+// validating literal paths. The path must be between 1 and 500 characters.
+//
+// Note: While this function excludes regex anchors (^, $), it still allows
+// other special characters that may appear in actual paths such as ?, +, *,
+// |, [], {}, \, /, etc. Use ValidatePathPattern if you need to validate
+// patterns that include regex anchors.
+//
+// Parameters:
+//   - path: The path string to validate
+//
+// Returns:
+//   - *sdkErrors.SDKError: nil if valid, or one of the following errors:
+//   - ErrDataInvalidInput: if the path is empty, exceeds 500 characters, or
+//     contains invalid characters
+func ValidatePath(path string) *sdkErrors.SDKError {
 	if len(path) == 0 || len(path) > maxPathPatternLength {
-		return errors.ErrInvalidInput
+		return sdkErrors.ErrDataInvalidInput
 	}
 	if match, _ := regexp.MatchString(validPath, path); !match {
-		return errors.ErrInvalidInput
+		return sdkErrors.ErrDataInvalidInput
 	}
 	return nil
 }
 
-// ValidatePolicyID verifies if the given policyId is a valid UUID format.
-// Returns errors.ErrInvalidInput if the validation fails.
-func ValidatePolicyID(policyID string) error {
+// ValidatePolicyID verifies if the given policy ID is a valid UUID format.
+//
+// The policy ID must conform to the UUID specification (RFC 4122).
+// This function uses the google/uuid package for validation.
+//
+// Parameters:
+//   - policyID: The policy ID string to validate
+//
+// Returns:
+//   - *sdkErrors.SDKError: nil if valid, or one of the following errors:
+//   - ErrDataInvalidInput: if the policy ID is not a valid UUID
+func ValidatePolicyID(policyID string) *sdkErrors.SDKError {
 	err := uuid.Validate(policyID)
 	if err != nil {
-		return errors.ErrInvalidInput
+		return sdkErrors.ErrDataInvalidInput
 	}
 	return nil
 }
 
 // ValidatePermissions checks if all provided permissions are valid.
-// Permissions are compared against a predefined list of allowed permissions.
-// Returns ErrInvalidInput if any permission is invalid, nil otherwise.
-func ValidatePermissions(permissions []data.PolicyPermission) error {
+//
+// Permissions are compared against a predefined list of allowed permissions:
+//   - PermissionList: list secrets
+//   - PermissionRead: read secret values
+//   - PermissionWrite: create/update secrets
+//   - PermissionSuper: administrative access
+//
+// Parameters:
+//   - permissions: Slice of policy permissions to validate
+//
+// Returns:
+//   - *sdkErrors.SDKError: nil if all permissions are valid, or one of the
+//     following errors:
+//   - ErrDataInvalidInput: if any permission is not in the allowed list
+func ValidatePermissions(
+	permissions []data.PolicyPermission,
+) *sdkErrors.SDKError {
 	allowedPermissions := []data.PolicyPermission{
 		data.PermissionList,
 		data.PermissionRead,
@@ -118,7 +208,7 @@ func ValidatePermissions(permissions []data.PolicyPermission) error {
 			}
 		}
 		if !isAllowed {
-			return errors.ErrInvalidInput
+			return sdkErrors.ErrDataInvalidInput
 		}
 	}
 

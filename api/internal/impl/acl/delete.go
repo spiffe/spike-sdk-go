@@ -6,7 +6,6 @@ package acl
 
 import (
 	"encoding/json"
-	"errors"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 
@@ -25,8 +24,13 @@ import (
 //   - id: The unique identifier of the policy to be deleted
 //
 // Returns:
-//   - nil if successful
-//   - error if marshaling, network request, or server-side deletion fails
+//   - *sdkErrors.SDKError: nil on success, or one of the following errors:
+//   - ErrSPIFFENilX509Source: if source is nil
+//   - ErrDataMarshalFailure: if request serialization fails
+//   - ErrAPIPostFailed: if the HTTP request fails
+//   - ErrDataUnmarshalFailure: if response parsing fails
+//   - Error from FromCode(): if the server returns an error (e.g.,
+//     ErrAccessUnauthorized, ErrAPINotFound, ErrAPIBadRequest, etc.)
 //
 // Example:
 //
@@ -43,43 +47,21 @@ import (
 func DeletePolicy(
 	source *workloadapi.X509Source,
 	id string,
-) error {
+) *sdkErrors.SDKError {
 	if source == nil {
-		return sdkErrors.ErrNilX509Source
+		return sdkErrors.ErrSPIFFENilX509Source
 	}
 
-	r := reqres.PolicyDeleteRequest{
-		ID: id,
+	r := reqres.PolicyDeleteRequest{ID: id}
+
+	mr, marshalErr := json.Marshal(r)
+	if marshalErr != nil {
+		failErr := sdkErrors.ErrDataMarshalFailure.Wrap(marshalErr)
+		failErr.Msg = "problem generating the payload"
+		return failErr
 	}
 
-	mr, err := json.Marshal(r)
-	if err != nil {
-		return errors.Join(
-			errors.New(
-				"deletePolicy: I am having problem generating the payload",
-			),
-			err,
-		)
-	}
-
-	client := net.CreateMTLSClientForNexus(source)
-
-	body, err := net.Post(client, url.PolicyDelete(), mr)
-	if err != nil {
-		return err
-	}
-
-	res := reqres.PolicyDeleteResponse{}
-	err = json.Unmarshal(body, &res)
-	if err != nil {
-		return errors.Join(
-			errors.New("deletePolicy: Problem parsing response body"),
-			err,
-		)
-	}
-	if res.Err != "" {
-		return errors.New(string(res.Err))
-	}
-
-	return nil
+	_, postErr := net.PostAndUnmarshal[reqres.PolicyDeleteResponse](
+		source, url.PolicyDelete(), mr)
+	return postErr
 }

@@ -8,93 +8,114 @@ import (
 	"io"
 
 	"github.com/spiffe/spike-sdk-go/api/internal/impl/cipher"
+	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
 )
 
 // CipherEncryptStream encrypts data from a reader using streaming mode.
-// It sends the reader content as the request body with the specified content type.
+//
+// It sends the reader content as the request body to SPIKE Nexus for encryption.
+// The data is treated as binary (application/octet-stream) regardless of its
+// original format, as encryption operates on raw bytes.
 //
 // Parameters:
-//   - reader io.Reader: The data source to encrypt
-//   - contentType string: The MIME type of the data (e.g., "application/json")
+//   - reader: The data source to encrypt
 //
 // Returns:
-//   - []byte: The encrypted data if successful
-//   - error: nil on success, or an error if the operation fails
+//   - []byte: The encrypted ciphertext if successful, nil on error
+//   - *sdkErrors.SDKError: nil on success, or one of the following errors:
+//   - ErrSPIFFENilX509Source: if the X509 source is nil
+//   - Errors from streamPost(): if the streaming request fails
+//   - ErrNetReadingResponseBody: if reading the response fails
 //
 // Example:
 //
 //	reader := strings.NewReader("sensitive data")
-//	encrypted, err := api.CipherEncryptStream(reader, "text/plain")
+//	encrypted, err := api.CipherEncryptStream(reader)
 func (a *API) CipherEncryptStream(
-	reader io.Reader, contentType string,
-) ([]byte, error) {
-	return cipher.EncryptStream(a.source, reader, contentType)
+	reader io.Reader,
+) ([]byte, *sdkErrors.SDKError) {
+	return cipher.EncryptStream(a.source, reader)
 }
 
-// CipherEncryptJSON encrypts data using JSON mode with structured parameters.
-// It sends plaintext and algorithm as JSON and returns encrypted bytes.
+// CipherEncrypt encrypts data with structured parameters.
+//
+// It sends plaintext and algorithm to SPIKE Nexus and returns the
+// encrypted ciphertext bytes.
 //
 // Parameters:
-//   - plaintext []byte: The data to encrypt
-//   - algorithm string: The encryption algorithm to use (e.g., "AES-GCM")
+//   - plaintext: The data to encrypt
+//   - algorithm: The encryption algorithm to use (e.g., "AES-GCM")
 //
 // Returns:
-//   - []byte: The encrypted data if successful
-//   - error: nil on success, or an error if the operation fails
+//   - []byte: The encrypted ciphertext if successful, nil on error
+//   - *sdkErrors.SDKError: nil on success, or one of the following errors:
+//   - ErrSPIFFENilX509Source: if the X509 source is nil
+//   - ErrDataMarshalFailure: if request serialization fails
+//   - Errors from httpPost(): if the HTTP request fails
+//   - ErrDataUnmarshalFailure: if response parsing fails
+//   - Error from FromCode(): if the server returns an error
 //
 // Example:
 //
 //	data := []byte("secret message")
-//	encrypted, err := api.CipherEncryptJSON(data, "AES-GCM")
-func (a *API) CipherEncryptJSON(
+//	encrypted, err := api.CipherEncrypt(data, "AES-GCM")
+func (a *API) CipherEncrypt(
 	plaintext []byte, algorithm string,
-) ([]byte, error) {
-	return cipher.EncryptJSON(a.source, plaintext, algorithm)
+) ([]byte, *sdkErrors.SDKError) {
+	return cipher.Encrypt(a.source, plaintext, algorithm)
 }
 
 // CipherDecryptStream decrypts data from a reader using streaming mode.
-// It sends the reader content as the request body with the specified
-// content type.
+//
+// It sends the reader content as the request body to SPIKE Nexus for decryption.
+// The data is treated as binary (application/octet-stream) as decryption
+// operates on raw encrypted bytes.
 //
 // Parameters:
-//   - reader io.Reader: The encrypted data source to decrypt
-//   - contentType string: The MIME type of the data
-//     (e.g., "application/octet-stream")
+//   - reader: The encrypted data source to decrypt
 //
 // Returns:
-//   - []byte: The decrypted plaintext if successful
-//   - error: nil on success, or an error if the operation fails
+//   - []byte: The decrypted plaintext if successful, nil on error
+//   - *sdkErrors.SDKError: nil on success, or one of the following errors:
+//   - ErrSPIFFENilX509Source: if the X509 source is nil
+//   - Errors from streamPost(): if the streaming request fails
+//   - ErrNetReadingResponseBody: if reading the response fails
 //
 // Example:
 //
-//		reader := bytes.NewReader(encryptedData)
-//		plaintext, err := api.CipherDecryptStream(
-//	 	reader, "application/octet-stream")
+//	reader := bytes.NewReader(encryptedData)
+//	plaintext, err := api.CipherDecryptStream(reader)
 func (a *API) CipherDecryptStream(
-	reader io.Reader, contentType string,
-) ([]byte, error) {
-	return cipher.DecryptStream(a.source, reader, contentType)
+	reader io.Reader,
+) ([]byte, *sdkErrors.SDKError) {
+	return cipher.DecryptStream(a.source, reader)
 }
 
-// CipherDecryptJSON decrypts data using JSON mode with structured parameters.
-// It sends version, nonce, ciphertext, and algorithm as JSON and returns
-// plaintext.
+// CipherDecrypt decrypts data with structured parameters.
+//
+// It sends version, nonce, ciphertext, and algorithm to SPIKE Nexus
+// and returns the decrypted plaintext.
 //
 // Parameters:
-//   - version byte: The cipher version used during encryption
-//   - nonce []byte: The nonce bytes used during encryption
-//   - ciphertext []byte: The encrypted data to decrypt
-//   - algorithm string: The encryption algorithm used (e.g., "AES-GCM")
+//   - version: The cipher version used during encryption
+//   - nonce: The nonce bytes used during encryption
+//   - ciphertext: The encrypted data to decrypt
+//   - algorithm: The encryption algorithm used (e.g., "AES-GCM")
 //
 // Returns:
-//   - []byte: The decrypted plaintext if successful
-//   - error: nil on success, or an error if the operation fails
+//   - []byte: The decrypted plaintext if successful, nil on error
+//   - *sdkErrors.SDKError: nil on success, or one of the following errors:
+//   - ErrSPIFFENilX509Source: if the X509 source is nil
+//   - ErrDataMarshalFailure: if request serialization fails
+//   - Errors from httpPost(): if the HTTP request fails
+//   - ErrDataUnmarshalFailure: if response parsing fails
+//   - Error from FromCode(): if the server returns an error
 //
 // Example:
 //
-//	plaintext, err := api.CipherDecryptJSON(1, nonce, ciphertext, "AES-GCM")
-func (a *API) CipherDecryptJSON(
+//	plaintext, err := api.CipherDecrypt(1, nonce, ciphertext, "AES-GCM")
+func (a *API) CipherDecrypt(
 	version byte, nonce, ciphertext []byte, algorithm string,
-) ([]byte, error) {
-	return cipher.DecryptJSON(a.source, version, nonce, ciphertext, algorithm)
+) ([]byte, *sdkErrors.SDKError) {
+	return cipher.Decrypt(a.source, version, nonce, ciphertext, algorithm)
 }

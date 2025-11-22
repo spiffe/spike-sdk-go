@@ -121,7 +121,7 @@ func TestKV_Get(t *testing.T) {
 			path:    "test/path",
 			version: 1,
 			want:    nil,
-			wantErr: sdkErrors.ErrStoreItemSoftDeleted,
+			wantErr: sdkErrors.ErrEntityDeleted,
 		},
 		{
 			name: "non_existent_version",
@@ -147,7 +147,7 @@ func TestKV_Get(t *testing.T) {
 			path:    "test/path",
 			version: 999,
 			want:    nil,
-			wantErr: sdkErrors.ErrStoreItemSoftDeleted,
+			wantErr: sdkErrors.ErrEntityDeleted,
 		},
 	}
 
@@ -156,12 +156,18 @@ func TestKV_Get(t *testing.T) {
 			kv := tt.setup()
 			got, err := kv.Get(tt.path, tt.version)
 
-			if !errors.Is(err, tt.wantErr) {
+			// Handle nil case explicitly to avoid typed nil vs untyped nil issues
+			if tt.wantErr == nil {
+				if err != nil {
+					t.Errorf("Get() error = %v, wantErr nil", err)
+					return
+				}
+			} else if !errors.Is(err, tt.wantErr) {
 				t.Errorf("Get() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 
-			if tt.wantErr == nil {
+			if err == nil {
 				if len(got) != len(tt.want) {
 					t.Errorf("Get() got = %v, want %v", got, tt.want)
 					return
@@ -240,12 +246,18 @@ func TestKV_GetRawSecret(t *testing.T) {
 			kv := tt.setup()
 			got, err := kv.GetRawSecret(tt.path)
 
-			if !errors.Is(err, tt.wantErr) {
+			// Handle nil case explicitly to avoid typed nil vs untyped nil issues
+			if tt.wantErr == nil {
+				if err != nil {
+					t.Errorf("GetRawSecret() error = %v, wantErr nil", err)
+					return
+				}
+			} else if !errors.Is(err, tt.wantErr) {
 				t.Errorf("GetRawSecret() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 
-			if tt.wantErr == nil {
+			if err == nil {
 				if got.Metadata.CurrentVersion != tt.want.Metadata.CurrentVersion {
 					t.Errorf("GetRawSecret() got CurrentVersion = %v, want %v",
 						got.Metadata.CurrentVersion, tt.want.Metadata.CurrentVersion)

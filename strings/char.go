@@ -2,15 +2,40 @@
 //  \\\\\ Copyright 2024-present SPIKE contributors.
 // \\\\\\\ SPDX-License-Identifier: Apache-2.0
 
-package crypto
+package strings
 
 import (
-	"fmt"
+	"crypto/rand"
+
+	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
+	"github.com/spiffe/spike-sdk-go/log"
 )
 
 // secureRandomStringFromCharClass generates a cryptographically secure random
 // string of the specified length using characters from the given character
 // class.
+//
+// # Security: Fatal Exit on CSPRNG Failure
+//
+// This function uses crypto/rand.Read() as its source of randomness. If the
+// cryptographic random number generator fails, this function will terminate
+// the program with log.FatalErr() rather than returning an error.
+//
+// This design decision is intentional and critical for security:
+//
+//  1. CSPRNG failures indicate fundamental system compromise or misconfiguration
+//  2. This function generates security-sensitive strings (passwords, tokens,
+//     API keys, secrets) where weak randomness would be catastrophic
+//  3. Silently falling back to weaker randomness or continuing execution would
+//     create a false sense of security
+//  4. A CSPRNG failure is an exceptional, unrecoverable system-level error
+//     (kernel entropy depletion, hardware failure, or system compromise)
+//  5. Consistent with other security-critical operations in the SDK (Shamir
+//     secret sharing, SVID acquisition) that also fatal exit on failure
+//
+// DO NOT remove this fatal exit behavior. Allowing the function to return
+// an error that could be ignored would compromise the security guarantees
+// of all code using this function.
 //
 // Parameters:
 //   - charClass: character class specification supporting:
@@ -20,26 +45,37 @@ import (
 //   - length: number of characters in the resulting string
 //
 // Returns:
-//   - string: the generated random string
-//   - error: non-nil if the character class is empty, invalid, results in
-//     an empty character set, or if the cryptographic random number generator
-//     fails
+//   - string: the generated random string, empty on error
+//   - *sdkErrors.SDKError: nil on success, or one of the following errors:
+//   - ErrStringEmptyCharacterClass: if character class is empty
+//   - ErrStringInvalidRange: if character range is invalid
+//   - ErrStringEmptyCharacterSet: if character set is empty
+//
+// Note: CSPRNG failures (crypto/rand.Read) cause immediate program termination
+// via log.FatalErr() for security reasons (cannot generate secure random data).
+// This is intentional and critical - DO NOT remove this fatal exit behavior.
 func secureRandomStringFromCharClass(
 	charClass string, length int,
-) (string, error) {
+) (string, *sdkErrors.SDKError) {
+	const fName = "secureRandomStringFromCharClass"
+
 	chars, err := expandCharacterClass(charClass)
 	if err != nil {
 		return "", err
 	}
 
 	if len(chars) == 0 {
-		return "", fmt.Errorf("empty character set")
+		failErr := sdkErrors.ErrStringEmptyCharacterSet
+		failErr.Msg = "character class resulted in empty character set"
+		return "", failErr
 	}
 
 	result := make([]byte, length)
 	randomBytes := make([]byte, length)
-	if _, err := reader(randomBytes); err != nil {
-		return "", err
+	if _, randErr := rand.Read(randomBytes); randErr != nil {
+		failErr := sdkErrors.ErrCryptoRandomGenerationFailed.Wrap(randErr)
+		failErr.Msg = "cryptographic random number generator failed"
+		log.FatalErr(fName, *failErr)
 	}
 	for i := 0; i < length; i++ {
 		result[i] = chars[randomBytes[i]%byte(len(chars))]
@@ -64,13 +100,18 @@ func secureRandomStringFromCharClass(
 //   - Combined ranges: "A-Za-z0-9" expands to alphanumeric characters
 //
 // Returns:
-//   - string: expanded character set containing all characters from the class
-//   - error: non-nil if the character class is empty, contains invalid range
-//     specifications (e.g., "Z-A"), or results in an empty character set
-func expandCharacterClass(charClass string) (string, error) {
+//   - string: expanded character set containing all characters from the class,
+//     empty on error
+//   - *sdkErrors.SDKError: nil on success, or one of the following errors:
+//   - ErrStringEmptyCharacterClass: if character class is empty
+//   - ErrStringInvalidRange: if character range is invalid (e.g., "Z-A")
+//   - ErrStringEmptyCharacterSet: if expansion results in empty set
+func expandCharacterClass(charClass string) (string, *sdkErrors.SDKError) {
 	// Check for empty character class first
 	if len(charClass) == 0 {
-		return "", fmt.Errorf("empty character class")
+		failErr := sdkErrors.ErrStringEmptyCharacterClass
+		failErr.Msg = "character class cannot be empty"
+		return "", failErr
 	}
 
 	charSet := make(map[byte]bool) // Use map to avoid duplicates
@@ -115,8 +156,9 @@ func expandCharacterClass(charClass string) (string, error) {
 
 				// Only allow forward ranges (`start <= end`)
 				if start > end {
-					return "",
-						fmt.Errorf("invalid range specified: %c-%c", start, end)
+					failErr := sdkErrors.ErrStringInvalidRange
+					failErr.Msg = "invalid character range: start > end"
+					return "", failErr
 				}
 
 				// Add all characters in range
@@ -140,7 +182,9 @@ func expandCharacterClass(charClass string) (string, error) {
 
 	// Final check for the empty result (this catches edge cases)
 	if len(chars) == 0 {
-		return "", fmt.Errorf("character class resulted in empty character set")
+		failErr := sdkErrors.ErrStringEmptyCharacterSet
+		failErr.Msg = "character class resulted in empty character set"
+		return "", failErr
 	}
 
 	return string(chars), nil

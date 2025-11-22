@@ -1,0 +1,603 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>mock: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">github.com/spiffe/spike-sdk-go/retry/mock/mock.go (0.0%)</option>
+				
+				<option value="file1">github.com/spiffe/spike-sdk-go/retry/retry.go (92.8%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">//    \\ SPIKE: Secure your secrets with SPIFFE. — https://spike.ist/
+//  \\\\\ Copyright 2024-present SPIKE contributors.
+// \\\\\\\ SPDX-License-Identifier: Apache-2.0
+
+package mock
+
+import (
+        "context"
+)
+
+// Retrier implements Retrier for testing
+type Retrier struct {
+        RetryFunc func(context.Context, func() error) error
+}
+
+// RetryWithBackoff implements the Retrier interface
+func (m *Retrier) RetryWithBackoff(
+        ctx context.Context,
+        operation func() error,
+) error <span class="cov0" title="0">{
+        if m.RetryFunc != nil </span><span class="cov0" title="0">{
+                return m.RetryFunc(ctx, operation)
+        }</span>
+        <span class="cov0" title="0">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">//    \\ SPIKE: Secure your secrets with SPIFFE. — https://spike.ist/
+//  \\\\\ Copyright 2024-present SPIKE contributors.
+// \\\\\\\ SPDX-License-Identifier: Apache-2.0
+
+// Package retry provides a flexible and type-safe retry mechanism with
+// exponential backoff. It allows for customizable retry strategies and
+// notifications while maintaining context awareness and cancellation support.
+package retry
+
+import (
+        "context"
+        "errors"
+        "time"
+
+        "github.com/cenkalti/backoff/v4"
+        sdkErrors "github.com/spiffe/spike-sdk-go/errors"
+)
+
+// Default configuration values for the exponential backoff strategy
+const (
+        // Initial wait time between retries
+        defaultInitialInterval = 500 * time.Millisecond
+        // Maximum wait time between retries
+        defaultMaxInterval = 60 * time.Second
+        // Maximum total time for all retry attempts
+        defaultMaxElapsedTime = 1200 * time.Second
+        // A zero max elapsed time means try forever.
+        forever = 0
+        // Factor by which the wait time increases
+        defaultMultiplier = 2.0
+)
+
+// Retrier defines the interface for retry operations with backoff support.
+// Implementations of this interface provide different retry strategies.
+type Retrier interface {
+        // RetryWithBackoff executes an operation with a backoff strategy.
+        // It will repeatedly execute the operation until it succeeds or
+        // the context is canceled. The backoff strategy determines the
+        // delay between retry attempts.
+        //
+        // Parameters:
+        //   - ctx: Context for cancellation and timeout control
+        //   - op: The operation to retry, returns error if the attempt failed
+        //
+        // Returns:
+        //   - *sdkErrors.SDKError: nil if successful, or one of the following:
+        //   - ErrRetryMaxElapsedTimeReached: if maximum elapsed time is reached
+        //   - ErrRetryContextCanceled: if context is canceled
+        //   - The last error from the operation
+        RetryWithBackoff(
+                ctx context.Context, op func() *sdkErrors.SDKError,
+        ) *sdkErrors.SDKError
+}
+
+// TypedRetrier provides type-safe retry operations for functions that return
+// both a value and an error. It wraps a base Retrier to provide typed results.
+type TypedRetrier[T any] struct {
+        retrier Retrier
+}
+
+// NewTypedRetrier creates a new TypedRetrier with the given base Retrier.
+// This allows for type-safe retry operations while reusing existing retry
+// logic.
+//
+// Parameters:
+//   - r: The base Retrier implementation to wrap
+//
+// Returns:
+//   - *TypedRetrier[T]: A new TypedRetrier instance for the specified type
+//
+// Example:
+//
+//                retrier := NewTypedRetrier[string](NewExponentialRetrier())
+//                result, err := retrier.RetryWithBackoff(ctx, func() (
+//                 string, *sdkErrors.SDKError) {
+//                    return callExternalService()
+//                })
+func NewTypedRetrier[T any](r Retrier) *TypedRetrier[T] <span class="cov8" title="1">{
+        return &amp;TypedRetrier[T]{retrier: r}
+}</span>
+
+// RetryWithBackoff executes a typed operation with a backoff strategy.
+// It preserves the return value while maintaining retry functionality.
+//
+// Parameters:
+//   - ctx: Context for cancellation and timeout control
+//   - op: The operation to retry, returns both a value and an error
+//
+// Returns:
+//   - T: The result value from the successful operation
+//   - *sdkErrors.SDKError: nil if successful, or one of the following errors:
+//   - ErrRetryMaxElapsedTimeReached: if maximum elapsed time is reached
+//   - ErrRetryContextCanceled: if context is canceled
+//   - The wrapped error from the operation if it fails
+func (r *TypedRetrier[T]) RetryWithBackoff(
+        ctx context.Context,
+        op func() (T, *sdkErrors.SDKError),
+) (T, *sdkErrors.SDKError) <span class="cov8" title="1">{
+        var result T
+        err := r.retrier.RetryWithBackoff(ctx, func() *sdkErrors.SDKError </span><span class="cov8" title="1">{
+                var opErr *sdkErrors.SDKError
+                result, opErr = op()
+                return opErr
+        }</span>)
+        <span class="cov8" title="1">return result, err</span>
+}
+
+// NotifyFn is a callback function type for retry notifications.
+// It provides information about each retry attempt, including the error,
+// current interval duration, and total elapsed time.
+type NotifyFn func(
+        err *sdkErrors.SDKError, duration, totalDuration time.Duration,
+)
+
+// RetrierOption is a function type for configuring ExponentialRetrier.
+// It follows the functional options pattern for flexible configuration.
+type RetrierOption func(*ExponentialRetrier)
+
+// ExponentialRetrier implements Retrier using exponential backoff strategy.
+// It provides configurable retry intervals and maximum attempt durations.
+type ExponentialRetrier struct {
+        newBackOff func() backoff.BackOff
+        notify     NotifyFn
+}
+
+// BackOffOption is a function type for configuring ExponentialBackOff.
+// It allows fine-tuning of the backoff strategy parameters.
+type BackOffOption func(*backoff.ExponentialBackOff)
+
+// NewExponentialRetrier creates a new ExponentialRetrier with configurable
+// settings. Default values provide sensible backoff behavior for most use
+// cases.
+//
+// Default settings:
+//   - InitialInterval: 500ms
+//   - MaxInterval: 60s
+//   - MaxElapsedTime: 1200s (20 minutes)
+//   - Multiplier: 2.0
+//
+// Parameters:
+//   - opts: Optional configuration functions to customize retry behavior
+//
+// Returns:
+//   - *ExponentialRetrier: A configured retrier instance ready for use
+//
+// Example:
+//
+//        retrier := NewExponentialRetrier(
+//            WithBackOffOptions(
+//                WithInitialInterval(100 * time.Millisecond),
+//                WithMaxInterval(5 * time.Second),
+//            ),
+//            WithNotify(func(err *sdkErrors.SDKError, d, total time.Duration) {
+//                log.Printf("Retry attempt failed: %v", err)
+//            }),
+//        )
+func NewExponentialRetrier(opts ...RetrierOption) *ExponentialRetrier <span class="cov8" title="1">{
+        b := backoff.NewExponentialBackOff()
+        b.InitialInterval = defaultInitialInterval
+        b.MaxInterval = defaultMaxInterval
+        b.MaxElapsedTime = defaultMaxElapsedTime
+        b.Multiplier = defaultMultiplier
+
+        r := &amp;ExponentialRetrier{
+                newBackOff: func() backoff.BackOff </span><span class="cov8" title="1">{
+                        return b
+                }</span>,
+        }
+
+        <span class="cov8" title="1">for _, opt := range opts </span><span class="cov8" title="1">{
+                opt(r)
+        }</span>
+
+        <span class="cov8" title="1">return r</span>
+}
+
+// RetryWithBackoff implements the Retrier interface using exponential backoff.
+// It executes the operation repeatedly until success or context cancellation.
+//
+// Parameters:
+//   - ctx: Context for cancellation and timeout control
+//   - operation: The function to retry that returns an error
+//
+// Returns:
+//   - *sdkErrors.SDKError: nil if the operation eventually succeeds, or one of:
+//   - ErrRetryMaxElapsedTimeReached: if maximum elapsed time is reached
+//   - ErrRetryContextCanceled: if context is canceled
+//   - The last error from the operation
+func (r *ExponentialRetrier) RetryWithBackoff(
+        ctx context.Context,
+        operation func() *sdkErrors.SDKError,
+) *sdkErrors.SDKError <span class="cov8" title="1">{
+        b := r.newBackOff()
+        totalDuration := time.Duration(0)
+
+        // Wrap operation to convert SDKError to plain error for backoff library
+        wrappedOp := func() error </span><span class="cov8" title="1">{
+                sdkErr := operation()
+                if sdkErr == nil </span><span class="cov8" title="1">{
+                        return nil
+                }</span>
+                <span class="cov8" title="1">return sdkErr</span>
+        }
+
+        <span class="cov8" title="1">err := backoff.RetryNotify(
+                wrappedOp,
+                backoff.WithContext(b, ctx),
+                func(err error, duration time.Duration) </span><span class="cov8" title="1">{
+                        totalDuration += duration
+                        if r.notify != nil </span><span class="cov8" title="1">{
+                                // Convert plain error back to SDKError for notification
+                                var sdkErr *sdkErrors.SDKError
+                                if errors.As(err, &amp;sdkErr) </span><span class="cov8" title="1">{
+                                        r.notify(sdkErr, duration, totalDuration)
+                                }</span> else<span class="cov0" title="0"> {
+                                        // Wrap plain error if it's not already an SDKError
+                                        wrapped := sdkErrors.ErrRetryOperationFailed.Wrap(err)
+                                        r.notify(wrapped, duration, totalDuration)
+                                }</span>
+                        }
+                },
+        )
+
+        <span class="cov8" title="1">if err == nil </span><span class="cov8" title="1">{
+                return nil
+        }</span>
+
+        // Check if error is already an SDKError
+        <span class="cov8" title="1">var sdkErr *sdkErrors.SDKError
+        if errors.As(err, &amp;sdkErr) </span><span class="cov8" title="1">{
+                return sdkErr
+        }</span>
+
+        // Wrap context errors appropriately
+        <span class="cov8" title="1">if errors.Is(err, context.Canceled) </span><span class="cov8" title="1">{
+                failErr := sdkErrors.ErrRetryContextCanceled.Wrap(err)
+                failErr.Msg = "retry operation canceled"
+                return failErr
+        }</span>
+
+        <span class="cov8" title="1">if errors.Is(err, context.DeadlineExceeded) </span><span class="cov8" title="1">{
+                failErr := sdkErrors.ErrRetryMaxElapsedTimeReached.Wrap(err)
+                failErr.Msg = "maximum retry elapsed time exceeded"
+                return failErr
+        }</span>
+
+        // Wrap any other error
+        <span class="cov0" title="0">failErr := sdkErrors.ErrRetryOperationFailed.Wrap(err)
+        failErr.Msg = "retry operation failed"
+        return failErr</span>
+}
+
+// WithBackOffOptions configures the backoff settings using the provided
+// options. Multiple options can be combined to customize the retry behavior.
+//
+// Parameters:
+//   - opts: One or more BackOffOption functions to configure the backoff
+//     strategy
+//
+// Returns:
+//   - RetrierOption: A configuration function for ExponentialRetrier
+//
+// Example:
+//
+//        retrier := NewExponentialRetrier(
+//            WithBackOffOptions(
+//                WithInitialInterval(1 * time.Second),
+//                WithMaxElapsedTime(1 * time.Minute),
+//            ),
+//        )
+func WithBackOffOptions(opts ...BackOffOption) RetrierOption <span class="cov8" title="1">{
+        return func(r *ExponentialRetrier) </span><span class="cov8" title="1">{
+                b := r.newBackOff().(*backoff.ExponentialBackOff)
+                for _, opt := range opts </span><span class="cov8" title="1">{
+                        opt(b)
+                }</span>
+        }
+}
+
+// WithInitialInterval sets the initial interval between retries.
+// This is the starting point for the exponential backoff calculation.
+//
+// Parameters:
+//   - d: The initial wait duration before the first retry
+//
+// Returns:
+//   - BackOffOption: A configuration function for ExponentialBackOff
+func WithInitialInterval(d time.Duration) BackOffOption <span class="cov8" title="1">{
+        return func(b *backoff.ExponentialBackOff) </span><span class="cov8" title="1">{
+                b.InitialInterval = d
+        }</span>
+}
+
+// WithMaxInterval sets the maximum interval between retries.
+// The interval will never exceed this value, regardless of the multiplier.
+//
+// Parameters:
+//   - d: The maximum wait duration between retry attempts
+//
+// Returns:
+//   - BackOffOption: A configuration function for ExponentialBackOff
+func WithMaxInterval(d time.Duration) BackOffOption <span class="cov8" title="1">{
+        return func(b *backoff.ExponentialBackOff) </span><span class="cov8" title="1">{
+                b.MaxInterval = d
+        }</span>
+}
+
+// WithMaxElapsedTime sets the maximum total time for retries.
+// The retry operation will stop after this duration, even if not successful.
+// Set to 0 to retry indefinitely (until context is canceled).
+//
+// Parameters:
+//   - d: The maximum total duration for all retry attempts
+//
+// Returns:
+//   - BackOffOption: A configuration function for ExponentialBackOff
+func WithMaxElapsedTime(d time.Duration) BackOffOption <span class="cov8" title="1">{
+        return func(b *backoff.ExponentialBackOff) </span><span class="cov8" title="1">{
+                b.MaxElapsedTime = d
+        }</span>
+}
+
+// WithMultiplier sets the multiplier for increasing intervals.
+// Each retry interval is multiplied by this value, up to MaxInterval.
+//
+// Parameters:
+//   - m: The multiplier factor (e.g., 2.0 doubles the interval each time)
+//
+// Returns:
+//   - BackOffOption: A configuration function for ExponentialBackOff
+func WithMultiplier(m float64) BackOffOption <span class="cov8" title="1">{
+        return func(b *backoff.ExponentialBackOff) </span><span class="cov8" title="1">{
+                b.Multiplier = m
+        }</span>
+}
+
+// WithRandomizationFactor sets the randomization factor for backoff intervals.
+// The actual interval will be randomized between
+// [interval * (1 - factor), interval * (1 + factor)].
+//
+// A factor of 0 disables randomization (deterministic intervals).
+// A factor of 0.5 (the default) means intervals can vary by ±50%.
+// This randomization helps prevent thundering herd issues in distributed
+// systems.
+//
+// Parameters:
+//   - factor: The randomization factor (0.0 to 1.0)
+//
+// Returns:
+//   - BackOffOption: A configuration function for ExponentialBackOff
+func WithRandomizationFactor(factor float64) BackOffOption <span class="cov8" title="1">{
+        return func(b *backoff.ExponentialBackOff) </span><span class="cov8" title="1">{
+                b.RandomizationFactor = factor
+        }</span>
+}
+
+// WithNotify is an option to set the notification callback.
+// The callback is called after each failed attempt, allowing you to log
+// or monitor retry behavior.
+//
+// Parameters:
+//   - fn: Callback function invoked after each failed retry attempt
+//
+// Returns:
+//   - RetrierOption: A configuration function for ExponentialRetrier
+//
+// Example:
+//
+//        retrier := NewExponentialRetrier(
+//            WithNotify(func(err *sdkErrors.SDKError, d, total time.Duration) {
+//                log.Printf("Attempt failed after %v, total time %v: %v",
+//                    d, total, err)
+//            }),
+//        )
+func WithNotify(fn NotifyFn) RetrierOption <span class="cov8" title="1">{
+        return func(r *ExponentialRetrier) </span><span class="cov8" title="1">{
+                r.notify = fn
+        }</span>
+}
+
+// Handler represents a function that returns a value and an error.
+// It's used with the Do helper function for simple retry operations.
+type Handler[T any] func() (T, *sdkErrors.SDKError)
+
+// Do provides a simplified way to retry a typed operation with configurable
+// settings. It creates a TypedRetrier with exponential backoff and applies
+// any provided options.
+//
+// This is a convenience function for common retry scenarios where you don't
+// need to create and manage a retrier instance explicitly.
+//
+// Parameters:
+//   - ctx: Context for cancellation and timeout control
+//   - handler: The function to retry that returns a value and error
+//   - options: Optional configuration for the retry behavior
+//
+// Returns:
+//   - T: The result value from the successful operation
+//   - *sdkErrors.SDKError: nil if successful, or one of the following errors:
+//   - ErrRetryMaxElapsedTimeReached: if maximum elapsed time is reached
+//   - ErrRetryContextCanceled: if context is canceled
+//   - The wrapped error from the handler if it fails
+//
+// Example:
+//
+//        result, err := Do(ctx, func() (string, *sdkErrors.SDKError) {
+//            return fetchData()
+//        }, WithNotify(logRetryAttempts))
+func Do[T any](
+        ctx context.Context, handler Handler[T], options ...RetrierOption,
+) (T, *sdkErrors.SDKError) <span class="cov8" title="1">{
+        return NewTypedRetrier[T](
+                NewExponentialRetrier(options...),
+        ).RetryWithBackoff(ctx, handler)
+}</span>
+
+// Forever retries an operation indefinitely with exponential backoff until it
+// succeeds or the context is canceled. It sets MaxElapsedTime to 0, which means
+// the retry loop will continue forever (or until the context is canceled).
+//
+// This is a convenience function that sets up exponential backoff with sensible
+// defaults for infinite retry scenarios.
+//
+// Default settings:
+//   - InitialInterval: 500ms
+//   - MaxInterval: 60s
+//   - MaxElapsedTime: 0 (retry forever)
+//   - Multiplier: 2.0
+//
+// Parameters:
+//   - ctx: Context for cancellation control (the only way to stop retrying)
+//   - handler: The function to retry that returns a value and error
+//   - options: Optional configuration for retry behavior
+//
+// Note: User-provided options are applied AFTER the default settings and will
+// override them. If you pass WithBackOffOptions(WithMaxElapsedTime(...)), it
+// will override the "forever" behavior. This allows power users to customize
+// the retry behavior while keeping the convenience of preset defaults.
+//
+// Returns:
+//   - T: The result value from the successful operation
+//   - *sdkErrors.SDKError: nil if successful, or one of the following errors:
+//   - ErrRetryContextCanceled: if context is canceled
+//   - The wrapped error from the handler if all retries fail
+//
+// Example:
+//
+//                // Retry forever with custom notification
+//                result, err := Forever(ctx, func() (string, *sdkErrors.SDKError) {
+//                    return fetchData()
+//                }, WithNotify(func(err *sdkErrors.SDKError, d, total time.Duration) {
+//                    log.Printf("Retry failed: %v (attempt duration: %v, total: %v)",
+//                      err, d, total)
+//                }))
+//
+//                // Override behavior (will now stop after 1 minute
+//         //        instead of retrying forever)
+//                result, err := Forever(ctx, func() (string, *sdkErrors.SDKError) {
+//                    return fetchData()
+//                }, WithBackOffOptions(WithMaxElapsedTime(1 * time.Minute)))
+func Forever[T any](
+        ctx context.Context, handler Handler[T], options ...RetrierOption,
+) (T, *sdkErrors.SDKError) <span class="cov8" title="1">{
+        ro := WithBackOffOptions(WithMaxElapsedTime(forever))
+        ros := []RetrierOption{ro}
+        ros = append(ros, options...)
+
+        return NewTypedRetrier[T](
+                NewExponentialRetrier(ros...),
+        ).RetryWithBackoff(ctx, handler)
+}</span>
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>

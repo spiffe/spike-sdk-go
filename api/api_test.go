@@ -103,17 +103,17 @@ package api
 //		return []byte("p"), nil
 //	}
 //
-//	out, err := a.CipherEncryptJSON([]byte("p"), "alg")
+//	out, err := a.CipherEncrypt([]byte("p"), "alg")
 //	if err != nil {
-//		t.Fatalf("CipherEncryptJSON error: %v", err)
+//		t.Fatalf("CipherEncrypt error: %v", err)
 //	}
 //	if len(out) != 1 {
 //		t.Fatalf("unexpected encrypt json response length: %d", len(out))
 //	}
 //
-//	outp, err := a.CipherDecryptJSON(1, []byte{1}, []byte{2}, "alg")
+//	outp, err := a.CipherDecrypt(1, []byte{1}, []byte{2}, "alg")
 //	if err != nil {
-//		t.Fatalf("CipherDecryptJSON error: %v", err)
+//		t.Fatalf("CipherDecrypt error: %v", err)
 //	}
 //	if string(outp) != "p" {
 //		t.Fatalf("unexpected decrypt json: %s", string(outp))

@@ -5,7 +5,8 @@
 package reqres
 
 import (
-	"github.com/spiffe/spike-sdk-go/errors"
+	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
+	"github.com/spiffe/spike-sdk-go/log"
 )
 
 // CipherEncryptRequest for encrypting data
@@ -25,12 +26,31 @@ type CipherEncryptResponse struct {
 	// Encrypted ciphertext
 	Ciphertext []byte `json:"ciphertext"`
 	// Error code if operation failed
-	Err errors.ErrorCode `json:"err,omitempty"`
+	Err sdkErrors.ErrorCode `json:"err,omitempty"`
 }
 
-func (c CipherEncryptResponse) Success() CipherEncryptResponse {
-	c.Err = errors.ErrSuccess.Code
-	return c
+func (r CipherEncryptResponse) Success() CipherEncryptResponse {
+	r.Err = sdkErrors.ErrAPISuccess.Code
+	return r
+}
+func (r CipherEncryptResponse) NotFound() CipherEncryptResponse {
+	log.FatalErr("NotFound", *sdkErrors.ErrAPIResponseCodeInvalid)
+	return r
+}
+func (r CipherEncryptResponse) BadRequest() CipherEncryptResponse {
+	r.Err = sdkErrors.ErrAPIBadRequest.Code
+	return r
+}
+func (r CipherEncryptResponse) Unauthorized() CipherEncryptResponse {
+	r.Err = sdkErrors.ErrAccessUnauthorized.Code
+	return r
+}
+func (r CipherEncryptResponse) Internal() CipherEncryptResponse {
+	r.Err = sdkErrors.ErrAPIInternal.Code
+	return r
+}
+func (r CipherEncryptResponse) ErrorCode() sdkErrors.ErrorCode {
+	return r.Err
 }
 
 // CipherDecryptRequest for decrypting data
@@ -50,10 +70,29 @@ type CipherDecryptResponse struct {
 	// Decrypted plaintext data
 	Plaintext []byte `json:"plaintext"`
 	// Error code if operation failed
-	Err errors.ErrorCode `json:"err,omitempty"`
+	Err sdkErrors.ErrorCode `json:"err,omitempty"`
 }
 
-func (c CipherDecryptResponse) Success() CipherDecryptResponse {
-	c.Err = errors.ErrSuccess.Code
-	return c
+func (r CipherDecryptResponse) Success() CipherDecryptResponse {
+	r.Err = sdkErrors.ErrAPISuccess.Code
+	return r
+}
+func (r CipherDecryptResponse) NotFound() CipherDecryptResponse {
+	log.FatalErr("NotFound", *sdkErrors.ErrAPIResponseCodeInvalid)
+	return r
+}
+func (r CipherDecryptResponse) BadRequest() CipherDecryptResponse {
+	r.Err = sdkErrors.ErrAPIBadRequest.Code
+	return r
+}
+func (r CipherDecryptResponse) Unauthorized() CipherDecryptResponse {
+	r.Err = sdkErrors.ErrAccessUnauthorized.Code
+	return r
+}
+func (r CipherDecryptResponse) Internal() CipherDecryptResponse {
+	r.Err = sdkErrors.ErrAPIInternal.Code
+	return r
+}
+func (r CipherDecryptResponse) ErrorCode() sdkErrors.ErrorCode {
+	return r.Err
 }

@@ -6,7 +6,8 @@ package reqres
 
 import (
 	"github.com/spiffe/spike-sdk-go/api/entity/data"
-	"github.com/spiffe/spike-sdk-go/errors"
+	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
+	"github.com/spiffe/spike-sdk-go/log"
 )
 
 // RestoreRequest for disaster recovery.
@@ -18,12 +19,31 @@ type RestoreRequest struct {
 // RestoreResponse for disaster recovery.
 type RestoreResponse struct {
 	data.RestorationStatus
-	Err errors.ErrorCode `json:"err,omitempty"`
+	Err sdkErrors.ErrorCode `json:"err,omitempty"`
 }
 
 func (r RestoreResponse) Success() RestoreResponse {
-	r.Err = errors.ErrSuccess.Code
+	r.Err = sdkErrors.ErrAPISuccess.Code
 	return r
+}
+func (r RestoreResponse) NotFound() RestoreResponse {
+	log.FatalErr("NotFound", *sdkErrors.ErrAPIResponseCodeInvalid)
+	return r
+}
+func (r RestoreResponse) BadRequest() RestoreResponse {
+	r.Err = sdkErrors.ErrAPIBadRequest.Code
+	return r
+}
+func (r RestoreResponse) Unauthorized() RestoreResponse {
+	r.Err = sdkErrors.ErrAccessUnauthorized.Code
+	return r
+}
+func (r RestoreResponse) Internal() RestoreResponse {
+	r.Err = sdkErrors.ErrAPIInternal.Code
+	return r
+}
+func (r RestoreResponse) ErrorCode() sdkErrors.ErrorCode {
+	return r.Err
 }
 
 // RecoverRequest for disaster recovery.
@@ -32,11 +52,30 @@ type RecoverRequest struct {
 
 // RecoverResponse for disaster recovery.
 type RecoverResponse struct {
-	Shards map[int]*[32]byte `json:"shards"`
-	Err    errors.ErrorCode  `json:"err,omitempty"`
+	Shards map[int]*[32]byte   `json:"shards"`
+	Err    sdkErrors.ErrorCode `json:"err,omitempty"`
 }
 
 func (r RecoverResponse) Success() RecoverResponse {
-	r.Err = errors.ErrSuccess.Code
+	r.Err = sdkErrors.ErrAPISuccess.Code
 	return r
+}
+func (r RecoverResponse) NotFound() RecoverResponse {
+	log.FatalErr("NotFound", *sdkErrors.ErrAPIResponseCodeInvalid)
+	return r
+}
+func (r RecoverResponse) BadRequest() RecoverResponse {
+	r.Err = sdkErrors.ErrAPIBadRequest.Code
+	return r
+}
+func (r RecoverResponse) Unauthorized() RecoverResponse {
+	r.Err = sdkErrors.ErrAccessUnauthorized.Code
+	return r
+}
+func (r RecoverResponse) Internal() RecoverResponse {
+	r.Err = sdkErrors.ErrAPIInternal.Code
+	return r
+}
+func (r RecoverResponse) ErrorCode() sdkErrors.ErrorCode {
+	return r.Err
 }
