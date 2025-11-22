@@ -7,6 +7,7 @@ package net
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -156,19 +157,37 @@ func TestAuthorizerWithPredicate_ComplexLogic(t *testing.T) {
 
 // TestCreateMTLSServer_NilSource tests server creation with nil source
 func TestCreateMTLSServer_NilSource(t *testing.T) {
-	// This test documents behavior - CreateMTLSServer does not validate nil source
-	// The validation happens at server start time, not creation time
-	server := CreateMTLSServer(nil, ":8443")
-	assert.NotNil(t, server)
-	assert.Equal(t, ":8443", server.Addr)
+	// Enable panic on fatal to test fatal error behavior
+	t.Setenv("SPIKE_STACK_TRACES_ON_LOG_FATAL", "true")
+
+	defer func() {
+		r := recover()
+		require.NotNil(t, r, "Expected panic due to nil source")
+		panicMsg := fmt.Sprint(r)
+		assert.Contains(t, panicMsg, "CreateMTLSServerWithPredicate")
+	}()
+
+	// This should panic because source is nil
+	CreateMTLSServer(nil, ":8443")
+	t.Fatal("Should have panicked due to nil source")
 }
 
 // TestCreateMTLSServerWithPredicate_NilSource tests server creation with predicate and nil source
 func TestCreateMTLSServerWithPredicate_NilSource(t *testing.T) {
+	// Enable panic on fatal to test fatal error behavior
+	t.Setenv("SPIKE_STACK_TRACES_ON_LOG_FATAL", "true")
+
+	defer func() {
+		r := recover()
+		require.NotNil(t, r, "Expected panic due to nil source")
+		panicMsg := fmt.Sprint(r)
+		assert.Contains(t, panicMsg, "CreateMTLSServerWithPredicate")
+	}()
+
 	predicate := func(_ string) bool { return true }
-	server := CreateMTLSServerWithPredicate(nil, ":8443", predicate)
-	assert.NotNil(t, server)
-	assert.Equal(t, ":8443", server.Addr)
+	// This should panic because source is nil
+	CreateMTLSServerWithPredicate(nil, ":8443", predicate)
+	t.Fatal("Should have panicked due to nil source")
 }
 
 // TestCreateMTLSClient_NilSource tests client creation with nil source
