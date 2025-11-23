@@ -13,6 +13,10 @@ import (
 // Delete marks secret versions as deleted for a given path. The deletion is
 // performed by setting the DeletedTime to the current time.
 //
+// IMPORTANT: This is a soft delete. The path remains in the store even if all
+// versions are deleted. To completely remove a path and reclaim memory, use
+// Destroy() after deleting all versions.
+//
 // The function supports flexible version deletion with the following behavior:
 //   - If versions is empty, deletes only the current version
 //   - If versions contains specific numbers, deletes those versions

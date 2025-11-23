@@ -19,11 +19,11 @@ var (
 
 // SecretGetResponse variants
 var (
-	SecretReadNotFound     = SecretGetResponse{}.NotFound()
-	SecretReadBadRequest   = SecretGetResponse{}.BadRequest()
-	SecretReadUnauthorized = SecretGetResponse{}.Unauthorized()
-	SecretReadSuccess      = SecretGetResponse{}.Success()
-	SecretReadInternal     = SecretGetResponse{}.Internal()
+	SecretGetNotFound     = SecretGetResponse{}.NotFound()
+	SecretGetBadRequest   = SecretGetResponse{}.BadRequest()
+	SecretGetUnauthorized = SecretGetResponse{}.Unauthorized()
+	SecretGetSuccess      = SecretGetResponse{}.Success()
+	SecretGetInternal     = SecretGetResponse{}.Internal()
 )
 
 // SecretDeleteResponse variants

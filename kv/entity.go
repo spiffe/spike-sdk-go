@@ -16,7 +16,8 @@ type Version struct {
 	// CreatedTime is when this version was created
 	CreatedTime time.Time
 
-	// Version is the numeric identifier for this version
+	// Version is the numeric identifier for this version. Version numbers
+	// start at 1 and increment with each update.
 	Version int
 
 	// DeletedTime indicates when this version was marked as deleted
@@ -28,7 +29,9 @@ type Version struct {
 // It maintains version boundaries and timestamps for the overall data
 // collection.
 type Metadata struct {
-	// CurrentVersion is the newest/latest version number
+	// CurrentVersion is the newest/latest non-deleted version number.
+	// Version numbers start at 1. A value of 0 indicates that all versions
+	// have been deleted (no valid version exists).
 	CurrentVersion int
 
 	// OldestVersion is the oldest available version number
@@ -54,4 +57,41 @@ type Value struct {
 
 	// Metadata contains control information about this versioned data
 	Metadata Metadata
+}
+
+// HasValidVersions returns true if the Value has at least one non-deleted
+// version. It iterates through all versions to check their DeletedTime.
+//
+// Returns:
+//   - true if any version has DeletedTime == nil (active version exists)
+//   - false if all versions are deleted or no versions exist
+//
+// Note: This method performs a full scan of all versions. For stores where
+// CurrentVersion is maintained correctly (like SPIKE Nexus), checking
+// Metadata.CurrentVersion != 0 is more efficient.
+func (v *Value) HasValidVersions() bool {
+	for _, version := range v.Versions {
+		if version.DeletedTime == nil {
+			return true
+		}
+	}
+	return false
+}
+
+// Empty returns true if the Value has no valid (non-deleted) versions.
+// This is the inverse of HasValidVersions() and is useful for identifying
+// secrets that can be purged from storage.
+//
+// Returns:
+//   - true if all versions are deleted or no versions exist
+//   - false if at least one active version exists
+//
+// Example:
+//
+//	if secret.IsEmpty() {
+//	    // Safe to remove from storage
+//	    kv.Destroy(path)
+//	}
+func (v *Value) Empty() bool {
+	return !v.HasValidVersions()
 }
