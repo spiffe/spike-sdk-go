@@ -43,7 +43,7 @@ type Policy struct {
 	PathPattern     string             `json:"pathPattern"`
 	Permissions     []PolicyPermission `json:"permissions"`
 	CreatedAt       time.Time          `json:"createdAt"`
-	CreatedBy       string             `json:"createdBy"`
+	UpdatedAt       time.Time          `json:"updatedAt"`
 
 	// Unexported fields won't be serialized to JSON
 	IDRegex   *regexp.Regexp `json:"-"`

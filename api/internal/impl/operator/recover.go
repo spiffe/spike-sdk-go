@@ -37,6 +37,11 @@ import (
 //   - File descriptor exhaustion (resource pressure may clear)
 //   - SVID rotation failure (temporary SPIRE server issue)
 //   - Workload API connection lost after source creation (agent crash/restart)
+//   - If the SPIFFE provider is SPIRE the workload might not be registered;
+//     or the registration entry might not be propagated through the system yet,
+//   - The workload attestation server, kubelet, or even kubeapi-server might
+//     be overloaded and can't answer the requests from the agent, or it may
+//     even be hard to read data from the /proc/ or the cgroup filesystem.
 //
 // Since recovery is often performed during emergency procedures when
 // infrastructure may be unstable, this function returns errors rather than
@@ -68,7 +73,9 @@ import (
 //	    // SVID acquisition failures may be transient - consider retry logic
 //	    return nil, err
 //	}
-func Recover(source *workloadapi.X509Source) (map[int]*[32]byte, *sdkErrors.SDKError) {
+func Recover(source *workloadapi.X509Source) (
+	map[int]*[32]byte, *sdkErrors.SDKError,
+) {
 	const fName = "recover"
 
 	if source == nil {

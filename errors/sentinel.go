@@ -212,12 +212,24 @@ var ErrCryptoLowEntropy = register("crypto_low_entropy", "low entropy", nil)
 // ErrCryptoNonceGenerationFailed indicates nonce generation failed.
 var ErrCryptoNonceGenerationFailed = register("crypto_nonce_generation_failed", "nonce generation failed", nil)
 
+// ErrCryptoNonceSizeMismatch indicates the nonce size does not match the cipher block size.
+var ErrCryptoNonceSizeMismatch = register("crypto_nonce_size_mismatch", "nonce size mismatch", nil)
+
 // ErrCryptoRandomGenerationFailed indicates random data generation failed.
 var ErrCryptoRandomGenerationFailed = register("crypto_random_generation_failed", "random generation failed", nil)
+
+// ErrCryptoUnsupportedCipherVersion indicates the requested cipher version is not supported.
+var ErrCryptoUnsupportedCipherVersion = register("crypto_unsupported_version", "unsupported crypto version", nil)
 
 //
 // Backing store infrastructure (internal store operations)
 //
+
+// ErrStoreCloseFailed indicates the backing store close operation failed.
+var ErrStoreCloseFailed = register("store_close_failed", "backing store close failed", nil)
+
+// ErrStoreIntegrityCheckFailed indicates the backing store integrity check failed.
+var ErrStoreIntegrityCheckFailed = register("store_integrity_check_failed", "backing store integrity check failed", nil)
 
 // ErrStoreInvalidConfiguration indicates the backing store configuration is invalid.
 var ErrStoreInvalidConfiguration = register("store_invalid_configuration", "invalid store configuration", nil)
@@ -234,6 +246,9 @@ var ErrStoreResultSetFailedToLoad = register("store_result_set_failed_to_load", 
 
 // ErrFSDirectoryCreationFailed indicates filesystem directory creation failed.
 var ErrFSDirectoryCreationFailed = register("fs_directory_creation_failed", "directory creation failed", nil)
+
+// ErrFSDirectoryDoesNotExist indicates the directory does not exist.
+var ErrFSDirectoryDoesNotExist = register("fs_directory_does_not_exist", "directory does not exist", nil)
 
 // ErrFSFailedToCheckDirectory indicates failed to check directory status.
 var ErrFSFailedToCheckDirectory = register("fs_failed_to_check_directory", "failed to check directory", nil)
@@ -297,14 +312,14 @@ var ErrDataUnmarshalFailure = register("data_unmarshal_failure", "failed to unma
 // ErrStringEmptyCharacterClass indicates an empty character class was specified.
 var ErrStringEmptyCharacterClass = register("string_empty_character_class", "empty character class", nil)
 
-// ErrStringInvalidRange indicates an invalid character range specification.
-var ErrStringInvalidRange = register("string_invalid_range", "invalid character range", nil)
-
 // ErrStringEmptyCharacterSet indicates the character class resulted in an empty set.
 var ErrStringEmptyCharacterSet = register("string_empty_character_set", "character class resulted in empty set", nil)
 
 // ErrStringInvalidLength indicates an invalid length specification.
 var ErrStringInvalidLength = register("string_invalid_length", "invalid length specification", nil)
+
+// ErrStringInvalidRange indicates an invalid character range specification.
+var ErrStringInvalidRange = register("string_invalid_range", "invalid character range", nil)
 
 // ErrStringNegativeLength indicates the length cannot be negative.
 var ErrStringNegativeLength = register("string_negative_length", "length cannot be negative", nil)
@@ -345,24 +360,24 @@ var ErrTransactionRollbackFailed = register("transaction_rollback_failed", "fail
 // Recovery operations
 //
 
+// ErrRecoveryFailed indicates the recovery operation failed.
+var ErrRecoveryFailed = register("recovery_failed", "recovery failed", nil)
+
 // ErrRecoveryRetryFailed indicates recovery retry operation failed.
 var ErrRecoveryRetryFailed = register("recovery_retry_failed", "recovery retry failed", nil)
 
 // ErrRecoveryRetryLimitReached indicates the recovery retry limit was reached.
 var ErrRecoveryRetryLimitReached = register("recovery_retry_limit_reached", "recovery retry limit reached", nil)
 
-// ErrRecoveryFailed indicates the recovery operation failed.
-var ErrRecoveryFailed = register("recovery_failed", "recovery failed", nil)
-
 //
 // Retry operations
 //
 
-// ErrRetryMaxElapsedTimeReached indicates the maximum elapsed time for retries was reached.
-var ErrRetryMaxElapsedTimeReached = register("retry_max_elapsed_time_reached", "maximum elapsed time for retries reached", nil)
-
 // ErrRetryContextCanceled indicates the retry was canceled due to context cancellation.
 var ErrRetryContextCanceled = register("retry_context_canceled", "retry canceled due to context cancellation", nil)
+
+// ErrRetryMaxElapsedTimeReached indicates the maximum elapsed time for retries was reached.
+var ErrRetryMaxElapsedTimeReached = register("retry_max_elapsed_time_reached", "maximum elapsed time for retries reached", nil)
 
 // ErrRetryOperationFailed indicates the retry operation failed.
 var ErrRetryOperationFailed = register("retry_operation_failed", "retry operation failed", nil)
@@ -374,11 +389,20 @@ var ErrRetryOperationFailed = register("retry_operation_failed", "retry operatio
 // ErrSPIFFEEmptyTrustDomain indicates an empty SPIFFE trust domain was provided.
 var ErrSPIFFEEmptyTrustDomain = register("spiffe_empty_trust_domain", "empty trust domain", nil)
 
+// ErrSPIFFEFailedToCloseX509Source indicates X509Source close operation failed.
+var ErrSPIFFEFailedToCloseX509Source = register("spiffe_failed_to_close_source", "failed to close X509Source", nil)
+
 // ErrSPIFFEFailedToCreateX509Source indicates X509Source creation failed.
 var ErrSPIFFEFailedToCreateX509Source = register("spiffe_failed_to_create_x509_source", "failed to create X509Source", nil)
 
 // ErrSPIFFEFailedToExtractX509SVID indicates X509 SVID extraction failed.
 var ErrSPIFFEFailedToExtractX509SVID = register("spiffe_failed_to_extract_x509_svid", "failed to extract X509 SVID", nil)
+
+// ErrSPIFFEInvalidSPIFFEID indicates an invalid SPIFFE ID was provided.
+var ErrSPIFFEInvalidSPIFFEID = register("spiffe_invalid_spiffe_id", "invalid SPIFFE ID", nil)
+
+// ErrSPIFFEInvalidTrustDomain indicates an invalid trust domain was provided.
+var ErrSPIFFEInvalidTrustDomain = register("spiffe_invalid_trust_domain", "invalid trust domain", nil)
 
 // ErrSPIFFEMultipleTrustDomains indicates multiple trust domains were provided when only one is allowed.
 var ErrSPIFFEMultipleTrustDomains = register("spiffe_multiple_trust_domains", "provide a single trust domain", nil)
@@ -391,6 +415,3 @@ var ErrSPIFFENoPeerCertificates = register("spiffe_no_peer_certificates", "no pe
 
 // ErrSPIFFEUnableToFetchX509Source indicates unable to fetch X509Source.
 var ErrSPIFFEUnableToFetchX509Source = register("spiffe_unable_to_fetch_x509_source", "unable to fetch X509Source", nil)
-
-// ErrSPIFFEFailedToCloseX509Source indicates X509Source close operation failed.
-var ErrSPIFFEFailedToCloseX509Source = register("spiffe_failed_to_close_source", "failed to close X509Source", nil)
