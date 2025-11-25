@@ -141,3 +141,24 @@ func (e *SDKError) Is(target error) bool {
 	}
 	return false
 }
+
+// Clone creates a shallow copy of the SDKError. This is useful when you need
+// to modify the Msg field of a sentinel error without mutating the original.
+//
+// Returns:
+//   - *SDKError: a new SDK error with the same code, message, and wrapped
+//     error as the original
+//
+// Example:
+//
+//	// Copy a sentinel error to customize the message
+//	failErr := sdkErrors.ErrEntityNotFound.Copy()
+//	failErr.Msg = "secret 'prod-api-key' not found"
+//	return failErr
+func (e *SDKError) Clone() *SDKError {
+	return &SDKError{
+		Code:    e.Code,
+		Msg:     e.Msg,
+		Wrapped: e.Wrapped,
+	}
+}
