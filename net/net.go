@@ -309,7 +309,7 @@ func Source() *workloadapi.X509Source {
 
 	source, _, err := spiffe.Source(ctx, spiffe.EndpointSocket())
 	if err != nil {
-		failErr := sdkErrors.ErrObjectCreationFailed.Wrap(err)
+		failErr := sdkErrors.ErrSPIFFEUnableToFetchX509Source.Wrap(err)
 		log.FatalErr(fName, *failErr)
 	}
 	return source

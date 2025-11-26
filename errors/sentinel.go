@@ -21,6 +21,12 @@ var ErrNilContext = register("gen_nil_context", "nil context", nil)
 // ErrK8sReconciliationFailed indicates Kubernetes reconciliation failed.
 var ErrK8sReconciliationFailed = register("k8s_reconciliation_failed", "reconciliation failed", nil)
 
+// ErrK8sClientFailed indicates Kubernetes client creation failed.
+var ErrK8sClientFailed = register("k8s_client_failed", "failed to create Kubernetes client", nil)
+
+// ErrK8sResourceLookupFailed indicates Kubernetes resource lookup failed.
+var ErrK8sResourceLookupFailed = register("k8s_lookup_failed", "failed to lookup Kubernetes resource", nil)
+
 //
 // API/HTTP operations
 //
@@ -53,8 +59,14 @@ var ErrAPIServerFault = register("api_server_fault", "server fault", nil)
 // Entity operations
 //
 
+// ErrEntityCreationFailed indicates object creation failed.
+var ErrEntityCreationFailed = register("object_creation_failed", "creation failed", nil)
+
 // ErrEntityDeleted indicates the entity is marked as deleted.
 var ErrEntityDeleted = register("entity_deleted", "entity marked as deleted", nil)
+
+// ErrEntityDeletionFailed indicates object deletion failed.
+var ErrEntityDeletionFailed = register("object_deletion_failed", "deletion failed", nil)
 
 // ErrEntityExists indicates the entity already exists.
 var ErrEntityExists = register("entity_exists", "entity already exists", nil)
@@ -71,7 +83,7 @@ var ErrEntityNotFound = register("entity_not_found", "entity not found", nil)
 // ErrEntityQueryFailed indicates the entity query operation failed.
 var ErrEntityQueryFailed = register("entity_query_failed", "failed to query entities", nil)
 
-// ErrEntitySaveFailed indicates the entity failed to save to storage.
+// ErrEntitySaveFailed indicates the entity failed to get saved to storage.
 var ErrEntitySaveFailed = register("entity_save_failed", "failed to save entity", nil)
 
 // ErrEntityVersionInvalid indicates an invalid entity version was specified.
@@ -79,6 +91,9 @@ var ErrEntityVersionInvalid = register("entity_version_invalid", "invalid versio
 
 // ErrEntityVersionNotFound indicates the requested entity version was not found.
 var ErrEntityVersionNotFound = register("entity_version_not_found", "version not found", nil)
+
+// ErrEntityUndeletionFailed indicates object undeletion (restore) failed.
+var ErrEntityUndeletionFailed = register("object_undeletion_failed", "undeletion failed", nil)
 
 //
 // State operations
@@ -96,6 +111,9 @@ var ErrStateNotAlive = register("state_not_alive", "not alive", nil)
 // ErrStateNotReady indicates the system state is not ready.
 var ErrStateNotReady = register("state_not_ready", "not ready", nil)
 
+// ErrStateIntegrityCheck indicates the system state integrity check failed.
+var ErrStateIntegrityCheck = register("state_integrity_check", "state integrity check failed", nil)
+
 //
 // Policy/RBAC/ABAC
 //
@@ -105,19 +123,6 @@ var ErrAccessInvalidPermission = register("access_invalid_permission", "invalid 
 
 // ErrAccessUnauthorized indicates the requester lacks authorization for the operation.
 var ErrAccessUnauthorized = register("access_unauthorized", "unauthorized", nil)
-
-//
-// CRUD operations
-//
-
-// ErrObjectCreationFailed indicates object creation failed.
-var ErrObjectCreationFailed = register("object_creation_failed", "creation failed", nil)
-
-// ErrObjectDeletionFailed indicates object deletion failed.
-var ErrObjectDeletionFailed = register("object_deletion_failed", "deletion failed", nil)
-
-// ErrObjectUndeletionFailed indicates object undeletion (restore) failed.
-var ErrObjectUndeletionFailed = register("object_undeletion_failed", "undeletion failed", nil)
 
 //
 // Root key management
@@ -135,7 +140,7 @@ var ErrRootKeyNotEmpty = register("root_key_not_empty", "root key not empty", ni
 // ErrRootKeySkipCreationForInMemoryMode indicates root key creation was skipped for in-memory mode.
 var ErrRootKeySkipCreationForInMemoryMode = register("root_key_skip_creation_for_in_memory_mode", "root key skip creation for in memory mode", nil)
 
-// ErrRootKeyUpdateSkippedKeyEmpty indicates root key update was skipped because key is empty.
+// ErrRootKeyUpdateSkippedKeyEmpty indicates the root key update was skipped because the key is empty.
 var ErrRootKeyUpdateSkippedKeyEmpty = register("root_key_update_skipped_key_empty", "root key update skipped key empty", nil)
 
 //
@@ -213,9 +218,6 @@ var ErrCryptoUnsupportedCipherVersion = register("crypto_unsupported_version", "
 // ErrStoreCloseFailed indicates the backing store close operation failed.
 var ErrStoreCloseFailed = register("store_close_failed", "backing store close failed", nil)
 
-// ErrStoreIntegrityCheckFailed indicates the backing store integrity check failed.
-var ErrStoreIntegrityCheckFailed = register("store_integrity_check_failed", "backing store integrity check failed", nil)
-
 // ErrStoreInvalidConfiguration indicates the backing store configuration is invalid.
 var ErrStoreInvalidConfiguration = register("store_invalid_configuration", "invalid store configuration", nil)
 
@@ -235,10 +237,10 @@ var ErrFSDirectoryDoesNotExist = register("fs_directory_does_not_exist", "direct
 // ErrFSFailedToCheckDirectory indicates failed to check directory status.
 var ErrFSFailedToCheckDirectory = register("fs_failed_to_check_directory", "failed to check directory", nil)
 
-// ErrFSFailedToCreateDirectory indicates failed to create directory.
+// ErrFSFailedToCreateDirectory indicates failed to create the directory.
 var ErrFSFailedToCreateDirectory = register("fs_failed_to_create_directory", "failed to create directory", nil)
 
-// ErrFSFailedToResolvePath indicates failed to resolve filesystem path.
+// ErrFSFailedToResolvePath indicates failed to resolve the filesystem path.
 var ErrFSFailedToResolvePath = register("fs_failed_to_resolve_path", "failed to resolve filesystem path", nil)
 
 // ErrFSFileCloseFailed indicates file close operation failed.
@@ -264,6 +266,12 @@ var ErrFSPathRestricted = register("fs_path_restricted", "filesystem path is res
 
 // ErrFSStreamCloseFailed indicates stream close operation failed.
 var ErrFSStreamCloseFailed = register("fs_stream_close_failed", "stream close failed", nil)
+
+// ErrFSStreamReadFailed indicates stream read operation failed.
+var ErrFSStreamReadFailed = register("fs_stream_read_failed", "stream read failed", nil)
+
+// ErrFSStreamWriteFailed indicates a stream write operation failed.
+var ErrFSStreamWriteFailed = register("stream_write_failed", "stream write failed", nil)
 
 // ErrFSStreamOpenFailed indicates stream open operation failed.
 var ErrFSStreamOpenFailed = register("fs_stream_open_failed", "stream open failed", nil)
@@ -326,10 +334,10 @@ var ErrNetURLJoinPathFailed = register("net_url_join_path_failed", "failed to jo
 // Transaction operations
 //
 
-// ErrTransactionBeginFailed indicates transaction begin failed.
+// ErrTransactionBeginFailed indicates `transaction begin` failed.
 var ErrTransactionBeginFailed = register("transaction_begin_failed", "failed to begin transaction", nil)
 
-// ErrTransactionCommitFailed indicates transaction commit failed.
+// ErrTransactionCommitFailed indicates `transaction commit` failed.
 var ErrTransactionCommitFailed = register("transaction_commit_failed", "failed to commit transaction", nil)
 
 // ErrTransactionFailed indicates the transaction failed.
@@ -373,9 +381,6 @@ var ErrSPIFFEEmptyTrustDomain = register("spiffe_empty_trust_domain", "empty tru
 
 // ErrSPIFFEFailedToCloseX509Source indicates X509Source close operation failed.
 var ErrSPIFFEFailedToCloseX509Source = register("spiffe_failed_to_close_source", "failed to close X509Source", nil)
-
-// ErrSPIFFEFailedToCreateX509Source indicates X509Source creation failed.
-var ErrSPIFFEFailedToCreateX509Source = register("spiffe_failed_to_create_x509_source", "failed to create X509Source", nil)
 
 // ErrSPIFFEFailedToExtractX509SVID indicates X509 SVID extraction failed.
 var ErrSPIFFEFailedToExtractX509SVID = register("spiffe_failed_to_extract_x509_svid", "failed to extract X509 SVID", nil)
