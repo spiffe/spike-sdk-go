@@ -49,9 +49,6 @@ var ErrAPIResponseCodeInvalid = register("api_response_code_invalid", "invalid A
 // ErrAPIServerFault indicates a server-side fault occurred.
 var ErrAPIServerFault = register("api_server_fault", "server fault", nil)
 
-// ErrAPISuccess indicates the API operation completed successfully.
-var ErrAPISuccess = register("api_success", "success", nil)
-
 //
 // Entity operations
 //
@@ -119,14 +116,8 @@ var ErrObjectCreationFailed = register("object_creation_failed", "creation faile
 // ErrObjectDeletionFailed indicates object deletion failed.
 var ErrObjectDeletionFailed = register("object_deletion_failed", "deletion failed", nil)
 
-// ErrObjectDeletionSuccess indicates object deletion succeeded.
-var ErrObjectDeletionSuccess = register("object_deletion_success", "deletion success", nil)
-
 // ErrObjectUndeletionFailed indicates object undeletion (restore) failed.
 var ErrObjectUndeletionFailed = register("object_undeletion_failed", "undeletion failed", nil)
-
-// ErrObjectUndeletionSuccess indicates object undeletion (restore) succeeded.
-var ErrObjectUndeletionSuccess = register("object_undeletion_success", "undeletion success", nil)
 
 //
 // Root key management
@@ -140,9 +131,6 @@ var ErrRootKeyMissing = register("root_key_missing", "root key missing", nil)
 
 // ErrRootKeyNotEmpty indicates the root key is not empty when expected to be.
 var ErrRootKeyNotEmpty = register("root_key_not_empty", "root key not empty", nil)
-
-// ErrRootKeySetSuccess indicates the root key was set successfully.
-var ErrRootKeySetSuccess = register("root_key_set_success", "root key set success", nil)
 
 // ErrRootKeySkipCreationForInMemoryMode indicates root key creation was skipped for in-memory mode.
 var ErrRootKeySkipCreationForInMemoryMode = register("root_key_skip_creation_for_in_memory_mode", "root key skip creation for in memory mode", nil)
@@ -181,9 +169,6 @@ var ErrCryptoCipherNotAvailable = register("crypto_cipher_not_available", "ciphe
 
 // ErrCryptoCipherVerificationFailed indicates cipher verification failed.
 var ErrCryptoCipherVerificationFailed = register("crypto_cipher_verification_failed", "cipher verification failed", nil)
-
-// ErrCryptoCipherVerificationSuccess indicates cipher verification succeeded.
-var ErrCryptoCipherVerificationSuccess = register("crypto_cipher_verification_success", "cipher verification success", nil)
 
 // ErrCryptoDecryptionFailed indicates data decryption failed.
 var ErrCryptoDecryptionFailed = register("crypto_decryption_failed", "decryption failed", nil)
@@ -236,9 +221,6 @@ var ErrStoreInvalidConfiguration = register("store_invalid_configuration", "inva
 
 // ErrStoreInvalidEncryptionKey indicates the store encryption key is invalid.
 var ErrStoreInvalidEncryptionKey = register("store_invalid_encryption_key", "invalid store encryption key", nil)
-
-// ErrStoreResultSetFailedToLoad indicates the store result set failed to load.
-var ErrStoreResultSetFailedToLoad = register("store_result_set_failed_to_load", "result set failed to load", nil)
 
 //
 // Filesystem operations

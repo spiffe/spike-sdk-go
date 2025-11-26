@@ -297,7 +297,7 @@ func TestBootstrapVerifyResponseMethods(t *testing.T) {
 		{
 			name:         "Success",
 			method:       reqres.BootstrapVerifyResponse.Success,
-			expectedCode: sdkErrors.ErrAPISuccess.Code,
+			expectedCode: "",
 		},
 		{
 			name:         "BadRequest",
@@ -335,7 +335,7 @@ func TestShardPutResponseMethods(t *testing.T) {
 		{
 			name:         "Success",
 			method:       reqres.ShardPutResponse.Success,
-			expectedCode: sdkErrors.ErrAPISuccess.Code,
+			expectedCode: "",
 		},
 		{
 			name:         "BadRequest",
@@ -373,7 +373,7 @@ func TestShardGetResponseMethods(t *testing.T) {
 		{
 			name:         "Success",
 			method:       reqres.ShardGetResponse.Success,
-			expectedCode: sdkErrors.ErrAPISuccess.Code,
+			expectedCode: "",
 		},
 		{
 			name:         "NotFound",

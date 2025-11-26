@@ -25,7 +25,7 @@ type PolicyPutResponse struct {
 }
 
 func (r PolicyPutResponse) Success() PolicyPutResponse {
-	r.Err = sdkErrors.ErrAPISuccess.Code
+	r.Err = ""
 	return r
 }
 func (r PolicyPutResponse) NotFound() PolicyPutResponse {
@@ -60,7 +60,7 @@ type PolicyReadResponse struct {
 }
 
 func (r PolicyReadResponse) Success() PolicyReadResponse {
-	r.Err = sdkErrors.ErrAPISuccess.Code
+	r.Err = ""
 	return r
 }
 func (r PolicyReadResponse) NotFound() PolicyReadResponse {
@@ -94,7 +94,7 @@ type PolicyDeleteResponse struct {
 }
 
 func (r PolicyDeleteResponse) Success() PolicyDeleteResponse {
-	r.Err = sdkErrors.ErrAPISuccess.Code
+	r.Err = ""
 	return r
 }
 func (r PolicyDeleteResponse) NotFound() PolicyDeleteResponse {
@@ -130,7 +130,7 @@ type PolicyListResponse struct {
 }
 
 func (r PolicyListResponse) Success() PolicyListResponse {
-	r.Err = sdkErrors.ErrAPISuccess.Code
+	r.Err = ""
 	return r
 }
 func (r PolicyListResponse) NotFound() PolicyListResponse {
@@ -168,7 +168,7 @@ type PolicyAccessCheckResponse struct {
 }
 
 func (r PolicyAccessCheckResponse) Success() PolicyAccessCheckResponse {
-	r.Err = sdkErrors.ErrAPISuccess.Code
+	r.Err = ""
 	return r
 }
 func (r PolicyAccessCheckResponse) NotFound() PolicyAccessCheckResponse {
