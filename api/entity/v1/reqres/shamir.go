@@ -24,7 +24,7 @@ type ShardPutResponse struct {
 }
 
 func (r ShardPutResponse) Success() ShardPutResponse {
-	r.Err = sdkErrors.ErrAPISuccess.Code
+	r.Err = ""
 	return r
 }
 func (r ShardPutResponse) NotFound() ShardPutResponse {
@@ -59,7 +59,7 @@ type ShardGetResponse struct {
 }
 
 func (r ShardGetResponse) Success() ShardGetResponse {
-	r.Err = sdkErrors.ErrAPISuccess.Code
+	r.Err = ""
 	return r
 }
 func (r ShardGetResponse) NotFound() ShardGetResponse {

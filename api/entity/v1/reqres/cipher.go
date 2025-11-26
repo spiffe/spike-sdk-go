@@ -30,7 +30,7 @@ type CipherEncryptResponse struct {
 }
 
 func (r CipherEncryptResponse) Success() CipherEncryptResponse {
-	r.Err = sdkErrors.ErrAPISuccess.Code
+	r.Err = ""
 	return r
 }
 func (r CipherEncryptResponse) NotFound() CipherEncryptResponse {
@@ -74,7 +74,7 @@ type CipherDecryptResponse struct {
 }
 
 func (r CipherDecryptResponse) Success() CipherDecryptResponse {
-	r.Err = sdkErrors.ErrAPISuccess.Code
+	r.Err = ""
 	return r
 }
 func (r CipherDecryptResponse) NotFound() CipherDecryptResponse {

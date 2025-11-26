@@ -26,7 +26,7 @@ type BootstrapVerifyResponse struct {
 }
 
 func (r BootstrapVerifyResponse) Success() BootstrapVerifyResponse {
-	r.Err = sdkErrors.ErrAPISuccess.Code
+	r.Err = ""
 	return r
 }
 func (r BootstrapVerifyResponse) NotFound() BootstrapVerifyResponse {

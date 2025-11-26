@@ -23,7 +23,7 @@ type RestoreResponse struct {
 }
 
 func (r RestoreResponse) Success() RestoreResponse {
-	r.Err = sdkErrors.ErrAPISuccess.Code
+	r.Err = ""
 	return r
 }
 func (r RestoreResponse) NotFound() RestoreResponse {
@@ -57,7 +57,7 @@ type RecoverResponse struct {
 }
 
 func (r RecoverResponse) Success() RecoverResponse {
-	r.Err = sdkErrors.ErrAPISuccess.Code
+	r.Err = ""
 	return r
 }
 func (r RecoverResponse) NotFound() RecoverResponse {

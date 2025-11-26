@@ -268,7 +268,7 @@ func TestRecoverResponseMethods(t *testing.T) {
 		{
 			name:         "Success",
 			method:       reqres.RecoverResponse.Success,
-			expectedCode: sdkErrors.ErrAPISuccess.Code,
+			expectedCode: "",
 		},
 		{
 			name:         "BadRequest",
@@ -306,7 +306,7 @@ func TestRestoreResponseMethods(t *testing.T) {
 		{
 			name:         "Success",
 			method:       reqres.RestoreResponse.Success,
-			expectedCode: sdkErrors.ErrAPISuccess.Code,
+			expectedCode: "",
 		},
 		{
 			name:         "BadRequest",
