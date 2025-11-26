@@ -34,6 +34,30 @@ func ShamirSharesVal() int {
 	return 3
 }
 
+// ShamirMaxShareCountVal returns the maximum allowed number of shares in
+// Shamir's Secret Sharing scheme. It reads the value from the
+// SPIKE_NEXUS_SHAMIR_MAX_SHARE_COUNT environment variable.
+//
+// Returns:
+//   - The maximum share count specified in the environment variable if it's
+//     a valid positive integer
+//   - The default value of 1000 if the environment variable is unset, empty,
+//     or invalid
+//
+// This limit prevents excessive resource consumption when creating shares.
+// This variable also limits the maximum number of SPIKE Keeper instances that
+// a SPIKE deployment can support.
+func ShamirMaxShareCountVal() int {
+	p := os.Getenv(NexusShamirMaxShareCount)
+	if p != "" {
+		mv, err := strconv.Atoi(p)
+		if err == nil && mv > 0 {
+			return mv
+		}
+	}
+	return 1000
+}
+
 // ShamirThresholdVal returns the minimum number of shares required to
 // reconstruct the secret in Shamir's Secret Sharing scheme.
 // It reads the value from the SPIKE_NEXUS_SHAMIR_THRESHOLD environment
