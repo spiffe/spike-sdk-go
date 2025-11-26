@@ -75,7 +75,7 @@ func Source(ctx context.Context, socketPath string) (
 		workloadapi.WithClientOptions(workloadapi.WithAddr(socketPath)))
 
 	if err != nil {
-		return nil, "", sdkErrors.ErrSPIFFEFailedToCreateX509Source.Wrap(err)
+		return nil, "", sdkErrors.ErrSPIFFEUnableToFetchX509Source.Wrap(err)
 	}
 
 	sv, err := source.GetX509SVID()
