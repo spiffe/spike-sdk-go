@@ -220,8 +220,8 @@ func TestPilotRestore_ValidTrustRoot(t *testing.T) {
 	}
 }
 
-// TestIsPilot_ExactMatch tests IsPilot with exact match
-func TestIsPilot_ExactMatch(t *testing.T) {
+// TestIsPilotOperator_ExactMatch tests IsPilotOperator with exact match
+func TestIsPilotOperator_ExactMatch(t *testing.T) {
 	// Set up environment variable
 	os.Setenv("SPIKE_TRUST_ROOT_PILOT", "example.org")
 	defer os.Unsetenv("SPIKE_TRUST_ROOT_PILOT")
@@ -255,7 +255,7 @@ func TestIsPilot_ExactMatch(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := IsPilot(tt.spiffeID)
+			result := IsPilotOperator(tt.spiffeID)
 			assert.Equal(t, tt.expected, result)
 		})
 	}

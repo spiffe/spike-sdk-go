@@ -99,7 +99,7 @@ func Restore(
 	selfSPIFFEID := svid.ID.String()
 
 	// Security: Recovery and Restoration can ONLY be done via SPIKE Pilot.
-	if !spiffeid.IsPilot(selfSPIFFEID) {
+	if !spiffeid.IsPilotRestore(selfSPIFFEID) {
 		failErr := sdkErrors.ErrAccessUnauthorized
 		failErr.Msg = "restoration can only be performed from SPIKE Pilot"
 		log.FatalErr(fName, *failErr)

@@ -97,7 +97,7 @@ func Recover(source *workloadapi.X509Source) (
 	selfSPIFFEID := svid.ID.String()
 
 	// Security: Recovery and Restoration can ONLY be done via SPIKE Pilot.
-	if !spiffeid.IsPilot(selfSPIFFEID) {
+	if !spiffeid.IsPilotRecover(selfSPIFFEID) {
 		failErr := sdkErrors.ErrAccessUnauthorized
 		failErr.Msg = "recovery can only be performed from SPIKE Pilot"
 		log.FatalErr(fName, *failErr)
