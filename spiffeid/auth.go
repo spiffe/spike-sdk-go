@@ -10,43 +10,50 @@ import (
 	"github.com/spiffe/spike-sdk-go/config/env"
 )
 
-// IsPilot checks if a given SPIFFE ID matches the SPIKE Pilot's SPIFFE ID
-// pattern.
+// IsPilotOperator checks if a given SPIFFE ID matches the SPIKE Pilot
+// Operator's SPIFFE ID pattern.
 //
 // This function is used for identity verification to determine if the provided
-// SPIFFE ID belongs to a SPIKE pilot instance. It compares the input against
-// the expected pilot SPIFFE ID pattern.
+// SPIFFE ID belongs to a SPIKE Pilot Operator instance. The Operator role is
+// intended for regular day-to-day administrative operations on the SPIKE
+// system.
+//
+// Note: This function checks specifically for the Operator role within SPIKE
+// Pilot. It does NOT match higher-privileged doomsday recovery roles. For
+// disaster recovery scenarios, use the dedicated functions:
+//   - IsPilotRecover: for recovery operations during disaster recovery
+//   - IsPilotRestore: for restore operations during disaster recovery
 //
 // The function supports two formats:
-//   - Exact match: "spiffe://<trustRoot>/spike/pilot"
+//   - Exact match: "spiffe://<trustRoot>/spike/pilot/role/superuser"
 //   - Extended match with metadata:
-//     "spiffe://<trustRoot>/spike/pilot/<metadata>"
+//     "spiffe://<trustRoot>/spike/pilot/role/superuser/<metadata>"
 //
 // This allows for instance-specific identifiers while maintaining compatibility
-// with the base pilot identity.
+// with the base Pilot Operator identity.
 //
 // Parameters:
 //   - SPIFFEID: The SPIFFE ID string to check
 //
 // Returns:
-//   - bool: true if the provided SPIFFE ID matches either the exact pilot ID
-//     or an extended ID with additional path segments for any of the trust
-//     roots, false otherwise
+//   - bool: true if the provided SPIFFE ID matches either the exact Pilot
+//     Operator ID or an extended ID with additional path segments for any of
+//     the trust roots, false otherwise
 //
 // Example usage:
 //
-//	baseId := "spiffe://example.org/spike/pilot"
-//	extendedId := "spiffe://example.org/spike/pilot/instance-0"
+//	baseId := "spiffe://example.org/spike/pilot/role/superuser"
+//	extendedId := "spiffe://example.org/spike/pilot/role/superuser/instance-0"
 //
 //	// Both will return true
-//	if IsPilot(baseId) {
-//	    // Handle pilot-specific logic
+//	if IsPilotOperator(baseId) {
+//	    // Handle operator-specific logic
 //	}
 //
-//	if IsPilot(extendedId) {
-//	    // Also recognized as a SPIKE Pilot, with instance metadata
+//	if IsPilotOperator(extendedId) {
+//	    // Also recognized as a SPIKE Pilot Operator, with instance metadata
 //	}
-func IsPilot(SPIFFEID string) bool {
+func IsPilotOperator(SPIFFEID string) bool {
 	trustRoots := env.TrustRootFromEnv(env.TrustRootPilot)
 	for _, root := range strings.Split(trustRoots, ",") {
 		baseID := Pilot(strings.TrimSpace(root))
@@ -113,12 +120,21 @@ func IsLiteWorkload(SPIFFEID string) bool {
 	return false
 }
 
-// IsPilotRecover checks if a given SPIFFE ID matches the SPIKE Pilot's
-// recovery SPIFFE ID pattern.
+// IsPilotRecover checks if a given SPIFFE ID matches the SPIKE Pilot Recover
+// role's SPIFFE ID pattern.
 //
 // This function verifies if the provided SPIFFE ID corresponds to a SPIKE Pilot
-// instance with recovery capabilities by comparing it against the expected
-// recovery SPIFFE ID pattern.
+// instance with the Recover role. The Recover role is a higher-privileged
+// doomsday recovery role, used exclusively during disaster recovery scenarios
+// to recover the SPIKE system from a catastrophic failure.
+//
+// Note: This is NOT the same as the regular Operator role (see IsPilotOperator).
+// The Recover role should only be used in emergency disaster recovery
+// situations. For regular day-to-day operations, use IsPilotOperator instead.
+//
+// Related functions:
+//   - IsPilotOperator: for regular administrative operations
+//   - IsPilotRestore: for restore operations during disaster recovery
 //
 // The function supports two formats:
 //   - Exact match: "spiffe://<trustRoot>/spike/pilot/recover"
@@ -126,14 +142,14 @@ func IsLiteWorkload(SPIFFEID string) bool {
 //     "spiffe://<trustRoot>/spike/pilot/recover/<metadata>"
 //
 // This allows for instance-specific identifiers while maintaining compatibility
-// with the base pilot recovery identity.
+// with the base Pilot Recover identity.
 //
 // Parameters:
 //   - SPIFFEID: The SPIFFE ID string to check
 //
 // Returns:
-//   - bool: true if the provided SPIFFE ID matches either the exact pilot
-//     recovery ID or an extended ID with additional path segments for any of
+//   - bool: true if the provided SPIFFE ID matches either the exact Pilot
+//     Recover ID or an extended ID with additional path segments for any of
 //     the trust roots, false otherwise
 //
 // Example usage:
@@ -143,11 +159,11 @@ func IsLiteWorkload(SPIFFEID string) bool {
 //
 //	// Both will return true
 //	if IsPilotRecover(baseId) {
-//	    // Handle recovery-specific logic
+//	    // Handle doomsday recovery-specific logic
 //	}
 //
 //	if IsPilotRecover(extendedId) {
-//	    // Also recognized as a SPIKE Pilot recovery, with instance metadata
+//	    // Also recognized as a SPIKE Pilot Recover role, with instance metadata
 //	}
 func IsPilotRecover(SPIFFEID string) bool {
 	trustRoots := env.TrustRootFromEnv(env.TrustRootPilot)
@@ -162,12 +178,21 @@ func IsPilotRecover(SPIFFEID string) bool {
 	return false
 }
 
-// IsPilotRestore checks if a given SPIFFE ID matches the SPIKE Pilot's restore
-// SPIFFE ID pattern.
+// IsPilotRestore checks if a given SPIFFE ID matches the SPIKE Pilot Restore
+// role's SPIFFE ID pattern.
 //
-// This function verifies if the provided SPIFFE ID corresponds to a pilot
-// instance with restore capabilities by comparing it against the expected
-// restore SPIFFE ID pattern.
+// This function verifies if the provided SPIFFE ID corresponds to a SPIKE Pilot
+// instance with the Restore role. The Restore role is a higher-privileged
+// doomsday recovery role, used exclusively during disaster recovery scenarios
+// to restore the SPIKE system from a backup after a catastrophic failure.
+//
+// Note: This is NOT the same as the regular Operator role (see IsPilotOperator).
+// The Restore role should only be used in emergency disaster recovery
+// situations. For regular day-to-day operations, use IsPilotOperator instead.
+//
+// Related functions:
+//   - IsPilotOperator: for regular administrative operations
+//   - IsPilotRecover: for recovery operations during disaster recovery
 //
 // The function supports two formats:
 //   - Exact match: "spiffe://<trustRoot>/spike/pilot/restore"
@@ -175,14 +200,14 @@ func IsPilotRecover(SPIFFEID string) bool {
 //     "spiffe://<trustRoot>/spike/pilot/restore/<metadata>"
 //
 // This allows for instance-specific identifiers while maintaining compatibility
-// with the base pilot restore identity.
+// with the base Pilot Restore identity.
 //
 // Parameters:
 //   - SPIFFEID: The SPIFFE ID string to check
 //
 // Returns:
-//   - bool: true if the provided SPIFFE ID matches either the exact pilot
-//     restore ID or an extended ID with additional path segments for any of the
+//   - bool: true if the provided SPIFFE ID matches either the exact Pilot
+//     Restore ID or an extended ID with additional path segments for any of the
 //     trust roots, false otherwise
 //
 // Example usage:
@@ -192,11 +217,11 @@ func IsPilotRecover(SPIFFEID string) bool {
 //
 //	// Both will return true
 //	if IsPilotRestore(baseId) {
-//			// Handle restore-specific logic
+//	    // Handle doomsday restore-specific logic
 //	}
 //
 //	if IsPilotRestore(extendedId) {
-//			// Also recognized as a SPIKE Pilot restore, with instance metadata
+//	    // Also recognized as a SPIKE Pilot Restore role, with instance metadata
 //	}
 func IsPilotRestore(SPIFFEID string) bool {
 	trustRoots := env.TrustRootFromEnv(env.TrustRootPilot)
