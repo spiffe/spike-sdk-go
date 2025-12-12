@@ -47,3 +47,26 @@ func BootstrapInitVerificationTimeoutVal() time.Duration {
 	}
 	return 30 * time.Minute
 }
+
+// BootstrapTimeoutVal returns the maximum duration for the entire bootstrap
+// process.
+//
+// It retrieves the timeout from the SPIKE_BOOTSTRAP_TIMEOUT environment
+// variable. The value should be a valid Go duration string (e.g., "24h",
+// "48h", "72h"). A value of 0 means no timeout (infinite), which is also
+// the default behavior if the environment variable is not set or contains
+// an invalid duration format.
+//
+// Returns:
+//   - A time.Duration representing the maximum bootstrap process duration.
+//     A value of 0 indicates no timeout.
+func BootstrapTimeoutVal() time.Duration {
+	p := os.Getenv(BootstrapTimeout)
+	if p != "" {
+		d, err := time.ParseDuration(p)
+		if err == nil {
+			return d
+		}
+	}
+	return 0
+}
