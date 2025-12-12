@@ -4,7 +4,10 @@
 
 package env
 
-import "os"
+import (
+	"os"
+	"time"
+)
 
 // BootstrapConfigMapNameVal returns the name of the ConfigMap used to store
 // SPIKE Bootstrap state information.
@@ -21,4 +24,26 @@ func BootstrapConfigMapNameVal() string {
 		return "spike-bootstrap-state"
 	}
 	return cn
+}
+
+// BootstrapInitVerificationTimeoutVal returns the timeout duration for
+// bootstrap initialization verification.
+//
+// It retrieves the timeout from the SPIKE_BOOTSTRAP_INIT_VERIFICATION_TIMEOUT
+// environment variable. The value should be a valid Go duration string
+// (e.g., "30m", "1h", "45m30s"). If the environment variable is not set
+// or contains an invalid duration format, it returns a default of 30 minutes.
+//
+// Returns:
+//   - A time.Duration representing the bootstrap initialization verification
+//     timeout
+func BootstrapInitVerificationTimeoutVal() time.Duration {
+	p := os.Getenv(BootstrapInitVerificationTimeout)
+	if p != "" {
+		d, err := time.ParseDuration(p)
+		if err == nil {
+			return d
+		}
+	}
+	return 30 * time.Minute
 }
