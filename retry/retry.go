@@ -469,3 +469,96 @@ func Forever[T any](
 		NewExponentialRetrier(ros...),
 	).RetryWithBackoff(ctx, handler)
 }
+
+// WithMaxAttempts retries an operation up to a maximum number of attempts with
+// exponential backoff. It stops retrying when the operation succeeds, the
+// maximum number of attempts is reached, or the context is canceled.
+//
+// This is a convenience function for retry scenarios where you need to limit
+// the number of attempts rather than the total elapsed time.
+//
+// Default settings:
+//   - InitialInterval: 500ms
+//   - MaxInterval: 60s
+//   - MaxElapsedTime: 0 (unlimited, controlled by maxAttempts)
+//   - Multiplier: 2.0
+//
+// Parameters:
+//   - ctx: Context for cancellation and timeout control
+//   - maxAttempts: Maximum number of retry attempts (must be > 0)
+//   - handler: The function to retry that returns (success bool, error)
+//   - success: true if the operation succeeded, false to retry
+//   - error: nil on success, or the error that occurred
+//
+// Returns:
+//   - bool: true if the operation eventually succeeded; false otherwise
+//   - *sdkErrors.SDKError: nil if successful, or one of the following errors:
+//   - ErrRetryContextCanceled: if context is canceled
+//   - ErrRetryOperationFailed: if max attempts reached without success
+//   - The last error returned by the handler or a retry framework error
+//
+// Example:
+//
+//	success, err := WithMaxAttempts(ctx, 5, func() (bool, *sdkErrors.SDKError) {
+//	    result, err := callService()
+//	    if err != nil {
+//	        return false, err
+//	    }
+//	    return true, nil
+//	})
+func WithMaxAttempts(
+	ctx context.Context,
+	maxAttempts int,
+	handler func() (bool, *sdkErrors.SDKError),
+) (bool, *sdkErrors.SDKError) {
+	if maxAttempts <= 0 {
+		failErr := sdkErrors.ErrDataInvalidInput.Clone()
+		failErr.Msg = "maxAttempts must be greater than 0"
+		return false, failErr
+	}
+
+	var (
+		attempts int
+		lastErr  *sdkErrors.SDKError
+		success  bool
+	)
+
+	retrier := NewExponentialRetrier(
+		WithBackOffOptions(
+			WithMaxElapsedTime(forever), // attempts control termination
+		),
+	)
+
+	err := retrier.RetryWithBackoff(ctx, func() *sdkErrors.SDKError {
+		if attempts >= maxAttempts {
+			// Stop retrying definitively
+			if lastErr != nil {
+				return lastErr
+			}
+			failErr := sdkErrors.ErrRetryOperationFailed.Clone()
+			failErr.Msg = "maximum retry attempts reached"
+			return failErr
+		}
+
+		attempts++
+
+		success, lastErr = handler()
+		if success {
+			return nil // success stops retries
+		}
+
+		if lastErr != nil {
+			return lastErr
+		}
+
+		failErr := sdkErrors.ErrRetryOperationFailed.Clone()
+		failErr.Msg = "operation failed, will retry"
+		return failErr
+	})
+
+	if err != nil {
+		return false, err
+	}
+
+	return success, nil
+}
