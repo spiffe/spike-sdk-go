@@ -4,6 +4,8 @@
 
 package errors
 
+import "errors"
+
 // FromCode maps an ErrorCode to its corresponding SDKError using the
 // automatically populated error registry. This is used to convert error codes
 // received from API responses back to proper SDKError instances.
@@ -47,4 +49,37 @@ func MaybeError(err error) string {
 		return err.Error()
 	}
 	return ""
+}
+
+// IsOneOf checks whether the given error matches any of the provided target
+// errors using errors.Is for comparison. This is useful for checking if an
+// error belongs to a set of expected error types.
+//
+// Parameters:
+//   - err: the error to check
+//   - errs: one or more target errors to compare against
+//
+// Returns:
+//   - bool: true if err matches any of the provided errors, false otherwise
+func IsOneOf(err error, errs ...error) bool {
+	for _, e := range errs {
+		if errors.Is(err, e) {
+			return true
+		}
+	}
+	return false
+}
+
+// IsNoneOf checks whether the given error does not match any of the provided
+// target errors. It is the logical negation of IsOneOf and is useful for
+// ensuring an error is not one of several known error types.
+//
+// Parameters:
+//   - err: the error to check
+//   - errs: one or more target errors to compare against
+//
+// Returns:
+//   - bool: true if err does not match any of the provided errors, false otherwise
+func IsNoneOf(err error, errs ...error) bool {
+	return !IsOneOf(err, errs...)
 }
