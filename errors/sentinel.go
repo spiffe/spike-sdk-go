@@ -165,6 +165,9 @@ var ErrShamirNotEnoughShards = register("shamir_not_enough_shards", "shamir not 
 // ErrShamirReconstructionFailed indicates Shamir secret reconstruction failed.
 var ErrShamirReconstructionFailed = register("shamir_reconstruction_failed", "shamir reconstruction failed", nil)
 
+// ErrShamirNotEnoughKeepers indicates not enough Shamir keepers.
+var ErrShamirNotEnoughKeepers = register("shamir_not_enough_keepers", "not enough keepers for shamir shares", nil)
+
 //
 // Crypto operations
 //
