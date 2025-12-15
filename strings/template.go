@@ -162,7 +162,7 @@ func StringFromTemplate(template string) (string, *sdkErrors.SDKError) {
 
 		// Validate that length is non-negative
 		if length < 0 {
-			failErr := sdkErrors.ErrStringNegativeLength
+			failErr := sdkErrors.ErrStringNegativeLength.Clone()
 			failErr.Msg = "length cannot be negative in template"
 			return "", failErr
 		}

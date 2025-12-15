@@ -66,7 +66,7 @@ func CreatePolicy(source *workloadapi.X509Source,
 	permissions []data.PolicyPermission,
 ) *sdkErrors.SDKError {
 	if source == nil {
-		return sdkErrors.ErrSPIFFENilX509Source
+		return sdkErrors.ErrSPIFFENilX509Source.Clone()
 	}
 
 	r := reqres.PolicyPutRequest{

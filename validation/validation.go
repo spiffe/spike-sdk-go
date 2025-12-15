@@ -35,12 +35,12 @@ const validPath = `^[a-zA-Z0-9._\-/()?+*|[\]{}\\]+$`
 func ValidateName(name string) *sdkErrors.SDKError {
 	// Validate length
 	if len(name) == 0 || len(name) > maxNameLength {
-		return sdkErrors.ErrDataInvalidInput
+		return sdkErrors.ErrDataInvalidInput.Clone()
 	}
 
 	// Validate format
 	if match, _ := regexp.MatchString(validNamePattern, name); !match {
-		return sdkErrors.ErrDataInvalidInput
+		return sdkErrors.ErrDataInvalidInput.Clone()
 	}
 
 	return nil
@@ -65,7 +65,7 @@ func ValidateSPIFFEIDPattern(SPIFFEIDPattern string) *sdkErrors.SDKError {
 	// Validate SPIFFEIDPattern
 	if match, _ := regexp.MatchString(
 		validSPIFFEIDPattern, SPIFFEIDPattern); !match {
-		return sdkErrors.ErrDataInvalidInput
+		return sdkErrors.ErrDataInvalidInput.Clone()
 	}
 
 	return nil
@@ -89,7 +89,7 @@ func ValidateSPIFFEIDPattern(SPIFFEIDPattern string) *sdkErrors.SDKError {
 func ValidateSPIFFEID(SPIFFEID string) *sdkErrors.SDKError {
 	if match, _ := regexp.MatchString(
 		validRawSPIFFEIDPattern, SPIFFEID); !match {
-		return sdkErrors.ErrDataInvalidInput
+		return sdkErrors.ErrDataInvalidInput.Clone()
 	}
 	return nil
 }
@@ -115,13 +115,13 @@ func ValidateSPIFFEID(SPIFFEID string) *sdkErrors.SDKError {
 func ValidatePathPattern(pathPattern string) *sdkErrors.SDKError {
 	// Validate length
 	if len(pathPattern) == 0 || len(pathPattern) > maxPathPatternLength {
-		return sdkErrors.ErrDataInvalidInput
+		return sdkErrors.ErrDataInvalidInput.Clone()
 	}
 
 	// Validate format
 	// Allow regex special characters along with alphanumeric and basic symbols
 	if match, _ := regexp.MatchString(validPathPattern, pathPattern); !match {
-		return sdkErrors.ErrDataInvalidInput
+		return sdkErrors.ErrDataInvalidInput.Clone()
 	}
 
 	return nil
@@ -147,10 +147,10 @@ func ValidatePathPattern(pathPattern string) *sdkErrors.SDKError {
 //     contains invalid characters
 func ValidatePath(path string) *sdkErrors.SDKError {
 	if len(path) == 0 || len(path) > maxPathPatternLength {
-		return sdkErrors.ErrDataInvalidInput
+		return sdkErrors.ErrDataInvalidInput.Clone()
 	}
 	if match, _ := regexp.MatchString(validPath, path); !match {
-		return sdkErrors.ErrDataInvalidInput
+		return sdkErrors.ErrDataInvalidInput.Clone()
 	}
 	return nil
 }
@@ -169,7 +169,7 @@ func ValidatePath(path string) *sdkErrors.SDKError {
 func ValidatePolicyID(policyID string) *sdkErrors.SDKError {
 	err := uuid.Validate(policyID)
 	if err != nil {
-		return sdkErrors.ErrDataInvalidInput
+		return sdkErrors.ErrDataInvalidInput.Clone()
 	}
 	return nil
 }
@@ -208,7 +208,7 @@ func ValidatePermissions(
 			}
 		}
 		if !isAllowed {
-			return sdkErrors.ErrDataInvalidInput
+			return sdkErrors.ErrDataInvalidInput.Clone()
 		}
 	}
 

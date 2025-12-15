@@ -42,7 +42,7 @@ func Delete(
 	path string, versions []int,
 ) *sdkErrors.SDKError {
 	if source == nil {
-		return sdkErrors.ErrSPIFFENilX509Source
+		return sdkErrors.ErrSPIFFENilX509Source.Clone()
 	}
 
 	r := reqres.SecretDeleteRequest{Path: path, Versions: versions}

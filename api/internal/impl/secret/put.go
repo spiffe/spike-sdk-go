@@ -40,7 +40,7 @@ func Put(
 	path string, values map[string]string,
 ) *sdkErrors.SDKError {
 	if source == nil {
-		return sdkErrors.ErrSPIFFENilX509Source
+		return sdkErrors.ErrSPIFFENilX509Source.Clone()
 	}
 
 	r := reqres.SecretPutRequest{Path: path, Values: values}

@@ -49,7 +49,7 @@ func DeletePolicy(
 	id string,
 ) *sdkErrors.SDKError {
 	if source == nil {
-		return sdkErrors.ErrSPIFFENilX509Source
+		return sdkErrors.ErrSPIFFENilX509Source.Clone()
 	}
 
 	r := reqres.PolicyDeleteRequest{ID: id}

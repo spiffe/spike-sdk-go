@@ -79,7 +79,7 @@ func Restore(
 	const fName = "restore"
 
 	if source == nil {
-		return nil, sdkErrors.ErrSPIFFENilX509Source
+		return nil, sdkErrors.ErrSPIFFENilX509Source.Clone()
 	}
 
 	r := reqres.RestoreRequest{ID: shardIndex, Shard: shardValue}
@@ -91,7 +91,7 @@ func Restore(
 		return nil, failErr
 	}
 	if svid == nil {
-		failErr := sdkErrors.ErrSPIFFEFailedToExtractX509SVID
+		failErr := sdkErrors.ErrSPIFFEFailedToExtractX509SVID.Clone()
 		failErr.Msg = "no X509SVID in source"
 		return nil, failErr
 	}
@@ -100,7 +100,7 @@ func Restore(
 
 	// Security: Recovery and Restoration can ONLY be done via SPIKE Pilot.
 	if !spiffeid.IsPilotRestore(selfSPIFFEID) {
-		failErr := sdkErrors.ErrAccessUnauthorized
+		failErr := sdkErrors.ErrAccessUnauthorized.Clone()
 		failErr.Msg = "restoration can only be performed from SPIKE Pilot"
 		log.FatalErr(fName, *failErr)
 	}

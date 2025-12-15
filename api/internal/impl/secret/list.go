@@ -38,7 +38,7 @@ func ListKeys(
 	source *workloadapi.X509Source,
 ) (*[]string, *sdkErrors.SDKError) {
 	if source == nil {
-		return nil, sdkErrors.ErrSPIFFENilX509Source
+		return nil, sdkErrors.ErrSPIFFENilX509Source.Clone()
 	}
 
 	r := reqres.SecretListRequest{}

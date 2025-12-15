@@ -93,7 +93,7 @@ func AuthorizerWithPredicate(predicate func(string) bool) tlsconfig.Authorizer {
 			return nil
 		}
 
-		failErr := sdkErrors.ErrAccessUnauthorized
+		failErr := sdkErrors.ErrAccessUnauthorized.Clone()
 		failErr.Msg = fmt.Sprintf("unauthorized spiffe id: '%s'", id.String())
 
 		return failErr
@@ -129,7 +129,7 @@ func CreateMTLSServerWithPredicate(source *workloadapi.X509Source,
 	const fName = "CreateMTLSServerWithPredicate"
 
 	if source == nil {
-		failErr := sdkErrors.ErrSPIFFENilX509Source
+		failErr := sdkErrors.ErrSPIFFENilX509Source.Clone()
 		failErr.Msg = "source cannot be nil"
 		log.FatalErr(fName, *failErr)
 	}
@@ -344,7 +344,7 @@ func ServeWithPredicate(source *workloadapi.X509Source,
 	predicate func(string) bool,
 	tlsPort string) *sdkErrors.SDKError {
 	if source == nil {
-		failErr := sdkErrors.ErrSPIFFENilX509Source
+		failErr := sdkErrors.ErrSPIFFENilX509Source.Clone()
 		failErr.Msg = "got nil source while trying to serve"
 		return failErr
 	}

@@ -41,7 +41,7 @@ func Get(
 	path string, version int,
 ) (*data.Secret, *sdkErrors.SDKError) {
 	if source == nil {
-		return nil, sdkErrors.ErrSPIFFENilX509Source
+		return nil, sdkErrors.ErrSPIFFENilX509Source.Clone()
 	}
 
 	r := reqres.SecretGetRequest{Path: path, Version: version}
