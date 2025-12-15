@@ -152,7 +152,7 @@ func (e *SDKError) Is(target error) bool {
 // Example:
 //
 //	// Copy a sentinel error to customize the message
-//	failErr := sdkErrors.ErrEntityNotFound.Copy()
+//	failErr := sdkErrors.ErrEntityNotFound.Clone()
 //	failErr.Msg = "secret 'prod-api-key' not found"
 //	return failErr
 func (e *SDKError) Clone() *SDKError {

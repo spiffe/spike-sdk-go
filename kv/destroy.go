@@ -46,7 +46,7 @@ import (
 //	err := kv.Destroy("secret/path")
 func (kv *KV) Destroy(path string) *sdkErrors.SDKError {
 	if _, exists := kv.data[path]; !exists {
-		return sdkErrors.ErrEntityNotFound
+		return sdkErrors.ErrEntityNotFound.Clone()
 	}
 
 	delete(kv.data, path)

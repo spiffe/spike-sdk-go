@@ -39,7 +39,7 @@ func Undelete(source *workloadapi.X509Source,
 	path string, versions []int,
 ) *sdkErrors.SDKError {
 	if source == nil {
-		return sdkErrors.ErrSPIFFENilX509Source
+		return sdkErrors.ErrSPIFFENilX509Source.Clone()
 	}
 
 	var vv []int

@@ -79,7 +79,7 @@ func Recover(source *workloadapi.X509Source) (
 	const fName = "recover"
 
 	if source == nil {
-		return nil, sdkErrors.ErrSPIFFENilX509Source
+		return nil, sdkErrors.ErrSPIFFENilX509Source.Clone()
 	}
 
 	svid, err := source.GetX509SVID()
@@ -89,7 +89,7 @@ func Recover(source *workloadapi.X509Source) (
 		return nil, failErr
 	}
 	if svid == nil {
-		failErr := sdkErrors.ErrSPIFFEFailedToExtractX509SVID
+		failErr := sdkErrors.ErrSPIFFEFailedToExtractX509SVID.Clone()
 		failErr.Msg = "no X509SVID in source"
 		return nil, failErr
 	}
@@ -98,7 +98,7 @@ func Recover(source *workloadapi.X509Source) (
 
 	// Security: Recovery and Restoration can ONLY be done via SPIKE Pilot.
 	if !spiffeid.IsPilotRecover(selfSPIFFEID) {
-		failErr := sdkErrors.ErrAccessUnauthorized
+		failErr := sdkErrors.ErrAccessUnauthorized.Clone()
 		failErr.Msg = "recovery can only be performed from SPIKE Pilot"
 		log.FatalErr(fName, *failErr)
 	}

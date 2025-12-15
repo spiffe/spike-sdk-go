@@ -67,7 +67,7 @@ func Contribute(
 	const fName = "Contribute"
 
 	if source == nil {
-		return sdkErrors.ErrSPIFFENilX509Source
+		return sdkErrors.ErrSPIFFENilX509Source.Clone()
 	}
 
 	contribution, err := keeperShare.Value.MarshalBinary()
@@ -78,7 +78,7 @@ func Contribute(
 	}
 
 	if len(contribution) != crypto.AES256KeySize {
-		failErr := sdkErrors.ErrCryptoInvalidEncryptionKeyLength
+		failErr := sdkErrors.ErrCryptoInvalidEncryptionKeyLength.Clone()
 		failErr.Msg = fmt.Sprintf(
 			"invalid contribution length: expected %d, got %d",
 			crypto.AES256KeySize, len(contribution),
@@ -168,7 +168,7 @@ func Verify(
 	const fName = "Verify"
 
 	if source == nil {
-		return sdkErrors.ErrSPIFFENilX509Source
+		return sdkErrors.ErrSPIFFENilX509Source.Clone()
 	}
 
 	client := net.CreateMTLSClientForNexus(source)
@@ -221,7 +221,7 @@ func Verify(
 
 	// Verify the hash matches
 	if verifyResponse.Hash != expectedHashHex {
-		failErr := sdkErrors.ErrCryptoCipherVerificationFailed
+		failErr := sdkErrors.ErrCryptoCipherVerificationFailed.Clone()
 		failErr.Msg = "verification failed: hash mismatch"
 		log.FatalErr(fName, *failErr)
 	}

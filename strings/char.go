@@ -65,7 +65,7 @@ func secureRandomStringFromCharClass(
 	}
 
 	if len(chars) == 0 {
-		failErr := sdkErrors.ErrStringEmptyCharacterSet
+		failErr := sdkErrors.ErrStringEmptyCharacterSet.Clone()
 		failErr.Msg = "character class resulted in empty character set"
 		return "", failErr
 	}
@@ -109,7 +109,7 @@ func secureRandomStringFromCharClass(
 func expandCharacterClass(charClass string) (string, *sdkErrors.SDKError) {
 	// Check for empty character class first
 	if len(charClass) == 0 {
-		failErr := sdkErrors.ErrStringEmptyCharacterClass
+		failErr := sdkErrors.ErrStringEmptyCharacterClass.Clone()
 		failErr.Msg = "character class cannot be empty"
 		return "", failErr
 	}
@@ -156,7 +156,7 @@ func expandCharacterClass(charClass string) (string, *sdkErrors.SDKError) {
 
 				// Only allow forward ranges (`start <= end`)
 				if start > end {
-					failErr := sdkErrors.ErrStringInvalidRange
+					failErr := sdkErrors.ErrStringInvalidRange.Clone()
 					failErr.Msg = "invalid character range: start > end"
 					return "", failErr
 				}
@@ -182,7 +182,7 @@ func expandCharacterClass(charClass string) (string, *sdkErrors.SDKError) {
 
 	// Final check for the empty result (this catches edge cases)
 	if len(chars) == 0 {
-		failErr := sdkErrors.ErrStringEmptyCharacterSet
+		failErr := sdkErrors.ErrStringEmptyCharacterSet.Clone()
 		failErr.Msg = "character class resulted in empty character set"
 		return "", failErr
 	}

@@ -82,23 +82,23 @@ func Post(
 
 	if r.StatusCode != http.StatusOK {
 		if r.StatusCode == http.StatusNotFound {
-			return []byte{}, sdkErrors.ErrAPINotFound
+			return []byte{}, sdkErrors.ErrAPINotFound.Clone()
 		}
 
 		if r.StatusCode == http.StatusUnauthorized {
-			return []byte{}, sdkErrors.ErrAccessUnauthorized
+			return []byte{}, sdkErrors.ErrAccessUnauthorized.Clone()
 		}
 
 		if r.StatusCode == http.StatusBadRequest {
-			return []byte{}, sdkErrors.ErrAPIBadRequest
+			return []byte{}, sdkErrors.ErrAPIBadRequest.Clone()
 		}
 
 		// SPIKE Nexus is likely not initialized or in bad shape:
 		if r.StatusCode == http.StatusServiceUnavailable {
-			return []byte{}, sdkErrors.ErrStateNotReady
+			return []byte{}, sdkErrors.ErrStateNotReady.Clone()
 		}
 
-		failErr := sdkErrors.ErrNetPeerConnection
+		failErr := sdkErrors.ErrNetPeerConnection.Clone()
 		failErr.Msg = "unexpected status code from peer"
 		return []byte{}, failErr
 	}

@@ -4,6 +4,42 @@
 
 package errors
 
+// -----------------------------------------------------------------------------
+// SENTINEL ERRORS - IMPORTANT USAGE NOTES
+// -----------------------------------------------------------------------------
+//
+// All errors defined in this file are SHARED GLOBAL POINTERS (*SDKError).
+// They must NEVER be mutated directly.
+//
+// RULES FOR INTERNAL DEVELOPERS:
+//
+//  1. NEVER assign a sentinel to a variable and then modify it:
+//
+//     // WRONG - corrupts the shared sentinel:
+//     failErr := ErrEntityNotFound
+//     failErr.Msg = "custom"
+//
+//  2. ALWAYS use Clone() before modifying Msg:
+//
+//     // CORRECT:
+//     failErr := ErrEntityNotFound.Clone()
+//     failErr.Msg = "custom"
+//
+//  3. ALWAYS use Clone() when returning sentinels (defensive programming):
+//
+//     // CORRECT:
+//     return ErrEntityNotFound.Clone()
+//
+//  4. Wrap() is safe because it creates a new instance:
+//
+//     // SAFE:
+//     failErr := ErrEntityNotFound.Wrap(err)
+//     failErr.Msg = "custom"
+//
+// These rules prevent consumers from accidentally mutating shared state.
+// See doc.go for full documentation.
+// -----------------------------------------------------------------------------
+
 //
 // General error codes
 //
@@ -402,3 +438,9 @@ var ErrSPIFFENoPeerCertificates = register("spiffe_no_peer_certificates", "no pe
 
 // ErrSPIFFEUnableToFetchX509Source indicates unable to fetch X509Source.
 var ErrSPIFFEUnableToFetchX509Source = register("spiffe_unable_to_fetch_x509_source", "unable to fetch X509Source", nil)
+
+//
+// Errors related to the underlying system
+//
+
+var ErrSystemMemLockFailed = register("system_mem_lock_failed", "failed to lock memory", nil)

@@ -74,7 +74,7 @@ func (c *Cipher) streamOperation(
 	fName string,
 ) ([]byte, *sdkErrors.SDKError) {
 	if source == nil {
-		return nil, sdkErrors.ErrSPIFFENilX509Source
+		return nil, sdkErrors.ErrSPIFFENilX509Source.Clone()
 	}
 
 	client := c.createMTLSHTTPClientFromSource(source)
@@ -120,7 +120,7 @@ func (c *Cipher) jsonOperation(
 	source *workloadapi.X509Source, request any, urlPath string, response any,
 ) *sdkErrors.SDKError {
 	if source == nil {
-		return sdkErrors.ErrSPIFFENilX509Source
+		return sdkErrors.ErrSPIFFENilX509Source.Clone()
 	}
 
 	client := c.createMTLSHTTPClientFromSource(source)
