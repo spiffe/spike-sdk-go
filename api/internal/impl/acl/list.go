@@ -9,7 +9,6 @@ import (
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 
-	"github.com/spiffe/spike-sdk-go/api/entity/data"
 	"github.com/spiffe/spike-sdk-go/api/entity/v1/reqres"
 	"github.com/spiffe/spike-sdk-go/api/url"
 	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
@@ -68,7 +67,7 @@ import (
 func ListPolicies(
 	source *workloadapi.X509Source,
 	SPIFFEIDPattern string, pathPattern string,
-) (*[]data.Policy, *sdkErrors.SDKError) {
+) (*[]reqres.PolicyListItem, *sdkErrors.SDKError) {
 	if source == nil {
 		return nil, sdkErrors.ErrSPIFFENilX509Source
 	}
@@ -88,7 +87,7 @@ func ListPolicies(
 		source, url.PolicyList(), mr)
 	if postErr != nil {
 		if postErr.Is(sdkErrors.ErrAPINotFound) {
-			return &([]data.Policy{}), nil
+			return &([]reqres.PolicyListItem{}), nil
 		}
 		return nil, postErr
 	}

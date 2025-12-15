@@ -123,9 +123,15 @@ type PolicyListRequest struct {
 	PathPattern     string `json:"pathPattern"`
 }
 
+// PolicyListItem is a minimal policy representation for list operations
+type PolicyListItem struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}
+
 // PolicyListResponse to list policies.
 type PolicyListResponse struct {
-	Policies []data.Policy       `json:"policies"`
+	Policies []PolicyListItem    `json:"policies"`
 	Err      sdkErrors.ErrorCode `json:"err,omitempty"`
 }
 
