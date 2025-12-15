@@ -35,12 +35,10 @@ import (
 //	    // Decide whether to continue without memory locking
 //	}
 func Lock() *sdkErrors.SDKError {
-	const fName = "Lock"
 	// Attempt to lock all current and future memory
 	if err := syscall.Mlockall(
 		syscall.MCL_CURRENT | syscall.MCL_FUTURE); err != nil {
 		return sdkErrors.ErrSystemMemLockFailed.Clone()
 	}
-
 	return nil
 }
