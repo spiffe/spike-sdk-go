@@ -6,6 +6,7 @@ package env
 
 import (
 	"os"
+	"strconv"
 	"time"
 )
 
@@ -69,4 +70,49 @@ func BootstrapTimeoutVal() time.Duration {
 		}
 	}
 	return 0
+}
+
+// BootstrapKeeperTimeoutVal returns the timeout duration used by the bootstrap
+// keeper when attempting to complete its operation.
+//
+// It retrieves the timeout value from the SPIKE_BOOTSTRAP_KEEPER_TIMEOUT
+// environment variable. The value must be a valid Go duration string
+// (e.g., "30s", "1m", "5m").
+//
+// If the environment variable is not set or contains an invalid duration
+// format, it returns a default value of 30 seconds.
+//
+// Returns:
+//   - A time.Duration representing the bootstrap keeper timeout.
+func BootstrapKeeperTimeoutVal() time.Duration {
+	p := os.Getenv(BootstrapKeeperTimeout)
+	if p != "" {
+		d, err := time.ParseDuration(p)
+		if err == nil {
+			return d
+		}
+	}
+	return 30 * time.Second
+}
+
+// BootstrapKeeperMaxRetriesVal returns the maximum number of retry attempts
+// allowed for the bootstrap keeper operation.
+//
+// It retrieves the retry count from the SPIKE_BOOTSTRAP_KEEPER_MAX_RETRIES
+// environment variable. The value must be a positive integer.
+//
+// If the environment variable is not set, contains an invalid value,
+// or is less than or equal to zero, it returns a default value of 5.
+//
+// Returns:
+//   - An integer representing the maximum number of bootstrap keeper retries.
+func BootstrapKeeperMaxRetriesVal() int {
+	p := os.Getenv(BootstrapKeeperMaxRetries)
+	if p != "" {
+		mi, err := strconv.Atoi(p)
+		if err == nil && mi > 0 {
+			return mi
+		}
+	}
+	return 5
 }
