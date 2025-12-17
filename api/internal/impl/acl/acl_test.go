@@ -225,7 +225,7 @@ func TestListPolicies_EmptyResult(t *testing.T) {
 	// In practice, the function returns an empty slice pointer when ErrAPINotFound is encountered
 
 	// Test that we can create an empty policy slice
-	emptyPolicies := []reqres.PolicyListItem{}
+	emptyPolicies := []data.PolicyListItem{}
 	assert.NotNil(t, emptyPolicies)
 	assert.Equal(t, 0, len(emptyPolicies))
 

@@ -6,7 +6,6 @@ package api
 
 import (
 	"github.com/spiffe/spike-sdk-go/api/entity/data"
-	"github.com/spiffe/spike-sdk-go/api/entity/v1/reqres"
 	"github.com/spiffe/spike-sdk-go/api/internal/impl/acl"
 	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
 )
@@ -116,7 +115,7 @@ func (a *API) GetPolicy(id string) (*data.Policy, *sdkErrors.SDKError) {
 //     all paths)
 //
 // Returns:
-//   - *[]reqres.PolicyListItem: Array of policy list items (ID and Name),
+//   - *[]data.PolicyListItem: Array of policy list items (ID and Name),
 //     empty array if none found, nil on error
 //   - *sdkErrors.SDKError: nil on success, or one of the following errors:
 //   - ErrSPIFFENilX509Source: if the X509 source is nil
@@ -125,7 +124,7 @@ func (a *API) GetPolicy(id string) (*data.Policy, *sdkErrors.SDKError) {
 //   - ErrDataUnmarshalFailure: if response parsing fails
 //   - Error from FromCode(): if the server returns an error
 //
-// Note: Returns (&[]reqres.PolicyListItem{}, nil) if no policies are found (ErrAPINotFound)
+// Note: Returns (&[]data.PolicyListItem{}, nil) if no policies are found (ErrAPINotFound)
 //
 // Example:
 //
@@ -134,12 +133,12 @@ func (a *API) GetPolicy(id string) (*data.Policy, *sdkErrors.SDKError) {
 //	    log.Printf("Error listing policies: %v", err)
 //	    return
 //	}
-//	policies := *result // slice of reqres.PolicyListItem
+//	policies := *result // slice of data.PolicyListItem
 //	for _, policy := range policies {
 //	    log.Printf("Found policy: %+v", policy)
 //	}
 func (a *API) ListPolicies(
 	SPIFFEIDPattern, pathPattern string,
-) (*[]reqres.PolicyListItem, *sdkErrors.SDKError) {
+) (*[]data.PolicyListItem, *sdkErrors.SDKError) {
 	return acl.ListPolicies(a.source, SPIFFEIDPattern, pathPattern)
 }
