@@ -66,13 +66,13 @@ func PostAndUnmarshal[T ResponseWithError](
 ) (*T, *sdkErrors.SDKError) {
 	client := CreateMTLSClientForNexus(source)
 
-	body, err := Post(client, urlPath, requestBody)
+	postBody, err := Post(client, urlPath, requestBody)
 	if err != nil {
 		return nil, err
 	}
 
 	var response T
-	if unmarshalErr := json.Unmarshal(body, &response); unmarshalErr != nil {
+	if unmarshalErr := json.Unmarshal(postBody, &response); unmarshalErr != nil {
 		failErr := sdkErrors.ErrDataUnmarshalFailure.Wrap(unmarshalErr)
 		failErr.Msg = "problem parsing response body"
 		return nil, failErr

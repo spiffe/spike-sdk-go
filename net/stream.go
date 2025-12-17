@@ -75,7 +75,7 @@ func StreamPostWithContentType(
 		if r.Body != nil {
 			closeErr := r.Body.Close()
 			if closeErr != nil {
-				failErr := sdkErrors.ErrFSStreamCloseFailed
+				failErr := sdkErrors.ErrFSStreamCloseFailed.Clone()
 				failErr.Msg = "failed to close response body on error path"
 				log.WarnErr(fName, *failErr)
 			}

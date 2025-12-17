@@ -31,7 +31,7 @@ func TestKV_Get(t *testing.T) {
 			path:    "non/existent/path",
 			version: 0,
 			want:    nil,
-			wantErr: sdkErrors.ErrEntityNotFound,
+			wantErr: sdkErrors.ErrEntityNotFound.Clone(),
 		},
 		{
 			name: "get_current_version",
@@ -121,7 +121,7 @@ func TestKV_Get(t *testing.T) {
 			path:    "test/path",
 			version: 1,
 			want:    nil,
-			wantErr: sdkErrors.ErrEntityDeleted,
+			wantErr: sdkErrors.ErrEntityDeleted.Clone(),
 		},
 		{
 			name: "non_existent_version",
@@ -147,7 +147,7 @@ func TestKV_Get(t *testing.T) {
 			path:    "test/path",
 			version: 999,
 			want:    nil,
-			wantErr: sdkErrors.ErrEntityDeleted,
+			wantErr: sdkErrors.ErrEntityDeleted.Clone(),
 		},
 	}
 
@@ -199,7 +199,7 @@ func TestKV_GetRawSecret(t *testing.T) {
 			},
 			path:    "non/existent/path",
 			want:    nil,
-			wantErr: sdkErrors.ErrEntityNotFound,
+			wantErr: sdkErrors.ErrEntityNotFound.Clone(),
 		},
 		{
 			name: "existing_secret",
