@@ -27,7 +27,7 @@ func (r RestoreResponse) Success() RestoreResponse {
 	return r
 }
 func (r RestoreResponse) NotFound() RestoreResponse {
-	log.FatalErr("NotFound", *sdkErrors.ErrAPIResponseCodeInvalid)
+	log.FatalErr("NotFound", *sdkErrors.ErrAPIResponseCodeInvalid.Clone())
 	return r
 }
 func (r RestoreResponse) BadRequest() RestoreResponse {

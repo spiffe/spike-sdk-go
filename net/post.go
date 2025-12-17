@@ -72,8 +72,8 @@ func Post(
 		if b == nil {
 			return
 		}
-		err := b.Close()
-		if err != nil {
+		closeErr := b.Close()
+		if closeErr != nil {
 			failErr := sdkErrors.ErrFSStreamCloseFailed.Wrap(err)
 			failErr.Msg = "failed to close response body"
 			log.WarnErr(fName, *failErr)

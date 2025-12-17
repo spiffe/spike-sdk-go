@@ -50,7 +50,7 @@ import (
 func RequestBody(r *http.Request) (bod []byte, err *sdkErrors.SDKError) {
 	const fName = "RequestBody"
 
-	body, e := io.ReadAll(r.Body)
+	readBody, e := io.ReadAll(r.Body)
 	if e != nil {
 		failErr := sdkErrors.ErrNetReadingRequestBody.Wrap(e)
 		return nil, failErr
@@ -60,11 +60,14 @@ func RequestBody(r *http.Request) (bod []byte, err *sdkErrors.SDKError) {
 		if b == nil {
 			return
 		}
-		failErr := sdkErrors.ErrFSStreamCloseFailed
-		log.WarnErr(fName, *failErr)
+		// This would almost never happen:
+		if closeErr := b.Close(); closeErr != nil {
+			failErr := sdkErrors.ErrFSStreamCloseFailed.Wrap(e)
+			log.WarnErr(fName, *failErr)
+		}
 	}(r.Body)
 
-	return body, err
+	return readBody, err
 }
 
 // AuthorizerWithPredicate creates a TLS authorizer that validates SPIFFE IDs

@@ -45,7 +45,7 @@ import sdkErrors "github.com/spiffe/spike-sdk-go/errors"
 func (kv *KV) Get(path string, version int) (map[string]string, *sdkErrors.SDKError) {
 	secret, exists := kv.data[path]
 	if !exists {
-		return nil, sdkErrors.ErrEntityNotFound
+		return nil, sdkErrors.ErrEntityNotFound.Clone()
 	}
 
 	// If the version not specified, use the current version:
@@ -53,9 +53,9 @@ func (kv *KV) Get(path string, version int) (map[string]string, *sdkErrors.SDKEr
 		version = secret.Metadata.CurrentVersion
 	}
 
-	v, exists := secret.Versions[version]
-	if !exists || v.DeletedTime != nil {
-		return nil, sdkErrors.ErrEntityDeleted
+	v, versionExists := secret.Versions[version]
+	if !versionExists || v.DeletedTime != nil {
+		return nil, sdkErrors.ErrEntityDeleted.Clone()
 	}
 
 	return v.Data, nil
@@ -85,7 +85,7 @@ func (kv *KV) Get(path string, version int) (map[string]string, *sdkErrors.SDKEr
 func (kv *KV) GetRawSecret(path string) (*Value, *sdkErrors.SDKError) {
 	secret, exists := kv.data[path]
 	if !exists {
-		return nil, sdkErrors.ErrEntityNotFound
+		return nil, sdkErrors.ErrEntityNotFound.Clone()
 	}
 
 	return secret, nil

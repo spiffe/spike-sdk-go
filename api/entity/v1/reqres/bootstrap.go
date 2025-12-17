@@ -30,7 +30,7 @@ func (r BootstrapVerifyResponse) Success() BootstrapVerifyResponse {
 	return r
 }
 func (r BootstrapVerifyResponse) NotFound() BootstrapVerifyResponse {
-	log.FatalErr("NotFound", *sdkErrors.ErrAPIResponseCodeInvalid)
+	log.FatalErr("NotFound", *sdkErrors.ErrAPIResponseCodeInvalid.Clone())
 	return r
 }
 func (r BootstrapVerifyResponse) BadRequest() BootstrapVerifyResponse {

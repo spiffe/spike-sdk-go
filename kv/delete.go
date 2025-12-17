@@ -56,7 +56,7 @@ import (
 func (kv *KV) Delete(path string, versions []int) ([]int, *sdkErrors.SDKError) {
 	secret, exists := kv.data[path]
 	if !exists {
-		return nil, sdkErrors.ErrEntityNotFound
+		return nil, sdkErrors.ErrEntityNotFound.Clone()
 	}
 
 	now := time.Now()
@@ -65,7 +65,7 @@ func (kv *KV) Delete(path string, versions []int) ([]int, *sdkErrors.SDKError) {
 
 	// If no versions specified, mark the latest version as deleted
 	if len(versions) == 0 {
-		if v, exists := secret.Versions[cv]; exists && v.DeletedTime == nil {
+		if v, versionExists := secret.Versions[cv]; versionExists && v.DeletedTime == nil {
 			v.DeletedTime = &now // Mark as deleted.
 			secret.Versions[cv] = v
 			modified = append(modified, cv)
@@ -77,8 +77,8 @@ func (kv *KV) Delete(path string, versions []int) ([]int, *sdkErrors.SDKError) {
 	// Delete specific versions
 	for _, version := range versions {
 		if version == 0 {
-			v, exists := secret.Versions[cv]
-			if !exists || v.DeletedTime != nil {
+			v, versionExists := secret.Versions[cv]
+			if !versionExists || v.DeletedTime != nil {
 				continue
 			}
 
@@ -88,7 +88,7 @@ func (kv *KV) Delete(path string, versions []int) ([]int, *sdkErrors.SDKError) {
 			continue
 		}
 
-		if v, exists := secret.Versions[version]; exists && v.DeletedTime == nil {
+		if v, versionExists := secret.Versions[version]; versionExists && v.DeletedTime == nil {
 			v.DeletedTime = &now // Mark as deleted.
 			secret.Versions[version] = v
 			modified = append(modified, version)

@@ -29,7 +29,7 @@ func TestKV_Delete(t *testing.T) {
 			},
 			path:     "non/existent/path",
 			versions: nil,
-			wantErr:  sdkErrors.ErrEntityNotFound,
+			wantErr:  sdkErrors.ErrEntityNotFound.Clone(),
 		},
 		{
 			name: "delete_current_version_no_versions_specified",
