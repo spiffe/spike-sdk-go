@@ -125,8 +125,8 @@ type PolicyListRequest struct {
 
 // PolicyListResponse to list policies.
 type PolicyListResponse struct {
-	Policies []data.Policy       `json:"policies"`
-	Err      sdkErrors.ErrorCode `json:"err,omitempty"`
+	Policies []data.PolicyListItem `json:"policies"`
+	Err      sdkErrors.ErrorCode   `json:"err,omitempty"`
 }
 
 func (r PolicyListResponse) Success() PolicyListResponse {

@@ -68,7 +68,7 @@ import (
 func ListPolicies(
 	source *workloadapi.X509Source,
 	SPIFFEIDPattern string, pathPattern string,
-) (*[]data.Policy, *sdkErrors.SDKError) {
+) (*[]data.PolicyListItem, *sdkErrors.SDKError) {
 	if source == nil {
 		return nil, sdkErrors.ErrSPIFFENilX509Source.Clone()
 	}
@@ -88,7 +88,7 @@ func ListPolicies(
 		source, url.PolicyList(), mr)
 	if postErr != nil {
 		if postErr.Is(sdkErrors.ErrAPINotFound) {
-			return &([]data.Policy{}), nil
+			return &([]data.PolicyListItem{}), nil
 		}
 		return nil, postErr
 	}

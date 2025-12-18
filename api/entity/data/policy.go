@@ -61,3 +61,9 @@ type PolicySpec struct {
 	PathPattern     string             `yaml:"pathPattern"`
 	Permissions     []PolicyPermission `json:"permissions"`
 }
+
+// PolicyListItem is a minimal policy representation for list operations
+type PolicyListItem struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}

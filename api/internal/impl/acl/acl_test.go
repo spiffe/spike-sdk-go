@@ -151,7 +151,7 @@ func TestPolicyResponseUnmarshaling(t *testing.T) {
 		},
 		{
 			name:     "PolicyListResponse_WithPolicies",
-			jsonData: `{"policies":[{"id":"policy-1","name":"test","spiffeidPattern":"spiffe://test/*","pathPattern":"/api/*","permissions":["read"]}]}`,
+			jsonData: `{"policies":[{"id":"policy-1","name":"test"}]}`,
 			target:   &reqres.PolicyListResponse{},
 			wantErr:  false,
 		},
@@ -225,7 +225,7 @@ func TestListPolicies_EmptyResult(t *testing.T) {
 	// In practice, the function returns an empty slice pointer when ErrAPINotFound is encountered
 
 	// Test that we can create an empty policy slice
-	emptyPolicies := []data.Policy{}
+	emptyPolicies := []data.PolicyListItem{}
 	assert.NotNil(t, emptyPolicies)
 	assert.Equal(t, 0, len(emptyPolicies))
 
