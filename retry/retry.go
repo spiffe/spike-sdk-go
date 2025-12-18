@@ -193,12 +193,17 @@ func (r *ExponentialRetrier) RetryWithBackoff(
 	b := r.newBackOff()
 	totalDuration := time.Duration(0)
 
-	// Wrap operation to convert SDKError to plain error for backoff library
 	wrappedOp := func() error {
 		sdkErr := operation()
 		if sdkErr == nil {
 			return nil
 		}
+
+		if sdkErr.Is(sdkErrors.ErrRetryOperationFailed) &&
+			sdkErr.Msg == sdkErrors.ErrRetryMaximumAttemptsReached.Clone().Msg {
+			return backoff.Permanent(sdkErr)
+		}
+
 		return sdkErr
 	}
 
@@ -207,16 +212,17 @@ func (r *ExponentialRetrier) RetryWithBackoff(
 		backoff.WithContext(b, ctx),
 		func(err error, duration time.Duration) {
 			totalDuration += duration
-			if r.notify != nil {
-				// Convert plain error back to SDKError for notification
-				var sdkErr *sdkErrors.SDKError
-				if errors.As(err, &sdkErr) {
-					r.notify(sdkErr, duration, totalDuration)
-				} else {
-					// Wrap plain error if it's not already an SDKError
-					wrapped := sdkErrors.ErrRetryOperationFailed.Wrap(err)
-					r.notify(wrapped, duration, totalDuration)
-				}
+
+			if r.notify == nil {
+				return
+			}
+
+			var sdkErr *sdkErrors.SDKError
+			if errors.As(err, &sdkErr) {
+				r.notify(sdkErr, duration, totalDuration)
+			} else {
+				wrapped := sdkErrors.ErrRetryOperationFailed.Wrap(err)
+				r.notify(wrapped, duration, totalDuration)
 			}
 		},
 	)
@@ -225,13 +231,11 @@ func (r *ExponentialRetrier) RetryWithBackoff(
 		return nil
 	}
 
-	// Check if error is already an SDKError
 	var sdkErr *sdkErrors.SDKError
 	if errors.As(err, &sdkErr) {
 		return sdkErr
 	}
 
-	// Wrap context errors appropriately
 	if errors.Is(err, context.Canceled) {
 		failErr := sdkErrors.ErrRetryContextCanceled.Wrap(err)
 		failErr.Msg = "retry operation canceled"
@@ -244,7 +248,6 @@ func (r *ExponentialRetrier) RetryWithBackoff(
 		return failErr
 	}
 
-	// Wrap any other error
 	failErr := sdkErrors.ErrRetryOperationFailed.Wrap(err)
 	failErr.Msg = "retry operation failed"
 	return failErr
@@ -517,48 +520,34 @@ func WithMaxAttempts(
 		return false, failErr
 	}
 
-	var (
-		attempts int
-		lastErr  *sdkErrors.SDKError
-		success  bool
-	)
+	attempts := 0
 
-	retrier := NewExponentialRetrier(
-		WithBackOffOptions(
-			WithMaxElapsedTime(forever), // attempts control termination
+	return NewTypedRetrier[bool](
+		NewExponentialRetrier(
+			WithBackOffOptions(
+				WithMaxElapsedTime(forever),
+			),
 		),
-	)
-
-	err := retrier.RetryWithBackoff(ctx, func() *sdkErrors.SDKError {
-		if attempts >= maxAttempts {
-			// Stop retrying definitively
-			if lastErr != nil {
-				return lastErr
-			}
-			failErr := sdkErrors.ErrRetryOperationFailed.Clone()
-			failErr.Msg = "maximum retry attempts reached"
-			return failErr
-		}
-
+	).RetryWithBackoff(ctx, func() (bool, *sdkErrors.SDKError) {
 		attempts++
 
-		success, lastErr = handler()
+		success, err := handler()
 		if success {
-			return nil // success stops retries
+			return true, nil
 		}
 
-		if lastErr != nil {
-			return lastErr
+		if attempts >= maxAttempts {
+			failErr := sdkErrors.ErrRetryOperationFailed.Clone()
+			failErr.Msg = "maximum retry attempts reached"
+			return false, failErr
 		}
 
-		failErr := sdkErrors.ErrRetryOperationFailed.Clone()
-		failErr.Msg = "operation failed, will retry"
-		return failErr
+		if err != nil {
+			return false, err
+		}
+
+		retryErr := sdkErrors.ErrRetryOperationFailed.Clone()
+		retryErr.Msg = "operation failed, will retry"
+		return false, retryErr
 	})
-
-	if err != nil {
-		return false, err
-	}
-
-	return success, nil
 }
