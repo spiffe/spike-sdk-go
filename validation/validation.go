@@ -176,7 +176,7 @@ func ValidatePolicyID(policyID string) *sdkErrors.SDKError {
 	return nil
 }
 
-// ValidPermissions contains the set of valid policy permissions supported by
+// validPermissions contains the set of valid policy permissions supported by
 // the SPIKE system. These are sourced from the SDK to prevent typos.
 //
 // Valid permissions are:
@@ -185,7 +185,7 @@ func ValidatePolicyID(policyID string) *sdkErrors.SDKError {
 //   - list: List access to resources
 //   - execute: Execute access to resources
 //   - super: Superuser access (grants all permissions)
-var ValidPermissions = []data.PolicyPermission{
+var validPermissions = []data.PolicyPermission{
 	data.PermissionRead,
 	data.PermissionWrite,
 	data.PermissionList,
@@ -201,7 +201,7 @@ var ValidPermissions = []data.PolicyPermission{
 // Returns:
 //   - true if the permission is found in ValidPermissions, false otherwise.
 func ValidPermission(perm string) bool {
-	for _, p := range ValidPermissions {
+	for _, p := range validPermissions {
 		if string(p) == perm {
 			return true
 		}
@@ -215,8 +215,8 @@ func ValidPermission(perm string) bool {
 // Returns:
 //   - string: A comma-separated list of valid permissions.
 func ValidPermissionsList() string {
-	perms := make([]string, len(ValidPermissions))
-	for i, p := range ValidPermissions {
+	perms := make([]string, len(validPermissions))
+	for i, p := range validPermissions {
 		perms[i] = string(p)
 	}
 	return strings.Join(perms, ", ")
