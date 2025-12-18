@@ -199,8 +199,7 @@ func (r *ExponentialRetrier) RetryWithBackoff(
 			return nil
 		}
 
-		if sdkErr.Is(sdkErrors.ErrRetryOperationFailed) &&
-			sdkErr.Msg == sdkErrors.ErrRetryMaximumAttemptsReached.Clone().Msg {
+		if sdkErr.Is(sdkErrors.ErrRetryMaximumAttemptsReached) {
 			return backoff.Permanent(sdkErr)
 		}
 
@@ -537,7 +536,7 @@ func WithMaxAttempts(
 		}
 
 		if attempts >= maxAttempts {
-			failErr := sdkErrors.ErrRetryOperationFailed.Clone()
+			failErr := sdkErrors.ErrRetryMaximumAttemptsReached.Clone()
 			failErr.Msg = "maximum retry attempts reached"
 			return false, failErr
 		}

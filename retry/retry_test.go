@@ -416,7 +416,7 @@ func TestWithMaxAttempts_MaxAttemptsReached(t *testing.T) {
 
 	assert.False(t, result)
 	assert.NotNil(t, err)
-	assert.True(t, err.Is(sdkErrors.ErrRetryOperationFailed))
+	assert.True(t, err.Is(sdkErrors.ErrRetryMaximumAttemptsReached))
 	assert.Equal(t, 3, attempts)
 }
 
@@ -448,7 +448,7 @@ func TestWithMaxAttempts_FalseWithoutErrorRetries(t *testing.T) {
 
 	assert.False(t, result)
 	assert.NotNil(t, err)
-	assert.True(t, err.Is(sdkErrors.ErrRetryOperationFailed))
+	assert.True(t, err.Is(sdkErrors.ErrRetryMaximumAttemptsReached))
 	assert.Equal(t, 2, attempts)
 }
 
