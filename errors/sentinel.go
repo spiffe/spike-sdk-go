@@ -411,6 +411,9 @@ var ErrRetryMaxElapsedTimeReached = register("retry_max_elapsed_time_reached", "
 // ErrRetryOperationFailed indicates the retry operation failed.
 var ErrRetryOperationFailed = register("retry_operation_failed", "retry operation failed", nil)
 
+// ErrRetryMaximumAttemptsReached indicates the maximum number of retry attempts was reached.
+var ErrRetryMaximumAttemptsReached = register("retry_maximum_attempts_reached", "maximum retry attempts reached", nil)
+
 // ErrBootstrapKeeperUnreachable indicates a SPIKE Keeper instance could not be reached during bootstrap.
 var ErrBootstrapKeeperUnreachable = register("bootstrap_keeper_unreachable", "keeper unreachable", nil)
 

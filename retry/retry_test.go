@@ -382,6 +382,76 @@ func TestForever_VerifiesMaxElapsedTimeZero(t *testing.T) {
 	assert.Equal(t, time.Duration(0), b.MaxElapsedTime)
 }
 
+func TestWithMaxAttempts_EventualSuccess(t *testing.T) {
+	attempts := 0
+
+	result, err := WithMaxAttempts(
+		context.Background(),
+		5,
+		func() (bool, *sdkErrors.SDKError) {
+			attempts++
+			if attempts < 3 {
+				return false, sdkErrors.ErrRetryOperationFailed
+			}
+			return true, nil
+		},
+	)
+
+	assert.Nil(t, err)
+	assert.True(t, result)
+	assert.Equal(t, 3, attempts)
+}
+
+func TestWithMaxAttempts_MaxAttemptsReached(t *testing.T) {
+	attempts := 0
+
+	result, err := WithMaxAttempts(
+		context.Background(),
+		3,
+		func() (bool, *sdkErrors.SDKError) {
+			attempts++
+			return false, sdkErrors.ErrRetryOperationFailed
+		},
+	)
+
+	assert.False(t, result)
+	assert.NotNil(t, err)
+	assert.True(t, err.Is(sdkErrors.ErrRetryMaximumAttemptsReached))
+	assert.Equal(t, 3, attempts)
+}
+
+func TestWithMaxAttempts_InvalidMaxAttempts(t *testing.T) {
+	result, err := WithMaxAttempts(
+		context.Background(),
+		0,
+		func() (bool, *sdkErrors.SDKError) {
+			return true, nil
+		},
+	)
+
+	assert.False(t, result)
+	assert.NotNil(t, err)
+	assert.True(t, err.Is(sdkErrors.ErrDataInvalidInput))
+}
+
+func TestWithMaxAttempts_FalseWithoutErrorRetries(t *testing.T) {
+	attempts := 0
+
+	result, err := WithMaxAttempts(
+		context.Background(),
+		2,
+		func() (bool, *sdkErrors.SDKError) {
+			attempts++
+			return false, nil
+		},
+	)
+
+	assert.False(t, result)
+	assert.NotNil(t, err)
+	assert.True(t, err.Is(sdkErrors.ErrRetryMaximumAttemptsReached))
+	assert.Equal(t, 2, attempts)
+}
+
 func TestBackOffOptions(t *testing.T) {
 	initialInterval := 100 * time.Millisecond
 	maxInterval := 1 * time.Second
