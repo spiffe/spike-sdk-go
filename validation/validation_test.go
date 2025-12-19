@@ -355,6 +355,7 @@ func TestValidatePermissions_Valid(t *testing.T) {
 		{"SingleRead", []data.PolicyPermission{data.PermissionRead}},
 		{"SingleWrite", []data.PolicyPermission{data.PermissionWrite}},
 		{"SingleList", []data.PolicyPermission{data.PermissionList}},
+		{"SingleExecute", []data.PolicyPermission{data.PermissionExecute}},
 		{"SingleSuper", []data.PolicyPermission{data.PermissionSuper}},
 		{"ReadWrite", []data.PolicyPermission{data.PermissionRead, data.PermissionWrite}},
 		{"AllPermissions", []data.PolicyPermission{
@@ -362,8 +363,8 @@ func TestValidatePermissions_Valid(t *testing.T) {
 			data.PermissionWrite,
 			data.PermissionList,
 			data.PermissionSuper,
+			data.PermissionExecute,
 		}},
-		{"Empty", []data.PolicyPermission{}},
 		{"Duplicates", []data.PolicyPermission{
 			data.PermissionRead,
 			data.PermissionRead,
@@ -372,7 +373,14 @@ func TestValidatePermissions_Valid(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := ValidatePermissions(tt.input)
+			var perms []string
+			for _, p := range tt.input {
+				perms = append(perms, string(p))
+			}
+
+			inputStr := strings.Join(perms, ",")
+
+			_, err := ValidatePermissions(inputStr)
 			assert.Nil(t, err, "Expected valid permissions")
 		})
 	}
@@ -389,15 +397,22 @@ func TestValidatePermissions_Invalid(t *testing.T) {
 			data.PermissionRead,
 			"invalid",
 		}},
-		{"UnknownPermission", []data.PolicyPermission{"execute"}},
 		{"Typo", []data.PolicyPermission{"reed"}},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := ValidatePermissions(tt.input)
+			var perms []string
+			for _, p := range tt.input {
+				perms = append(perms, string(p))
+			}
+
+			inputStr := strings.Join(perms, ",")
+
+			_, err := ValidatePermissions(inputStr)
+
 			assert.NotNil(t, err, "Expected invalid permissions")
-			assert.True(t, err.Is(sdkErrors.ErrDataInvalidInput))
+			assert.True(t, err.Is(sdkErrors.ErrAccessInvalidPermission))
 		})
 	}
 }

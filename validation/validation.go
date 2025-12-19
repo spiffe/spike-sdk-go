@@ -5,7 +5,9 @@
 package validation
 
 import (
+	"fmt"
 	"regexp"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/spiffe/spike-sdk-go/api/entity/data"
@@ -174,43 +176,100 @@ func ValidatePolicyID(policyID string) *sdkErrors.SDKError {
 	return nil
 }
 
-// ValidatePermissions checks if all provided permissions are valid.
+// validPermissions contains the set of valid policy permissions supported by
+// the SPIKE system. These are sourced from the SDK to prevent typos.
 //
-// Permissions are compared against a predefined list of allowed permissions:
-//   - PermissionList: list secrets
-//   - PermissionRead: read secret values
-//   - PermissionWrite: create/update secrets
-//   - PermissionSuper: administrative access
+// Valid permissions are:
+//   - read: Read access to resources
+//   - write: Write access to resources
+//   - list: List access to resources
+//   - execute: Execute access to resources
+//   - super: Superuser access (grants all permissions)
+var validPermissions = []data.PolicyPermission{
+	data.PermissionRead,
+	data.PermissionWrite,
+	data.PermissionList,
+	data.PermissionExecute,
+	data.PermissionSuper,
+}
+
+// ValidPermission checks if the given permission string is valid.
 //
 // Parameters:
-//   - permissions: Slice of policy permissions to validate
+//   - perm: The permission string to validate.
 //
 // Returns:
-//   - *sdkErrors.SDKError: nil if all permissions are valid, or one of the
-//     following errors:
-//   - ErrDataInvalidInput: if any permission is not in the allowed list
-func ValidatePermissions(
-	permissions []data.PolicyPermission,
-) *sdkErrors.SDKError {
-	allowedPermissions := []data.PolicyPermission{
-		data.PermissionList,
-		data.PermissionRead,
-		data.PermissionWrite,
-		data.PermissionSuper,
-	}
-
-	for _, permission := range permissions {
-		isAllowed := false
-		for _, allowedPermission := range allowedPermissions {
-			if permission == allowedPermission {
-				isAllowed = true
-				break
-			}
-		}
-		if !isAllowed {
-			return sdkErrors.ErrDataInvalidInput.Clone()
+//   - true if the permission is found in ValidPermissions, false otherwise.
+func ValidPermission(perm string) bool {
+	for _, p := range validPermissions {
+		if string(p) == perm {
+			return true
 		}
 	}
+	return false
+}
 
-	return nil
+// ValidPermissionsList returns a comma-separated string of valid permissions,
+// suitable for display in error messages.
+//
+// Returns:
+//   - string: A comma-separated list of valid permissions.
+func ValidPermissionsList() string {
+	perms := make([]string, len(validPermissions))
+	for i, p := range validPermissions {
+		perms[i] = string(p)
+	}
+	return strings.Join(perms, ", ")
+}
+
+// ValidatePermissions validates policy permissions from a comma-separated
+// string and returns a slice of PolicyPermission values. It returns an error
+// if any permission is invalid or if the string contains no valid permissions.
+//
+// Valid permissions are:
+//   - read: Read access to resources
+//   - write: Write access to resources
+//   - list: List access to resources
+//   - execute: Execute access to resources
+//   - super: Superuser access (grants all permissions)
+//
+// Parameters:
+//   - permsStr: Comma-separated string of permissions
+//     (e.g., "read,write,execute")
+//
+// Returns:
+//   - []data.PolicyPermission: Validated policy permissions
+//   - *sdkErrors.SDKError: An error if any permission is invalid
+func ValidatePermissions(permsStr string) (
+	[]data.PolicyPermission, *sdkErrors.SDKError,
+) {
+	var permissions []string
+	for _, p := range strings.Split(permsStr, ",") {
+		perm := strings.TrimSpace(p)
+		if perm != "" {
+			permissions = append(permissions, perm)
+		}
+	}
+
+	perms := make([]data.PolicyPermission, 0, len(permissions))
+	for _, perm := range permissions {
+		if !ValidPermission(perm) {
+			failErr := *sdkErrors.ErrAccessInvalidPermission.Clone()
+			failErr.Msg = fmt.Sprintf(
+				"invalid permission: '%s'. valid permissions: '%s'",
+				perm, ValidPermissionsList(),
+			)
+			return nil, &failErr
+		}
+		perms = append(perms, data.PolicyPermission(perm))
+	}
+
+	if len(perms) == 0 {
+		failErr := *sdkErrors.ErrAccessInvalidPermission.Clone()
+		failErr.Msg = "no valid permissions specified" +
+			". valid permissions are: " + ValidPermissionsList()
+		return nil, &failErr
+	}
+
+	return perms, nil
 }
