@@ -5,6 +5,7 @@
 package bootstrap
 
 import (
+	"context"
 	"encoding/json"
 	"testing"
 
@@ -20,7 +21,7 @@ func TestVerify_NilSource(t *testing.T) {
 	nonce := []byte("test nonce")
 	ciphertext := []byte("test ciphertext")
 
-	err := Verify(nil, randomText, nonce, ciphertext)
+	err := Verify(context.Background(), nil, randomText, nonce, ciphertext)
 
 	assert.NotNil(t, err)
 	assert.True(t, err.Is(sdkErrors.ErrSPIFFENilX509Source))
@@ -28,7 +29,7 @@ func TestVerify_NilSource(t *testing.T) {
 
 // TestVerify_EmptyRandomText tests Verify with empty random text
 func TestVerify_EmptyRandomText(t *testing.T) {
-	err := Verify(nil, "", []byte("nonce"), []byte("ciphertext"))
+	err := Verify(context.Background(), nil, "", []byte("nonce"), []byte("ciphertext"))
 
 	assert.NotNil(t, err)
 	assert.True(t, err.Is(sdkErrors.ErrSPIFFENilX509Source))
@@ -36,7 +37,7 @@ func TestVerify_EmptyRandomText(t *testing.T) {
 
 // TestVerify_NilNonce tests Verify with nil nonce
 func TestVerify_NilNonce(t *testing.T) {
-	err := Verify(nil, "random text", nil, []byte("ciphertext"))
+	err := Verify(context.Background(), nil, "random text", nil, []byte("ciphertext"))
 
 	assert.NotNil(t, err)
 	assert.True(t, err.Is(sdkErrors.ErrSPIFFENilX509Source))
@@ -44,7 +45,7 @@ func TestVerify_NilNonce(t *testing.T) {
 
 // TestVerify_NilCiphertext tests Verify with nil ciphertext
 func TestVerify_NilCiphertext(t *testing.T) {
-	err := Verify(nil, "random text", []byte("nonce"), nil)
+	err := Verify(context.Background(), nil, "random text", []byte("nonce"), nil)
 
 	assert.NotNil(t, err)
 	assert.True(t, err.Is(sdkErrors.ErrSPIFFENilX509Source))

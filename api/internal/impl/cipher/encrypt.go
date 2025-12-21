@@ -5,6 +5,7 @@
 package cipher
 
 import (
+	"context"
 	"io"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
@@ -24,6 +25,8 @@ import (
 // For testing or custom configuration, create a Cipher instance directly.
 //
 // Parameters:
+//   - ctx: Context for cancellation and timeout control. If nil,
+//     context.Background() is used.
 //   - source: X509Source for establishing mTLS connection to SPIKE Nexus
 //   - r: io.Reader containing the data to encrypt
 //
@@ -36,6 +39,8 @@ import (
 //
 // Example:
 //
+//	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+//	defer cancel()
 //	source, err := workloadapi.NewX509Source(ctx)
 //	if err != nil {
 //	    log.Fatal(err)
@@ -43,14 +48,14 @@ import (
 //	defer source.Close()
 //
 //	reader := bytes.NewReader([]byte("sensitive data"))
-//	ciphertext, err := EncryptStream(source, reader)
+//	ciphertext, err := EncryptStream(ctx, source, reader)
 //	if err != nil {
 //	    log.Printf("Encryption failed: %v", err)
 //	}
 func EncryptStream(
-	source *workloadapi.X509Source, r io.Reader,
+	ctx context.Context, source *workloadapi.X509Source, r io.Reader,
 ) ([]byte, *sdkErrors.SDKError) {
-	return NewCipher().EncryptStream(source, r)
+	return NewCipher().EncryptStream(ctx, source, r)
 }
 
 // EncryptStream encrypts data from a reader using streaming mode.
@@ -59,6 +64,8 @@ func EncryptStream(
 // as encryption operates on raw bytes.
 //
 // Parameters:
+//   - ctx: Context for cancellation and timeout control. If nil,
+//     context.Background() is used.
 //   - source: X509Source for establishing mTLS connection to SPIKE Nexus
 //   - r: io.Reader containing the data to encrypt
 //
@@ -71,16 +78,18 @@ func EncryptStream(
 //
 // Example:
 //
+//	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+//	defer cancel()
 //	cipher := NewCipher()
 //	reader := bytes.NewReader([]byte("sensitive data"))
-//	ciphertext, err := cipher.EncryptStream(source, reader)
+//	ciphertext, err := cipher.EncryptStream(ctx, source, reader)
 //	if err != nil {
 //	    log.Printf("Encryption failed: %v", err)
 //	}
 func (c *Cipher) EncryptStream(
-	source *workloadapi.X509Source, r io.Reader,
+	ctx context.Context, source *workloadapi.X509Source, r io.Reader,
 ) ([]byte, *sdkErrors.SDKError) {
-	return c.streamOperation(source, r, url.CipherEncrypt(), "EncryptStream")
+	return c.streamOperation(ctx, source, r, url.CipherEncrypt(), "EncryptStream")
 }
 
 // Encrypt encrypts data with structured parameters using
@@ -92,6 +101,8 @@ func (c *Cipher) EncryptStream(
 // For testing or custom configuration, create a Cipher instance directly.
 //
 // Parameters:
+//   - ctx: Context for cancellation and timeout control. If nil,
+//     context.Background() is used.
 //   - source: X509Source for establishing mTLS connection to SPIKE Nexus
 //   - plaintext: The data to encrypt
 //   - algorithm: The encryption algorithm to use (e.g., "AES-GCM")
@@ -109,6 +120,8 @@ func (c *Cipher) EncryptStream(
 //
 // Example:
 //
+//	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+//	defer cancel()
 //	source, err := workloadapi.NewX509Source(ctx)
 //	if err != nil {
 //	    log.Fatal(err)
@@ -116,14 +129,15 @@ func (c *Cipher) EncryptStream(
 //	defer source.Close()
 //
 //	data := []byte("secret message")
-//	ciphertext, err := Encrypt(source, data, "AES-GCM")
+//	ciphertext, err := Encrypt(ctx, source, data, "AES-GCM")
 //	if err != nil {
 //	    log.Printf("Encryption failed: %v", err)
 //	}
 func Encrypt(
+	ctx context.Context,
 	source *workloadapi.X509Source, plaintext []byte, algorithm string,
 ) ([]byte, *sdkErrors.SDKError) {
-	return NewCipher().Encrypt(source, plaintext, algorithm)
+	return NewCipher().Encrypt(ctx, source, plaintext, algorithm)
 }
 
 // Encrypt encrypts data with structured parameters.
@@ -131,6 +145,8 @@ func Encrypt(
 // bytes.
 //
 // Parameters:
+//   - ctx: Context for cancellation and timeout control. If nil,
+//     context.Background() is used.
 //   - source: X509Source for establishing mTLS connection to SPIKE Nexus
 //   - plaintext: The data to encrypt
 //   - algorithm: The encryption algorithm to use (e.g., "AES-GCM")
@@ -148,13 +164,16 @@ func Encrypt(
 //
 // Example:
 //
+//	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+//	defer cancel()
 //	cipher := NewCipher()
 //	data := []byte("secret message")
-//	ciphertext, err := cipher.Encrypt(source, data, "AES-GCM")
+//	ciphertext, err := cipher.Encrypt(ctx, source, data, "AES-GCM")
 //	if err != nil {
 //	    log.Printf("Encryption failed: %v", err)
 //	}
 func (c *Cipher) Encrypt(
+	ctx context.Context,
 	source *workloadapi.X509Source, plaintext []byte, algorithm string,
 ) ([]byte, *sdkErrors.SDKError) {
 	payload := reqres.CipherEncryptRequest{
@@ -164,7 +183,7 @@ func (c *Cipher) Encrypt(
 
 	var res reqres.CipherEncryptResponse
 	if err := c.jsonOperation(
-		source, payload, url.CipherEncrypt(), &res,
+		ctx, source, payload, url.CipherEncrypt(), &res,
 	); err != nil {
 		return nil, err
 	}
