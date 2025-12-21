@@ -6,6 +6,7 @@ package net
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -297,7 +298,7 @@ func TestPost_ClientConfiguration(t *testing.T) {
 			defer server.Close()
 
 			client := server.Client()
-			bodyBytes, err := Post(client, server.URL, []byte(`{"test":"data"}`))
+			bodyBytes, err := Post(context.Background(), client, server.URL, []byte(`{"test":"data"}`))
 
 			if tt.expectedError != nil {
 				assert.NotNil(t, err)
@@ -331,7 +332,7 @@ func TestStreamPost_Success(t *testing.T) {
 	client := server.Client()
 	reader := bytes.NewReader(testData)
 
-	responseBody, err := StreamPost(client, server.URL, reader)
+	responseBody, err := StreamPost(context.Background(), client, server.URL, reader)
 
 	// Note: The implementation closes the response body in a defer,
 	// so the returned io.ReadCloser may not be readable
@@ -356,7 +357,7 @@ func TestStreamPostWithContentType_CustomContentType(t *testing.T) {
 	reader := bytes.NewReader(testData)
 
 	responseBody, err := StreamPostWithContentType(
-		client, server.URL, reader, ContentTypeJSON,
+		context.Background(), client, server.URL, reader, ContentTypeJSON,
 	)
 
 	require.Nil(t, err)
@@ -374,7 +375,7 @@ func TestStreamPost_NotFound(t *testing.T) {
 	client := server.Client()
 	reader := bytes.NewReader([]byte("test"))
 
-	responseBody, err := StreamPost(client, server.URL, reader)
+	responseBody, err := StreamPost(context.Background(), client, server.URL, reader)
 
 	assert.Nil(t, responseBody)
 	assert.NotNil(t, err)
@@ -412,7 +413,7 @@ func TestPost_RequestCreationFailure(t *testing.T) {
 	// Use an invalid URL that will cause request creation to fail
 	invalidURL := string([]byte{0x7f}) // Invalid UTF-8
 
-	_, err := Post(client, invalidURL, []byte(`{}`))
+	_, err := Post(context.Background(), client, invalidURL, []byte(`{}`))
 
 	assert.NotNil(t, err)
 }

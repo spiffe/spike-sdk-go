@@ -5,6 +5,7 @@
 package bootstrap
 
 import (
+	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
@@ -32,6 +33,8 @@ import (
 // memory for security.
 //
 // Parameters:
+//   - ctx: Context for cancellation and timeout control. If nil,
+//     context.Background() is used.
 //   - source: X509Source for establishing mTLS connection to SPIKE Keeper
 //   - keeperShare: The secret share to contribute to the Keeper
 //   - keeperID: The unique identifier of the target Keeper
@@ -49,17 +52,20 @@ import (
 //
 // Example:
 //
+//	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+//	defer cancel()
 //	source, err := workloadapi.NewX509Source(ctx)
 //	if err != nil {
 //	    log.Fatal(err)
 //	}
 //	defer source.Close()
 //
-//	err = Contribute(source, keeperShare, "keeper-1")
+//	err = Contribute(ctx, source, keeperShare, "keeper-1")
 //	if err != nil {
 //	    log.Printf("Failed to contribute share: %v", err)
 //	}
 func Contribute(
+	ctx context.Context,
 	source *workloadapi.X509Source,
 	keeperShare secretsharing.Share,
 	keeperID string,
@@ -112,7 +118,7 @@ func Contribute(
 
 		u := url.KeeperBootstrapContributeEndpoint(keeperAPIRoot)
 
-		_, sdkErr := net.Post(client, u, md)
+		_, sdkErr := net.Post(ctx, client, u, md)
 		if sdkErr != nil {
 			return sdkErr
 		}
@@ -131,6 +137,8 @@ func Contribute(
 // match confirms successful bootstrap.
 //
 // Parameters:
+//   - ctx: Context for cancellation and timeout control. If nil,
+//     context.Background() is used.
 //   - source: X509Source for establishing mTLS connection to SPIKE Nexus
 //   - randomText: The original random text that was encrypted
 //   - nonce: The nonce used during encryption
@@ -150,17 +158,20 @@ func Contribute(
 //
 // Example:
 //
+//	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+//	defer cancel()
 //	source, err := workloadapi.NewX509Source(ctx)
 //	if err != nil {
 //	    log.Fatal(err)
 //	}
 //	defer source.Close()
 //
-//	err = Verify(source, randomText, nonce, ciphertext)
+//	err = Verify(ctx, source, randomText, nonce, ciphertext)
 //	if err != nil {
 //	    log.Printf("Bootstrap verification failed: %v", err)
 //	}
 func Verify(
+	ctx context.Context,
 	source *workloadapi.X509Source,
 	randomText string,
 	nonce, ciphertext []byte,
@@ -195,7 +206,7 @@ func Verify(
 		"url", verifyURL,
 	)
 
-	responseBody, err := net.Post(client, verifyURL, md)
+	responseBody, err := net.Post(ctx, client, verifyURL, md)
 	if err != nil {
 		return err
 	}

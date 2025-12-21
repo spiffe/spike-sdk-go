@@ -5,6 +5,7 @@
 package secret
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
@@ -19,6 +20,8 @@ import (
 // specified path.
 //
 // Parameters:
+//   - ctx: Context for cancellation and timeout control. If nil,
+//     context.Background() is used.
 //   - source: X509Source for establishing mTLS connection to SPIKE Nexus
 //   - path: Path to the secret to restore
 //   - versions: Integer array of version numbers to restore. Empty array
@@ -34,8 +37,12 @@ import (
 //
 // Example:
 //
-//	err := Undelete(x509Source, "secret/path", []int{1, 2})
-func Undelete(source *workloadapi.X509Source,
+//	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+//	defer cancel()
+//	err := Undelete(ctx, x509Source, "secret/path", []int{1, 2})
+func Undelete(
+	ctx context.Context,
+	source *workloadapi.X509Source,
 	path string, versions []int,
 ) *sdkErrors.SDKError {
 	if source == nil {
@@ -59,6 +66,6 @@ func Undelete(source *workloadapi.X509Source,
 	}
 
 	_, postErr := net.PostAndUnmarshal[reqres.SecretUndeleteResponse](
-		source, url.SecretUndelete(), mr)
+		ctx, source, url.SecretUndelete(), mr)
 	return postErr
 }

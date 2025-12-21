@@ -5,6 +5,7 @@
 package cipher
 
 import (
+	"context"
 	"io"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
@@ -24,6 +25,8 @@ import (
 // For testing or custom configuration, create a Cipher instance directly.
 //
 // Parameters:
+//   - ctx: Context for cancellation and timeout control. If nil,
+//     context.Background() is used.
 //   - source: X509Source for establishing mTLS connection to SPIKE Nexus
 //   - r: io.Reader containing the encrypted data
 //
@@ -36,6 +39,8 @@ import (
 //
 // Example:
 //
+//	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+//	defer cancel()
 //	source, err := workloadapi.NewX509Source(ctx)
 //	if err != nil {
 //	    log.Fatal(err)
@@ -43,14 +48,14 @@ import (
 //	defer source.Close()
 //
 //	reader := bytes.NewReader(encryptedData)
-//	plaintext, err := DecryptStream(source, reader)
+//	plaintext, err := DecryptStream(ctx, source, reader)
 //	if err != nil {
 //	    log.Printf("Decryption failed: %v", err)
 //	}
 func DecryptStream(
-	source *workloadapi.X509Source, r io.Reader,
+	ctx context.Context, source *workloadapi.X509Source, r io.Reader,
 ) ([]byte, *sdkErrors.SDKError) {
-	return NewCipher().DecryptStream(source, r)
+	return NewCipher().DecryptStream(ctx, source, r)
 }
 
 // DecryptStream decrypts data from a reader using streaming mode.
@@ -59,6 +64,8 @@ func DecryptStream(
 // as decryption operates on raw encrypted bytes.
 //
 // Parameters:
+//   - ctx: Context for cancellation and timeout control. If nil,
+//     context.Background() is used.
 //   - source: X509Source for establishing mTLS connection to SPIKE Nexus
 //   - r: io.Reader containing the encrypted data
 //
@@ -71,16 +78,18 @@ func DecryptStream(
 //
 // Example:
 //
+//	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+//	defer cancel()
 //	cipher := NewCipher()
 //	reader := bytes.NewReader(encryptedData)
-//	plaintext, err := cipher.DecryptStream(source, reader)
+//	plaintext, err := cipher.DecryptStream(ctx, source, reader)
 //	if err != nil {
 //	    log.Printf("Decryption failed: %v", err)
 //	}
 func (c *Cipher) DecryptStream(
-	source *workloadapi.X509Source, r io.Reader,
+	ctx context.Context, source *workloadapi.X509Source, r io.Reader,
 ) ([]byte, *sdkErrors.SDKError) {
-	return c.streamOperation(source, r, url.CipherDecrypt(), "DecryptStream")
+	return c.streamOperation(ctx, source, r, url.CipherDecrypt(), "DecryptStream")
 }
 
 // Decrypt decrypts data with structured parameters using
@@ -92,6 +101,8 @@ func (c *Cipher) DecryptStream(
 // For testing or custom configuration, create a Cipher instance directly.
 //
 // Parameters:
+//   - ctx: Context for cancellation and timeout control. If nil,
+//     context.Background() is used.
 //   - source: X509Source for establishing mTLS connection to SPIKE Nexus
 //   - version: The cipher version used during encryption
 //   - nonce: The nonce bytes used during encryption
@@ -111,21 +122,24 @@ func (c *Cipher) DecryptStream(
 //
 // Example:
 //
+//	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+//	defer cancel()
 //	source, err := workloadapi.NewX509Source(ctx)
 //	if err != nil {
 //	    log.Fatal(err)
 //	}
 //	defer source.Close()
 //
-//	plaintext, err := Decrypt(source, 1, nonce, ciphertext, "AES-GCM")
+//	plaintext, err := Decrypt(ctx, source, 1, nonce, ciphertext, "AES-GCM")
 //	if err != nil {
 //	    log.Printf("Decryption failed: %v", err)
 //	}
 func Decrypt(
+	ctx context.Context,
 	source *workloadapi.X509Source,
 	version byte, nonce, ciphertext []byte, algorithm string,
 ) ([]byte, *sdkErrors.SDKError) {
-	return NewCipher().Decrypt(source, version, nonce, ciphertext, algorithm)
+	return NewCipher().Decrypt(ctx, source, version, nonce, ciphertext, algorithm)
 }
 
 // Decrypt decrypts data with structured parameters.
@@ -133,6 +147,8 @@ func Decrypt(
 // decrypted plaintext bytes.
 //
 // Parameters:
+//   - ctx: Context for cancellation and timeout control. If nil,
+//     context.Background() is used.
 //   - source: X509Source for establishing mTLS connection to SPIKE Nexus
 //   - version: The cipher version used during encryption
 //   - nonce: The nonce bytes used during encryption
@@ -152,12 +168,15 @@ func Decrypt(
 //
 // Example:
 //
+//	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+//	defer cancel()
 //	cipher := NewCipher()
-//	plaintext, err := cipher.Decrypt(source, 1, nonce, ciphertext, "AES-GCM")
+//	plaintext, err := cipher.Decrypt(ctx, source, 1, nonce, ciphertext, "AES-GCM")
 //	if err != nil {
 //	    log.Printf("Decryption failed: %v", err)
 //	}
 func (c *Cipher) Decrypt(
+	ctx context.Context,
 	source *workloadapi.X509Source,
 	version byte, nonce, ciphertext []byte, algorithm string,
 ) ([]byte, *sdkErrors.SDKError) {
@@ -170,7 +189,7 @@ func (c *Cipher) Decrypt(
 
 	var res reqres.CipherDecryptResponse
 	if err := c.jsonOperation(
-		source, payload, url.CipherDecrypt(), &res,
+		ctx, source, payload, url.CipherDecrypt(), &res,
 	); err != nil {
 		return nil, err
 	}

@@ -5,6 +5,7 @@
 package acl
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
@@ -21,6 +22,8 @@ import (
 // and sends a policy retrieval request.
 //
 // Parameters:
+//   - ctx: Context for cancellation and timeout control. If nil,
+//     context.Background() is used.
 //   - source: X509Source for establishing mTLS connection to SPIKE Nexus
 //   - id: The unique identifier of the policy to retrieve
 //
@@ -37,13 +40,15 @@ import (
 //
 // Example:
 //
+//	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+//	defer cancel()
 //	source, err := workloadapi.NewX509Source(ctx)
 //	if err != nil {
 //	    log.Fatal(err)
 //	}
 //	defer source.Close()
 //
-//	policy, err := GetPolicy(source, "policy-123")
+//	policy, err := GetPolicy(ctx, source, "policy-123")
 //	if err != nil {
 //	    if err.Is(sdkErrors.ErrAPINotFound) {
 //	        log.Printf("Policy not found")
@@ -55,6 +60,7 @@ import (
 //
 //	log.Printf("Found policy: %+v", policy)
 func GetPolicy(
+	ctx context.Context,
 	source *workloadapi.X509Source, id string,
 ) (*data.Policy, *sdkErrors.SDKError) {
 	if source == nil {
@@ -71,7 +77,7 @@ func GetPolicy(
 	}
 
 	res, postErr := net.PostAndUnmarshal[reqres.PolicyReadResponse](
-		source, url.PolicyGet(), mr)
+		ctx, source, url.PolicyGet(), mr)
 	if postErr != nil {
 		return nil, postErr
 	}

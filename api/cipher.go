@@ -5,6 +5,7 @@
 package api
 
 import (
+	"context"
 	"io"
 
 	"github.com/spiffe/spike-sdk-go/api/internal/impl/cipher"
@@ -18,6 +19,8 @@ import (
 // original format, as encryption operates on raw bytes.
 //
 // Parameters:
+//   - ctx: Context for cancellation and timeout control. If nil,
+//     context.Background() is used.
 //   - reader: The data source to encrypt
 //
 // Returns:
@@ -29,12 +32,14 @@ import (
 //
 // Example:
 //
+//	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+//	defer cancel()
 //	reader := strings.NewReader("sensitive data")
-//	encrypted, err := api.CipherEncryptStream(reader)
+//	encrypted, err := api.CipherEncryptStream(ctx, reader)
 func (a *API) CipherEncryptStream(
-	reader io.Reader,
+	ctx context.Context, reader io.Reader,
 ) ([]byte, *sdkErrors.SDKError) {
-	return cipher.EncryptStream(a.source, reader)
+	return cipher.EncryptStream(ctx, a.source, reader)
 }
 
 // CipherEncrypt encrypts data with structured parameters.
@@ -43,6 +48,8 @@ func (a *API) CipherEncryptStream(
 // encrypted ciphertext bytes.
 //
 // Parameters:
+//   - ctx: Context for cancellation and timeout control. If nil,
+//     context.Background() is used.
 //   - plaintext: The data to encrypt
 //   - algorithm: The encryption algorithm to use (e.g., "AES-GCM")
 //
@@ -57,12 +64,14 @@ func (a *API) CipherEncryptStream(
 //
 // Example:
 //
+//	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+//	defer cancel()
 //	data := []byte("secret message")
-//	encrypted, err := api.CipherEncrypt(data, "AES-GCM")
+//	encrypted, err := api.CipherEncrypt(ctx, data, "AES-GCM")
 func (a *API) CipherEncrypt(
-	plaintext []byte, algorithm string,
+	ctx context.Context, plaintext []byte, algorithm string,
 ) ([]byte, *sdkErrors.SDKError) {
-	return cipher.Encrypt(a.source, plaintext, algorithm)
+	return cipher.Encrypt(ctx, a.source, plaintext, algorithm)
 }
 
 // CipherDecryptStream decrypts data from a reader using streaming mode.
@@ -72,6 +81,8 @@ func (a *API) CipherEncrypt(
 // operates on raw encrypted bytes.
 //
 // Parameters:
+//   - ctx: Context for cancellation and timeout control. If nil,
+//     context.Background() is used.
 //   - reader: The encrypted data source to decrypt
 //
 // Returns:
@@ -83,12 +94,14 @@ func (a *API) CipherEncrypt(
 //
 // Example:
 //
+//	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+//	defer cancel()
 //	reader := bytes.NewReader(encryptedData)
-//	plaintext, err := api.CipherDecryptStream(reader)
+//	plaintext, err := api.CipherDecryptStream(ctx, reader)
 func (a *API) CipherDecryptStream(
-	reader io.Reader,
+	ctx context.Context, reader io.Reader,
 ) ([]byte, *sdkErrors.SDKError) {
-	return cipher.DecryptStream(a.source, reader)
+	return cipher.DecryptStream(ctx, a.source, reader)
 }
 
 // CipherDecrypt decrypts data with structured parameters.
@@ -97,6 +110,8 @@ func (a *API) CipherDecryptStream(
 // and returns the decrypted plaintext.
 //
 // Parameters:
+//   - ctx: Context for cancellation and timeout control. If nil,
+//     context.Background() is used.
 //   - version: The cipher version used during encryption
 //   - nonce: The nonce bytes used during encryption
 //   - ciphertext: The encrypted data to decrypt
@@ -113,9 +128,12 @@ func (a *API) CipherDecryptStream(
 //
 // Example:
 //
-//	plaintext, err := api.CipherDecrypt(1, nonce, ciphertext, "AES-GCM")
+//	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+//	defer cancel()
+//	plaintext, err := api.CipherDecrypt(ctx, 1, nonce, ciphertext, "AES-GCM")
 func (a *API) CipherDecrypt(
+	ctx context.Context,
 	version byte, nonce, ciphertext []byte, algorithm string,
 ) ([]byte, *sdkErrors.SDKError) {
-	return cipher.Decrypt(a.source, version, nonce, ciphertext, algorithm)
+	return cipher.Decrypt(ctx, a.source, version, nonce, ciphertext, algorithm)
 }

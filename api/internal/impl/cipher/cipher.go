@@ -5,6 +5,7 @@
 package cipher
 
 import (
+	"context"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -27,12 +28,14 @@ type Cipher struct {
 	createMTLSHTTPClientFromSource func(*workloadapi.X509Source) *http.Client
 
 	// httpPost performs a POST request and returns the response body
-	httpPost func(*http.Client, string, []byte) ([]byte, *sdkErrors.SDKError)
+	httpPost func(
+		context.Context, *http.Client, string, []byte,
+	) ([]byte, *sdkErrors.SDKError)
 
 	// streamPost performs a streaming POST request with binary data
 	// (always uses application/octet-stream content type)
 	streamPost func(
-		*http.Client, string, io.Reader,
+		context.Context, *http.Client, string, io.Reader,
 	) (io.ReadCloser, *sdkErrors.SDKError)
 }
 
@@ -59,6 +62,8 @@ func NewCipher() *Cipher {
 // and DecryptStream.
 //
 // Parameters:
+//   - ctx: Context for cancellation and timeout control. If nil,
+//     context.Background() is used.
 //   - source: X509Source for establishing mTLS connection
 //   - r: io.Reader containing the data to process
 //   - urlPath: The API endpoint URL
@@ -68,6 +73,7 @@ func NewCipher() *Cipher {
 //   - []byte: The processed data if successful
 //   - *sdkErrors.SDKError: Error if the operation fails
 func (c *Cipher) streamOperation(
+	ctx context.Context,
 	source *workloadapi.X509Source,
 	r io.Reader,
 	urlPath string,
@@ -78,7 +84,7 @@ func (c *Cipher) streamOperation(
 	}
 
 	client := c.createMTLSHTTPClientFromSource(source)
-	rc, err := c.streamPost(client, urlPath, r)
+	rc, err := c.streamPost(ctx, client, urlPath, r)
 	if err != nil {
 		return nil, err
 	}
@@ -109,6 +115,8 @@ func (c *Cipher) streamOperation(
 // operations.
 //
 // Parameters:
+//   - ctx: Context for cancellation and timeout control. If nil,
+//     context.Background() is used.
 //   - source: X509Source for establishing mTLS connection
 //   - request: The request payload (will be marshaled to JSON)
 //   - urlPath: The API endpoint URL
@@ -117,6 +125,7 @@ func (c *Cipher) streamOperation(
 // Returns:
 //   - *sdkErrors.SDKError: Error if the operation fails, nil on success
 func (c *Cipher) jsonOperation(
+	ctx context.Context,
 	source *workloadapi.X509Source, request any, urlPath string, response any,
 ) *sdkErrors.SDKError {
 	if source == nil {
@@ -132,7 +141,7 @@ func (c *Cipher) jsonOperation(
 		return failErr
 	}
 
-	body, err := c.httpPost(client, urlPath, mr)
+	body, err := c.httpPost(ctx, client, urlPath, mr)
 	if err != nil {
 		return err
 	}

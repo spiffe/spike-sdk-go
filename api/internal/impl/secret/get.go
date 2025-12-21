@@ -5,6 +5,7 @@
 package secret
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
@@ -19,6 +20,8 @@ import (
 // Get retrieves a specific version of a secret at the given path.
 //
 // Parameters:
+//   - ctx: Context for cancellation and timeout control. If nil,
+//     context.Background() is used.
 //   - source: X509Source for establishing mTLS connection to SPIKE Nexus
 //   - path: Path to the secret to retrieve
 //   - version: Version number of the secret to retrieve
@@ -35,8 +38,11 @@ import (
 //
 // Example:
 //
-//	secret, err := Get(x509Source, "secret/path", 1)
+//	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+//	defer cancel()
+//	secret, err := Get(ctx, x509Source, "secret/path", 1)
 func Get(
+	ctx context.Context,
 	source *workloadapi.X509Source,
 	path string, version int,
 ) (*data.Secret, *sdkErrors.SDKError) {
@@ -54,7 +60,7 @@ func Get(
 	}
 
 	res, postErr := net.PostAndUnmarshal[reqres.SecretGetResponse](
-		source, url.SecretGet(), mr)
+		ctx, source, url.SecretGet(), mr)
 	if postErr != nil {
 		return nil, postErr
 	}

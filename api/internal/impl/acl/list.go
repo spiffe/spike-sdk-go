@@ -5,6 +5,7 @@
 package acl
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
@@ -21,6 +22,8 @@ import (
 // SPIKE Nexus using the X.509 source and sends a policy list request.
 //
 // Parameters:
+//   - ctx: Context for cancellation and timeout control. If nil,
+//     context.Background() is used.
 //   - source: X509Source for establishing mTLS connection to SPIKE Nexus
 //   - SPIFFEIDPattern: The SPIFFE ID pattern to filter policies. An empty
 //     string matches all SPIFFE IDs.
@@ -44,6 +47,8 @@ import (
 //
 // Example:
 //
+//	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+//	defer cancel()
 //	source, err := workloadapi.NewX509Source(ctx)
 //	if err != nil {
 //	    log.Fatal(err)
@@ -51,7 +56,7 @@ import (
 //	defer source.Close()
 //
 //	// List all policies
-//	result, err := ListPolicies(source, "", "")
+//	result, err := ListPolicies(ctx, source, "", "")
 //	if err != nil {
 //	    log.Printf("Error listing policies: %v", err)
 //	    return
@@ -66,6 +71,7 @@ import (
 //	    log.Printf("Found policy: %+v", policy)
 //	}
 func ListPolicies(
+	ctx context.Context,
 	source *workloadapi.X509Source,
 	SPIFFEIDPattern string, pathPattern string,
 ) (*[]data.PolicyListItem, *sdkErrors.SDKError) {
@@ -85,7 +91,7 @@ func ListPolicies(
 	}
 
 	res, postErr := net.PostAndUnmarshal[reqres.PolicyListResponse](
-		source, url.PolicyList(), mr)
+		ctx, source, url.PolicyList(), mr)
 	if postErr != nil {
 		if postErr.Is(sdkErrors.ErrAPINotFound) {
 			return &([]data.PolicyListItem{}), nil

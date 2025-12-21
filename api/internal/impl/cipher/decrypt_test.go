@@ -6,6 +6,7 @@ package cipher
 
 import (
 	"bytes"
+	"context"
 	"io"
 	"net/http"
 	"testing"
@@ -22,20 +23,20 @@ func TestDecrypt_OctetStream(t *testing.T) {
 				return nil, nil
 			}))
 		},
-		streamPost: func(_ *http.Client, _ string, body io.Reader) (io.ReadCloser, *sdkErrors.SDKError) {
+		streamPost: func(_ context.Context, _ *http.Client, _ string, body io.Reader) (io.ReadCloser, *sdkErrors.SDKError) {
 			b, _ := io.ReadAll(body)
 			if string(b) != "cipher" {
 				t.Fatalf("unexpected body: %q", string(b))
 			}
 			return io.NopCloser(bytes.NewReader([]byte("plain"))), nil
 		},
-		httpPost: func(_ *http.Client, _ string, _ []byte) ([]byte, *sdkErrors.SDKError) {
+		httpPost: func(_ context.Context, _ *http.Client, _ string, _ []byte) ([]byte, *sdkErrors.SDKError) {
 			return nil, nil
 		},
 	}
 
 	out, err := cipher.DecryptStream(
-		&workloadapi.X509Source{}, bytes.NewReader([]byte("cipher")),
+		context.Background(), &workloadapi.X509Source{}, bytes.NewReader([]byte("cipher")),
 	)
 	if err != nil {
 		t.Fatalf("DecryptStream error: %v", err)
