@@ -165,10 +165,10 @@ type ErrorResponder[T any] interface {
 //
 // Use this function in route handlers after state operations (Get, Put, Delete,
 // List, etc.) that may return "not found" or internal errors. Do NOT use this
-// for authentication/authorization or input validation errors in guard/intercept
-// functions; those have different semantics (400 Bad Request, 401 Unauthorized)
-// that don't map to the 404/500 distinction this function provides, so they
-// should use net.Fail directly.
+// for authentication/authorization or input validation errors in
+// guard/intercept functions; those have different semantics (400 Bad Request,
+// 401 Unauthorized) that don't map to the 404/500 distinction this function
+// provides, so they should use net.Fail directly.
 //
 // The function distinguishes between two types of errors:
 //   - sdkErrors.ErrEntityNotFound: Returns HTTP 404 Not Found when the
