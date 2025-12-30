@@ -116,3 +116,49 @@ func BootstrapKeeperMaxRetriesVal() int {
 	}
 	return 5
 }
+
+// BootstrapKeeperRetryInitialIntervalVal returns the initial interval between
+// retry attempts when broadcasting to keepers during bootstrap.
+//
+// It retrieves the interval from the
+// SPIKE_BOOTSTRAP_KEEPER_RETRY_INITIAL_INTERVAL environment variable.
+// The value must be a valid Go duration string (e.g., "2s", "5s", "1m").
+//
+// If the environment variable is not set or contains an invalid duration
+// format, it returns a default value of 2 seconds.
+//
+// Returns:
+//   - A time.Duration representing the initial retry interval.
+func BootstrapKeeperRetryInitialIntervalVal() time.Duration {
+	p := os.Getenv(BootstrapKeeperRetryInitialInterval)
+	if p != "" {
+		d, err := time.ParseDuration(p)
+		if err == nil {
+			return d
+		}
+	}
+	return 2 * time.Second
+}
+
+// BootstrapKeeperRetryMaxIntervalVal returns the maximum interval between
+// retry attempts when broadcasting to keepers during bootstrap.
+//
+// It retrieves the interval from the SPIKE_BOOTSTRAP_KEEPER_RETRY_MAX_INTERVAL
+// environment variable. The value must be a valid Go duration string
+// (e.g., "30s", "1m", "5m").
+//
+// If the environment variable is not set or contains an invalid duration
+// format, it returns a default value of 30 seconds.
+//
+// Returns:
+//   - A time.Duration representing the maximum retry interval.
+func BootstrapKeeperRetryMaxIntervalVal() time.Duration {
+	p := os.Getenv(BootstrapKeeperRetryMaxInterval)
+	if p != "" {
+		d, err := time.ParseDuration(p)
+		if err == nil {
+			return d
+		}
+	}
+	return 30 * time.Second
+}
