@@ -159,7 +159,7 @@ type ErrorResponder[T any] interface {
 	Internal() T
 }
 
-// RespondWithHttpError processes errors from state operations (database,
+// RespondWithHTTPError processes errors from state operations (database,
 // storage) and sends appropriate HTTP responses. It uses generics to work
 // with any response type that implements the ErrorResponder interface.
 //
@@ -189,7 +189,7 @@ type ErrorResponder[T any] interface {
 //
 //	// In a route handler after a state operation:
 //	if err != nil {
-//	    return net.RespondWithHttpError(err, w, reqres.SecretGetResponse{})
+//	    return net.RespondWithHTTPError(err, w, reqres.SecretGetResponse{})
 //	}
 //
 //	// In guard/intercept functions, use net.Fail directly instead:
@@ -197,7 +197,7 @@ type ErrorResponder[T any] interface {
 //	    net.Fail(response.Unauthorized(), w, http.StatusUnauthorized)
 //	    return sdkErrors.ErrAccessUnauthorized
 //	}
-func RespondWithHttpError[T ErrorResponder[T]](
+func RespondWithHTTPError[T ErrorResponder[T]](
 	err *sdkErrors.SDKError, w http.ResponseWriter, response T,
 ) *sdkErrors.SDKError {
 	if err == nil {
