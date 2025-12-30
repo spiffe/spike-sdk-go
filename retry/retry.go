@@ -491,6 +491,7 @@ func Forever[T any](
 //   - handler: The function to retry that returns (success bool, error)
 //   - success: true if the operation succeeded, false to retry
 //   - error: nil on success, or the error that occurred
+//   - options: Optional configuration for the retry behavior
 //
 // Returns:
 //   - bool: true if the operation eventually succeeded; false otherwise
@@ -508,10 +509,19 @@ func Forever[T any](
 //	    }
 //	    return true, nil
 //	})
+//
+//	// With custom backoff options:
+//	success, err := WithMaxAttempts(ctx, 5, handler,
+//	    WithBackOffOptions(
+//	        WithInitialInterval(2 * time.Second),
+//	        WithMaxInterval(30 * time.Second),
+//	    ),
+//	)
 func WithMaxAttempts(
 	ctx context.Context,
 	maxAttempts int,
 	handler func() (bool, *sdkErrors.SDKError),
+	options ...RetrierOption,
 ) (bool, *sdkErrors.SDKError) {
 	if maxAttempts <= 0 {
 		failErr := sdkErrors.ErrDataInvalidInput.Clone()
@@ -521,12 +531,12 @@ func WithMaxAttempts(
 
 	attempts := 0
 
+	// Prepend MaxElapsedTime(forever) so user options can override if needed
+	opts := []RetrierOption{WithBackOffOptions(WithMaxElapsedTime(forever))}
+	opts = append(opts, options...)
+
 	return NewTypedRetrier[bool](
-		NewExponentialRetrier(
-			WithBackOffOptions(
-				WithMaxElapsedTime(forever),
-			),
-		),
+		NewExponentialRetrier(opts...),
 	).RetryWithBackoff(ctx, func() (bool, *sdkErrors.SDKError) {
 		attempts++
 
