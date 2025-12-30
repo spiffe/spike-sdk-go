@@ -6,8 +6,11 @@ package net
 
 import (
 	"encoding/json"
+	"io"
+	"net/http"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
+	"github.com/spiffe/spike-sdk-go/log"
 
 	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
 )
@@ -83,4 +86,52 @@ func PostAndUnmarshal[T ResponseWithError](
 	}
 
 	return &response, nil
+}
+
+// RequestBody reads and returns the entire request body as a byte slice.
+// It reads all data from r.Body and ensures the body is properly closed
+// after reading, even if an error occurs during the read operation.
+//
+// Close errors are logged but not returned to the caller, as the primary
+// operation (reading the body data) has already completed. If reading fails,
+// the error is returned immediately.
+//
+// Parameters:
+//   - r: HTTP request containing the body to read
+//
+// Returns:
+//   - bod: byte slice containing the full request body data on success, nil on
+//     error
+//   - err: *sdkErrors.SDKError with ErrNetReadingRequestBody if reading fails,
+//     nil on success (close errors are only logged)
+//
+// Example:
+//
+//	body, err := RequestBody(req)
+//	if err != nil {
+//	    log.Printf("Failed to read request body: %v", err)
+//	    return
+//	}
+//	// Process body data...
+func RequestBody(r *http.Request) (bod []byte, err *sdkErrors.SDKError) {
+	const fName = "RequestBody"
+
+	readBody, e := io.ReadAll(r.Body)
+	if e != nil {
+		failErr := sdkErrors.ErrNetReadingRequestBody.Wrap(e)
+		return nil, failErr
+	}
+
+	defer func(b io.ReadCloser) {
+		if b == nil {
+			return
+		}
+		// This would almost never happen:
+		if closeErr := b.Close(); closeErr != nil {
+			failErr := sdkErrors.ErrFSStreamCloseFailed.Wrap(e)
+			log.WarnErr(fName, *failErr)
+		}
+	}(r.Body)
+
+	return readBody, err
 }

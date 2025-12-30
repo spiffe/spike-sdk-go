@@ -1,0 +1,419 @@
+//    \\ SPIKE: Secure your secrets with SPIFFE. — https://spike.ist/
+//  \\\\\ Copyright 2024-present SPIKE contributors.
+// \\\\\\\ SPDX-License-Identifier: Apache-2.0
+
+package net
+
+import (
+	"encoding/json"
+	"net/http"
+
+	"github.com/spiffe/go-spiffe/v2/spiffeid"
+
+	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
+	"github.com/spiffe/spike-sdk-go/spiffe"
+	"github.com/spiffe/spike-sdk-go/validation"
+)
+
+// Respond writes a JSON response with the specified status code and body.
+//
+// This function sets the Content-Type header to application/json, adds cache
+// invalidation headers (Cache-Control, Pragma, Expires), writes the provided
+// status code, and sends the response body.
+//
+// Parameters:
+//   - statusCode: int - The HTTP status code to send
+//   - body: []byte - The pre-marshaled JSON response body
+//   - w: http.ResponseWriter - The response writer to use
+//
+// Returns:
+//   - *sdkErrors.SDKError: sdkErrors.ErrAPIInternal if writing fails,
+//     nil on success
+func Respond(
+	statusCode int, body []byte, w http.ResponseWriter,
+) *sdkErrors.SDKError {
+	w.Header().Set("Content-Type", "application/json")
+
+	// Add cache invalidation headers
+	w.Header().Set(
+		"Cache-Control",
+		"no-store, no-cache, must-revalidate, private",
+	)
+	w.Header().Set("Pragma", "no-cache")
+	w.Header().Set("Expires", "0")
+
+	w.WriteHeader(statusCode)
+
+	_, err := w.Write(body)
+	if err != nil {
+		// At this point, we cannot respond. So there is little to send
+		// back to the client. We can only log the error.
+		// This should rarely, if ever, happen.
+		return sdkErrors.ErrAPIInternal.Wrap(err)
+	}
+
+	return nil
+}
+
+// MarshalBodyAndRespondOnMarshalFail serializes a response object to JSON and
+// handles error cases.
+//
+// This function attempts to marshal the provided response object to JSON bytes.
+// If marshaling fails, it sends a 500 Internal Server Error response to the
+// client and returns nil. The function handles all error logging and response
+// writing for the error case.
+//
+// Parameters:
+//   - res: any - The response object to marshal to JSON
+//   - w: http.ResponseWriter - The response writer for error handling
+//
+// Returns:
+//   - []byte: The marshaled JSON bytes, or nil if marshaling failed
+//   - *sdkErrors.SDKError: sdkErrors.ErrAPIInternal if marshaling failed,
+//     nil otherwise
+func MarshalBodyAndRespondOnMarshalFail(
+	res any, w http.ResponseWriter,
+) ([]byte, *sdkErrors.SDKError) {
+	body, err := json.Marshal(res)
+
+	// Since this function is typically called with sentinel error values,
+	// this error should, "typically", never happen.
+	// That's why, instead of sending a "marshal failure" sentinel error,
+	// we return an internal sentinel error (sdkErrors.ErrAPIInternal)
+	if err != nil {
+		// Chain an error for detailed internal logging.
+		failErr := *sdkErrors.ErrAPIInternal.Clone()
+		failErr.Msg = "problem generating response"
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+
+		internalErrJSON, marshalErr := json.Marshal(failErr)
+
+		// Add extra info "after" marshaling to avoid leaking internal error details
+		wrappedErr := failErr.Wrap(err)
+
+		if marshalErr != nil {
+			wrappedErr = wrappedErr.Wrap(marshalErr)
+			// Cannot marshal; try a generic message instead.
+			internalErrJSON = []byte(`{"error":"internal server error"}`)
+		}
+		_, err = w.Write(internalErrJSON)
+		if err != nil {
+			wrappedErr = wrappedErr.Wrap(err)
+			// At this point, we cannot respond. So there is little to send.
+			// We cannot even send a generic error message.
+			// We can only log the error.
+		}
+
+		return nil, wrappedErr
+	}
+
+	// body marshaled successfully
+	return body, nil
+}
+
+// Fail sends an error response to the client.
+//
+// This function marshals the client response and sends it with the specified
+// HTTP status code.
+//
+// Type Parameters:
+//   - T: The response type to send to the client (e.g.,
+//     reqres.ShardPutBadInput)
+//
+// Parameters:
+//   - clientResponse: The response object to send to the client
+//   - w: The HTTP response writer for error responses
+//   - statusCode: The HTTP status code to send (e.g., http.StatusBadRequest)
+//
+// Returns:
+//   - *sdkErrors.SDKError: An error if writing the response fails,
+//     nil on success
+//
+// Example usage:
+//
+//	if request.Shard == nil {
+//	    net.Fail(reqres.ShardPutBadInput, w, http.StatusBadRequest)
+//	    return errors.ErrInvalidInput
+//	}
+func Fail[T any](
+	clientResponse T,
+	w http.ResponseWriter,
+	statusCode int,
+) *sdkErrors.SDKError {
+	responseBody, marshalErr := MarshalBodyAndRespondOnMarshalFail(
+		clientResponse, w,
+	)
+	if notRespondedYet := marshalErr == nil; notRespondedYet {
+		return Respond(statusCode, responseBody, w)
+	}
+	return nil
+}
+
+// Success sends a success response with HTTP 200 OK.
+//
+// This is a convenience wrapper around Fail that sends a 200 OK status.
+// It maintains semantic clarity by using the name "Success" rather than
+// calling Fail directly at call sites.
+//
+// Type Parameters:
+//   - T: The response type to send to the client (e.g.,
+//     reqres.ShardPutSuccess)
+//
+// Parameters:
+//   - clientResponse: The response object to send to the client
+//   - w: The HTTP response writer
+//
+// Returns:
+//   - *sdkErrors.SDKError: An error if writing the response fails,
+//     nil on success
+//
+// Example usage:
+//
+//	state.SetShard(request.Shard)
+//	net.Success(reqres.ShardPutSuccess, w)
+//	return nil
+func Success[T any](
+	clientResponse T, w http.ResponseWriter,
+) *sdkErrors.SDKError {
+	return Fail(clientResponse, w, http.StatusOK)
+}
+
+// SuccessWithResponseBody sends a success response with HTTP 200 OK and
+// returns the response body for cleanup.
+//
+// This variant is used when the response body needs to be explicitly cleared
+// from memory for security reasons, such as when returning sensitive
+// cryptographic data. The caller is responsible for clearing the returned
+// byte slice.
+//
+// Type Parameters:
+//   - T: The response type to send to the client (e.g.,
+//     reqres.ShardGetResponse)
+//
+// Parameters:
+//   - clientResponse: The response object to send to the client
+//   - w: The HTTP response writer
+//
+// Returns:
+//   - []byte: The marshaled response body that should be cleared for security
+//   - *sdkErrors.SDKError: An error if writing the response fails,
+//     nil on success
+//
+// Example usage:
+//
+//	responseBody, err := net.SuccessWithResponseBody(
+//	    reqres.ShardGetResponse{Shard: sh}.Success(), w,
+//	)
+//	if err != nil {
+//	    return err
+//	}
+//	defer func() {
+//	    mem.ClearBytes(responseBody)
+//	}()
+//	return nil
+func SuccessWithResponseBody[T any](
+	clientResponse T, w http.ResponseWriter,
+) ([]byte, *sdkErrors.SDKError) {
+	responseBody, marshalErr := MarshalBodyAndRespondOnMarshalFail(
+		clientResponse, w,
+	)
+
+	if alreadyResponded := marshalErr != nil; alreadyResponded {
+		// Headers already sent. Just return the response body.
+		return responseBody, nil
+	}
+
+	respondErr := Respond(http.StatusOK, responseBody, w)
+	if respondErr != nil {
+		return nil, respondErr
+	}
+	return responseBody, nil
+}
+
+// UnmarshalAndRespondOnFail unmarshals a JSON request body into a typed
+// request struct.
+//
+// This is a generic function that handles the common pattern of unmarshaling
+// and validating incoming JSON requests. If unmarshaling fails, it sends the
+// provided error response to the client with a 400 Bad Request status.
+//
+// Type Parameters:
+//   - Req: The request type to unmarshal into
+//   - Res: The response type for error cases
+//
+// Parameters:
+//   - requestBody: The raw JSON request body to unmarshal
+//   - w: The response writer for error handling
+//   - errorResponseForBadRequest: A response object to send if unmarshaling
+//     fails
+//
+// Returns:
+//   - *Req: A pointer to the unmarshaled request struct, or nil if
+//     unmarshaling failed
+//   - *sdkErrors.SDKError: ErrDataUnmarshalFailure if unmarshaling fails, or
+//     nil on success
+//
+// The function handles all error logging and response writing for the error
+// case. Callers should check if the returned pointer is nil before proceeding.
+func UnmarshalAndRespondOnFail[Req any, Res any](
+	requestBody []byte,
+	w http.ResponseWriter,
+	errorResponseForBadRequest Res,
+) (*Req, *sdkErrors.SDKError) {
+	var request Req
+
+	if unmarshalErr := json.Unmarshal(requestBody, &request); unmarshalErr != nil {
+		failErr := sdkErrors.ErrDataUnmarshalFailure.Wrap(unmarshalErr)
+
+		responseBodyForBadRequest, err := MarshalBodyAndRespondOnMarshalFail(
+			errorResponseForBadRequest, w,
+		)
+		if noResponseSentYet := err == nil; noResponseSentYet {
+			respondErr := Respond(http.StatusBadRequest, responseBodyForBadRequest, w)
+			if respondErr != nil {
+				failErr = failErr.Wrap(respondErr)
+			}
+		}
+
+		// If marshal succeeded, we already responded with a 400 Bad Request with
+		// the errorResponseForBadRequest.
+		// Otherwise, if marshal failed (err != nil; very unlikely), we already
+		// responded with a 400 Bad Request in MarshalBodyAndRespondOnMarshalFail.
+		// Either way, we don't need to respond again. Just return the error.
+		return nil, failErr
+	}
+
+	// We were able to unmarshal the request successfully.
+	// We didn't send any failure response to the client so far.
+	// Return a pointer to the request to be handled by the calling site.
+	return &request, nil
+}
+
+// ExtractPeerSPIFFEIDAndRespondOnFail extracts and validates the peer
+// SPIFFE ID from an HTTP request. If the SPIFFE ID cannot be extracted or is
+// nil, it writes an unauthorized response using the provided error response
+// object and returns an error.
+//
+// This function is generic and can be used with any response type that needs
+// to be returned in case of authentication failure.
+//
+// Parameters:
+//   - r *http.Request: The HTTP request containing peer SPIFFE ID
+//   - w http.ResponseWriter: Response writer for error responses
+//   - errorResponse T: The error response object to marshal and send if
+//     validation fails
+//
+// Returns:
+//   - *spiffeid.ID: The extracted SPIFFE ID if successful
+//   - *sdkErrors.SDKError: ErrAccessUnauthorized if extraction fails or ID is
+//     invalid, nil otherwise
+//
+// Example usage:
+//
+//	peerID, err := net.ExtractPeerSPIFFEIDAndRespondOnFail(
+//	    r, w,
+//	    reqres.ShardGetResponse{Err: data.ErrUnauthorized},
+//	)
+//	if err != nil {
+//	    return err
+//	}
+func ExtractPeerSPIFFEIDAndRespondOnFail[T any](
+	r *http.Request,
+	w http.ResponseWriter,
+	errorResponse T,
+) (*spiffeid.ID, *sdkErrors.SDKError) {
+	peerSPIFFEID, err := spiffe.IDFromRequest(r)
+	if err != nil {
+		failErr := sdkErrors.ErrSPIFFEFailedToExtractX509SVID.Wrap(err)
+
+		responseBody, err := MarshalBodyAndRespondOnMarshalFail(
+			errorResponse, w,
+		)
+		if notRespondedYet := err == nil; notRespondedYet {
+			respondErr := Respond(http.StatusUnauthorized, responseBody, w)
+			if respondErr != nil {
+				failErr = failErr.Wrap(respondErr)
+			}
+		}
+
+		notAuthorizedErr := sdkErrors.ErrAccessUnauthorized.Wrap(failErr)
+		return nil, notAuthorizedErr
+	}
+
+	err = validation.ValidateSPIFFEID(peerSPIFFEID.String())
+	if err != nil {
+		failErr := sdkErrors.ErrSPIFFEInvalidSPIFFEID.Wrap(err)
+
+		responseBody, err := MarshalBodyAndRespondOnMarshalFail(
+			errorResponse, w,
+		)
+		if notRespondedYet := err == nil; notRespondedYet {
+			respondErr := Respond(http.StatusUnauthorized, responseBody, w)
+			if respondErr != nil {
+				failErr = failErr.Wrap(respondErr)
+			}
+		}
+
+		notAuthorizedErr := sdkErrors.ErrAccessUnauthorized.Wrap(failErr)
+		return nil, notAuthorizedErr
+	}
+
+	return peerSPIFFEID, nil
+}
+
+// ReadRequestBodyAndRespondOnFail reads the entire request body from an HTTP
+// request.
+//
+// On error, this function writes a 400 Bad Request status to the response
+// writer and returns the error for propagation to the caller. If writing the
+// error response fails, it returns a 500 Internal Server Error.
+//
+// Parameters:
+//   - w: http.ResponseWriter - The response writer for error handling
+//   - r: *http.Request - The incoming HTTP request
+//
+// Returns:
+//   - []byte: The request body as a byte slice, or nil if reading failed
+//   - *sdkErrors.SDKError: sdkErrors.ErrDataReadFailure if reading fails,
+//     nil on success
+func ReadRequestBodyAndRespondOnFail(
+	w http.ResponseWriter, r *http.Request,
+) ([]byte, *sdkErrors.SDKError) {
+	body, err := RequestBody(r)
+	if err != nil {
+		failErr := sdkErrors.ErrDataReadFailure.Wrap(err)
+		failErr.Msg = "problem reading request body"
+
+		// do not send the wrapped error to the client as it may contain
+		// error details that an attacker can use and exploit.
+		failJSON, err := json.Marshal(sdkErrors.ErrDataReadFailure)
+		if err != nil {
+			// Cannot even parse a generic struct, this is an internal error.
+			w.WriteHeader(http.StatusInternalServerError)
+			_, writeErr := w.Write(failJSON)
+			if writeErr != nil {
+				// Cannot even write the error response, this is a critical error.
+				failErr = failErr.Wrap(writeErr)
+				failErr.Msg = "problem writing response"
+			}
+
+			return nil, failErr
+		}
+
+		w.WriteHeader(http.StatusBadRequest)
+		_, writeErr := w.Write(failJSON)
+		if writeErr != nil {
+			failErr = failErr.Wrap(writeErr)
+			failErr.Msg = "problem writing response"
+			// Cannot even write the error response, this is a critical error.
+			// We can only return the error at this point.
+			return nil, failErr
+		}
+
+		return nil, failErr
+	}
+
+	return body, nil
+}
