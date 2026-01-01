@@ -9,6 +9,7 @@ import (
 	"net/http"
 
 	"github.com/spiffe/go-spiffe/v2/spiffeid"
+	"github.com/spiffe/spike-sdk-go/api/entity/v1/reqres"
 
 	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
 	"github.com/spiffe/spike-sdk-go/spiffe"
@@ -592,6 +593,50 @@ func RespondUnauthorizedOnPredicateFail(
 			return sdkErrors.ErrAccessUnauthorized.Wrap(failErr)
 		}
 		return sdkErrors.ErrAccessUnauthorized.Clone()
+	}
+
+	return nil
+}
+
+// RespondFallbackWithStatus writes a fallback JSON response with the given HTTP
+// status code and error code. It sets appropriate headers to prevent caching.
+//
+// This function is used when the primary response handling fails or when a
+// generic error response needs to be sent.
+//
+// Parameters:
+//   - w: The HTTP response writer
+//   - status: The HTTP status code to return
+//   - code: The error code to include in the response body
+//
+// Returns:
+//   - *sdkErrors.SDKError: An error if marshaling or writing fails,
+//     nil on success
+func RespondFallbackWithStatus(
+	w http.ResponseWriter, status int, code sdkErrors.ErrorCode,
+) *sdkErrors.SDKError {
+	body, err := MarshalBodyAndRespondOnMarshalFail(
+		reqres.FallbackResponse{Err: code}, w,
+	)
+	if err != nil {
+		return err
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+
+	// Add cache invalidation headers
+	w.Header().Set(
+		"Cache-Control",
+		"no-store, no-cache, must-revalidate, private",
+	)
+	w.Header().Set("Pragma", "no-cache")
+	w.Header().Set("Expires", "0")
+
+	w.WriteHeader(status)
+
+	if _, err := w.Write(body); err != nil {
+		failErr := sdkErrors.ErrAPIInternal.Wrap(err)
+		return failErr
 	}
 
 	return nil
