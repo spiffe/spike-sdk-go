@@ -5,6 +5,7 @@
 package validation
 
 import (
+	"context"
 	"fmt"
 	"regexp"
 	"strings"
@@ -12,6 +13,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/spiffe/spike-sdk-go/api/entity/data"
 	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
+	"github.com/spiffe/spike-sdk-go/log"
 )
 
 const validNamePattern = `^[a-zA-Z0-9-_ ]+$`
@@ -272,4 +274,22 @@ func ValidatePermissions(permsStr string) (
 	}
 
 	return perms, nil
+}
+
+// NonNilContextOrDie checks if the provided context is nil and terminates the
+// program if so.
+//
+// This function is used to ensure that all operations requiring a context
+// receive a valid one. A nil context indicates a programming error that
+// should never occur in production, so the function terminates the program
+// immediately via log.FatalErr.
+//
+// Parameters:
+//   - ctx: The context to validate
+//   - fName: The calling function name for logging purposes
+func NonNilContextOrDie(ctx context.Context, fName string) {
+	if ctx == nil {
+		failErr := *sdkErrors.ErrNilContext.Clone()
+		log.FatalErr(fName, failErr)
+	}
 }
