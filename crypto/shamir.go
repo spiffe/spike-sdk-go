@@ -45,9 +45,16 @@ import (
 func VerifyShamirReconstruction(secret group.Scalar, shares []shamir.Share) {
 	const fName = "VerifyShamirReconstruction"
 
-	t := uint(env.ShamirThresholdVal() - 1) // Need t+1 shares to reconstruct
+	thresholdVal := env.ShamirThresholdVal()
+	if thresholdVal < 1 {
+		failErr := *sdkErrors.ErrShamirReconstructionFailed.Clone()
+		failErr.Msg = "shamir threshold must be at least 1"
+		log.FatalErr(fName, failErr)
+	}
+	// #nosec G115 -- thresholdVal is validated >= 1 above, so thresholdVal-1 >= 0
+	t := uint(thresholdVal - 1) // Need t+1 shares to reconstruct
 
-	reconstructed, err := shamir.Recover(t, shares[:env.ShamirThresholdVal()])
+	reconstructed, err := shamir.Recover(t, shares[:thresholdVal])
 	// Security: Ensure that the secret is zeroed out if the check fails.
 	defer func() {
 		if reconstructed == nil {
