@@ -7,11 +7,11 @@ package crypto
 import (
 	"github.com/cloudflare/circl/group"
 	shamir "github.com/cloudflare/circl/secretsharing"
-	"github.com/spiffe/spike-sdk-go/security/mem"
 
 	"github.com/spiffe/spike-sdk-go/config/env"
 	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
 	"github.com/spiffe/spike-sdk-go/log"
+	"github.com/spiffe/spike-sdk-go/security/mem"
 )
 
 // VerifyShamirReconstruction verifies that a set of secret shares can
