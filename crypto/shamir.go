@@ -115,14 +115,21 @@ func ComputeShares(rk *[32]byte) (group.Scalar, []shamir.Share) {
 	g := group.P256
 
 	thresholdVal := env.ShamirThresholdVal()
+	sharesVal := env.ShamirSharesVal()
 	if thresholdVal < 1 {
 		failErr := *sdkErrors.ErrShamirReconstructionFailed.Clone()
 		failErr.Msg = "shamir threshold must be at least 1"
 		log.FatalErr(fName, failErr)
 	}
+	if sharesVal < thresholdVal {
+		failErr := *sdkErrors.ErrShamirReconstructionFailed.Clone()
+		failErr.Msg = "shamir shares must be at least threshold"
+		log.FatalErr(fName, failErr)
+	}
 	// #nosec G115 -- thresholdVal is validated >= 1 above, so thresholdVal-1 >= 0
-	t := uint(thresholdVal - 1)      // Need t+1 shares to reconstruct
-	n := uint(env.ShamirSharesVal()) // Total number of shares
+	t := uint(thresholdVal - 1) // Need t+1 shares to reconstruct
+	// #nosec G115 -- sharesVal is validated >= thresholdVal above.
+	n := uint(sharesVal) // Total number of shares
 
 	rootSecret := g.NewScalar()
 	if err := rootSecret.UnmarshalBinary(rk[:]); err != nil {
