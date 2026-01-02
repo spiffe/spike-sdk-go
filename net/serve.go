@@ -6,9 +6,12 @@ package net
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/spiffe/go-spiffe/v2/spiffetls/tlsconfig"
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
+	"github.com/spiffe/spike-sdk-go/crypto"
+	"github.com/spiffe/spike-sdk-go/journal"
 
 	"github.com/spiffe/spike-sdk-go/config/env"
 	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
@@ -185,21 +188,87 @@ func Serve(
 	)
 }
 
+// Handler is a function type that processes HTTP requests with audit
+// logging support.
+//
+// Parameters:
+//   - w: HTTP response writer for sending the response
+//   - r: HTTP request containing the incoming request data
+//   - audit: Audit entry for logging the request lifecycle
+//
+// Returns:
+//   - *sdkErrors.SDKError: nil on success, error on failure
+type Handler func(
+	w http.ResponseWriter, r *http.Request, audit *journal.AuditEntry,
+) *sdkErrors.SDKError
+
+// HandleRoute wraps an HTTP handler with audit logging functionality.
+// It creates and manages audit log entries for the request lifecycle,
+// including
+// - Generating unique trail IDs
+// - Recording timestamps and durations
+// - Tracking request status (created, success, error)
+// - Capturing error information
+//
+// The wrapped handler is mounted at the root path ("/") and automatically
+// logs entry and exit audit events for all requests.
+//
+// Parameters:
+//   - h: Handler function to wrap with audit logging
+func HandleRoute(h Handler) {
+	http.HandleFunc("/", func(
+		writer http.ResponseWriter, request *http.Request,
+	) {
+		now := time.Now()
+		id := crypto.ID()
+
+		entry := journal.AuditEntry{
+			TrailID:   id,
+			Timestamp: now,
+			UserID:    "",
+			Action:    journal.AuditEnter,
+			Path:      request.URL.Path,
+			Resource:  "",
+			SessionID: "",
+			State:     journal.AuditEntryCreated,
+		}
+		journal.Audit(entry)
+
+		err := h(writer, request, &entry)
+		if err == nil {
+			entry.Action = journal.AuditExit
+			entry.State = journal.AuditSuccess
+		} else {
+			entry.Action = journal.AuditExit
+			entry.State = journal.AuditErrored
+			entry.Err = err.Error()
+		}
+
+		entry.Duration = time.Since(now)
+		journal.Audit(entry)
+	})
+}
+
 // ServeWithRoute is a convenience wrapper around ServeWithPredicate that
 // initializes and starts an HTTPS server using mTLS authentication with
-// SPIFFE X.509 certificates. Unlike ServeWithPredicate, this function
+// SPIFFE X.509 certificates. It automatically wraps the provided handler with
+// audit logging via HandleRoute. Unlike ServeWithPredicate, this function
 // terminates the program on failure instead of returning an error.
 //
 // Parameters:
 //   - appName: The application name used for error logging context.
 //   - source: An X509Source that provides the server's identity credentials and
 //     validates client certificates. Must not be nil.
-//   - initializeRoutes: A function that sets up the HTTP route handlers for
-//     the server. This function is called before the server starts.
+//   - route: A Handler function that processes HTTP requests. This handler
+//     receives an AuditEntry for logging the request lifecycle and is
+//     automatically wrapped with audit logging functionality.
 //   - spiffeIDPredicate: A function that takes a client SPIFFE ID string and
 //     returns true if the client should be allowed access, false otherwise.
 //   - tlsPort: The network address and port for the server to listen on
 //     (e.g., ":8443").
+//
+// The handler is mounted at the root path ("/") and receives automatic audit
+// logging for request entry, exit, duration, and error tracking.
 //
 // The function terminates the program via log.FatalErr if:
 //   - source is nil
@@ -210,7 +279,9 @@ func Serve(
 func ServeWithRoute(
 	appName string,
 	source *workloadapi.X509Source,
-	initializeRoutes func(),
+	route func(
+		http.ResponseWriter, *http.Request, *journal.AuditEntry,
+	) *sdkErrors.SDKError,
 	spiffeIDPredicate func(string) bool,
 	tlsPort string,
 ) {
@@ -220,7 +291,7 @@ func ServeWithRoute(
 
 	if err := ServeWithPredicate(
 		source,
-		initializeRoutes,
+		func() { HandleRoute(route) },
 		spiffeIDPredicate,
 		tlsPort,
 	); err != nil {
