@@ -184,3 +184,46 @@ func Serve(
 		predicate.AllowAll, tlsPort,
 	)
 }
+
+// ServeWithRoute is a convenience wrapper around ServeWithPredicate that
+// initializes and starts an HTTPS server using mTLS authentication with
+// SPIFFE X.509 certificates. Unlike ServeWithPredicate, this function
+// terminates the program on failure instead of returning an error.
+//
+// Parameters:
+//   - appName: The application name used for error logging context.
+//   - source: An X509Source that provides the server's identity credentials and
+//     validates client certificates. Must not be nil.
+//   - initializeRoutes: A function that sets up the HTTP route handlers for
+//     the server. This function is called before the server starts.
+//   - spiffeIDPredicate: A function that takes a client SPIFFE ID string and
+//     returns true if the client should be allowed access, false otherwise.
+//   - tlsPort: The network address and port for the server to listen on
+//     (e.g., ":8443").
+//
+// The function terminates the program via log.FatalErr if:
+//   - source is nil
+//   - the server fails to start or encounters an error while running
+//
+// Use this function when server startup failures should be fatal. For more
+// granular error handling, use ServeWithPredicate instead.
+func ServeWithRoute(
+	appName string,
+	source *workloadapi.X509Source,
+	initializeRoutes func(),
+	spiffeIDPredicate func(string) bool,
+	tlsPort string,
+) {
+	if source == nil {
+		log.FatalErr(appName, *sdkErrors.ErrSPIFFENilX509Source)
+	}
+
+	if err := ServeWithPredicate(
+		source,
+		initializeRoutes,
+		spiffeIDPredicate,
+		tlsPort,
+	); err != nil {
+		log.FatalErr(appName, *err)
+	}
+}
