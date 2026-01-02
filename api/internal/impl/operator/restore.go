@@ -5,6 +5,7 @@
 package operator
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
@@ -44,6 +45,8 @@ import (
 // or other retry strategies for transient failures.
 //
 // Parameters:
+//   - ctx: Context for cancellation and timeout control. If nil,
+//     context.Background() is used.
 //   - source *workloadapi.X509Source: X509Source used for mTLS client
 //     authentication
 //   - shardIndex int: Index of the recovery shard
@@ -68,12 +71,15 @@ import (
 //
 // Example:
 //
-//	status, err := Restore(x509Source, shardIndex, shardValue)
+//	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+//	defer cancel()
+//	status, err := Restore(ctx, x509Source, shardIndex, shardValue)
 //	if err != nil {
 //	    // SVID acquisition failures may be transient - consider retry logic
 //	    return nil, err
 //	}
 func Restore(
+	ctx context.Context,
 	source *workloadapi.X509Source, shardIndex int, shardValue *[32]byte,
 ) (*data.RestorationStatus, *sdkErrors.SDKError) {
 	const fName = "restore"
@@ -117,7 +123,7 @@ func Restore(
 	}
 
 	res, postErr := net.PostAndUnmarshal[reqres.RestoreResponse](
-		source, url.Restore(), mr)
+		ctx, source, url.Restore(), mr)
 	// Security: Zero out mr after the POST request is complete
 	for i := range mr {
 		mr[i] = 0

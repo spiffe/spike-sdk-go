@@ -5,6 +5,7 @@
 package acl
 
 import (
+	"context"
 	"encoding/json"
 	"testing"
 
@@ -17,7 +18,7 @@ import (
 
 // TestCreatePolicy_NilSource tests that CreatePolicy returns error for nil X509Source
 func TestCreatePolicy_NilSource(t *testing.T) {
-	err := CreatePolicy(nil, "test-policy", "spiffe://test/*", "/api/*",
+	err := CreatePolicy(context.Background(), nil, "test-policy", "spiffe://test/*", "/api/*",
 		[]data.PolicyPermission{data.PermissionRead})
 
 	assert.NotNil(t, err)
@@ -26,7 +27,7 @@ func TestCreatePolicy_NilSource(t *testing.T) {
 
 // TestGetPolicy_NilSource tests that GetPolicy returns error for nil X509Source
 func TestGetPolicy_NilSource(t *testing.T) {
-	policy, err := GetPolicy(nil, "policy-123")
+	policy, err := GetPolicy(context.Background(), nil, "policy-123")
 
 	assert.Nil(t, policy)
 	assert.NotNil(t, err)
@@ -35,7 +36,7 @@ func TestGetPolicy_NilSource(t *testing.T) {
 
 // TestDeletePolicy_NilSource tests that DeletePolicy returns error for nil X509Source
 func TestDeletePolicy_NilSource(t *testing.T) {
-	err := DeletePolicy(nil, "policy-123")
+	err := DeletePolicy(context.Background(), nil, "policy-123")
 
 	assert.NotNil(t, err)
 	assert.True(t, err.Is(sdkErrors.ErrSPIFFENilX509Source))
@@ -43,7 +44,7 @@ func TestDeletePolicy_NilSource(t *testing.T) {
 
 // TestListPolicies_NilSource tests that ListPolicies returns error for nil X509Source
 func TestListPolicies_NilSource(t *testing.T) {
-	policies, err := ListPolicies(nil, "", "")
+	policies, err := ListPolicies(context.Background(), nil, "", "")
 
 	assert.Nil(t, policies)
 	assert.NotNil(t, err)

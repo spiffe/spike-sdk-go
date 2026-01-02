@@ -5,6 +5,7 @@
 package operator
 
 import (
+	"context"
 	"encoding/json"
 	"testing"
 
@@ -17,7 +18,7 @@ import (
 
 // TestRecover_NilSource tests that Recover returns error for nil X509Source
 func TestRecover_NilSource(t *testing.T) {
-	shards, err := Recover(nil)
+	shards, err := Recover(context.Background(), nil)
 
 	assert.Nil(t, shards)
 	assert.NotNil(t, err)
@@ -27,7 +28,7 @@ func TestRecover_NilSource(t *testing.T) {
 // TestRestore_NilSource tests that Restore returns error for nil X509Source
 func TestRestore_NilSource(t *testing.T) {
 	shardValue := &[32]byte{}
-	status, err := Restore(nil, 1, shardValue)
+	status, err := Restore(context.Background(), nil, 1, shardValue)
 
 	assert.Nil(t, status)
 	assert.NotNil(t, err)
@@ -36,7 +37,7 @@ func TestRestore_NilSource(t *testing.T) {
 
 // TestRestore_NilShardValue tests that Restore handles nil shard value
 func TestRestore_NilShardValue(t *testing.T) {
-	status, err := Restore(nil, 1, nil)
+	status, err := Restore(context.Background(), nil, 1, nil)
 
 	assert.Nil(t, status)
 	assert.NotNil(t, err)

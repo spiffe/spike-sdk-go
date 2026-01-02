@@ -5,6 +5,7 @@
 package acl
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
@@ -20,6 +21,8 @@ import (
 // and sends a policy deletion request.
 //
 // Parameters:
+//   - ctx: Context for cancellation and timeout control. If nil,
+//     context.Background() is used.
 //   - source: X509Source for establishing mTLS connection to SPIKE Nexus
 //   - id: The unique identifier of the policy to be deleted
 //
@@ -34,17 +37,20 @@ import (
 //
 // Example:
 //
+//	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+//	defer cancel()
 //	source, err := workloadapi.NewX509Source(ctx)
 //	if err != nil {
 //	    log.Fatal(err)
 //	}
 //	defer source.Close()
 //
-//	err = DeletePolicy(source, "policy-123")
+//	err = DeletePolicy(ctx, source, "policy-123")
 //	if err != nil {
 //	    log.Printf("Failed to delete policy: %v", err)
 //	}
 func DeletePolicy(
+	ctx context.Context,
 	source *workloadapi.X509Source,
 	id string,
 ) *sdkErrors.SDKError {
@@ -62,6 +68,6 @@ func DeletePolicy(
 	}
 
 	_, postErr := net.PostAndUnmarshal[reqres.PolicyDeleteResponse](
-		source, url.PolicyDelete(), mr)
+		ctx, source, url.PolicyDelete(), mr)
 	return postErr
 }
