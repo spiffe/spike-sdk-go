@@ -11,6 +11,7 @@ import (
 	"github.com/spiffe/spike-sdk-go/config/env"
 	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
 	"github.com/spiffe/spike-sdk-go/log"
+	"github.com/spiffe/spike-sdk-go/security/mem"
 )
 
 // VerifyShamirReconstruction verifies that a set of secret shares can
@@ -79,4 +80,75 @@ func VerifyShamirReconstruction(secret group.Scalar, shares []shamir.Share) {
 		failErr.Msg = "recovered secret does not match original"
 		log.FatalErr(fName, failErr)
 	}
+}
+
+// ComputeShares generates a set of Shamir secret shares from the root key.
+// The function uses a deterministic random reader seeded with the root key,
+// which ensures that the same shares are always generated for a given root key.
+// This deterministic behavior is crucial for the system's reliability, allowing
+// shares to be recomputed as needed while maintaining consistency.
+//
+// Parameters:
+//   - rk *[32]byte: The root key used to generate the secret shares. Since this
+//     is a pointer type and the root key is typically a global variable in
+//     SPIKE Nexus, the caller must acquire a mutex lock before calling this
+//     function and release it afterward to ensure thread safety.
+//
+// Returns:
+//   - group.Scalar: The root secret as a P256 scalar (caller must zero after
+//     use)
+//   - []shamir.Share: The computed shares with monotonically increasing IDs
+//     starting from 1 (caller must zero after use)
+//
+// The function will log a fatal error and exit if:
+//   - The root key is nil or zeroed
+//   - The root key fails to unmarshal into a scalar
+//   - The generated shares fail reconstruction verification
+func ComputeShares(rk *[32]byte) (group.Scalar, []shamir.Share) {
+	const fName = "ComputeShares"
+
+	if rk == nil || mem.Zeroed32(rk) {
+		failErr := sdkErrors.ErrRootKeyEmpty.Clone()
+		log.FatalErr(fName, *failErr)
+	}
+
+	g := group.P256
+
+	thresholdVal := env.ShamirThresholdVal()
+	sharesVal := env.ShamirSharesVal()
+	if thresholdVal < 1 {
+		failErr := *sdkErrors.ErrShamirReconstructionFailed.Clone()
+		failErr.Msg = "shamir threshold must be at least 1"
+		log.FatalErr(fName, failErr)
+	}
+	if sharesVal < thresholdVal {
+		failErr := *sdkErrors.ErrShamirReconstructionFailed.Clone()
+		failErr.Msg = "shamir shares must be at least threshold"
+		log.FatalErr(fName, failErr)
+	}
+	// #nosec G115 -- thresholdVal is validated >= 1 above, so thresholdVal-1 >= 0
+	t := uint(thresholdVal - 1) // Need t+1 shares to reconstruct
+	// #nosec G115 -- sharesVal is validated >= thresholdVal above.
+	n := uint(sharesVal) // Total number of shares
+
+	rootSecret := g.NewScalar()
+	if err := rootSecret.UnmarshalBinary(rk[:]); err != nil {
+		failErr := sdkErrors.ErrDataUnmarshalFailure.Wrap(err)
+		log.FatalErr(fName, *failErr)
+	}
+
+	// Using the root key as the seed is secure because Shamir Secret Sharing
+	// security does not depend on the random seed; it depends on the shards
+	// being kept secret. Using a deterministic reader ensures identical shares
+	// are generated for the same root key, which simplifies synchronization
+	// after Nexus restarts.
+	reader := NewDeterministicReader(rk[:])
+	ss := shamir.New(reader, t, rootSecret)
+	shares := ss.Share(n)
+
+	// Verify the generated shares can reconstruct the original secret.
+	// This crashes via log.FatalErr if reconstruction fails.
+	VerifyShamirReconstruction(rootSecret, shares)
+
+	return rootSecret, shares
 }
