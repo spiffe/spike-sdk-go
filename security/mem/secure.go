@@ -80,6 +80,22 @@ import (
 //	                             // array)
 //		ClearRawBytes(&data.Tokens[0]) // Clear slice data manually if needed
 //		ClearRawBytes(data)            // Finally clear the struct itself.
+//
+// Security implementation notes:
+//
+// This function uses two techniques to prevent the Go compiler from optimizing
+// away the memory clearing as "dead stores" (writes to memory never read
+// again):
+//
+//  1. //go:noinline prevents inlining, making it harder for the compiler to
+//     reason about whether the writes are observable.
+//
+//  2. A read-back pass after zeroing ensures the compiler cannot prove the
+//     writes are dead. The read values are accumulated into a variable that
+//     is kept alive, preventing the compiler from eliminating either the
+//     writes or the reads.
+//
+//go:noinline
 func ClearRawBytes[T any](s *T) {
 	if s == nil {
 		return
@@ -89,12 +105,17 @@ func ClearRawBytes[T any](s *T) {
 	size := unsafe.Sizeof(*s)
 	b := (*[1 << 30]byte)(p)[:size:size]
 
-	// Zero out all bytes in mem
 	for i := range b {
 		b[i] = 0
 	}
 
-	// Make sure the data is actually wiped before gc has time to interfere
+	// Prevent dead store elimination by reading back.
+	// The compiler cannot prove this read is unused since we keep it alive.
+	var check byte
+	for i := range b {
+		check |= b[i]
+	}
+	runtime.KeepAlive(check)
 	runtime.KeepAlive(s)
 }
 
@@ -123,6 +144,14 @@ func ClearRawBytes[T any](s *T) {
 //
 // This method is provided for users with extreme security requirements or in
 // regulated environments where multiple-pass overwrite policies are mandated.
+//
+// Security implementation notes:
+//
+// Like ClearRawBytes, this function uses //go:noinline and a read-back pattern
+// to prevent the compiler from optimizing away the memory overwrites. See the
+// documentation for ClearRawBytes for detailed rationale.
+//
+//go:noinline
 func ClearRawBytesParanoid[T any](s *T) {
 	const fName = "ClearRawBytesParanoid"
 
@@ -141,24 +170,32 @@ func ClearRawBytesParanoid[T any](s *T) {
 	// 4. Alternating 0x55/0xAA (01010101/10101010)
 	// 5. Final zero out
 
+	var check byte
+
 	// Zero out all bytes (first pass)
 	for i := range b {
 		b[i] = 0
 	}
-	runtime.KeepAlive(s)
+	for i := range b {
+		check |= b[i]
+	}
 
 	// Fill with ones (second pass)
 	for i := range b {
 		b[i] = 0xFF
 	}
-	runtime.KeepAlive(s)
+	for i := range b {
+		check |= b[i]
+	}
 
 	// Fill with random data (third pass)
 	_, err := rand.Read(b)
 	if err != nil {
 		log.FatalLn(fName)
 	}
-	runtime.KeepAlive(s)
+	for i := range b {
+		check |= b[i]
+	}
 
 	// Alternating bit pattern (fourth pass)
 	for i := range b {
@@ -168,12 +205,19 @@ func ClearRawBytesParanoid[T any](s *T) {
 			b[i] = 0xAA // 10101010
 		}
 	}
-	runtime.KeepAlive(s)
+	for i := range b {
+		check |= b[i]
+	}
 
 	// Final zero out (fifth pass)
 	for i := range b {
 		b[i] = 0
 	}
+	for i := range b {
+		check |= b[i]
+	}
+
+	runtime.KeepAlive(check)
 	runtime.KeepAlive(s)
 }
 
@@ -213,6 +257,14 @@ func Zeroed32(ar *[32]byte) bool {
 //	key := []byte{...} // Sensitive cryptographic key
 //	defer mem.ClearBytes(key)
 //	// Use key...
+//
+// Security implementation notes:
+//
+// Like ClearRawBytes, this function uses //go:noinline and a read-back pattern
+// to prevent the compiler from optimizing away the memory overwrites. See the
+// documentation for ClearRawBytes for detailed rationale.
+//
+//go:noinline
 func ClearBytes(b []byte) {
 	if len(b) == 0 {
 		return
@@ -222,6 +274,11 @@ func ClearBytes(b []byte) {
 		b[i] = 0
 	}
 
-	// Make sure the data is actually wiped before gc has time to interfere
+	// Prevent dead store elimination by reading back.
+	var check byte
+	for i := range b {
+		check |= b[i]
+	}
+	runtime.KeepAlive(check)
 	runtime.KeepAlive(b)
 }
