@@ -232,8 +232,9 @@ func TestKV_ImportSecrets(t *testing.T) {
 				secret := kv.data["app/test"]
 				secret.Versions[1].Data["shared"] = "modified"
 
-				// If we had a reference to original, this would affect it
-				// Since we don't have access to original here, we verify the copy exists
+				// If we had a reference to the original, this would affect it
+				// Since we don't have access to the original here, we verify the
+				// copy exists
 				if secret.Versions[1].Data["shared"] != "modified" {
 					t.Error("should be able to modify imported data independently")
 				}

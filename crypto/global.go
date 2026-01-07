@@ -9,7 +9,7 @@ package crypto
 //
 // While GCM technically supports other nonce sizes via NewGCMWithNonceSize(),
 // the 12-byte standard is strongly preferred because:
-//   - It uses the more efficient counter mode internally
+//   - It uses the more efficient "counter mode" internally
 //   - Non-standard sizes require additional GHASH operations
 //   - It is the NIST-recommended size for maximum interoperability
 //   - Go's cipher.NewGCM() uses this size by default

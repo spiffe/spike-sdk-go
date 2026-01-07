@@ -62,7 +62,7 @@ func Post(
 	req.Header.Set("Content-Type", "application/json")
 
 	// Use the existing mTLS client to make the request
-	//nolint:bodyclose // Response body is properly closed in defer block
+	//nolint:bodyclose // Response body is properly closed in the "defer" block
 	r, err := client.Do(req)
 	if err != nil {
 		failErr := sdkErrors.ErrNetPeerConnection.Wrap(err)

@@ -18,7 +18,7 @@ import (
 
 // TestAES256Seed_Success tests successful AES-256 seed generation
 func TestAES256Seed_Success(t *testing.T) {
-	// Save original reader and restore after test
+	// Save the original reader and restore after the test
 	originalReader := reader
 	defer func() { reader = originalReader }()
 
@@ -43,9 +43,9 @@ func TestAES256Seed_Success(t *testing.T) {
 	assert.Equal(t, AES256KeySize, len(decoded))
 }
 
-// TestAES256Seed_Error tests AES256Seed when random generation fails
+// TestAES256Seed_Error tests AES256Seed when the random generation fails
 func TestAES256Seed_Error(t *testing.T) {
-	// Save original reader and restore after test
+	// Save the original reader and restore after the test
 	originalReader := reader
 	defer func() { reader = originalReader }()
 
@@ -63,7 +63,7 @@ func TestAES256Seed_Error(t *testing.T) {
 
 // TestAES256Seed_Uniqueness tests that multiple calls generate different seeds
 func TestAES256Seed_Uniqueness(t *testing.T) {
-	// Save original reader and restore after test
+	// Save the original reader and restore after the test
 	originalReader := reader
 	defer func() { reader = originalReader }()
 
@@ -87,14 +87,14 @@ func TestAES256Seed_Uniqueness(t *testing.T) {
 
 // TestRandomString_Success tests successful random string generation
 func TestRandomString_Success(t *testing.T) {
-	// Save original reader and restore after test
+	// Save the original reader and restore after the test
 	originalReader := reader
 	defer func() { reader = originalReader }()
 
 	// Use deterministic reader
 	reader = func(b []byte) (int, error) {
 		for i := range b {
-			b[i] = byte(i % 62) // Keep within alphanumeric range
+			b[i] = byte(i % 62) // Keep within an alphanumeric range
 		}
 		return len(b), nil
 	}
@@ -127,7 +127,7 @@ func TestRandomString_Success(t *testing.T) {
 
 // TestRandomString_EmptyLength tests RandomString with zero length
 func TestRandomString_EmptyLength(t *testing.T) {
-	// Save original reader and restore after test
+	// Save the original reader and restore after the test
 	originalReader := reader
 	defer func() { reader = originalReader }()
 
@@ -141,7 +141,7 @@ func TestRandomString_EmptyLength(t *testing.T) {
 
 // TestRandomString_CharacterDistribution tests that all character classes are used
 func TestRandomString_CharacterDistribution(t *testing.T) {
-	// Save original reader and restore after test
+	// Save the original reader and restore after the test
 	originalReader := reader
 	defer func() { reader = originalReader }()
 
@@ -169,7 +169,7 @@ func TestRandomString_CharacterDistribution(t *testing.T) {
 
 // TestToken_Format tests that Token generates correct format
 func TestToken_Format(t *testing.T) {
-	// Save original reader and restore after test
+	// Save the original reader and restore after the test
 	originalReader := reader
 	defer func() { reader = originalReader }()
 
@@ -190,7 +190,7 @@ func TestToken_Format(t *testing.T) {
 	randomPart := token[6:]
 	assert.Equal(t, 26, len(randomPart))
 
-	// Verify all characters in random part are alphanumeric
+	// Verify all characters in the random part are alphanumeric
 	for _, c := range randomPart {
 		assert.True(t,
 			(c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9'),
@@ -200,7 +200,7 @@ func TestToken_Format(t *testing.T) {
 
 // TestToken_Uniqueness tests that multiple Token calls generate different tokens
 func TestToken_Uniqueness(t *testing.T) {
-	// Save original reader and restore after test
+	// Save the original reader and restore after the test
 	originalReader := reader
 	defer func() { reader = originalReader }()
 
@@ -221,9 +221,9 @@ func TestToken_Uniqueness(t *testing.T) {
 	assert.True(t, strings.HasPrefix(token2, "spike."))
 }
 
-// TestID_Format tests that ID generates correct length
+// TestID_Format tests that ID generates the correct length
 func TestID_Format(t *testing.T) {
-	// Save original reader and restore after test
+	// Save the original reader and restore after the test
 	originalReader := reader
 	defer func() { reader = originalReader }()
 
@@ -248,7 +248,7 @@ func TestID_Format(t *testing.T) {
 
 // TestID_Uniqueness tests that multiple ID calls generate different IDs
 func TestID_Uniqueness(t *testing.T) {
-	// Save original reader and restore after test
+	// Save the original reader and restore after the test
 	originalReader := reader
 	defer func() { reader = originalReader }()
 
@@ -290,7 +290,7 @@ func TestDeterministicReader_Read(t *testing.T) {
 func TestDeterministicReader_Consistency(t *testing.T) {
 	seed := []byte("test seed")
 
-	// Create two readers with same seed
+	// Create two readers with the same seed
 	reader1 := NewDeterministicReader(seed)
 	reader2 := NewDeterministicReader(seed)
 
@@ -352,7 +352,7 @@ func TestDeterministicReader_MultipleReads(t *testing.T) {
 	assert.NotEqual(t, buffer2, buffer3)
 }
 
-// TestDeterministicReader_LargeRead tests reading more data than initial buffer
+// TestDeterministicReader_LargeRead tests reading more data than the initial buffer
 func TestDeterministicReader_LargeRead(t *testing.T) {
 	seed := []byte("test seed")
 	reader := NewDeterministicReader(seed)
@@ -374,7 +374,7 @@ func TestDeterministicReader_LargeRead(t *testing.T) {
 	assert.NotEmpty(t, buffer)
 }
 
-// TestDeterministicReader_EmptyBuffer tests reading into empty buffer
+// TestDeterministicReader_EmptyBuffer tests reading into an empty buffer
 func TestDeterministicReader_EmptyBuffer(t *testing.T) {
 	seed := []byte("test seed")
 	reader := NewDeterministicReader(seed)
@@ -413,7 +413,7 @@ func TestDeterministicReader_ReproducibleStream(t *testing.T) {
 	stream1 := make([]byte, 200)
 	_, err1 := reader1.Read(stream1)
 
-	// Second stream with same seed
+	// Second stream with the same seed
 	reader2 := NewDeterministicReader(seed)
 	stream2 := make([]byte, 200)
 	_, err2 := reader2.Read(stream2)
@@ -452,7 +452,7 @@ func TestLettersConstant(t *testing.T) {
 	assert.Equal(t, 62, len(letters), "letters should have 62 characters (26+26+10)")
 }
 
-// TestNewDeterministicReader_NilSeed tests creating reader with nil seed
+// TestNewDeterministicReader_NilSeed tests creating a reader with nil seed
 func TestNewDeterministicReader_NilSeed(t *testing.T) {
 	reader := NewDeterministicReader(nil)
 	require.NotNil(t, reader)
@@ -465,7 +465,7 @@ func TestNewDeterministicReader_NilSeed(t *testing.T) {
 	assert.NotEmpty(t, buffer)
 }
 
-// TestNewDeterministicReader_EmptySeed tests creating reader with empty seed
+// TestNewDeterministicReader_EmptySeed tests creating a reader with empty seed
 func TestNewDeterministicReader_EmptySeed(t *testing.T) {
 	reader := NewDeterministicReader([]byte{})
 	require.NotNil(t, reader)

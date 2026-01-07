@@ -14,25 +14,6 @@ import (
 	"github.com/spiffe/spike-sdk-go/validation"
 )
 
-func respondUnauthorizedAndWrapError(
-	err *sdkErrors.SDKError,
-	failErr *sdkErrors.SDKError,
-	w http.ResponseWriter,
-	responseBody []byte,
-) *sdkErrors.SDKError {
-	if notRespondedYet := err == nil; notRespondedYet {
-		respondErr := Respond(http.StatusUnauthorized, responseBody, w)
-		if respondErr != nil {
-			notAuthorizedErr := sdkErrors.ErrAccessUnauthorized.Wrap(
-				failErr.Wrap(respondErr),
-			)
-			return notAuthorizedErr
-		}
-	}
-	notAuthorizedErr := sdkErrors.ErrAccessUnauthorized.Wrap(failErr)
-	return notAuthorizedErr
-}
-
 // ExtractPeerSPIFFEIDFromRequestAndRespondOnFail extracts and validates
 // the peer SPIFFE ID from an HTTP request. If the SPIFFE ID cannot be extracted
 // or is nil, it writes an unauthorized response using the provided error
@@ -76,7 +57,7 @@ func ExtractPeerSPIFFEIDFromRequestAndRespondOnFail[T any](
 			errorResponse, w,
 		)
 
-		e := respondUnauthorizedAndWrapError(err, failErr, w, responseBody)
+		e := RespondUnauthorizedAndWrapError(err, failErr, w, responseBody)
 
 		return nil, e
 	}
@@ -89,7 +70,7 @@ func ExtractPeerSPIFFEIDFromRequestAndRespondOnFail[T any](
 			errorResponse, w,
 		)
 
-		e := respondUnauthorizedAndWrapError(err, failErr, w, responseBody)
+		e := RespondUnauthorizedAndWrapError(err, failErr, w, responseBody)
 
 		return nil, e
 	}

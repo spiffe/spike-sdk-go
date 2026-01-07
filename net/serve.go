@@ -112,7 +112,7 @@ func CreateMTLSServer(source *workloadapi.X509Source,
 // Returns:
 //   - *sdkErrors.SDKError: Returns nil if the server starts successfully,
 //     otherwise returns one of the following errors:
-//   - ErrSPIFFENilX509Source: if source is nil
+//   - ErrSPIFFENilX509Source: if `source` is nil
 //   - ErrFSStreamOpenFailed: if the server fails to start or encounters an
 //     error while running
 //

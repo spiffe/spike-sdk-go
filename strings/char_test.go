@@ -167,7 +167,7 @@ func TestExpandCharacterClass_SingleCharacters(t *testing.T) {
 	}
 }
 
-// TestExpandCharacterClass_EmptyCharClass tests empty character class
+// TestExpandCharacterClass_EmptyCharClass tests an empty character class
 func TestExpandCharacterClass_EmptyCharClass(t *testing.T) {
 	result, err := expandCharacterClass("")
 	assert.Empty(t, result)
@@ -215,8 +215,8 @@ func TestExpandCharacterClass_EdgeCases(t *testing.T) {
 		charClass string
 		wantErr   bool
 	}{
-		{"DashAtEnd", "ABC-", false},     // Dash at end is treated as literal
-		{"DashAtStart", "-ABC", false},   // Dash at start is treated as literal
+		{"DashAtEnd", "ABC-", false},     // Dash at the end is treated as literal
+		{"DashAtStart", "-ABC", false},   // Dash at the start is treated as literal
 		{"OnlyDash", "-", false},         // Single dash is treated as literal
 		{"MultipleDashes", "---", false}, // Multiple dashes treated as literals
 	}
@@ -292,7 +292,7 @@ func TestSecureRandomStringFromCharClass_DifferentLengths(t *testing.T) {
 	}
 }
 
-// TestSecureRandomStringFromCharClass_EmptyCharClass tests empty character class
+// TestSecureRandomStringFromCharClass_EmptyCharClass tests an empty character class
 func TestSecureRandomStringFromCharClass_EmptyCharClass(t *testing.T) {
 	result, err := secureRandomStringFromCharClass("", 10)
 	assert.Empty(t, result)
@@ -388,7 +388,7 @@ func TestExpandCharacterClass_DigitClassSize(t *testing.T) {
 	assert.Equal(t, 10, len(result))
 }
 
-// TestExpandCharacterClass_SymbolClassSize tests that \x has correct size
+// TestExpandCharacterClass_SymbolClassSize tests that \x has the correct size
 func TestExpandCharacterClass_SymbolClassSize(t *testing.T) {
 	result, err := expandCharacterClass("\\x")
 	assert.Nil(t, err)

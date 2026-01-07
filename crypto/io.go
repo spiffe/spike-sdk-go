@@ -25,7 +25,7 @@ type DeterministicReader struct {
 //
 // This implementation properly satisfies the io.Reader interface contract.
 // The error return is always nil since deterministic hashing operations cannot
-// fail, but is required for io.Reader interface compliance.
+// fail, but it is required for io.Reader interface compliance.
 //
 // Parameters:
 //   - p []byte: Buffer to read data into

@@ -13,7 +13,7 @@
 //
 // Memory Clearing:
 //
-// ClearRawBytes performs a single-pass zero overwrite, which is sufficient
+// ClearRawBytes performs a single-pass zero overwrite, which is adequate
 // for most use cases according to NIST SP 800-88 Rev. 1 guidelines:
 //
 //	key := &[32]byte{...}

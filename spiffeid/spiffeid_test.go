@@ -220,7 +220,7 @@ func TestPilotRestore_ValidTrustRoot(t *testing.T) {
 	}
 }
 
-// TestIsPilotOperator_ExactMatch tests IsPilotOperator with exact match
+// TestIsPilotOperator_ExactMatch tests IsPilotOperator with an exact match
 func TestIsPilotOperator_ExactMatch(t *testing.T) {
 	// Set up environment variable
 	os.Setenv("SPIKE_TRUST_ROOT_PILOT", "example.org")
@@ -261,7 +261,7 @@ func TestIsPilotOperator_ExactMatch(t *testing.T) {
 	}
 }
 
-// TestIsLiteWorkload_ExactMatch tests IsLiteWorkload with exact match
+// TestIsLiteWorkload_ExactMatch tests IsLiteWorkload with an exact match
 func TestIsLiteWorkload_ExactMatch(t *testing.T) {
 	// Set up environment variable
 	os.Setenv("SPIKE_TRUST_ROOT_LITE_WORKLOAD", "example.org")
@@ -297,7 +297,7 @@ func TestIsLiteWorkload_ExactMatch(t *testing.T) {
 	}
 }
 
-// TestIsPilotRecover_ExactMatch tests IsPilotRecover with exact match
+// TestIsPilotRecover_ExactMatch tests IsPilotRecover with an exact match
 func TestIsPilotRecover_ExactMatch(t *testing.T) {
 	// Set up environment variable
 	os.Setenv("SPIKE_TRUST_ROOT_PILOT", "example.org")
@@ -333,7 +333,7 @@ func TestIsPilotRecover_ExactMatch(t *testing.T) {
 	}
 }
 
-// TestIsPilotRestore_ExactMatch tests IsPilotRestore with exact match
+// TestIsPilotRestore_ExactMatch tests IsPilotRestore with an exact match
 func TestIsPilotRestore_ExactMatch(t *testing.T) {
 	// Set up environment variable
 	os.Setenv("SPIKE_TRUST_ROOT_PILOT", "example.org")
@@ -369,7 +369,7 @@ func TestIsPilotRestore_ExactMatch(t *testing.T) {
 	}
 }
 
-// TestIsBootstrap_ExactMatch tests IsBootstrap with exact match
+// TestIsBootstrap_ExactMatch tests IsBootstrap with an exact match
 func TestIsBootstrap_ExactMatch(t *testing.T) {
 	// Set up environment variable
 	os.Setenv("SPIKE_TRUST_ROOT_BOOTSTRAP", "example.org")
@@ -405,7 +405,7 @@ func TestIsBootstrap_ExactMatch(t *testing.T) {
 	}
 }
 
-// TestIsKeeper_ExactMatch tests IsKeeper with exact match
+// TestIsKeeper_ExactMatch tests IsKeeper with an exact match
 func TestIsKeeper_ExactMatch(t *testing.T) {
 	// Set up environment variable
 	os.Setenv("SPIKE_TRUST_ROOT_KEEPER", "example.org")
@@ -441,7 +441,7 @@ func TestIsKeeper_ExactMatch(t *testing.T) {
 	}
 }
 
-// TestIsNexus_ExactMatch tests IsNexus with exact match
+// TestIsNexus_ExactMatch tests IsNexus with an exact match
 func TestIsNexus_ExactMatch(t *testing.T) {
 	// Set up environment variable
 	os.Setenv("SPIKE_TRUST_ROOT_NEXUS", "example.org")
@@ -558,7 +558,7 @@ func TestPeerCanTalkToKeeper(t *testing.T) {
 
 // TestMultipleTrustDomains tests validation with multiple trust domains
 func TestMultipleTrustDomains(t *testing.T) {
-	// Set up environment variable with multiple trust domains
+	// Set up an environment variable with multiple trust domains
 	os.Setenv("SPIKE_TRUST_ROOT_NEXUS", "example.org, other.org")
 	defer os.Unsetenv("SPIKE_TRUST_ROOT_NEXUS")
 
