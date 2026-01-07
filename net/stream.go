@@ -18,10 +18,10 @@ import (
 // This function is designed for streaming large amounts of data without loading
 // the entire payload into memory.
 //
-// Resource Management: On success, returns an open io.ReadCloser that the caller
-// MUST close (typically with defer). On error, any response body is automatically
-// closed by this function and nil is returned, following the canonical Go pattern
-// of returning (zero-value, error) on failures.
+// Resource Management: On success, returns an open io.ReadCloser that the
+// caller MUST close (typically with `defer`). On error, any response body is
+// automatically closed by this function and nil is returned, following the
+// canonical Go pattern of returning (zero-value, error) on failures.
 //
 // Parameters:
 //   - client *http.Client: The HTTP client to use for the request
@@ -31,8 +31,8 @@ import (
 //     (e.g., ContentTypeJSON, ContentTypeTextPlain, ContentTypeOctetStream)
 //
 // Returns:
-//   - io.ReadCloser: The response body stream on success (must be closed by caller),
-//     nil on error (already closed by this function)
+//   - io.ReadCloser: The response body stream on success (must be closed by
+//     the caller), nil on error (already closed by this function)
 //   - *sdkErrors.SDKError: nil on success, or one of the following errors:
 //   - ErrAPINotFound (404): Resource not found
 //   - ErrAccessUnauthorized (401): Authentication required

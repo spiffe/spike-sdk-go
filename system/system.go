@@ -30,7 +30,7 @@ import (
 //
 // Parameters:
 //   - onSignal: Optional callback invoked when a signal is received, with the
-//     signal as parameter. If not provided, the function returns silently.
+//     signal as the parameter. If not provided, the function returns silently.
 //
 // Example usage:
 //

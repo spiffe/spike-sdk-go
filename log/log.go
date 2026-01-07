@@ -177,7 +177,7 @@ func FatalErr(fName string, err sdkErrors.SDKError) {
 	)
 }
 
-// Cannot get from env.go because of circular dependency.
+// Cannot get from env because of circular dependency.
 const systemLogLevelEnvVar = "SPIKE_SYSTEM_LOG_LEVEL"
 
 // Level returns the logging level for the SPIKE components.

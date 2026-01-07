@@ -30,7 +30,7 @@ import (
 //
 // For production deployments, especially in Kubernetes environments, it's
 // recommended to set SPIFFE_ENDPOINT_SOCKET to a more restricted socket path,
-// such as: "unix:///run/spire/agent/sockets/spire.sock"
+// such as "unix:///run/spire/agent/sockets/spire.sock"
 //
 // Default socket paths by environment:
 //   - Development (Linux): unix:///tmp/spire-agent/public/api.sock
@@ -127,7 +127,7 @@ func IDFromRequest(r *http.Request) (*spiffeid.ID, *sdkErrors.SDKError) {
 //   - source: The X509Source to close, may be nil
 //
 // Returns:
-//   - *sdkErrors.SDKError: nil if successful or source is nil,
+//   - *sdkErrors.SDKError: nil if successful or `source` is nil,
 //     ErrSPIFFEFailedToCloseX509Source if closure fails
 func CloseSource(source *workloadapi.X509Source) *sdkErrors.SDKError {
 	if source == nil {

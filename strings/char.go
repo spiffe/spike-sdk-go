@@ -49,7 +49,7 @@ import (
 //   - *sdkErrors.SDKError: nil on success, or one of the following errors:
 //   - ErrStringEmptyCharacterClass: if character class is empty
 //   - ErrStringInvalidRange: if character range is invalid
-//   - ErrStringEmptyCharacterSet: if character set is empty
+//   - ErrStringEmptyCharacterSet: if the character set is empty
 //
 // Note: CSPRNG failures (crypto/rand.Read) cause immediate program termination
 // via log.FatalErr() for security reasons (cannot generate secure random data).
@@ -105,7 +105,7 @@ func secureRandomStringFromCharClass(
 //   - *sdkErrors.SDKError: nil on success, or one of the following errors:
 //   - ErrStringEmptyCharacterClass: if character class is empty
 //   - ErrStringInvalidRange: if character range is invalid (e.g., "Z-A")
-//   - ErrStringEmptyCharacterSet: if expansion results in empty set
+//   - ErrStringEmptyCharacterSet: if expansion results in an empty set
 func expandCharacterClass(charClass string) (string, *sdkErrors.SDKError) {
 	// Check for empty character class first
 	if len(charClass) == 0 {

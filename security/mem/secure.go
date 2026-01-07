@@ -17,7 +17,7 @@ import (
 // and Shamir shards are properly cleaned from memory before garbage collection.
 //
 // According to NIST SP 800-88 Rev. 1 (Guidelines for Media Sanitization),
-// a single overwrite pass with zeros is sufficient for modern storage
+// a single overwrite pass with zeros is adequate for modern storage
 // devices, including RAM.
 //
 // IMPORTANT LIMITATIONS:

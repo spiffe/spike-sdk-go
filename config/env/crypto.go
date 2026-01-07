@@ -13,7 +13,7 @@ import (
 // bytes.
 // It reads the value from the SPIKE_NEXUS_CRYPTO_MAX_CIPHERTEXT_SIZE
 // environment variable. If the variable is not set or contains an invalid
-// value, it defaults to 65536 bytes (64 KB).
+// value, it defaults to 65,536 bytes (64 KB).
 func CryptoMaxCiphertextSizeVal() int {
 	p := os.Getenv(NexusCryptoMaxCiphertextSize)
 	if p != "" {

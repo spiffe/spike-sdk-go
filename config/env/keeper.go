@@ -20,7 +20,7 @@ import (
 // 'https://localhost:8443,https://localhost:8543,https://localhost:8643'
 //
 // The SPIKE Keeper address mappings will be automatically assigned starting
-// with the key "1" and incrementing by 1 for each subsequent SPIKE Keeper.
+// with the key "1" and incrementing by 1 for each following SPIKE Keeper.
 //
 // Returns:
 //   - map[string]string: Mapping of keeper IDs to their URLs

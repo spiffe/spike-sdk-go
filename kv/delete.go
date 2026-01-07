@@ -28,8 +28,8 @@ import (
 //
 // Parameters:
 //   - path: Path to the secret to delete
-//   - versions: Array of version numbers to delete (empty array deletes current
-//     version only, 0 in the array represents current version)
+//   - versions: Array of version numbers to delete (an empty array deletes
+//     the current version only, 0 in the array represents the current version)
 //
 // Returns:
 //   - []int: Array of version numbers that were actually modified (had their

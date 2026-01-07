@@ -119,7 +119,7 @@ func TestKV_Delete_ModifiedReturnValue(t *testing.T) {
 				kv := &KV{
 					data: make(map[string]*Value),
 				}
-				// Manually create state where current version doesn't exist
+				// Manually create the state where the current version doesn't exist
 				kv.data["test/path"] = &Value{
 					Metadata: Metadata{
 						CurrentVersion: 1,

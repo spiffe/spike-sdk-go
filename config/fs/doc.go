@@ -25,7 +25,7 @@
 // # Thread Safety
 //
 // Directory paths are resolved once on first access using [sync.Once] and
-// cached for subsequent calls, making all accessor functions safe for
+// cached for the following calls, making all accessor functions safe for
 // concurrent use.
 //
 // # Security

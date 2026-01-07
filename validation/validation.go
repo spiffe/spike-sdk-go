@@ -34,7 +34,7 @@ const validPath = `^[a-zA-Z0-9._\-/()?+*|[\]{}\\]+$`
 //
 // Returns:
 //   - *sdkErrors.SDKError: nil if valid, or one of the following errors:
-//   - ErrDataInvalidInput: if name is empty, exceeds 250 characters, or
+//   - ErrDataInvalidInput: if `name` is empty, exceeds 250 characters, or
 //     contains invalid characters
 func ValidateName(name string) *sdkErrors.SDKError {
 	// Validate length

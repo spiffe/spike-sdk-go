@@ -26,7 +26,8 @@ import (
 //     limits exceeded)
 //
 // Note: This function is only available on non-Windows platforms. On Linux,
-// the process typically needs CAP_IPC_LOCK capability or sufficient RLIMIT_MEMLOCK.
+// the process typically needs CAP_IPC_LOCK capability or sufficient
+// RLIMIT_MEMLOCK.
 //
 // Example:
 //

@@ -37,7 +37,8 @@ func TestClear(t *testing.T) {
 		}
 	}
 
-	// Note: String contents won't be zeroed directly as strings are immutable in Go
+	// Note: String contents won't be zeroed directly as strings are immutable
+	// in Go
 	// The string header will point to the same backing array
 	// In a real application, sensitive strings should be stored as byte slices
 
