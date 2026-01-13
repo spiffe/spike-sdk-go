@@ -21,6 +21,9 @@ const spikeCipherVersion = 0x01
 // Returns:
 //   - nil if the version is valid
 //   - *sdkErrors.SDKError if the version is unsupported
+//
+// On error, writes an HTTP 400 Bad Request response with errorResponse as
+// the JSON body.
 func RespondCryptoErrOnVersionMismatch[T any](
 	version byte, w http.ResponseWriter, errorResponse T,
 ) *sdkErrors.SDKError {
@@ -45,6 +48,9 @@ func RespondCryptoErrOnVersionMismatch[T any](
 // Returns:
 //   - nil if the nonce size is valid
 //   - *sdkErrors.SDKError if the nonce size is invalid
+//
+// On error, writes an HTTP 400 Bad Request response with errorResponse as
+// the JSON body.
 func RespondCryptoErrOnInvalidNonceSize[T any](
 	nonce []byte, w http.ResponseWriter, errorResponse T,
 ) *sdkErrors.SDKError {
@@ -69,6 +75,9 @@ func RespondCryptoErrOnInvalidNonceSize[T any](
 // Returns:
 //   - nil if the ciphertext size is valid
 //   - *sdkErrors.SDKError if the ciphertext is too large
+//
+// On error, writes an HTTP 400 Bad Request response with errorResponse as
+// the JSON body.
 func RespondCryptoErrOnLargeCipherText[T any](
 	ciphertext []byte, w http.ResponseWriter, errorResponse T,
 ) *sdkErrors.SDKError {
@@ -93,6 +102,9 @@ func RespondCryptoErrOnLargeCipherText[T any](
 // Returns:
 //   - nil if the plaintext size is valid
 //   - *sdkErrors.SDKError if the plaintext is too large
+//
+// On error, writes an HTTP 400 Bad Request response with errorResponse as
+// the JSON body.
 func RespondCryptoErrOnLargePlaintext[T any](
 	plaintext []byte, w http.ResponseWriter, errorResponse T,
 ) *sdkErrors.SDKError {
