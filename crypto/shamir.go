@@ -296,6 +296,13 @@ func ComputeRootKeyFromShards(ss []ShamirShard) *[AES256KeySize]byte {
 	// The first parameter to Recover is threshold-1
 	// We need the threshold from the environment
 	threshold := env.ShamirThresholdVal()
+	if threshold < 1 {
+		failErr := *sdkErrors.ErrShamirReconstructionFailed.Clone()
+		failErr.Msg = "shamir threshold must be at least 1"
+		log.FatalErr(fName, failErr)
+	}
+
+	// #nosec G115 -- threshold is validated above, so threshold >= 1
 	reconstructed, recoverErr := shamir.Recover(uint(threshold-1), shares)
 	if recoverErr != nil {
 		// Security: Reset shares.
