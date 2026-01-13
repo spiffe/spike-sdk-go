@@ -211,3 +211,146 @@ func RootShares(rootKeySeed *[32]byte) []shamir.Share {
 
 	return computedShares
 }
+
+// ShamirShard is a simplified representation of a Shamir secret share that uses
+// plain Go types instead of the cryptographic group types from
+// cloudflare/circl.
+//
+// It is functionally equivalent to shamir.Share (secretsharing.Share) but
+// easier to work with for serialization, storage, and transport since it
+// avoids the group.Scalar interface and uses a uint64 ID and a fixed-size
+// byte array for the share value.
+//
+// Fields:
+//   - ID: The share identifier (1-indexed, monotonically increasing)
+//   - Value: The 32-byte share value corresponding to a P256 scalar
+//
+// This type is used when shares need to be passed between system components
+// (e.g., from SPIKE Keeper to SPIKE Nexus) without coupling them to the
+// secretsharing library's internal types.
+type ShamirShard struct {
+	ID    uint64
+	Value *[AES256KeySize]byte
+}
+
+// ComputeRootKeyFromShards reconstructs the original root key from a slice of
+// ShamirShard. It uses Shamir's Secret Sharing scheme to recover the original
+// secret.
+//
+// Parameters:
+//   - ss []ShamirShard: A slice of ShamirShard structures, each containing
+//     an ID and a pointer to a 32-byte value representing a secret share
+//
+// Returns:
+//   - *[32]byte: A pointer to the reconstructed 32-byte root key
+//
+// The function will:
+//   - Convert each ShamirShard into a properly formatted secretsharing.Share
+//   - Use the IDs from the provided ShamirShards
+//   - Retrieve the threshold from the environment
+//   - Reconstruct the original secret using the secretsharing.Recover function
+//   - Validate the recovered key has the correct length (32 bytes)
+//   - Zero out all shares after use for security
+//
+// It will log a fatal error and exit if:
+//   - Any share fails to unmarshal properly
+//   - The recovery process fails
+//   - The reconstructed key is nil
+//   - The binary representation has an incorrect length
+func ComputeRootKeyFromShards(ss []ShamirShard) *[AES256KeySize]byte {
+	const fName = "ComputeRootKeyFromShards"
+
+	g := group.P256
+	shares := make([]shamir.Share, 0, len(ss))
+	// Security: Ensure that the shares are zeroed out after the function returns:
+	defer func() {
+		for _, s := range shares {
+			s.ID.SetUint64(0)
+			s.Value.SetUint64(0)
+		}
+	}()
+
+	// Process all provided shares
+	for _, shamirShard := range ss {
+		// Create a new share with sequential ID (starting from 1):
+		share := shamir.Share{
+			ID:    g.NewScalar(),
+			Value: g.NewScalar(),
+		}
+
+		// Set ID
+		share.ID.SetUint64(shamirShard.ID)
+
+		// Unmarshal the binary data
+		unmarshalErr := share.Value.UnmarshalBinary(shamirShard.Value[:])
+		if unmarshalErr != nil {
+			failErr := sdkErrors.ErrDataUnmarshalFailure.Wrap(unmarshalErr)
+			failErr.Msg = "failed to unmarshal shard"
+			log.FatalErr(fName, *failErr)
+		}
+
+		shares = append(shares, share)
+	}
+
+	// Recover the secret
+	// The first parameter to Recover is threshold-1
+	// We need the threshold from the environment
+	threshold := env.ShamirThresholdVal()
+	reconstructed, recoverErr := shamir.Recover(uint(threshold-1), shares)
+	if recoverErr != nil {
+		// Security: Reset shares.
+		// Defer won't get called because log.FatalErr terminates the program.
+		for _, s := range shares {
+			s.ID.SetUint64(0)
+			s.Value.SetUint64(0)
+		}
+
+		failErr := sdkErrors.ErrShamirReconstructionFailed.Wrap(recoverErr)
+		failErr.Msg = "failed to recover secret"
+		log.FatalErr(fName, *failErr)
+	}
+
+	if reconstructed == nil {
+		// Security: Reset shares.
+		// Defer won't get called because log.FatalErr terminates the program.
+		for _, s := range shares {
+			s.ID.SetUint64(0)
+			s.Value.SetUint64(0)
+		}
+
+		failErr := *sdkErrors.ErrShamirReconstructionFailed.Clone()
+		failErr.Msg = "failed to reconstruct the root key"
+		log.FatalErr(fName, failErr)
+	}
+
+	if reconstructed != nil {
+		binaryRec, marshalErr := reconstructed.MarshalBinary()
+		if marshalErr != nil {
+			// Security: Zero out:
+			reconstructed.SetUint64(0)
+
+			failErr := sdkErrors.ErrDataMarshalFailure.Wrap(marshalErr)
+			failErr.Msg = "failed to marshal reconstructed key"
+			log.FatalErr(fName, *failErr)
+
+			return &[AES256KeySize]byte{}
+		}
+
+		if len(binaryRec) != AES256KeySize {
+			failErr := *sdkErrors.ErrDataInvalidInput.Clone()
+			failErr.Msg = "reconstructed root key has incorrect length"
+			log.FatalErr(fName, failErr)
+
+			return &[AES256KeySize]byte{}
+		}
+
+		var result [AES256KeySize]byte
+		copy(result[:], binaryRec)
+		// Security: Zero out temporary variables before the function exits.
+		mem.ClearBytes(binaryRec)
+
+		return &result
+	}
+
+	return &[AES256KeySize]byte{}
+}
