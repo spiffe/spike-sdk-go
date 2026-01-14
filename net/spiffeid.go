@@ -14,7 +14,7 @@ import (
 	"github.com/spiffe/spike-sdk-go/validation"
 )
 
-// ExtractPeerSPIFFEIDFromRequestAndRespondOnFail extracts and validates
+// ExtractPeerSPIFFEIDAndRespondOnFail extracts and validates
 // the peer SPIFFE ID from an HTTP request. If the SPIFFE ID cannot be extracted
 // or is nil, it writes an unauthorized response using the provided error
 // response object and returns an error.
@@ -44,7 +44,7 @@ import (
 //	if err != nil {
 //	    return err
 //	}
-func ExtractPeerSPIFFEIDFromRequestAndRespondOnFail[T any](
+func ExtractPeerSPIFFEIDAndRespondOnFail[T any](
 	w http.ResponseWriter, r *http.Request,
 	errorResponse T,
 ) (*spiffeid.ID, *sdkErrors.SDKError) {
