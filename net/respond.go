@@ -416,10 +416,10 @@ func UnmarshalAndRespondOnFail[Req any, Res any](
 // to be returned in case of authentication failure.
 //
 // Parameters:
-//   - r *http.Request: The HTTP request containing peer SPIFFE ID
 //   - w http.ResponseWriter: Response writer for error responses
 //   - errorResponse T: The error response object to marshal and send if
 //     validation fails
+//   - r *http.Request: The HTTP request containing peer SPIFFE ID
 //
 // Returns:
 //   - *spiffeid.ID: The extracted SPIFFE ID if successful
@@ -436,8 +436,8 @@ func UnmarshalAndRespondOnFail[Req any, Res any](
 //	    return err
 //	}
 func ExtractPeerSPIFFEIDAndRespondOnFail[T any](
-	r *http.Request,
 	w http.ResponseWriter,
+	r *http.Request,
 	errorResponse T,
 ) (*spiffeid.ID, *sdkErrors.SDKError) {
 	peerSPIFFEID, err := spiffe.IDFromRequest(r)
@@ -578,7 +578,7 @@ func RespondUnauthorizedOnPredicateFail(
 	w http.ResponseWriter, r *http.Request,
 ) *sdkErrors.SDKError {
 	peerSPIFFEID, err := ExtractPeerSPIFFEIDAndRespondOnFail(
-		r, w, failureResponse,
+		w, r, failureResponse,
 	)
 	if err != nil {
 		return err
