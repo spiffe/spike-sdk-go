@@ -48,9 +48,7 @@ import (
 //	    return err
 //	}
 func readAndParseRequest[Req any, Res any](
-	w http.ResponseWriter,
-	r *http.Request,
-	errorResponse Res,
+	w http.ResponseWriter, r *http.Request, errorResponse Res,
 ) (*Req, *sdkErrors.SDKError) {
 	requestBody, readErr := ReadRequestBodyAndRespondOnFail(w, r)
 	if readErr != nil {

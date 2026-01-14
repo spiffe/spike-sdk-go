@@ -25,8 +25,8 @@ import (
 //     format expected by clients.
 //
 // Parameters:
-//   - r *http.Request: The HTTP request containing peer SPIFFE ID
 //   - w http.ResponseWriter: Response writer for error responses
+//   - r *http.Request: The HTTP request containing peer SPIFFE ID
 //   - errorResponse T: The error response object to marshal and send if
 //     validation fails
 //
@@ -45,8 +45,7 @@ import (
 //	    return err
 //	}
 func ExtractPeerSPIFFEIDFromRequestAndRespondOnFail[T any](
-	r *http.Request,
-	w http.ResponseWriter,
+	w http.ResponseWriter, r *http.Request,
 	errorResponse T,
 ) (*spiffeid.ID, *sdkErrors.SDKError) {
 	peerSPIFFEID, err := spiffe.IDFromRequest(r)

@@ -110,7 +110,7 @@ func TestBody_JSONResponse(t *testing.T) {
 	assert.Equal(t, float64(42), result["number"])
 }
 
-// Mock response type for testing PostAndUnmarshal
+// Mock the response type for testing PostAndUnmarshal
 type mockResponse struct {
 	Data string              `json:"data"`
 	Err  sdkErrors.ErrorCode `json:"err,omitempty"`
@@ -155,7 +155,7 @@ func TestAuthorizerWithPredicate_ComplexLogic(t *testing.T) {
 	assert.NotNil(t, authorizer)
 }
 
-// TestCreateMTLSServer_NilSource tests server creation with nil source
+// TestCreateMTLSServer_NilSource tests server creation with a nil source
 func TestCreateMTLSServer_NilSource(t *testing.T) {
 	// Enable panic on fatal to test fatal error behavior
 	t.Setenv("SPIKE_STACK_TRACES_ON_LOG_FATAL", "true")
@@ -167,12 +167,13 @@ func TestCreateMTLSServer_NilSource(t *testing.T) {
 		assert.Contains(t, panicMsg, "CreateMTLSServerWithPredicate")
 	}()
 
-	// This should panic because source is nil
+	// This should panic because the source is nil
 	CreateMTLSServer(nil, ":8443")
 	t.Fatal("Should have panicked due to nil source")
 }
 
-// TestCreateMTLSServerWithPredicate_NilSource tests server creation with predicate and nil source
+// TestCreateMTLSServerWithPredicate_NilSource tests server creation with a
+// predicate and nil source
 func TestCreateMTLSServerWithPredicate_NilSource(t *testing.T) {
 	// Enable panic on fatal to test fatal error behavior
 	t.Setenv("SPIKE_STACK_TRACES_ON_LOG_FATAL", "true")
@@ -185,12 +186,12 @@ func TestCreateMTLSServerWithPredicate_NilSource(t *testing.T) {
 	}()
 
 	predicate := func(_ string) bool { return true }
-	// This should panic because source is nil
+	// This should panic because the source is nil
 	CreateMTLSServerWithPredicate(nil, ":8443", predicate)
 	t.Fatal("Should have panicked due to nil source")
 }
 
-// TestCreateMTLSClient_NilSource tests client creation with nil source
+// TestCreateMTLSClient_NilSource tests client creation with a nil source
 func TestCreateMTLSClient_NilSource(t *testing.T) {
 	// This test documents behavior - CreateMTLSClient does not validate nil source
 	// The validation happens at connection time, not creation time
@@ -199,7 +200,8 @@ func TestCreateMTLSClient_NilSource(t *testing.T) {
 	assert.NotNil(t, client.Transport)
 }
 
-// TestCreateMTLSClientWithPredicate_NilSource tests client creation with predicate and nil source
+// TestCreateMTLSClientWithPredicate_NilSource tests client creation with
+// a predicate and nil source
 func TestCreateMTLSClientWithPredicate_NilSource(t *testing.T) {
 	predicate := func(_ string) bool { return true }
 	client := CreateMTLSClientWithPredicate(nil, predicate)
@@ -221,7 +223,7 @@ func TestCreateMTLSClientForKeeper_NilSource(t *testing.T) {
 	assert.NotNil(t, client.Transport)
 }
 
-// TestServeWithPredicate_NilSource tests serve function with nil source
+// TestServeWithPredicate_NilSource tests serve function with a nil source
 func TestServeWithPredicate_NilSource(t *testing.T) {
 	initializeRoutes := func() {}
 	predicate := func(_ string) bool { return true }
@@ -232,7 +234,7 @@ func TestServeWithPredicate_NilSource(t *testing.T) {
 	assert.True(t, err.Is(sdkErrors.ErrSPIFFENilX509Source))
 }
 
-// TestServe_NilSource tests serve function with nil source
+// TestServe_NilSource tests serve function with a nil source
 func TestServe_NilSource(t *testing.T) {
 	initializeRoutes := func() {}
 
@@ -318,7 +320,7 @@ func TestStreamPost_Success(t *testing.T) {
 	testData := []byte("streaming test data")
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Verify content type
+		// Verify the content type
 		assert.Equal(t, "application/octet-stream", r.Header.Get("Content-Type"))
 
 		// Read and echo the request body
@@ -333,18 +335,19 @@ func TestStreamPost_Success(t *testing.T) {
 
 	responseBody, err := StreamPost(client, server.URL, reader)
 
-	// Note: The implementation closes the response body in a defer,
+	// Note: The implementation closes the response body in a `defer`,
 	// so the returned io.ReadCloser may not be readable
 	require.Nil(t, err)
 	require.NotNil(t, responseBody)
 }
 
-// TestStreamPostWithContentType_CustomContentType tests streaming POST with custom content type
+// TestStreamPostWithContentType_CustomContentType tests streaming POST with
+// a custom content type
 func TestStreamPostWithContentType_CustomContentType(t *testing.T) {
 	testData := []byte(`{"streaming":"json"}`)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Verify content type
+		// Verify the content type
 		assert.Equal(t, "application/json", r.Header.Get("Content-Type"))
 
 		w.WriteHeader(http.StatusOK)
