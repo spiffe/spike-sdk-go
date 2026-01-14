@@ -436,9 +436,7 @@ func UnmarshalAndRespondOnFail[Req any, Res any](
 //	    return err
 //	}
 func ExtractPeerSPIFFEIDAndRespondOnFail[T any](
-	w http.ResponseWriter,
-	r *http.Request,
-	errorResponse T,
+	w http.ResponseWriter, r *http.Request, errorResponse T,
 ) (*spiffeid.ID, *sdkErrors.SDKError) {
 	peerSPIFFEID, err := spiffe.IDFromRequest(r)
 	if err != nil {

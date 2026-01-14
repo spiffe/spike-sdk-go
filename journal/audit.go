@@ -106,8 +106,9 @@ func Audit(entry AuditEntry) {
 //   - r: The HTTP request being audited
 //   - audit: A pointer to the AuditEntry to be updated
 //   - action: The AuditAction to be recorded in the audit entry
-func AuditRequest(fName string,
-	r *http.Request, audit *AuditEntry, action AuditAction) {
+func AuditRequest(
+	fName string, r *http.Request, audit *AuditEntry, action AuditAction,
+) {
 	audit.Component = fName
 	audit.Path = r.URL.Path
 	audit.Resource = r.URL.RawQuery
