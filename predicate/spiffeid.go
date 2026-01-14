@@ -30,6 +30,31 @@ type PolicyAccessChecker func(
 	perms []data.PolicyPermission,
 ) bool
 
+// AllowSPIFFEIDForPathAndPermissions checks if a SPIFFE ID is authorized to
+// access a specific path with the given permissions.
+//
+// This is a general-purpose authorization function that delegates to the
+// provided PolicyAccessChecker. It serves as the foundation for more specific
+// authorization functions like AllowSPIFFEIDForPolicyDelete and
+// AllowSPIFFEIDForPolicyRead.
+//
+// Parameters:
+//   - peerSPIFFEID: string - The SPIFFE ID of the peer requesting access
+//   - path: string - The resource path being accessed
+//   - permissions: []data.PolicyPermission - The permissions required for access
+//   - checkAccess: PolicyAccessChecker - The function to perform the access
+//     check
+//
+// Returns:
+//   - bool: true if the peer has the required permissions, false otherwise
+func AllowSPIFFEIDForPathAndPermissions(
+	peerSPIFFEID string,
+	path string, permissions []data.PolicyPermission,
+	checkAccess PolicyAccessChecker,
+) bool {
+	return checkAccess(peerSPIFFEID, path, permissions)
+}
+
 // AllowSPIFFEIDForPolicyDelete checks if a SPIFFE ID is authorized to delete
 // policies.
 //
@@ -46,10 +71,9 @@ type PolicyAccessChecker func(
 func AllowSPIFFEIDForPolicyDelete(
 	peerSPIFFEID string, checkAccess PolicyAccessChecker,
 ) bool {
-	return checkAccess(
-		peerSPIFFEID,
-		auth.PathSystemPolicyAccess,
-		[]data.PolicyPermission{data.PermissionWrite},
+	return AllowSPIFFEIDForPathAndPermissions(
+		peerSPIFFEID, auth.PathSystemPolicyAccess,
+		[]data.PolicyPermission{data.PermissionWrite}, checkAccess,
 	)
 }
 
@@ -69,10 +93,9 @@ func AllowSPIFFEIDForPolicyDelete(
 func AllowSPIFFEIDForPolicyRead(
 	peerSPIFFEID string, checkAccess PolicyAccessChecker,
 ) bool {
-	return checkAccess(
-		peerSPIFFEID,
-		auth.PathSystemPolicyAccess,
-		[]data.PolicyPermission{data.PermissionRead},
+	return AllowSPIFFEIDForPathAndPermissions(
+		peerSPIFFEID, auth.PathSystemPolicyAccess,
+		[]data.PolicyPermission{data.PermissionRead}, checkAccess,
 	)
 }
 
@@ -98,9 +121,8 @@ func AllowSPIFFEIDForCipherDecrypt(
 		return true
 	}
 	// If not, do a policy check to determine if the request is allowed:
-	return checkAccess(
-		peerSPIFFEID,
-		auth.PathSystemCipherDecrypt,
-		[]data.PolicyPermission{data.PermissionExecute},
+	return AllowSPIFFEIDForPathAndPermissions(
+		peerSPIFFEID, auth.PathSystemCipherDecrypt,
+		[]data.PolicyPermission{data.PermissionExecute}, checkAccess,
 	)
 }
