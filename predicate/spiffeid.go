@@ -121,6 +121,15 @@ func AllowSPIFFEIDForPolicyList(
 	)
 }
 
+func AllowSPIFFEIDForPolicyWrite(
+	peerSPIFFEID string, checkAccess PolicyAccessChecker,
+) bool {
+	return AllowSPIFFEIDForPathAndPermissions(
+		peerSPIFFEID, auth.PathSystemPolicyAccess,
+		[]data.PolicyPermission{data.PermissionWrite}, checkAccess,
+	)
+}
+
 // AllowSPIFFEIDForCipherDecrypt checks if a SPIFFE ID is authorized to perform
 // cipher decryption operations.
 //

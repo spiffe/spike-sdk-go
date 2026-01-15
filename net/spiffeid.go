@@ -76,3 +76,36 @@ func ExtractPeerSPIFFEIDAndRespondOnFail[T any](
 
 	return peerSPIFFEID, nil
 }
+
+// RespondErrOnBadSPIFFEIDPattern validates the given SPIFFE ID pattern and
+// writes an error response if the validation fails.
+//
+// This function checks if the SPIFFE ID pattern conforms to the expected format
+// using validation.ValidateSPIFFEIDPattern. The pattern may include regex
+// special characters for matching multiple SPIFFE IDs. If validation fails, it
+// sends the provided error response to the client with a 400 Bad Request status
+// code.
+//
+// Type Parameters:
+//   - T: The response type to send to the client in case of validation failure
+//
+// Parameters:
+//   - SPIFFEIDPattern: string - The SPIFFE ID pattern to validate
+//   - badInputResp: T - The error response object to send if validation fails
+//   - w: http.ResponseWriter - The response writer for error handling
+//
+// Returns:
+//   - *sdkErrors.SDKError: ErrDataInvalidInput if the pattern is invalid,
+//     nil if validation succeeds
+func RespondErrOnBadSPIFFEIDPattern[T any](
+	SPIFFEIDPattern string, badInputResp T, w http.ResponseWriter,
+) *sdkErrors.SDKError {
+	if err := validation.ValidateSPIFFEIDPattern(SPIFFEIDPattern); err != nil {
+		failEr := Fail(badInputResp, w, http.StatusBadRequest)
+		if failEr != nil {
+			return sdkErrors.ErrDataInvalidInput.Wrap(failEr)
+		}
+		return sdkErrors.ErrDataInvalidInput.Clone()
+	}
+	return nil
+}
