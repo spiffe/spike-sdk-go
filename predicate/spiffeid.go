@@ -99,6 +99,28 @@ func AllowSPIFFEIDForPolicyRead(
 	)
 }
 
+// AllowSPIFFEIDForPolicyList checks if a SPIFFE ID is authorized to list
+// policies.
+//
+// This function verifies that the peer has list permission on the system
+// policy access path (auth.PathSystemPolicyAccess).
+//
+// Parameters:
+//   - peerSPIFFEID: string - The SPIFFE ID of the peer requesting access
+//   - checkAccess: PolicyAccessChecker - The function to perform the access
+//     check
+//
+// Returns:
+//   - bool: true if the peer is authorized to list policies, false otherwise
+func AllowSPIFFEIDForPolicyList(
+	peerSPIFFEID string, checkAccess PolicyAccessChecker,
+) bool {
+	return AllowSPIFFEIDForPathAndPermissions(
+		peerSPIFFEID, auth.PathSystemPolicyAccess,
+		[]data.PolicyPermission{data.PermissionList}, checkAccess,
+	)
+}
+
 // AllowSPIFFEIDForCipherDecrypt checks if a SPIFFE ID is authorized to perform
 // cipher decryption operations.
 //
