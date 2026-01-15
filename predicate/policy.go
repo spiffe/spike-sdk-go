@@ -4,7 +4,10 @@
 
 package predicate
 
-import "github.com/spiffe/spike-sdk-go/api/entity/data"
+import (
+	"github.com/spiffe/spike-sdk-go/api/entity/data"
+	"github.com/spiffe/spike-sdk-go/config/auth"
+)
 
 // PolicyAccessChecker is a function type that determines whether a SPIFFE ID
 // has the required permissions for a given path.
@@ -42,3 +45,91 @@ type PolicyAccessChecker func(
 // Returns:
 //   - bool: true if access is granted, false otherwise
 type WithPolicyAccessChecker func(string, PolicyAccessChecker) bool
+
+// AllowSPIFFEIDForPolicyDelete checks if a SPIFFE ID is authorized to delete
+// policies.
+//
+// This function verifies that the peer has write permission on the system
+// policy access path (auth.PathSystemPolicyAccess).
+//
+// Parameters:
+//   - peerSPIFFEID: string - The SPIFFE ID of the peer requesting access
+//   - checkAccess: PolicyAccessChecker - The function to perform the access
+//     check
+//
+// Returns:
+//   - bool: true if the peer is authorized to delete policies, false otherwise
+func AllowSPIFFEIDForPolicyDelete(
+	peerSPIFFEID string, checkAccess PolicyAccessChecker,
+) bool {
+	return AllowSPIFFEIDForPathAndPermissions(
+		peerSPIFFEID, auth.PathSystemPolicyAccess,
+		[]data.PolicyPermission{data.PermissionWrite}, checkAccess,
+	)
+}
+
+// AllowSPIFFEIDForPolicyRead checks if a SPIFFE ID is authorized to read
+// policies.
+//
+// This function verifies that the peer has read permission on the system
+// policy access path (auth.PathSystemPolicyAccess).
+//
+// Parameters:
+//   - peerSPIFFEID: string - The SPIFFE ID of the peer requesting access
+//   - checkAccess: PolicyAccessChecker - The function to perform the access
+//     check
+//
+// Returns:
+//   - bool: true if the peer is authorized to read policies, false otherwise
+func AllowSPIFFEIDForPolicyRead(
+	peerSPIFFEID string, checkAccess PolicyAccessChecker,
+) bool {
+	return AllowSPIFFEIDForPathAndPermissions(
+		peerSPIFFEID, auth.PathSystemPolicyAccess,
+		[]data.PolicyPermission{data.PermissionRead}, checkAccess,
+	)
+}
+
+// AllowSPIFFEIDForPolicyList checks if a SPIFFE ID is authorized to list
+// policies.
+//
+// This function verifies that the peer has list permission on the system
+// policy access path (auth.PathSystemPolicyAccess).
+//
+// Parameters:
+//   - peerSPIFFEID: string - The SPIFFE ID of the peer requesting access
+//   - checkAccess: PolicyAccessChecker - The function to perform the access
+//     check
+//
+// Returns:
+//   - bool: true if the peer is authorized to list policies, false otherwise
+func AllowSPIFFEIDForPolicyList(
+	peerSPIFFEID string, checkAccess PolicyAccessChecker,
+) bool {
+	return AllowSPIFFEIDForPathAndPermissions(
+		peerSPIFFEID, auth.PathSystemPolicyAccess,
+		[]data.PolicyPermission{data.PermissionList}, checkAccess,
+	)
+}
+
+// AllowSPIFFEIDForPolicyWrite checks if a SPIFFE ID is authorized to write
+// policies.
+//
+// This function verifies that the peer has write permission on the system
+// policy access path (auth.PathSystemPolicyAccess).
+//
+// Parameters:
+//   - peerSPIFFEID: string - The SPIFFE ID of the peer requesting access
+//   - checkAccess: PolicyAccessChecker - The function to perform the access
+//     check
+//
+// Returns:
+//   - bool: true if the peer is authorized to write policies, false otherwise
+func AllowSPIFFEIDForPolicyWrite(
+	peerSPIFFEID string, checkAccess PolicyAccessChecker,
+) bool {
+	return AllowSPIFFEIDForPathAndPermissions(
+		peerSPIFFEID, auth.PathSystemPolicyAccess,
+		[]data.PolicyPermission{data.PermissionWrite}, checkAccess,
+	)
+}
