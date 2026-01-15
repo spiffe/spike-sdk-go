@@ -10,26 +10,6 @@ import (
 	"github.com/spiffe/spike-sdk-go/spiffeid"
 )
 
-// PolicyAccessChecker is a function type that determines whether a SPIFFE ID
-// has the required permissions for a given path.
-//
-// This type is used as a dependency injection point for policy-based access
-// control checks. Implementations should verify if the peer identified by
-// peerSPIFFEID has any of the specified permissions for the given path.
-//
-// Parameters:
-//   - peerSPIFFEID: string - The SPIFFE ID of the peer requesting access
-//   - path: string - The resource path being accessed
-//   - perms: []data.PolicyPermission - The permissions required for access
-//
-// Returns:
-//   - bool: true if access is allowed, false otherwise
-type PolicyAccessChecker func(
-	peerSPIFFEID string,
-	path string,
-	perms []data.PolicyPermission,
-) bool
-
 // AllowSPIFFEIDForPathAndPermissions checks if a SPIFFE ID is authorized to
 // access a specific path with the given permissions.
 //
