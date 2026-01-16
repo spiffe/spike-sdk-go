@@ -7,6 +7,7 @@ package predicate
 import (
 	"github.com/spiffe/spike-sdk-go/api/entity/data"
 	"github.com/spiffe/spike-sdk-go/config/auth"
+	"github.com/spiffe/spike-sdk-go/spiffeid"
 )
 
 // PolicyAccessChecker is a function type that determines whether a SPIFFE ID
@@ -62,6 +63,15 @@ type WithPolicyAccessChecker func(string, PolicyAccessChecker) bool
 func AllowSPIFFEIDForPolicyDelete(
 	peerSPIFFEID string, checkAccess PolicyAccessChecker,
 ) bool {
+	// SPIKE Pilot is a system workload; no policy check needed.
+	if spiffeid.IsPilotOperator(peerSPIFFEID) {
+		return true
+	}
+	// Lite workloads are not allowed to delete policies.
+	if spiffeid.IsLiteWorkload(peerSPIFFEID) {
+		return false
+	}
+
 	return AllowSPIFFEIDForPathAndPermissions(
 		peerSPIFFEID, auth.PathSystemPolicyAccess,
 		[]data.PolicyPermission{data.PermissionWrite}, checkAccess,
@@ -84,6 +94,15 @@ func AllowSPIFFEIDForPolicyDelete(
 func AllowSPIFFEIDForPolicyRead(
 	peerSPIFFEID string, checkAccess PolicyAccessChecker,
 ) bool {
+	// SPIKE Pilot is a system workload; no policy check needed.
+	if spiffeid.IsPilotOperator(peerSPIFFEID) {
+		return true
+	}
+	// Lite workloads are not allowed to read policies.
+	if spiffeid.IsLiteWorkload(peerSPIFFEID) {
+		return false
+	}
+
 	return AllowSPIFFEIDForPathAndPermissions(
 		peerSPIFFEID, auth.PathSystemPolicyAccess,
 		[]data.PolicyPermission{data.PermissionRead}, checkAccess,
@@ -106,6 +125,15 @@ func AllowSPIFFEIDForPolicyRead(
 func AllowSPIFFEIDForPolicyList(
 	peerSPIFFEID string, checkAccess PolicyAccessChecker,
 ) bool {
+	// SPIKE Pilot is a system workload; no policy check needed.
+	if spiffeid.IsPilotOperator(peerSPIFFEID) {
+		return true
+	}
+	// Lite workloads are not allowed to list policies.
+	if spiffeid.IsLiteWorkload(peerSPIFFEID) {
+		return false
+	}
+
 	return AllowSPIFFEIDForPathAndPermissions(
 		peerSPIFFEID, auth.PathSystemPolicyAccess,
 		[]data.PolicyPermission{data.PermissionList}, checkAccess,
@@ -128,6 +156,15 @@ func AllowSPIFFEIDForPolicyList(
 func AllowSPIFFEIDForPolicyWrite(
 	peerSPIFFEID string, checkAccess PolicyAccessChecker,
 ) bool {
+	// SPIKE Pilot is a system workload; no policy check needed.
+	if spiffeid.IsPilotOperator(peerSPIFFEID) {
+		return true
+	}
+	// Lite workloads are not allowed to write policies.
+	if spiffeid.IsLiteWorkload(peerSPIFFEID) {
+		return false
+	}
+
 	return AllowSPIFFEIDForPathAndPermissions(
 		peerSPIFFEID, auth.PathSystemPolicyAccess,
 		[]data.PolicyPermission{data.PermissionWrite}, checkAccess,

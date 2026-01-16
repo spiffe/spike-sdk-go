@@ -4,7 +4,10 @@
 
 package predicate
 
-import "github.com/spiffe/spike-sdk-go/api/entity/data"
+import (
+	"github.com/spiffe/spike-sdk-go/api/entity/data"
+	"github.com/spiffe/spike-sdk-go/spiffeid"
+)
 
 // AllowSPIFFEIDForPathAndPermissions checks if a SPIFFE ID is authorized to
 // access a specific path with the given permissions.
@@ -29,5 +32,10 @@ func AllowSPIFFEIDForPathAndPermissions(
 	path string, permissions []data.PolicyPermission,
 	checkAccess PolicyAccessChecker,
 ) bool {
+	// SPIKE Pilot is a system workload; no policy check needed.
+	if spiffeid.IsPilotOperator(peerSPIFFEID) {
+		return true
+	}
+
 	return checkAccess(peerSPIFFEID, path, permissions)
 }
