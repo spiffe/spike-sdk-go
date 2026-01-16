@@ -79,6 +79,41 @@ func AllowSPIFFEIDForSecretDelete(
 	)
 }
 
+// AllowSPIFFEIDForSecretUndelete checks if a SPIFFE ID is authorized to
+// undelete secrets at a specific path.
+//
+// Secrets are path-bound (similar to Vault KVv2), so access control is
+// evaluated against the provided path. This function first checks if the peer
+// is a SPIKE Pilot operator (system workload), which is always permitted. Lite
+// workloads are explicitly denied. For other workloads, it verifies that the
+// peer has "write" permission on the specified path.
+//
+// Parameters:
+//   - peerSPIFFEID: string - The SPIFFE ID of the peer requesting access
+//   - path: string - The secret path to check access for
+//   - checkAccess: PolicyAccessChecker - The function to perform the access
+//     check
+//
+// Returns:
+//   - bool: true if the peer is authorized to undelete secrets, false otherwise
+func AllowSPIFFEIDForSecretUndelete(
+	peerSPIFFEID string, path string, checkAccess PolicyAccessChecker,
+) bool {
+	// SPIKE Pilot is a system workload; no policy check needed.
+	if spiffeid.IsPilotOperator(peerSPIFFEID) {
+		return true
+	}
+	// Lite workloads are not allowed to undelete secrets.
+	if spiffeid.IsLiteWorkload(peerSPIFFEID) {
+		return false
+	}
+
+	return AllowSPIFFEIDForPathAndPermissions(
+		peerSPIFFEID, path,
+		[]data.PolicyPermission{data.PermissionWrite}, checkAccess,
+	)
+}
+
 // AllowSPIFFEIDForSecretWrite checks if a SPIFFE ID is authorized to write
 // secrets at a specific path.
 //
@@ -147,4 +182,38 @@ func AllowSPIFFEIDForSecretRead(
 		peerSPIFFEID, path,
 		[]data.PolicyPermission{data.PermissionRead}, checkAccess,
 	)
+}
+
+// AllowSPIFFEIDForSecretMetaDataRead checks if a SPIFFE ID is authorized to
+// read secret metadata at a specific path.
+//
+// Secrets are path-bound (similar to Vault KVv2), so access control is
+// evaluated against the provided path. This function first checks if the peer
+// is a SPIKE Pilot operator (system workload), which is always permitted. Lite
+// workloads are explicitly denied. For other workloads, it delegates to
+// AllowSPIFFEIDForSecretRead, requiring "read" permission on the specified
+// path.
+//
+// Parameters:
+//   - peerSPIFFEID: string - The SPIFFE ID of the peer requesting access
+//   - path: string - The secret path to check access for
+//   - checkAccess: PolicyAccessChecker - The function to perform the access
+//     check
+//
+// Returns:
+//   - bool: true if the peer is authorized to read secret metadata, false
+//     otherwise
+func AllowSPIFFEIDForSecretMetaDataRead(
+	peerSPIFFEID string, path string, checkAccess PolicyAccessChecker,
+) bool {
+	// SPIKE Pilot is a system workload; no policy check needed.
+	if spiffeid.IsPilotOperator(peerSPIFFEID) {
+		return true
+	}
+	// Lite workloads are not allowed to read secret metadata.
+	if spiffeid.IsLiteWorkload(peerSPIFFEID) {
+		return false
+	}
+
+	return AllowSPIFFEIDForSecretRead(peerSPIFFEID, path, checkAccess)
 }
