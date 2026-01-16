@@ -6,6 +6,7 @@ package predicate
 
 import (
 	"github.com/spiffe/spike-sdk-go/api/entity/data"
+	"github.com/spiffe/spike-sdk-go/config/auth"
 	"github.com/spiffe/spike-sdk-go/spiffeid"
 )
 
@@ -20,14 +21,13 @@ import (
 //
 // Parameters:
 //   - peerSPIFFEID: string - The SPIFFE ID of the peer requesting access
-//   - path: string - The secret path to check access for
 //   - checkAccess: PolicyAccessChecker - The function to perform the access
 //     check
 //
 // Returns:
 //   - bool: true if the peer is authorized to list secrets, false otherwise
 func AllowSPIFFEIDForSecretList(
-	peerSPIFFEID string, path string, checkAccess PolicyAccessChecker,
+	peerSPIFFEID string, checkAccess PolicyAccessChecker,
 ) bool {
 	// SPIKE Pilot is a system workload; no policy check needed.
 	if spiffeid.IsPilotOperator(peerSPIFFEID) {
@@ -39,7 +39,7 @@ func AllowSPIFFEIDForSecretList(
 	}
 
 	return AllowSPIFFEIDForPathAndPermissions(
-		peerSPIFFEID, path,
+		peerSPIFFEID, auth.PathSystemSecretAccess,
 		[]data.PolicyPermission{data.PermissionList}, checkAccess,
 	)
 }
