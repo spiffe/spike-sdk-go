@@ -9,6 +9,5 @@ package auth
 // They should NOT start with a trailing slash.
 
 const PathSystemPolicyAccess = "spike/system/acl"
-const PathSystemCipherEncrypt = "spike/system/cipher/encrypt"
-const PathSystemCipherDecrypt = "spike/system/cipher/decrypt"
+const PathSystemCipherExecute = "spike/system/cipher/exec"
 const PathSystemSecretAccess = "spike/system/secret"

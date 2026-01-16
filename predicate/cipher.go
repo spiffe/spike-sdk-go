@@ -27,13 +27,18 @@ import (
 func AllowSPIFFEIDForCipherDecrypt(
 	peerSPIFFEID string, checkAccess PolicyAccessChecker,
 ) bool {
+	// SPIKE Pilot is a system workload; no policy check needed.
+	if spiffeid.IsPilotOperator(peerSPIFFEID) {
+		return true
+	}
+
 	// Lite workloads are always allowed:
 	if spiffeid.IsLiteWorkload(peerSPIFFEID) {
 		return true
 	}
 	// If not, do a policy check to determine if the request is allowed:
 	return AllowSPIFFEIDForPathAndPermissions(
-		peerSPIFFEID, auth.PathSystemCipherDecrypt,
+		peerSPIFFEID, auth.PathSystemCipherExecute,
 		[]data.PolicyPermission{data.PermissionExecute}, checkAccess,
 	)
 }
@@ -43,7 +48,7 @@ func AllowSPIFFEIDForCipherDecrypt(
 //
 // This function first checks if the peer is a "lite" workload, which is always
 // permitted to encrypt. If not, it verifies that the peer has "execute"
-// permission on the system cipher encrypt path (auth.PathSystemCipherEncrypt).
+// permission on the system cipher encrypt path (auth.PathSystemCipherExecute).
 //
 // Parameters:
 //   - peerSPIFFEID: string - The SPIFFE ID of the peer requesting access
@@ -55,13 +60,19 @@ func AllowSPIFFEIDForCipherDecrypt(
 func AllowSPIFFEIDForCipherEncrypt(
 	peerSPIFFEID string, checkAccess PolicyAccessChecker,
 ) bool {
+	// SPIKE Pilot is a system workload; no policy check needed.
+	if spiffeid.IsPilotOperator(peerSPIFFEID) {
+		return true
+	}
+
 	// Lite workloads are always allowed:
 	if spiffeid.IsLiteWorkload(peerSPIFFEID) {
 		return true
 	}
+
 	// If not, do a policy check to determine if the request is allowed:
 	return AllowSPIFFEIDForPathAndPermissions(
-		peerSPIFFEID, auth.PathSystemCipherEncrypt,
+		peerSPIFFEID, auth.PathSystemCipherExecute,
 		[]data.PolicyPermission{data.PermissionExecute}, checkAccess,
 	)
 }
