@@ -44,22 +44,124 @@ func AuthorizeAndRespondOnFail[U any](
 	policyCheck predicate.PolicyAccessChecker,
 	w http.ResponseWriter, r *http.Request,
 ) *sdkErrors.SDKError {
-	if _, idErr := ExtractPeerSPIFFEIDAndRespondOnFail(
+	peerSPIFFEID, idErr := ExtractPeerSPIFFEIDAndRespondOnFail(
 		w, r, unauthorizedRes,
-	); idErr != nil {
+	)
+	if idErr != nil {
 		return idErr
 	}
 
-	if authErr := RespondUnauthorizedOnPredicateFail(
+	if authErr := AuthorizedAndRespondOnFailWithPredicate(
 		func(peerSPIFFEID string) bool {
 			return accessCheck(
 				peerSPIFFEID, policyCheck,
 			)
 		},
-		unauthorizedRes, w, r,
+		peerSPIFFEID.String(),
+		unauthorizedRes, w,
 	); authErr != nil {
 		return authErr
 	}
+	return nil
+}
+
+// AuthorizeAndRespondOnFailNoPolicy performs access-based authorization for an
+// HTTP request without policy validation and automatically responds with an
+// unauthorized error if the check fails.
+//
+// This is a simplified version of AuthorizeAndRespondOnFail that uses
+// predicate.AllowAllPolicies, bypassing policy-level checks while still
+// performing SPIFFE ID extraction and access validation. Use this when you need
+// to verify the caller's identity but don't require fine-grained policy control.
+//
+// Type Parameters:
+//   - U: The type of the unauthorized response body to send on failure
+//
+// Parameters:
+//   - unauthorizedRes: The response body to return if authorization fails
+//   - accessCheck: Function that validates access for a SPIFFE ID (policy
+//     parameter will receive AllowAllPolicies)
+//   - w: The HTTP response writer
+//   - r: The HTTP request containing the peer's TLS credentials
+//
+// Returns:
+//   - *sdkErrors.SDKError: nil if authorized, otherwise an error describing the
+//     authorization failure
+func AuthorizeAndRespondOnFailNoPolicy[U any](
+	unauthorizedRes U,
+	accessCheck predicate.WithPolicyAccessChecker,
+	w http.ResponseWriter, r *http.Request,
+) *sdkErrors.SDKError {
+	peerSPIFFEID, idErr := ExtractPeerSPIFFEIDAndRespondOnFail(
+		w, r, unauthorizedRes,
+	)
+	if idErr != nil {
+		return idErr
+	}
+
+	if authErr := AuthorizedAndRespondOnFailWithPredicate(
+		func(peerSPIFFEID string) bool {
+			return accessCheck(peerSPIFFEID, predicate.AllowAllPolicies)
+		},
+		peerSPIFFEID.String(),
+		unauthorizedRes, w,
+	); authErr != nil {
+		return authErr
+	}
+	return nil
+}
+
+// AuthorizedAndRespondOnFailWithPredicate extracts the peer SPIFFE ID from an
+// HTTP request and validates it using the provided predicate function. If the
+// SPIFFE ID extraction fails or the predicate returns false, it sends an
+// HTTP 401 Unauthorized response with the provided failure response body.
+//
+// This function combines SPIFFE ID extraction with custom authorization logic,
+// making it useful for route handlers that need to verify the caller's identity
+// against specific criteria (e.g., checking if the caller is a known service,
+// validating trust domain membership, or matching against an allowlist).
+//
+// Parameters:
+//   - predicateFn: A function that takes a SPIFFE ID string and returns true
+//     if the caller is authorized, false otherwise
+//   - failureResponse: The response object to send if authorization fails
+//   - w: The HTTP response writer for error responses
+//   - r: The incoming HTTP request containing the peer's SPIFFE ID
+//
+// Returns:
+//   - *sdkErrors.SDKError: nil if the SPIFFE ID was successfully extracted and
+//     the predicate returned true; otherwise returns ErrAccessUnauthorized
+//     (potentially wrapping additional errors from response writing)
+//
+// Example usage:
+//
+//	isAuthorizedService := func(spiffeID string) bool {
+//	    return strings.HasPrefix(spiffeID, "spiffe://example.org/service/")
+//	}
+//
+//	if err := net.RespondUnauthorizedOnPredicateFail(
+//	    isAuthorizedService,
+//	    reqres.SecretGetResponse{Err: data.ErrUnauthorized},
+//	    w, r,
+//	); err != nil {
+//	    return err
+//	}
+func AuthorizedAndRespondOnFailWithPredicate(
+	predicateFn predicate.Predicate, peerSPIFFEID string,
+	failureResponse any,
+	w http.ResponseWriter,
+) *sdkErrors.SDKError {
+	if !predicateFn(peerSPIFFEID) {
+		failErr := Fail(
+			failureResponse, w,
+			http.StatusUnauthorized,
+		)
+		if failErr != nil {
+			return sdkErrors.ErrAccessUnauthorized.Wrap(failErr)
+		}
+		return sdkErrors.ErrAccessUnauthorized.Clone()
+	}
+
 	return nil
 }
 
