@@ -326,7 +326,7 @@ func HandleRoute(h Handler) {
 // Returns:
 //   - Handler: Route handler function or Fallback for non-POST methods
 func RouteFactory[ApiAction any](p url.APIURL, a ApiAction, m string,
-	switchyard func(a ApiAction, p url.APIURL) net.Handler) net.Handler {
+	switchyard func(a ApiAction, p url.APIURL) Handler) Handler {
 	log.Debug("RouteFactory", "path", p, "action", a, "method", m)
 
 	// We only accept POST requests---See ADR-0012.
