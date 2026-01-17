@@ -58,7 +58,7 @@ func AuthorizeAndRespondOnFail[U any](
 			)
 		},
 		peerSPIFFEID.String(),
-		unauthorizedRes, w, r,
+		unauthorizedRes, w,
 	); authErr != nil {
 		return authErr
 	}
@@ -104,7 +104,7 @@ func AuthorizeAndRespondOnFailNoPolicy[U any](
 			return accessCheck(peerSPIFFEID, predicate.AllowAllPolicies)
 		},
 		peerSPIFFEID.String(),
-		unauthorizedRes, w, r,
+		unauthorizedRes, w,
 	); authErr != nil {
 		return authErr
 	}
@@ -149,7 +149,7 @@ func AuthorizeAndRespondOnFailNoPolicy[U any](
 func AuthorizedAndRespondOnFailWithPredicate(
 	predicateFn predicate.Predicate, peerSPIFFEID string,
 	failureResponse any,
-	w http.ResponseWriter, r *http.Request,
+	w http.ResponseWriter,
 ) *sdkErrors.SDKError {
 	if !predicateFn(peerSPIFFEID) {
 		failErr := Fail(
