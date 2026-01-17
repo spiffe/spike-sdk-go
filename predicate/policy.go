@@ -30,6 +30,28 @@ type PolicyAccessChecker func(
 	perms []data.PolicyPermission,
 ) bool
 
+// AllowAllPolicies is a permissive PolicyAccessChecker that grants access
+// regardless of the SPIFFE ID, path, or requested permissions.
+//
+// This function is intended for use cases where policy-level authorization
+// is not required, but the calling code still expects a PolicyAccessChecker.
+// It is commonly used with AuthorizeAndRespondOnFailNoPolicy to perform
+// SPIFFE ID validation without fine-grained policy checks.
+//
+// This is especially useful in SPIKE components where no operator engagement
+// happens, such as SPIKE Keeper.
+//
+// Parameters:
+//   - peerSPIFFEID: string - The SPIFFE ID of the peer (ignored)
+//   - path: string - The resource path being accessed (ignored)
+//   - perms: []data.PolicyPermission - The permissions required (ignored)
+//
+// Returns:
+//   - bool: Always returns true
+func AllowAllPolicies(_ string, _ string, _ []data.PolicyPermission) bool {
+	return true
+}
+
 // WithPolicyAccessChecker is a function type that validates access by
 // delegating to a PolicyAccessChecker.
 //
