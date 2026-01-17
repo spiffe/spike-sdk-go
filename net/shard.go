@@ -11,15 +11,15 @@ import (
 	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
 )
 
-// minRequestId is the minimum valid request ID for Shamir secret sharing
+// minRequestID is the minimum valid request ID for Shamir secret sharing
 // operations. Request IDs must be at least 1 to be valid.
-const minRequestId = 1
+const minRequestID = 1
 
 // RespondErrOnBadRequestID validates that a request ID falls within the
 // acceptable range for Shamir secret sharing operations and responds with
 // a bad request error if validation fails.
 //
-// The request ID must be between minRequestId (1) and the configured maximum
+// The request ID must be between minRequestID (1) and the configured maximum
 // share count (env.ShamirMaxShareCountVal()). This ensures that shard indices
 // are valid for the secret sharing scheme.
 //
@@ -37,7 +37,7 @@ const minRequestId = 1
 func RespondErrOnBadRequestID[T any](
 	requestID int, badInputResp T, w http.ResponseWriter,
 ) *sdkErrors.SDKError {
-	if requestID < minRequestId || requestID > env.ShamirMaxShareCountVal() {
+	if requestID < minRequestID || requestID > env.ShamirMaxShareCountVal() {
 		if failErr := Fail(badInputResp, w, http.StatusBadRequest); failErr != nil {
 			return sdkErrors.ErrAPIBadRequest.Wrap(failErr)
 		}
