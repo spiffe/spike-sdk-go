@@ -5,6 +5,8 @@
 package api
 
 import (
+	"context"
+
 	"github.com/spiffe/spike-sdk-go/api/entity/data"
 	"github.com/spiffe/spike-sdk-go/api/internal/impl/operator"
 	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
@@ -16,6 +18,10 @@ import (
 // This should be used when the SPIKE Nexus auto-recovery mechanism isn't
 // successful. The returned shards are sensitive and should be securely stored
 // out-of-band in encrypted form.
+//
+// Parameters:
+//   - ctx: Context for cancellation and timeout control. If nil,
+//     context.Background() is used.
 //
 // Returns:
 //   - map[int]*[32]byte: Map of shard indices to shard byte arrays if
@@ -34,12 +40,14 @@ import (
 //
 // Example:
 //
-//	shards, err := api.Recover()
+//	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+//	defer cancel()
+//	shards, err := api.Recover(ctx)
 //	if err != nil {
 //	    log.Fatalf("Failed to recover shards: %v", err)
 //	}
-func (a *API) Recover() (map[int]*[32]byte, *sdkErrors.SDKError) {
-	return operator.Recover(a.source)
+func (a *API) Recover(ctx context.Context) (map[int]*[32]byte, *sdkErrors.SDKError) {
+	return operator.Recover(ctx, a.source)
 }
 
 // Restore submits a recovery shard to continue the SPIKE Nexus restoration
@@ -50,6 +58,8 @@ func (a *API) Recover() (map[int]*[32]byte, *sdkErrors.SDKError) {
 // operation that a well-architected SPIKE deployment should not need.
 //
 // Parameters:
+//   - ctx: Context for cancellation and timeout control. If nil,
+//     context.Background() is used.
 //   - index: Index of the recovery shard
 //   - shard: Pointer to a 32-byte array containing the recovery shard
 //
@@ -70,14 +80,16 @@ func (a *API) Recover() (map[int]*[32]byte, *sdkErrors.SDKError) {
 //
 // Example:
 //
-//	status, err := api.Restore(shardIndex, shardPtr)
+//	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+//	defer cancel()
+//	status, err := api.Restore(ctx, shardIndex, shardPtr)
 //	if err != nil {
 //	    log.Fatalf("Failed to restore shard: %v", err)
 //	}
 //	log.Printf("Shards collected: %d, remaining: %d",
 //	    status.ShardsCollected, status.ShardsRemaining)
 func (a *API) Restore(
-	index int, shard *[32]byte,
+	ctx context.Context, index int, shard *[32]byte,
 ) (*data.RestorationStatus, *sdkErrors.SDKError) {
-	return operator.Restore(a.source, index, shard)
+	return operator.Restore(ctx, a.source, index, shard)
 }

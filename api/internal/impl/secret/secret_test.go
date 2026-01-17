@@ -5,6 +5,7 @@
 package secret
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -20,7 +21,7 @@ import (
 
 // TestGet_NilSource tests that Get returns error for nil X509Source
 func TestGet_NilSource(t *testing.T) {
-	secret, err := Get(nil, "test/path", 1)
+	secret, err := Get(context.Background(), nil, "test/path", 1)
 
 	assert.Nil(t, secret)
 	assert.NotNil(t, err)
@@ -29,7 +30,7 @@ func TestGet_NilSource(t *testing.T) {
 
 // TestPut_NilSource tests that Put returns error for nil X509Source
 func TestPut_NilSource(t *testing.T) {
-	err := Put(nil, "test/path", map[string]string{"key": "value"})
+	err := Put(context.Background(), nil, "test/path", map[string]string{"key": "value"})
 
 	assert.NotNil(t, err)
 	assert.True(t, err.Is(sdkErrors.ErrSPIFFENilX509Source))
@@ -37,7 +38,7 @@ func TestPut_NilSource(t *testing.T) {
 
 // TestDelete_NilSource tests that Delete returns error for nil X509Source
 func TestDelete_NilSource(t *testing.T) {
-	err := Delete(nil, "test/path", []int{1})
+	err := Delete(context.Background(), nil, "test/path", []int{1})
 
 	assert.NotNil(t, err)
 	assert.True(t, err.Is(sdkErrors.ErrSPIFFENilX509Source))
@@ -45,7 +46,7 @@ func TestDelete_NilSource(t *testing.T) {
 
 // TestUndelete_NilSource tests that Undelete returns error for nil X509Source
 func TestUndelete_NilSource(t *testing.T) {
-	err := Undelete(nil, "test/path", []int{1})
+	err := Undelete(context.Background(), nil, "test/path", []int{1})
 
 	assert.NotNil(t, err)
 	assert.True(t, err.Is(sdkErrors.ErrSPIFFENilX509Source))
@@ -53,7 +54,7 @@ func TestUndelete_NilSource(t *testing.T) {
 
 // TestListKeys_NilSource tests that ListKeys returns error for nil X509Source
 func TestListKeys_NilSource(t *testing.T) {
-	keys, err := ListKeys(nil)
+	keys, err := ListKeys(context.Background(), nil)
 
 	assert.Nil(t, keys)
 	assert.NotNil(t, err)
@@ -62,7 +63,7 @@ func TestListKeys_NilSource(t *testing.T) {
 
 // TestGetMetadata_NilSource tests that GetMetadata returns error for nil X509Source
 func TestGetMetadata_NilSource(t *testing.T) {
-	metadata, err := GetMetadata(nil, "test/path", 1)
+	metadata, err := GetMetadata(context.Background(), nil, "test/path", 1)
 
 	assert.Nil(t, metadata)
 	assert.NotNil(t, err)
@@ -83,7 +84,7 @@ func TestGet_NotFound(t *testing.T) {
 	// with dependency injection.
 
 	// For now, we test the nil source case which is testable
-	secret, err := Get(nil, "test/path", 1)
+	secret, err := Get(context.Background(), nil, "test/path", 1)
 	assert.Nil(t, secret)
 	assert.NotNil(t, err)
 }
@@ -97,7 +98,7 @@ func TestListKeys_NotFound(t *testing.T) {
 	defer server.Close()
 
 	// Note: Same limitation as TestGet_NotFound applies here
-	keys, err := ListKeys(nil)
+	keys, err := ListKeys(context.Background(), nil)
 	assert.Nil(t, keys)
 	assert.NotNil(t, err)
 }
@@ -111,7 +112,7 @@ func TestGetMetadata_NotFound(t *testing.T) {
 	defer server.Close()
 
 	// Note: Same limitation as TestGet_NotFound applies here
-	metadata, err := GetMetadata(nil, "test/path", 1)
+	metadata, err := GetMetadata(context.Background(), nil, "test/path", 1)
 	assert.Nil(t, metadata)
 	assert.NotNil(t, err)
 }
@@ -120,7 +121,7 @@ func TestGetMetadata_NotFound(t *testing.T) {
 func TestUndelete_EmptyVersions(t *testing.T) {
 	// The function should handle empty versions gracefully
 	// But without a real X509Source, we can only test nil case
-	err := Undelete(nil, "test/path", []int{})
+	err := Undelete(context.Background(), nil, "test/path", []int{})
 
 	assert.NotNil(t, err)
 	assert.True(t, err.Is(sdkErrors.ErrSPIFFENilX509Source))

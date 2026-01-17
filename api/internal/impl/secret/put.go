@@ -5,6 +5,7 @@
 package secret
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
@@ -19,6 +20,8 @@ import (
 // values.
 //
 // Parameters:
+//   - ctx: Context for cancellation and timeout control. If nil,
+//     context.Background() is used.
 //   - source: X509Source for establishing mTLS connection to SPIKE Nexus
 //   - path: Path where the secret should be stored
 //   - values: Map of key-value pairs representing the secret data
@@ -33,9 +36,12 @@ import (
 //
 // Example:
 //
-//	err := Put(x509Source, "secret/path",
+//	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+//	defer cancel()
+//	err := Put(ctx, x509Source, "secret/path",
 //		map[string]string{"key": "value"})
 func Put(
+	ctx context.Context,
 	source *workloadapi.X509Source,
 	path string, values map[string]string,
 ) *sdkErrors.SDKError {
@@ -53,6 +59,6 @@ func Put(
 	}
 
 	_, postErr := net.PostAndUnmarshal[reqres.SecretPutResponse](
-		source, url.SecretPut(), mr)
+		ctx, source, url.SecretPut(), mr)
 	return postErr
 }

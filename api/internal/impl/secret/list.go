@@ -5,6 +5,7 @@
 package secret
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
@@ -18,6 +19,8 @@ import (
 // ListKeys retrieves all secret keys.
 //
 // Parameters:
+//   - ctx: Context for cancellation and timeout control. If nil,
+//     context.Background() is used.
 //   - source: X509Source for establishing mTLS connection to SPIKE Nexus
 //
 // Returns:
@@ -33,8 +36,11 @@ import (
 //
 // Example:
 //
-//	keys, err := ListKeys(x509Source)
+//	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+//	defer cancel()
+//	keys, err := ListKeys(ctx, x509Source)
 func ListKeys(
+	ctx context.Context,
 	source *workloadapi.X509Source,
 ) (*[]string, *sdkErrors.SDKError) {
 	if source == nil {
@@ -50,7 +56,7 @@ func ListKeys(
 	}
 
 	res, postErr := net.PostAndUnmarshal[reqres.SecretListResponse](
-		source, url.SecretList(), mr)
+		ctx, source, url.SecretList(), mr)
 	if postErr != nil {
 		if postErr.Is(sdkErrors.ErrAPINotFound) {
 			return &[]string{}, nil
