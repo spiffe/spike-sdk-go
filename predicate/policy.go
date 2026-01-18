@@ -61,13 +61,36 @@ func AllowAllPolicies(_ string, _ string, _ []data.PolicyPermission) bool {
 // permissions for the specified resource.
 //
 // Parameters:
-//   - string: The resource path or identifier to check access for
+//   - string: The SPIFFEID of the peer requesting access.
 //   - PolicyAccessChecker: The function to use for policy-based access
 //     validation
 //
 // Returns:
 //   - bool: true if access is granted, false otherwise
-type WithPolicyAccessChecker func(string, PolicyAccessChecker) bool
+type WithPolicyAccessChecker func(
+	peerSPIFFEID string, check PolicyAccessChecker,
+) bool
+
+// ForPathWithPolicyAccessChecker is a function type that validates access by
+// delegating to a PolicyAccessChecker, with an explicit resource path
+// parameter.
+//
+// This is a path-aware variant of WithPolicyAccessChecker that includes the
+// resource path in the function signature. Use this type when the access
+// decision depends on the specific resource path being accessed, allowing
+// for path-based authorization logic before delegating to the policy checker.
+//
+// Parameters:
+//   - peerSPIFFEID: string - The SPIFFE ID of the peer requesting access
+//   - path: string - The resource path being accessed
+//   - check: PolicyAccessChecker - The function to use for policy-based access
+//     validation
+//
+// Returns:
+//   - bool: true if access is granted, false otherwise
+type ForPathWithPolicyAccessChecker func(
+	peerSPIFFEID string, path string, check PolicyAccessChecker,
+) bool
 
 // AllowSPIFFEIDForPolicyDelete checks if a SPIFFE ID is authorized to delete
 // policies.
