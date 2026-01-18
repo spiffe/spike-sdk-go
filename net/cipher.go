@@ -33,7 +33,7 @@ func DecryptDataStreaming(
 	return plaintext, nil
 }
 
-// decryptDataJSON performs decryption for JSON mode requests.
+// DecryptDataJSON performs decryption for JSON mode requests.
 //
 // Parameters:
 //   - nonce: The nonce bytes
@@ -44,7 +44,7 @@ func DecryptDataStreaming(
 // Returns:
 //   - plaintext: The decrypted data if successful
 //   - *sdkErrors.SDKError: An error if decryption fails
-func decryptDataJSON(
+func DecryptDataJSON(
 	nonce, ciphertext []byte, c cipher.AEAD, w http.ResponseWriter,
 ) ([]byte, *sdkErrors.SDKError) {
 	plaintext, err := c.Open(nil, nonce, ciphertext, nil)
@@ -62,7 +62,7 @@ func decryptDataJSON(
 	return plaintext, nil
 }
 
-// generateNonceOrFailStreaming generates a cryptographically secure random
+// GenerateNonceOrFailStreaming generates a cryptographically secure random
 // nonce for streaming mode requests.
 //
 // Parameters:
@@ -72,7 +72,7 @@ func decryptDataJSON(
 // Returns:
 //   - nonce: The generated nonce bytes if successful
 //   - *sdkErrors.SDKError: An error if nonce generation fails
-func generateNonceOrFailStreaming(
+func GenerateNonceOrFailStreaming(
 	c cipher.AEAD, w http.ResponseWriter,
 ) ([]byte, *sdkErrors.SDKError) {
 	nonce := make([]byte, c.NonceSize())
@@ -129,7 +129,7 @@ func GenerateNonceOrFailJSON[T any](
 func EncryptDataStreaming(
 	plaintext []byte, c cipher.AEAD, w http.ResponseWriter,
 ) ([]byte, []byte, *sdkErrors.SDKError) {
-	nonce, err := generateNonceOrFailStreaming(c, w)
+	nonce, err := GenerateNonceOrFailStreaming(c, w)
 	if err != nil {
 		return nil, nil, err
 	}
