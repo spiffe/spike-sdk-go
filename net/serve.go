@@ -189,20 +189,6 @@ func Serve(
 	)
 }
 
-// Handler is a function type that processes HTTP requests with audit
-// logging support.
-//
-// Parameters:
-//   - w: HTTP response writer for sending the response
-//   - r: HTTP request containing the incoming request data
-//   - audit: Audit entry for logging the request lifecycle
-//
-// Returns:
-//   - *sdkErrors.SDKError: nil on success, error on failure
-type Handler func(
-	w http.ResponseWriter, r *http.Request, audit *journal.AuditEntry,
-) *sdkErrors.SDKError
-
 // Fallback handles requests to undefined routes by returning a 400 Bad Request.
 //
 // This function serves as a catch-all handler for undefined routes, logging the
