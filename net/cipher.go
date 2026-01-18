@@ -414,3 +414,60 @@ func RespondJSONEncrypt(
 		}.Success(), w,
 	)
 }
+
+// ReadAndGuardRequest reads and parses a request, then validates it using the
+// provided guard function. This is similar to net.ReadParseAndGuard but accepts
+// a custom reader function for streaming mode support.
+//
+// Parameters:
+//   - readRequest: Function to read and parse the request body
+//   - guard: Function to validate the parsed request (handles auth and fields)
+//   - w: The HTTP response writer
+//   - r: The HTTP request
+//
+// Returns:
+//   - *T: The parsed and validated request
+//   - *sdkErrors.SDKError: An error if reading or validation fails
+func ReadAndGuardRequest[T any](
+	readRequest HandlerWithReturn[T],
+	guard HandlerWithEntity[T],
+	w http.ResponseWriter, r *http.Request,
+) (*T, *sdkErrors.SDKError) {
+	request, readErr := readRequest(w, r)
+	if readErr != nil {
+		return nil, readErr
+	}
+
+	if guardErr := guard(*request, w, r); guardErr != nil {
+		return nil, guardErr
+	}
+
+	return request, nil
+}
+
+// GetCipherAndEncrypt retrieves the cipher and encrypts the provided data.
+// This combines cipher acquisition and encryption into a single operation.
+//
+// Parameters:
+//   - getCipher: Function to retrieve the AEAD cipher
+//   - encryptData: The encryption function to use
+//   - plaintext: The data to encrypt
+//   - w: The HTTP response writer for error responses
+//
+// Returns:
+//   - []byte: The generated nonce
+//   - []byte: The encrypted ciphertext
+//   - *sdkErrors.SDKError: An error if cipher retrieval or encryption fails
+func GetCipherAndEncrypt(
+	getCipher func() (cipher.AEAD, *sdkErrors.SDKError),
+	encryptData Encryptor,
+	plaintext []byte,
+	w http.ResponseWriter,
+) ([]byte, []byte, *sdkErrors.SDKError) {
+	c, cipherErr := getCipher()
+	if cipherErr != nil {
+		return nil, nil, cipherErr
+	}
+
+	return encryptData(plaintext, c, w)
+}
