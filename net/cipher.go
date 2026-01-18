@@ -239,3 +239,86 @@ func ReadStreamingDecryptRequestData(
 
 	return version, nonce, ciphertext, nil
 }
+
+// ReadJSONDecryptRequestWithoutGuard reads and parses a JSON mode decryption
+// request without performing guard validation.
+//
+// Parameters:
+//   - w: The HTTP response writer for error responses
+//   - r: The HTTP request containing the JSON data
+//
+// Returns:
+//   - *reqres.CipherDecryptRequest: The parsed request
+//   - *sdkErrors.SDKError: An error if reading or parsing fails
+func ReadJSONDecryptRequestWithoutGuard(
+	w http.ResponseWriter, r *http.Request,
+) (*reqres.CipherDecryptRequest, *sdkErrors.SDKError) {
+	requestBody, err := ReadRequestBodyAndRespondOnFail(w, r)
+	if err != nil {
+		return nil, err
+	}
+
+	request, unmarshalErr := UnmarshalAndRespondOnFail[
+		reqres.CipherDecryptRequest, reqres.CipherDecryptResponse](
+		requestBody, w,
+		reqres.CipherDecryptResponse{}.BadRequest(),
+	)
+	if unmarshalErr != nil {
+		return nil, unmarshalErr
+	}
+
+	return request, nil
+}
+
+// ReadStreamingEncryptRequestWithoutGuard reads a streaming mode encryption
+// request without performing guard validation. The raw binary body is wrapped
+// in a CipherEncryptRequest to provide a unified interface with the JSON
+// reader.
+//
+// Parameters:
+//   - w: The HTTP response writer for error responses
+//   - r: The HTTP request containing the binary data
+//
+// Returns:
+//   - *reqres.CipherEncryptRequest: The request with plaintext populated
+//   - *sdkErrors.SDKError: An error if reading fails
+func ReadStreamingEncryptRequestWithoutGuard(
+	w http.ResponseWriter, r *http.Request,
+) (*reqres.CipherEncryptRequest, *sdkErrors.SDKError) {
+	plaintext, err := ReadRequestBodyAndRespondOnFail(w, r)
+	if err != nil {
+		return nil, err
+	}
+
+	return &reqres.CipherEncryptRequest{Plaintext: plaintext}, nil
+}
+
+// ReadJSONEncryptRequestWithoutGuard reads and parses a JSON mode encryption
+// request without performing guard validation.
+//
+// Parameters:
+//   - w: The HTTP response writer for error responses
+//   - r: The HTTP request containing the JSON data
+//
+// Returns:
+//   - *reqres.CipherEncryptRequest: The parsed request
+//   - *sdkErrors.SDKError: An error if reading or parsing fails
+func ReadJSONEncryptRequestWithoutGuard(
+	w http.ResponseWriter, r *http.Request,
+) (*reqres.CipherEncryptRequest, *sdkErrors.SDKError) {
+	requestBody, err := ReadRequestBodyAndRespondOnFail(w, r)
+	if err != nil {
+		return nil, err
+	}
+
+	request, unmarshalErr := UnmarshalAndRespondOnFail[
+		reqres.CipherEncryptRequest, reqres.CipherEncryptResponse](
+		requestBody, w,
+		reqres.CipherEncryptResponse{}.BadRequest(),
+	)
+	if unmarshalErr != nil {
+		return nil, unmarshalErr
+	}
+
+	return request, nil
+}
