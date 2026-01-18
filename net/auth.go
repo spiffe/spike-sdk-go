@@ -65,6 +65,61 @@ func AuthorizeAndRespondOnFail[U any](
 	return nil
 }
 
+// AuthorizeAndRespondOnFailForPath performs path-based policy authorization
+// for an HTTP request and automatically responds with an unauthorized error
+// if the check fails.
+//
+// This is a path-aware variant of AuthorizeAndRespondOnFail that includes the
+// resource path in the authorization decision. It extracts the peer's SPIFFE ID
+// from the TLS connection, then validates access using the provided path,
+// access checker, and policy checker.
+//
+// Use this function when authorization decisions depend on the specific
+// resource path being accessed, such as when different paths have different
+// permission requirements.
+//
+// Type Parameters:
+//   - U: The type of the unauthorized response body to send on failure
+//
+// Parameters:
+//   - unauthorizedRes: The response body to return if authorization fails
+//   - requestPath: The resource path being accessed, used in policy evaluation
+//   - accessCheck: Function that validates access for a SPIFFE ID and path
+//     using a policy
+//   - policyCheck: Function that checks if a SPIFFE ID has required permissions
+//   - w: The HTTP response writer
+//   - r: The HTTP request containing the peer's TLS credentials
+//
+// Returns:
+//   - *sdkErrors.SDKError: nil if authorized, otherwise an error describing the
+//     authorization failure
+func AuthorizeAndRespondOnFailForPath[U any](
+	unauthorizedRes U,
+	requestPath string,
+	accessCheck predicate.ForPathWithPolicyAccessChecker,
+	policyCheck predicate.PolicyAccessChecker,
+	w http.ResponseWriter, r *http.Request,
+) *sdkErrors.SDKError {
+	peerSPIFFEID, idErr := ExtractPeerSPIFFEIDAndRespondOnFail(
+		w, r, unauthorizedRes,
+	)
+	if idErr != nil {
+		return idErr
+	}
+
+	if authErr := AuthorizedAndRespondOnFailWithPredicate(
+		func(peerSPIFFEID string) bool {
+			return accessCheck(peerSPIFFEID, requestPath, policyCheck)
+		},
+		peerSPIFFEID.String(),
+		unauthorizedRes, w,
+	); authErr != nil {
+		return authErr
+	}
+
+	return nil
+}
+
 // AuthorizeAndRespondOnFailNoPolicy performs access-based authorization for an
 // HTTP request without policy validation and automatically responds with an
 // unauthorized error if the check fails.
