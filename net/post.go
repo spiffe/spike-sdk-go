@@ -6,6 +6,7 @@ package net
 
 import (
 	"bytes"
+	"context"
 	"io"
 	"net/http"
 
@@ -18,6 +19,7 @@ import (
 // status codes, and proper response body handling.
 //
 // Parameters:
+//   - ctx: Context for cancellation and deadline control.
 //   - client: An *http.Client used to make the request, typically
 //     configured with TLS settings.
 //   - path: The URL path to send the POST request to.
@@ -41,17 +43,27 @@ import (
 //
 //	client := &http.Client{}
 //	data := []byte(`{"key": "value"}`)
-//	response, err := Post(client, "https://api.example.com/endpoint", data)
+//	response, err := Post(ctx, client, "https://api.example.com/endpoint", data)
 //	if err != nil {
 //	    log.Fatalf("failed to post: %v", err)
 //	}
 func Post(
-	client *http.Client, path string, mr []byte,
+	ctx context.Context, client *http.Client, path string, mr []byte,
 ) ([]byte, *sdkErrors.SDKError) {
 	const fName = "Post"
 
+	// Note: Checking for nil context is not idiomatic Go (the convention is to
+	// let http.NewRequestWithContext panic). However, this SDK runs in containers
+	// where a panic would crash the entire Pod. Returning an error allows the
+	// application to handle it gracefully and continue serving other requests.
+	if ctx == nil {
+		failErr := sdkErrors.ErrNilContext.Clone()
+		failErr.Msg = fName + ": nil context"
+		return nil, failErr
+	}
+
 	// Create the request while preserving the mTLS client
-	req, err := http.NewRequest("POST", path, bytes.NewBuffer(mr))
+	req, err := http.NewRequestWithContext(ctx, "POST", path, bytes.NewBuffer(mr))
 	if err != nil {
 		failErr := sdkErrors.ErrAPIBadRequest.Wrap(err)
 		failErr.Msg = "failed to create request"

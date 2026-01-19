@@ -5,6 +5,7 @@
 package bootstrap
 
 import (
+	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
@@ -55,11 +56,12 @@ import (
 //	}
 //	defer source.Close()
 //
-//	err = Contribute(source, keeperShare, "keeper-1")
+//	err = Contribute(ctx, source, keeperShare, "keeper-1")
 //	if err != nil {
 //	    log.Printf("Failed to contribute share: %v", err)
 //	}
 func Contribute(
+	ctx context.Context,
 	source *workloadapi.X509Source,
 	keeperShare secretsharing.Share,
 	keeperID string,
@@ -112,7 +114,7 @@ func Contribute(
 
 		u := url.KeeperBootstrapContributeEndpoint(keeperAPIRoot)
 
-		_, sdkErr := net.Post(client, u, md)
+		_, sdkErr := net.Post(ctx, client, u, md)
 		if sdkErr != nil {
 			return sdkErr
 		}
@@ -156,11 +158,12 @@ func Contribute(
 //	}
 //	defer source.Close()
 //
-//	err = Verify(source, randomText, nonce, ciphertext)
+//	err = Verify(ctx, source, randomText, nonce, ciphertext)
 //	if err != nil {
 //	    log.Printf("Bootstrap verification failed: %v", err)
 //	}
 func Verify(
+	ctx context.Context,
 	source *workloadapi.X509Source,
 	randomText string,
 	nonce, ciphertext []byte,
@@ -195,7 +198,7 @@ func Verify(
 		"url", verifyURL,
 	)
 
-	responseBody, err := net.Post(client, verifyURL, md)
+	responseBody, err := net.Post(ctx, client, verifyURL, md)
 	if err != nil {
 		return err
 	}

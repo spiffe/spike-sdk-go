@@ -5,6 +5,7 @@
 package secret
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
@@ -36,8 +37,9 @@ import (
 //
 // Example:
 //
-//	err := Delete(x509Source, "secret/path", []int{1, 2})
+//	err := Delete(ctx, x509Source, "secret/path", []int{1, 2})
 func Delete(
+	ctx context.Context,
 	source *workloadapi.X509Source,
 	path string, versions []int,
 ) *sdkErrors.SDKError {
@@ -55,6 +57,6 @@ func Delete(
 	}
 
 	_, postErr := net.PostAndUnmarshal[reqres.SecretDeleteResponse](
-		source, url.SecretDelete(), mr)
+		ctx, source, url.SecretDelete(), mr)
 	return postErr
 }

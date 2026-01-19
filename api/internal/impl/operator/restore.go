@@ -5,6 +5,7 @@
 package operator
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
@@ -68,12 +69,13 @@ import (
 //
 // Example:
 //
-//	status, err := Restore(x509Source, shardIndex, shardValue)
+//	status, err := Restore(ctx, x509Source, shardIndex, shardValue)
 //	if err != nil {
 //	    // SVID acquisition failures may be transient - consider retry logic
 //	    return nil, err
 //	}
 func Restore(
+	ctx context.Context,
 	source *workloadapi.X509Source, shardIndex int, shardValue *[32]byte,
 ) (*data.RestorationStatus, *sdkErrors.SDKError) {
 	const fName = "restore"
@@ -117,7 +119,7 @@ func Restore(
 	}
 
 	res, postErr := net.PostAndUnmarshal[reqres.RestoreResponse](
-		source, url.Restore(), mr)
+		ctx, source, url.Restore(), mr)
 	// Security: Zero out mr after the POST request is complete
 	for i := range mr {
 		mr[i] = 0

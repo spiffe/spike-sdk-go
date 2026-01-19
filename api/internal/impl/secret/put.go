@@ -5,6 +5,7 @@
 package secret
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
@@ -33,9 +34,10 @@ import (
 //
 // Example:
 //
-//	err := Put(x509Source, "secret/path",
+//	err := Put(ctx, x509Source, "secret/path",
 //		map[string]string{"key": "value"})
 func Put(
+	ctx context.Context,
 	source *workloadapi.X509Source,
 	path string, values map[string]string,
 ) *sdkErrors.SDKError {
@@ -53,6 +55,6 @@ func Put(
 	}
 
 	_, postErr := net.PostAndUnmarshal[reqres.SecretPutResponse](
-		source, url.SecretPut(), mr)
+		ctx, source, url.SecretPut(), mr)
 	return postErr
 }

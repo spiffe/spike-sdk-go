@@ -1,6 +1,8 @@
 package api
 
 import (
+	"context"
+
 	"github.com/cloudflare/circl/secretsharing"
 	"github.com/spiffe/spike-sdk-go/api/internal/impl/bootstrap"
 	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
@@ -27,9 +29,9 @@ import (
 //   - Marshal failures (ErrDataMarshalFailure)
 //   - Share length validation fails (ErrCryptoInvalidEncryptionKeyLength)
 func (a *API) Contribute(
-	keeperShare secretsharing.Share, keeperID string,
+	ctx context.Context, keeperShare secretsharing.Share, keeperID string,
 ) *sdkErrors.SDKError {
-	return bootstrap.Contribute(a.source, keeperShare, keeperID)
+	return bootstrap.Contribute(ctx, a.source, keeperShare, keeperID)
 }
 
 // Verify performs bootstrap verification with SPIKE Nexus by sending encrypted
@@ -55,7 +57,7 @@ func (a *API) Contribute(
 //   - Response parsing failures (ErrDataUnmarshalFailure)
 //   - Hash verification fails (ErrCryptoCipherVerificationFailed)
 func (a *API) Verify(
-	randomText string, nonce, cipherText []byte,
+	ctx context.Context, randomText string, nonce, cipherText []byte,
 ) *sdkErrors.SDKError {
-	return bootstrap.Verify(a.source, randomText, nonce, cipherText)
+	return bootstrap.Verify(ctx, a.source, randomText, nonce, cipherText)
 }

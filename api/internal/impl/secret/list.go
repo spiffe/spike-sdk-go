@@ -5,6 +5,7 @@
 package secret
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
@@ -33,8 +34,9 @@ import (
 //
 // Example:
 //
-//	keys, err := ListKeys(x509Source)
+//	keys, err := ListKeys(ctx, x509Source)
 func ListKeys(
+	ctx context.Context,
 	source *workloadapi.X509Source,
 ) (*[]string, *sdkErrors.SDKError) {
 	if source == nil {
@@ -50,7 +52,7 @@ func ListKeys(
 	}
 
 	res, postErr := net.PostAndUnmarshal[reqres.SecretListResponse](
-		source, url.SecretList(), mr)
+		ctx, source, url.SecretList(), mr)
 	if postErr != nil {
 		if postErr.Is(sdkErrors.ErrAPINotFound) {
 			return &[]string{}, nil

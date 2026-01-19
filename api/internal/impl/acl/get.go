@@ -5,6 +5,7 @@
 package acl
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
@@ -43,7 +44,7 @@ import (
 //	}
 //	defer source.Close()
 //
-//	policy, err := GetPolicy(source, "policy-123")
+//	policy, err := GetPolicy(ctx, source, "policy-123")
 //	if err != nil {
 //	    if err.Is(sdkErrors.ErrAPINotFound) {
 //	        log.Printf("Policy not found")
@@ -55,6 +56,7 @@ import (
 //
 //	log.Printf("Found policy: %+v", policy)
 func GetPolicy(
+	ctx context.Context,
 	source *workloadapi.X509Source, id string,
 ) (*data.Policy, *sdkErrors.SDKError) {
 	if source == nil {
@@ -71,7 +73,7 @@ func GetPolicy(
 	}
 
 	res, postErr := net.PostAndUnmarshal[reqres.PolicyReadResponse](
-		source, url.PolicyGet(), mr)
+		ctx, source, url.PolicyGet(), mr)
 	if postErr != nil {
 		return nil, postErr
 	}

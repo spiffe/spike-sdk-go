@@ -5,6 +5,8 @@
 package api
 
 import (
+	"context"
+
 	"github.com/spiffe/spike-sdk-go/api/entity/data"
 	"github.com/spiffe/spike-sdk-go/api/internal/impl/secret"
 	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
@@ -27,14 +29,14 @@ import (
 //
 // Example:
 //
-//	err := api.DeleteSecretVersions("secret/path", []int{1, 2})
+//	err := api.DeleteSecretVersions(ctx, "secret/path", []int{1, 2})
 //	if err != nil {
 //	    log.Printf("Failed to delete secret versions: %v", err)
 //	}
 func (a *API) DeleteSecretVersions(
-	path string, versions []int,
+	ctx context.Context, path string, versions []int,
 ) *sdkErrors.SDKError {
-	return secret.Delete(a.source, path, versions)
+	return secret.Delete(ctx, a.source, path, versions)
 }
 
 // DeleteSecret deletes the entire secret at the given path.
@@ -52,12 +54,12 @@ func (a *API) DeleteSecretVersions(
 //
 // Example:
 //
-//	err := api.DeleteSecret("secret/path")
+//	err := api.DeleteSecret(ctx, "secret/path")
 //	if err != nil {
 //	    log.Printf("Failed to delete secret: %v", err)
 //	}
-func (a *API) DeleteSecret(path string) *sdkErrors.SDKError {
-	return secret.Delete(a.source, path, []int{})
+func (a *API) DeleteSecret(ctx context.Context, path string) *sdkErrors.SDKError {
+	return secret.Delete(ctx, a.source, path, []int{})
 }
 
 // GetSecretVersion retrieves a specific version of a secret at the given
@@ -79,7 +81,7 @@ func (a *API) DeleteSecret(path string) *sdkErrors.SDKError {
 //
 // Example:
 //
-//	secret, err := api.GetSecretVersion("secret/path", 1)
+//	secret, err := api.GetSecretVersion(ctx, "secret/path", 1)
 //	if err != nil {
 //	    if err.Is(sdkErrors.ErrAPINotFound) {
 //	        log.Printf("Secret not found")
@@ -89,9 +91,9 @@ func (a *API) DeleteSecret(path string) *sdkErrors.SDKError {
 //	    return
 //	}
 func (a *API) GetSecretVersion(
-	path string, version int,
+	ctx context.Context, path string, version int,
 ) (*data.Secret, *sdkErrors.SDKError) {
-	return secret.Get(a.source, path, version)
+	return secret.Get(ctx, a.source, path, version)
 }
 
 // GetSecret retrieves the latest version of the secret at the given path.
@@ -111,7 +113,7 @@ func (a *API) GetSecretVersion(
 //
 // Example:
 //
-//	secret, err := api.GetSecret("secret/path")
+//	secret, err := api.GetSecret(ctx, "secret/path")
 //	if err != nil {
 //	    if err.Is(sdkErrors.ErrAPINotFound) {
 //	        log.Printf("Secret not found")
@@ -120,8 +122,8 @@ func (a *API) GetSecretVersion(
 //	    log.Printf("Error retrieving secret: %v", err)
 //	    return
 //	}
-func (a *API) GetSecret(path string) (*data.Secret, *sdkErrors.SDKError) {
-	return secret.Get(a.source, path, 0)
+func (a *API) GetSecret(ctx context.Context, path string) (*data.Secret, *sdkErrors.SDKError) {
+	return secret.Get(ctx, a.source, path, 0)
 }
 
 // ListSecretKeys retrieves all secret keys.
@@ -140,7 +142,7 @@ func (a *API) GetSecret(path string) (*data.Secret, *sdkErrors.SDKError) {
 //
 // Example:
 //
-//	keys, err := api.ListSecretKeys()
+//	keys, err := api.ListSecretKeys(ctx)
 //	if err != nil {
 //	    log.Printf("Error listing keys: %v", err)
 //	    return
@@ -148,8 +150,8 @@ func (a *API) GetSecret(path string) (*data.Secret, *sdkErrors.SDKError) {
 //	for _, key := range *keys {
 //	    log.Printf("Found key: %s", key)
 //	}
-func (a *API) ListSecretKeys() (*[]string, *sdkErrors.SDKError) {
-	return secret.ListKeys(a.source)
+func (a *API) ListSecretKeys(ctx context.Context) (*[]string, *sdkErrors.SDKError) {
+	return secret.ListKeys(ctx, a.source)
 }
 
 // GetSecretMetadata retrieves metadata for a specific version of a secret at
@@ -171,7 +173,7 @@ func (a *API) ListSecretKeys() (*[]string, *sdkErrors.SDKError) {
 //
 // Example:
 //
-//	metadata, err := api.GetSecretMetadata("secret/path", 1)
+//	metadata, err := api.GetSecretMetadata(ctx, "secret/path", 1)
 //	if err != nil {
 //	    if err.Is(sdkErrors.ErrAPINotFound) {
 //	        log.Printf("Metadata not found")
@@ -181,9 +183,9 @@ func (a *API) ListSecretKeys() (*[]string, *sdkErrors.SDKError) {
 //	    return
 //	}
 func (a *API) GetSecretMetadata(
-	path string, version int,
+	ctx context.Context, path string, version int,
 ) (*data.SecretMetadata, *sdkErrors.SDKError) {
-	return secret.GetMetadata(a.source, path, version)
+	return secret.GetMetadata(ctx, a.source, path, version)
 }
 
 // PutSecret creates or updates a secret at the specified path with the given
@@ -203,14 +205,14 @@ func (a *API) GetSecretMetadata(
 //
 // Example:
 //
-//	err := api.PutSecret("secret/path", map[string]string{"key": "value"})
+//	err := api.PutSecret(ctx, "secret/path", map[string]string{"key": "value"})
 //	if err != nil {
 //	    log.Printf("Failed to put secret: %v", err)
 //	}
 func (a *API) PutSecret(
-	path string, data map[string]string,
+	ctx context.Context, path string, data map[string]string,
 ) *sdkErrors.SDKError {
-	return secret.Put(a.source, path, data)
+	return secret.Put(ctx, a.source, path, data)
 }
 
 // UndeleteSecret restores previously deleted versions of a secret at the
@@ -231,10 +233,10 @@ func (a *API) PutSecret(
 //
 // Example:
 //
-//	err := api.UndeleteSecret("secret/path", []int{1, 2})
+//	err := api.UndeleteSecret(ctx, "secret/path", []int{1, 2})
 //	if err != nil {
 //	    log.Printf("Failed to undelete secret: %v", err)
 //	}
-func (a *API) UndeleteSecret(path string, versions []int) *sdkErrors.SDKError {
-	return secret.Undelete(a.source, path, versions)
+func (a *API) UndeleteSecret(ctx context.Context, path string, versions []int) *sdkErrors.SDKError {
+	return secret.Undelete(ctx, a.source, path, versions)
 }

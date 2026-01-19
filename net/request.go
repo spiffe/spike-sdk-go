@@ -5,6 +5,7 @@
 package net
 
 import (
+	"context"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -29,6 +30,7 @@ type ResponseWithError interface {
 // Type parameter T must be a response type that implements ResponseWithError.
 //
 // Parameters:
+//   - ctx: Context for cancellation and deadline control
 //   - source: X509Source for establishing mTLS connection to SPIKE Nexus
 //   - urlPath: The URL path to send the POST request to
 //   - requestBody: Marshaled JSON request body
@@ -42,7 +44,7 @@ type ResponseWithError interface {
 //
 // Note: Callers should check for specific errors and handle them as needed:
 //
-//	response, err := net.PostAndUnmarshal[MyResponse](source, url, body)
+//	response, err := net.PostAndUnmarshal[MyResponse](ctx, source, url, body)
 //	if err != nil {
 //	    if err.Is(sdkErrors.ErrAPINotFound) {
 //	        // Handle not found case (e.g., return empty slice for lists)
@@ -61,15 +63,16 @@ type ResponseWithError interface {
 //	func (r *MyResponse) ErrorCode() sdkErrors.ErrorCode { return r.Err }
 //
 //	response, err := net.PostAndUnmarshal[MyResponse](
-//	    source, "https://api.example.com/endpoint", requestBody)
+//	    ctx, source, "https://api.example.com/endpoint", requestBody)
 func PostAndUnmarshal[T ResponseWithError](
+	ctx context.Context,
 	source *workloadapi.X509Source,
 	urlPath string,
 	requestBody []byte,
 ) (*T, *sdkErrors.SDKError) {
 	client := CreateMTLSClientForNexus(source)
 
-	postBody, err := Post(client, urlPath, requestBody)
+	postBody, err := Post(ctx, client, urlPath, requestBody)
 	if err != nil {
 		return nil, err
 	}
