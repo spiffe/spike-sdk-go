@@ -15,6 +15,7 @@ import (
 	"github.com/spiffe/spike-sdk-go/api/entity/data"
 	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
 	"github.com/spiffe/spike-sdk-go/log"
+	"github.com/spiffe/spike-sdk-go/security/mem"
 )
 
 const validNamePattern = `^[a-zA-Z0-9-_ ]+$`
@@ -324,4 +325,30 @@ func ValidatePolicyPermissions(
 		}
 	}
 	return true
+}
+
+// ValidRootKeyOrDie validates that the provided root key is neither nil nor
+// zeroed and terminates the program if validation fails.
+//
+// This function ensures cryptographic operations have a valid root key.
+// A nil or all-zero root key indicates a critical configuration error that
+// should never occur in production, so the function terminates the program
+// immediately via log.FatalErr.
+//
+// Parameters:
+//   - rootKey: Pointer to a 32-byte array containing the root key to validate
+func ValidRootKeyOrDie(rootKey *[32]byte) {
+	const fName = "ValidRootKeyOrDie"
+
+	if rootKey == nil {
+		failErr := *sdkErrors.ErrRootKeyEmpty.Clone()
+		failErr.Msg = "root key cannot be nil"
+		log.FatalErr(fName, failErr)
+	}
+
+	if mem.Zeroed32(rootKey) {
+		failErr := *sdkErrors.ErrRootKeyEmpty.Clone()
+		failErr.Msg = "root key cannot be empty"
+		log.FatalErr(fName, failErr)
+	}
 }
