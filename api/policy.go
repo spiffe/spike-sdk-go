@@ -128,7 +128,8 @@ func (a *API) GetPolicy(ctx context.Context, id string) (*data.Policy, *sdkError
 //   - ErrDataUnmarshalFailure: if response parsing fails
 //   - Error from FromCode(): if the server returns an error
 //
-// Note: Returns (&[]data.PolicyListItem{}, nil) if no policies are found (ErrAPINotFound)
+// Note: Returns (&[]data.PolicyListItem{}, nil) if no policies
+// are found (ErrAPINotFound)
 //
 // Example:
 //
