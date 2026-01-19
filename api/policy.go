@@ -128,7 +128,8 @@ func (a *API) GetPolicy(ctx context.Context, id string) (*data.Policy, *sdkError
 //   - ErrDataUnmarshalFailure: if response parsing fails
 //   - Error from FromCode(): if the server returns an error
 //
-// Note: Returns (&[]data.PolicyListItem{}, nil) if no policies are found (ErrAPINotFound)
+// Note: Returns (&[]data.PolicyListItem{}, nil) if no policies
+// are found (ErrAPINotFound)
 //
 // Example:
 //
@@ -145,4 +146,39 @@ func (a *API) ListPolicies(
 	ctx context.Context, SPIFFEIDPattern, pathPattern string,
 ) (*[]data.PolicyListItem, *sdkErrors.SDKError) {
 	return acl.ListPolicies(ctx, a.source, SPIFFEIDPattern, pathPattern)
+}
+
+// ListAllPolicies retrieves all policies from the system without any filtering.
+//
+// This is a convenience wrapper around ListPolicies that passes empty patterns
+// to match all policies.
+//
+// Returns:
+//   - *[]data.PolicyListItem: Array of policy list items (ID and Name),
+//     empty array if none found, nil on error
+//   - *sdkErrors.SDKError: nil on success, or one of the following errors:
+//   - ErrSPIFFENilX509Source: if the X509 source is nil
+//   - ErrDataMarshalFailure: if request serialization fails
+//   - Errors from net.Post(): if the HTTP request fails (except ErrAPINotFound)
+//   - ErrDataUnmarshalFailure: if response parsing fails
+//   - Error from FromCode(): if the server returns an error
+//
+// Note: Returns (&[]data.PolicyListItem{}, nil) if no policies
+// are found (ErrAPINotFound)
+//
+// Example:
+//
+//	result, err := api.ListAllPolicies(ctx)
+//	if err != nil {
+//	    log.Printf("Error listing policies: %v", err)
+//	    return
+//	}
+//	policies := *result // slice of data.PolicyListItem
+//	for _, policy := range policies {
+//	    log.Printf("Found policy: %+v", policy)
+//	}
+func (a *API) ListAllPolicies(
+	ctx context.Context,
+) (*[]data.PolicyListItem, *sdkErrors.SDKError) {
+	return acl.ListPolicies(ctx, a.source, "", "")
 }

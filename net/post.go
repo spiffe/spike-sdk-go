@@ -12,6 +12,7 @@ import (
 
 	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
 	"github.com/spiffe/spike-sdk-go/log"
+	"github.com/spiffe/spike-sdk-go/validation"
 )
 
 // Post performs an HTTP POST request with a JSON payload and returns the
@@ -52,15 +53,8 @@ func Post(
 ) ([]byte, *sdkErrors.SDKError) {
 	const fName = "Post"
 
-	// Note: Checking for nil context is not idiomatic Go (the convention is to
-	// let http.NewRequestWithContext panic). However, this SDK runs in containers
-	// where a panic would crash the entire Pod. Returning an error allows the
-	// application to handle it gracefully and continue serving other requests.
-	if ctx == nil {
-		failErr := sdkErrors.ErrNilContext.Clone()
-		failErr.Msg = fName + ": nil context"
-		return nil, failErr
-	}
+	// Nil context is almost always a bug in the code; better to crash:
+	validation.NonNilContextOrDie(ctx, fName)
 
 	// Create the request while preserving the mTLS client
 	req, err := http.NewRequestWithContext(ctx, "POST", path, bytes.NewBuffer(mr))
