@@ -8,6 +8,8 @@ import (
 	"strings"
 
 	"github.com/spiffe/spike-sdk-go/config/env"
+	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
+	"github.com/spiffe/spike-sdk-go/log"
 )
 
 // IsPilotOperator checks if a given SPIFFE ID matches the SPIKE Pilot
@@ -399,4 +401,43 @@ func PeerCanTalkToAnyone(_, _ string) bool {
 //     SPIFFE ID for any of the trust roots, false otherwise
 func PeerCanTalkToKeeper(peerSPIFFEID string) bool {
 	return IsNexus(peerSPIFFEID) || IsBootstrap(peerSPIFFEID)
+}
+
+// IsPilotOperatorOrDie verifies if the provided SPIFFE ID belongs to a
+// SPIKE Pilot instance. Logs a fatal error and exits if verification fails.
+//
+// SPIFFEID is the SPIFFE ID string to authenticate for pilot access.
+func IsPilotOperatorOrDie(SPIFFEID string) {
+	const fName = "AuthenticateForPilot"
+	if !IsPilotOperator(SPIFFEID) {
+		failErr := *sdkErrors.ErrAccessUnauthorized.Clone()
+		failErr.Msg = "you need a 'pilot' SPIFFE ID to use this command"
+		log.FatalErr(fName, failErr)
+	}
+}
+
+// IsPilotRecoverOrDie validates the SPIFFE ID for the recover role
+// and exits the application if it does not match the recover SPIFFE ID.
+//
+// SPIFFEID is the SPIFFE ID string to authenticate for pilot recover access.
+func IsPilotRecoverOrDie(SPIFFEID string) {
+	const fName = "AuthenticateForPilotRecover"
+	if !IsPilotRecover(SPIFFEID) {
+		failErr := *sdkErrors.ErrAccessUnauthorized.Clone()
+		failErr.Msg = "you need a 'recover' SPIFFE ID to use this command"
+		log.FatalErr(fName, failErr)
+	}
+}
+
+// IsPilotRestoreOrDie verifies if the given SPIFFE ID is valid for
+// restoration. Logs a fatal error and exits if the SPIFFE ID validation fails.
+//
+// SPIFFEID is the SPIFFE ID string to authenticate for restore access.
+func IsPilotRestoreOrDie(SPIFFEID string) {
+	const fName = "AuthenticateForPilotRestore"
+	if !IsPilotRestore(SPIFFEID) {
+		failErr := *sdkErrors.ErrAccessUnauthorized.Clone()
+		failErr.Msg = "you need a 'restore' SPIFFE ID to use this command"
+		log.FatalErr(fName, failErr)
+	}
 }

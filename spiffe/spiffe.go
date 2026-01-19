@@ -12,9 +12,8 @@ import (
 	"github.com/spiffe/go-spiffe/v2/spiffeid"
 	"github.com/spiffe/go-spiffe/v2/svid/x509svid"
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
-	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
-
 	"github.com/spiffe/spike-sdk-go/config/env"
+	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
 )
 
 // EndpointSocket returns the UNIX domain socket address for the SPIFFE
