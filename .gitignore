@@ -27,3 +27,6 @@ go.work.sum
 
 # Dev Env
 .idea
+
+# for LLM feed.
+prompt.md

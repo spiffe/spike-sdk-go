@@ -5,6 +5,7 @@
 package api
 
 import (
+	"context"
 	"io"
 
 	"github.com/spiffe/spike-sdk-go/api/internal/impl/cipher"
@@ -30,11 +31,11 @@ import (
 // Example:
 //
 //	reader := strings.NewReader("sensitive data")
-//	encrypted, err := api.CipherEncryptStream(reader)
+//	encrypted, err := api.CipherEncryptStream(ctx, reader)
 func (a *API) CipherEncryptStream(
-	reader io.Reader,
+	ctx context.Context, reader io.Reader,
 ) ([]byte, *sdkErrors.SDKError) {
-	return cipher.EncryptStream(a.source, reader)
+	return cipher.EncryptStream(ctx, a.source, reader)
 }
 
 // CipherEncrypt encrypts data with structured parameters.
@@ -58,11 +59,11 @@ func (a *API) CipherEncryptStream(
 // Example:
 //
 //	data := []byte("secret message")
-//	encrypted, err := api.CipherEncrypt(data, "AES-GCM")
+//	encrypted, err := api.CipherEncrypt(ctx, data, "AES-GCM")
 func (a *API) CipherEncrypt(
-	plaintext []byte, algorithm string,
+	ctx context.Context, plaintext []byte, algorithm string,
 ) ([]byte, *sdkErrors.SDKError) {
-	return cipher.Encrypt(a.source, plaintext, algorithm)
+	return cipher.Encrypt(ctx, a.source, plaintext, algorithm)
 }
 
 // CipherDecryptStream decrypts data from a reader using streaming mode.
@@ -84,11 +85,11 @@ func (a *API) CipherEncrypt(
 // Example:
 //
 //	reader := bytes.NewReader(encryptedData)
-//	plaintext, err := api.CipherDecryptStream(reader)
+//	plaintext, err := api.CipherDecryptStream(ctx, reader)
 func (a *API) CipherDecryptStream(
-	reader io.Reader,
+	ctx context.Context, reader io.Reader,
 ) ([]byte, *sdkErrors.SDKError) {
-	return cipher.DecryptStream(a.source, reader)
+	return cipher.DecryptStream(ctx, a.source, reader)
 }
 
 // CipherDecrypt decrypts data with structured parameters.
@@ -113,9 +114,9 @@ func (a *API) CipherDecryptStream(
 //
 // Example:
 //
-//	plaintext, err := api.CipherDecrypt(1, nonce, ciphertext, "AES-GCM")
+//	plaintext, err := api.CipherDecrypt(ctx, 1, nonce, ciphertext, "AES-GCM")
 func (a *API) CipherDecrypt(
-	version byte, nonce, ciphertext []byte, algorithm string,
+	ctx context.Context, version byte, nonce, ciphertext []byte, algorithm string,
 ) ([]byte, *sdkErrors.SDKError) {
-	return cipher.Decrypt(a.source, version, nonce, ciphertext, algorithm)
+	return cipher.Decrypt(ctx, a.source, version, nonce, ciphertext, algorithm)
 }

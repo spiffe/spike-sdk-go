@@ -5,6 +5,7 @@
 package acl
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
@@ -52,6 +53,7 @@ import (
 //	}
 //
 //	err = CreatePolicy(
+//	    ctx,
 //	    source,
 //	    "doc-reader",
 //	    "spiffe://example.org/service/*",
@@ -61,7 +63,7 @@ import (
 //	if err != nil {
 //	    log.Printf("Failed to create policy: %v", err)
 //	}
-func CreatePolicy(source *workloadapi.X509Source,
+func CreatePolicy(ctx context.Context, source *workloadapi.X509Source,
 	name string, SPIFFEIDPattern string, pathPattern string,
 	permissions []data.PolicyPermission,
 ) *sdkErrors.SDKError {
@@ -86,6 +88,6 @@ func CreatePolicy(source *workloadapi.X509Source,
 	}
 
 	_, postErr := net.PostAndUnmarshal[reqres.PolicyPutResponse](
-		source, url.PolicyCreate(), mr)
+		ctx, source, url.PolicyCreate(), mr)
 	return postErr
 }

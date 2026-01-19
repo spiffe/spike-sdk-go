@@ -5,6 +5,7 @@
 package secret
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
@@ -36,8 +37,9 @@ import (
 //
 // Example:
 //
-//	metadata, err := GetMetadata(x509Source, "secret/path", 1)
+//	metadata, err := GetMetadata(ctx, x509Source, "secret/path", 1)
 func GetMetadata(
+	ctx context.Context,
 	source *workloadapi.X509Source, path string, version int,
 ) (*data.SecretMetadata, *sdkErrors.SDKError) {
 	if source == nil {
@@ -54,7 +56,7 @@ func GetMetadata(
 	}
 
 	res, postErr := net.PostAndUnmarshal[reqres.SecretMetadataResponse](
-		source, url.SecretMetadataGet(), mr)
+		ctx, source, url.SecretMetadataGet(), mr)
 	if postErr != nil {
 		return nil, postErr
 	}

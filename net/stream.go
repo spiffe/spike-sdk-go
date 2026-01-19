@@ -5,6 +5,7 @@
 package net
 
 import (
+	"context"
 	"io"
 	"net/http"
 
@@ -24,6 +25,7 @@ import (
 // canonical Go pattern of returning (zero-value, error) on failures.
 //
 // Parameters:
+//   - ctx context.Context: Context for cancellation and deadline control
 //   - client *http.Client: The HTTP client to use for the request
 //   - path string: The URL path to POST to
 //   - body io.Reader: The request body data stream
@@ -43,7 +45,7 @@ import (
 // Example:
 //
 //		data := strings.NewReader("large data payload")
-//		response, err := StreamPostWithContentType(client,
+//		response, err := StreamPostWithContentType(ctx, client,
 //	 	"/api/upload", data, "text/plain")
 //		if err != nil {
 //		    return err
@@ -51,12 +53,13 @@ import (
 //		defer response.Close()
 //		// Process streaming response...
 func StreamPostWithContentType(
+	ctx context.Context,
 	client *http.Client, path string, body io.Reader,
 	contentType ContentType,
 ) (io.ReadCloser, *sdkErrors.SDKError) {
 	const fName = "StreamPostWithContentType"
 
-	req, err := http.NewRequest("POST", path, body)
+	req, err := http.NewRequestWithContext(ctx, "POST", path, body)
 	if err != nil {
 		failErr := sdkErrors.ErrAPIPostFailed.Wrap(err)
 		failErr.Msg = "failed to create request"
@@ -108,6 +111,7 @@ func StreamPostWithContentType(
 // io.ReadCloser.
 //
 // Parameters:
+//   - ctx context.Context: Context for cancellation and deadline control
 //   - client *http.Client: The HTTP client to use for the request
 //   - path string: The URL path to POST to
 //   - body io.Reader: The request body data stream
@@ -121,16 +125,17 @@ func StreamPostWithContentType(
 // Example:
 //
 //	binaryData := bytes.NewReader(fileBytes)
-//	response, err := StreamPost(client, "/api/upload", binaryData)
+//	response, err := StreamPost(ctx, client, "/api/upload", binaryData)
 //	if err != nil {
 //	    return err
 //	}
 //	defer response.Close()
 //	// Process response...
 func StreamPost(
+	ctx context.Context,
 	client *http.Client, path string, body io.Reader,
 ) (io.ReadCloser, *sdkErrors.SDKError) {
 	return StreamPostWithContentType(
-		client, path, body, ContentTypeOctetStream,
+		ctx, client, path, body, ContentTypeOctetStream,
 	)
 }

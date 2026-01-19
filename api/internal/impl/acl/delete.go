@@ -5,6 +5,7 @@
 package acl
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
@@ -40,11 +41,12 @@ import (
 //	}
 //	defer source.Close()
 //
-//	err = DeletePolicy(source, "policy-123")
+//	err = DeletePolicy(ctx, source, "policy-123")
 //	if err != nil {
 //	    log.Printf("Failed to delete policy: %v", err)
 //	}
 func DeletePolicy(
+	ctx context.Context,
 	source *workloadapi.X509Source,
 	id string,
 ) *sdkErrors.SDKError {
@@ -62,6 +64,6 @@ func DeletePolicy(
 	}
 
 	_, postErr := net.PostAndUnmarshal[reqres.PolicyDeleteResponse](
-		source, url.PolicyDelete(), mr)
+		ctx, source, url.PolicyDelete(), mr)
 	return postErr
 }

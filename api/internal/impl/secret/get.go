@@ -5,6 +5,7 @@
 package secret
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
@@ -35,8 +36,9 @@ import (
 //
 // Example:
 //
-//	secret, err := Get(x509Source, "secret/path", 1)
+//	secret, err := Get(ctx, x509Source, "secret/path", 1)
 func Get(
+	ctx context.Context,
 	source *workloadapi.X509Source,
 	path string, version int,
 ) (*data.Secret, *sdkErrors.SDKError) {
@@ -54,7 +56,7 @@ func Get(
 	}
 
 	res, postErr := net.PostAndUnmarshal[reqres.SecretGetResponse](
-		source, url.SecretGet(), mr)
+		ctx, source, url.SecretGet(), mr)
 	if postErr != nil {
 		return nil, postErr
 	}

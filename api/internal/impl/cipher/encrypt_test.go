@@ -6,6 +6,7 @@ package cipher
 
 import (
 	"bytes"
+	"context"
 	"io"
 	"net/http"
 	"testing"
@@ -32,7 +33,7 @@ func TestEncryptOctetStream(t *testing.T) {
 				return nil, nil
 			}))
 		},
-		streamPost: func(_ *http.Client, path string, body io.Reader) (io.ReadCloser, *sdkErrors.SDKError) {
+		streamPost: func(_ context.Context, _ *http.Client, path string, body io.Reader) (io.ReadCloser, *sdkErrors.SDKError) {
 			if path == "" {
 				t.Fatalf("empty path")
 			}
@@ -42,13 +43,13 @@ func TestEncryptOctetStream(t *testing.T) {
 			}
 			return io.NopCloser(bytes.NewReader([]byte("cipher"))), nil
 		},
-		httpPost: func(_ *http.Client, _ string, _ []byte) ([]byte, *sdkErrors.SDKError) {
+		httpPost: func(_ context.Context, _ *http.Client, _ string, _ []byte) ([]byte, *sdkErrors.SDKError) {
 			return nil, nil
 		},
 	}
 
 	out, err := cipher.EncryptStream(
-		&workloadapi.X509Source{}, bytes.NewReader([]byte("plain")),
+		context.Background(), &workloadapi.X509Source{}, bytes.NewReader([]byte("plain")),
 	)
 	if err != nil {
 		t.Fatalf("EncryptStream error: %v", err)

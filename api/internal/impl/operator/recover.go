@@ -5,6 +5,7 @@
 package operator
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
@@ -68,12 +69,12 @@ import (
 //
 // Example:
 //
-//	shards, err := Recover(x509Source)
+//	shards, err := Recover(ctx, x509Source)
 //	if err != nil {
 //	    // SVID acquisition failures may be transient - consider retry logic
 //	    return nil, err
 //	}
-func Recover(source *workloadapi.X509Source) (
+func Recover(ctx context.Context, source *workloadapi.X509Source) (
 	map[int]*[32]byte, *sdkErrors.SDKError,
 ) {
 	const fName = "recover"
@@ -113,7 +114,7 @@ func Recover(source *workloadapi.X509Source) (
 	}
 
 	res, postErr := net.PostAndUnmarshal[reqres.RecoverResponse](
-		source, url.Recover(), mr)
+		ctx, source, url.Recover(), mr)
 	if postErr != nil {
 		return nil, postErr
 	}

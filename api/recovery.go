@@ -5,6 +5,8 @@
 package api
 
 import (
+	"context"
+
 	"github.com/spiffe/spike-sdk-go/api/entity/data"
 	"github.com/spiffe/spike-sdk-go/api/internal/impl/operator"
 	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
@@ -34,12 +36,12 @@ import (
 //
 // Example:
 //
-//	shards, err := api.Recover()
+//	shards, err := api.Recover(ctx)
 //	if err != nil {
 //	    log.Fatalf("Failed to recover shards: %v", err)
 //	}
-func (a *API) Recover() (map[int]*[32]byte, *sdkErrors.SDKError) {
-	return operator.Recover(a.source)
+func (a *API) Recover(ctx context.Context) (map[int]*[32]byte, *sdkErrors.SDKError) {
+	return operator.Recover(ctx, a.source)
 }
 
 // Restore submits a recovery shard to continue the SPIKE Nexus restoration
@@ -70,14 +72,14 @@ func (a *API) Recover() (map[int]*[32]byte, *sdkErrors.SDKError) {
 //
 // Example:
 //
-//	status, err := api.Restore(shardIndex, shardPtr)
+//	status, err := api.Restore(ctx, shardIndex, shardPtr)
 //	if err != nil {
 //	    log.Fatalf("Failed to restore shard: %v", err)
 //	}
 //	log.Printf("Shards collected: %d, remaining: %d",
 //	    status.ShardsCollected, status.ShardsRemaining)
 func (a *API) Restore(
-	index int, shard *[32]byte,
+	ctx context.Context, index int, shard *[32]byte,
 ) (*data.RestorationStatus, *sdkErrors.SDKError) {
-	return operator.Restore(a.source, index, shard)
+	return operator.Restore(ctx, a.source, index, shard)
 }

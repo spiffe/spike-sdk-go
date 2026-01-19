@@ -5,6 +5,7 @@
 package secret
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
@@ -34,8 +35,8 @@ import (
 //
 // Example:
 //
-//	err := Undelete(x509Source, "secret/path", []int{1, 2})
-func Undelete(source *workloadapi.X509Source,
+//	err := Undelete(ctx, x509Source, "secret/path", []int{1, 2})
+func Undelete(ctx context.Context, source *workloadapi.X509Source,
 	path string, versions []int,
 ) *sdkErrors.SDKError {
 	if source == nil {
@@ -59,6 +60,6 @@ func Undelete(source *workloadapi.X509Source,
 	}
 
 	_, postErr := net.PostAndUnmarshal[reqres.SecretUndeleteResponse](
-		source, url.SecretUndelete(), mr)
+		ctx, source, url.SecretUndelete(), mr)
 	return postErr
 }

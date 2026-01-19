@@ -5,6 +5,8 @@
 package api
 
 import (
+	"context"
+
 	"github.com/spiffe/spike-sdk-go/api/entity/data"
 	"github.com/spiffe/spike-sdk-go/api/internal/impl/acl"
 	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
@@ -35,6 +37,7 @@ import (
 //	    {Action: "read", Resource: "documents/*"},
 //	}
 //	err := api.CreatePolicy(
+//	    ctx,
 //	    "doc-reader",
 //	    "spiffe://example.org/service/*",
 //	    "/api/documents/*",
@@ -44,10 +47,11 @@ import (
 //	    log.Printf("Failed to create policy: %v", err)
 //	}
 func (a *API) CreatePolicy(
+	ctx context.Context,
 	name string, SPIFFEIDPattern string, pathPattern string,
 	permissions []data.PolicyPermission,
 ) *sdkErrors.SDKError {
-	return acl.CreatePolicy(a.source,
+	return acl.CreatePolicy(ctx, a.source,
 		name, SPIFFEIDPattern, pathPattern, permissions)
 }
 
@@ -66,12 +70,12 @@ func (a *API) CreatePolicy(
 //
 // Example:
 //
-//	err := api.DeletePolicy("policy-123")
+//	err := api.DeletePolicy(ctx, "policy-123")
 //	if err != nil {
 //	    log.Printf("Failed to delete policy: %v", err)
 //	}
-func (a *API) DeletePolicy(id string) *sdkErrors.SDKError {
-	return acl.DeletePolicy(a.source, id)
+func (a *API) DeletePolicy(ctx context.Context, id string) *sdkErrors.SDKError {
+	return acl.DeletePolicy(ctx, a.source, id)
 }
 
 // GetPolicy retrieves a policy from the system using its unique ID.
@@ -91,7 +95,7 @@ func (a *API) DeletePolicy(id string) *sdkErrors.SDKError {
 //
 // Example:
 //
-//	policy, err := api.GetPolicy("policy-123")
+//	policy, err := api.GetPolicy(ctx, "policy-123")
 //	if err != nil {
 //	    if err.Is(sdkErrors.ErrAPINotFound) {
 //	        log.Printf("Policy not found")
@@ -101,8 +105,8 @@ func (a *API) DeletePolicy(id string) *sdkErrors.SDKError {
 //	    return
 //	}
 //	log.Printf("Found policy: %+v", policy)
-func (a *API) GetPolicy(id string) (*data.Policy, *sdkErrors.SDKError) {
-	return acl.GetPolicy(a.source, id)
+func (a *API) GetPolicy(ctx context.Context, id string) (*data.Policy, *sdkErrors.SDKError) {
+	return acl.GetPolicy(ctx, a.source, id)
 }
 
 // ListPolicies retrieves policies from the system, optionally filtering by
@@ -128,7 +132,7 @@ func (a *API) GetPolicy(id string) (*data.Policy, *sdkErrors.SDKError) {
 //
 // Example:
 //
-//	result, err := api.ListPolicies("", "")
+//	result, err := api.ListPolicies(ctx, "", "")
 //	if err != nil {
 //	    log.Printf("Error listing policies: %v", err)
 //	    return
@@ -138,7 +142,7 @@ func (a *API) GetPolicy(id string) (*data.Policy, *sdkErrors.SDKError) {
 //	    log.Printf("Found policy: %+v", policy)
 //	}
 func (a *API) ListPolicies(
-	SPIFFEIDPattern, pathPattern string,
+	ctx context.Context, SPIFFEIDPattern, pathPattern string,
 ) (*[]data.PolicyListItem, *sdkErrors.SDKError) {
-	return acl.ListPolicies(a.source, SPIFFEIDPattern, pathPattern)
+	return acl.ListPolicies(ctx, a.source, SPIFFEIDPattern, pathPattern)
 }

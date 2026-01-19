@@ -5,6 +5,7 @@
 package cipher
 
 import (
+	"context"
 	"io"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
@@ -43,14 +44,14 @@ import (
 //	defer source.Close()
 //
 //	reader := bytes.NewReader(encryptedData)
-//	plaintext, err := DecryptStream(source, reader)
+//	plaintext, err := DecryptStream(ctx, source, reader)
 //	if err != nil {
 //	    log.Printf("Decryption failed: %v", err)
 //	}
 func DecryptStream(
-	source *workloadapi.X509Source, r io.Reader,
+	ctx context.Context, source *workloadapi.X509Source, r io.Reader,
 ) ([]byte, *sdkErrors.SDKError) {
-	return NewCipher().DecryptStream(source, r)
+	return NewCipher().DecryptStream(ctx, source, r)
 }
 
 // DecryptStream decrypts data from a reader using streaming mode.
@@ -73,14 +74,14 @@ func DecryptStream(
 //
 //	cipher := NewCipher()
 //	reader := bytes.NewReader(encryptedData)
-//	plaintext, err := cipher.DecryptStream(source, reader)
+//	plaintext, err := cipher.DecryptStream(ctx, source, reader)
 //	if err != nil {
 //	    log.Printf("Decryption failed: %v", err)
 //	}
 func (c *Cipher) DecryptStream(
-	source *workloadapi.X509Source, r io.Reader,
+	ctx context.Context, source *workloadapi.X509Source, r io.Reader,
 ) ([]byte, *sdkErrors.SDKError) {
-	return c.streamOperation(source, r, url.CipherDecrypt(), "DecryptStream")
+	return c.streamOperation(ctx, source, r, url.CipherDecrypt(), "DecryptStream")
 }
 
 // Decrypt decrypts data with structured parameters using
@@ -117,15 +118,16 @@ func (c *Cipher) DecryptStream(
 //	}
 //	defer source.Close()
 //
-//	plaintext, err := Decrypt(source, 1, nonce, ciphertext, "AES-GCM")
+//	plaintext, err := Decrypt(ctx, source, 1, nonce, ciphertext, "AES-GCM")
 //	if err != nil {
 //	    log.Printf("Decryption failed: %v", err)
 //	}
 func Decrypt(
+	ctx context.Context,
 	source *workloadapi.X509Source,
 	version byte, nonce, ciphertext []byte, algorithm string,
 ) ([]byte, *sdkErrors.SDKError) {
-	return NewCipher().Decrypt(source, version, nonce, ciphertext, algorithm)
+	return NewCipher().Decrypt(ctx, source, version, nonce, ciphertext, algorithm)
 }
 
 // Decrypt decrypts data with structured parameters.
@@ -153,11 +155,12 @@ func Decrypt(
 // Example:
 //
 //	cipher := NewCipher()
-//	plaintext, err := cipher.Decrypt(source, 1, nonce, ciphertext, "AES-GCM")
+//	plaintext, err := cipher.Decrypt(ctx, source, 1, nonce, ciphertext, "AES-GCM")
 //	if err != nil {
 //	    log.Printf("Decryption failed: %v", err)
 //	}
 func (c *Cipher) Decrypt(
+	ctx context.Context,
 	source *workloadapi.X509Source,
 	version byte, nonce, ciphertext []byte, algorithm string,
 ) ([]byte, *sdkErrors.SDKError) {
@@ -170,7 +173,7 @@ func (c *Cipher) Decrypt(
 
 	var res reqres.CipherDecryptResponse
 	if err := c.jsonOperation(
-		source, payload, url.CipherDecrypt(), &res,
+		ctx, source, payload, url.CipherDecrypt(), &res,
 	); err != nil {
 		return nil, err
 	}

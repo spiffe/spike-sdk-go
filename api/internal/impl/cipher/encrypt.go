@@ -5,6 +5,7 @@
 package cipher
 
 import (
+	"context"
 	"io"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
@@ -43,14 +44,14 @@ import (
 //	defer source.Close()
 //
 //	reader := bytes.NewReader([]byte("sensitive data"))
-//	ciphertext, err := EncryptStream(source, reader)
+//	ciphertext, err := EncryptStream(ctx, source, reader)
 //	if err != nil {
 //	    log.Printf("Encryption failed: %v", err)
 //	}
 func EncryptStream(
-	source *workloadapi.X509Source, r io.Reader,
+	ctx context.Context, source *workloadapi.X509Source, r io.Reader,
 ) ([]byte, *sdkErrors.SDKError) {
-	return NewCipher().EncryptStream(source, r)
+	return NewCipher().EncryptStream(ctx, source, r)
 }
 
 // EncryptStream encrypts data from a reader using streaming mode.
@@ -73,14 +74,14 @@ func EncryptStream(
 //
 //	cipher := NewCipher()
 //	reader := bytes.NewReader([]byte("sensitive data"))
-//	ciphertext, err := cipher.EncryptStream(source, reader)
+//	ciphertext, err := cipher.EncryptStream(ctx, source, reader)
 //	if err != nil {
 //	    log.Printf("Encryption failed: %v", err)
 //	}
 func (c *Cipher) EncryptStream(
-	source *workloadapi.X509Source, r io.Reader,
+	ctx context.Context, source *workloadapi.X509Source, r io.Reader,
 ) ([]byte, *sdkErrors.SDKError) {
-	return c.streamOperation(source, r, url.CipherEncrypt(), "EncryptStream")
+	return c.streamOperation(ctx, source, r, url.CipherEncrypt(), "EncryptStream")
 }
 
 // Encrypt encrypts data with structured parameters using
@@ -116,14 +117,14 @@ func (c *Cipher) EncryptStream(
 //	defer source.Close()
 //
 //	data := []byte("secret message")
-//	ciphertext, err := Encrypt(source, data, "AES-GCM")
+//	ciphertext, err := Encrypt(ctx, source, data, "AES-GCM")
 //	if err != nil {
 //	    log.Printf("Encryption failed: %v", err)
 //	}
 func Encrypt(
-	source *workloadapi.X509Source, plaintext []byte, algorithm string,
+	ctx context.Context, source *workloadapi.X509Source, plaintext []byte, algorithm string,
 ) ([]byte, *sdkErrors.SDKError) {
-	return NewCipher().Encrypt(source, plaintext, algorithm)
+	return NewCipher().Encrypt(ctx, source, plaintext, algorithm)
 }
 
 // Encrypt encrypts data with structured parameters.
@@ -150,12 +151,12 @@ func Encrypt(
 //
 //	cipher := NewCipher()
 //	data := []byte("secret message")
-//	ciphertext, err := cipher.Encrypt(source, data, "AES-GCM")
+//	ciphertext, err := cipher.Encrypt(ctx, source, data, "AES-GCM")
 //	if err != nil {
 //	    log.Printf("Encryption failed: %v", err)
 //	}
 func (c *Cipher) Encrypt(
-	source *workloadapi.X509Source, plaintext []byte, algorithm string,
+	ctx context.Context, source *workloadapi.X509Source, plaintext []byte, algorithm string,
 ) ([]byte, *sdkErrors.SDKError) {
 	payload := reqres.CipherEncryptRequest{
 		Plaintext: plaintext,
@@ -164,7 +165,7 @@ func (c *Cipher) Encrypt(
 
 	var res reqres.CipherEncryptResponse
 	if err := c.jsonOperation(
-		source, payload, url.CipherEncrypt(), &res,
+		ctx, source, payload, url.CipherEncrypt(), &res,
 	); err != nil {
 		return nil, err
 	}
