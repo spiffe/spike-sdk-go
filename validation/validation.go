@@ -8,6 +8,7 @@ import (
 	"context"
 	"fmt"
 	"regexp"
+	"slices"
 	"strings"
 
 	"github.com/google/uuid"
@@ -292,4 +293,35 @@ func NonNilContextOrDie(ctx context.Context, fName string) {
 		failErr := *sdkErrors.ErrNilContext.Clone()
 		log.FatalErr(fName, failErr)
 	}
+}
+
+// ValidatePolicyPermissions checks whether the "haves" permissions satisfy all
+// the required "wants" permissions.
+//
+// The "Super" permission acts as a wildcard that grants all permissions.
+// If "Super" is present in haves, this function returns true regardless of
+// the wants.
+//
+// Parameters:
+//   - haves: The permissions that are available
+//   - wants: The permissions that are required
+//
+// Returns:
+//   - true if all required permissions are satisfied (or "super" is present)
+//   - false if any required permission is missing
+func ValidatePolicyPermissions(
+	haves []data.PolicyPermission,
+	wants []data.PolicyPermission,
+) bool {
+	// The "Super" permission grants all permissions.
+	if slices.Contains(haves, data.PermissionSuper) {
+		return true
+	}
+
+	for _, want := range wants {
+		if !slices.Contains(haves, want) {
+			return false
+		}
+	}
+	return true
 }
