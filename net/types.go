@@ -74,3 +74,18 @@ type HandlerWithEntity[T any] func(
 type Encryptor func(
 	plaintext []byte, c cipher.AEAD, w http.ResponseWriter,
 ) ([]byte, []byte, *sdkErrors.SDKError)
+
+// ErrorResponder defines an interface for response types that can generate
+// standard error responses. All SDK response types in the reqres package
+// implement this interface through their NotFound() and Internal() methods.
+type ErrorResponder[T any] interface {
+	NotFound() T
+	Internal() T
+}
+
+// InternalErrorResponder defines an interface for response types that can
+// generate internal error responses. This is a subset of ErrorResponder for
+// cases where only internal errors are possible (no "not found" scenario).
+type InternalErrorResponder[T any] interface {
+	Internal() T
+}
