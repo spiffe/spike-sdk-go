@@ -352,3 +352,23 @@ func ValidRootKeyOrDie(rootKey *[32]byte) {
 		log.FatalErr(fName, failErr)
 	}
 }
+
+// NilRootKeyOrDie validates that the provided root key is nil and terminates
+// the program if it is not.
+//
+// This function is used for memory store configurations where a root key
+// should not be provided. A non-nil root key in this context indicates a
+// configuration error that should never occur in production, so the function
+// terminates the program immediately via log.FatalErr.
+//
+// Parameters:
+//   - rootKey: Pointer to a 32-byte array that must be nil
+func NilRootKeyOrDie(rootKey *[32]byte) {
+	const fName = "NilRootKeyOrDie"
+
+	if rootKey != nil {
+		failErr := *sdkErrors.ErrRootKeyNotEmpty.Clone()
+		failErr.Msg = "root key should be nil for memory store type"
+		log.FatalErr(fName, failErr)
+	}
+}
