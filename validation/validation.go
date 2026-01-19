@@ -245,7 +245,7 @@ func ValidPermissionsList() string {
 //   - []data.PolicyPermission: Validated policy permissions
 //   - *sdkErrors.SDKError: An error if any permission is invalid
 func ValidatePermissions(permsStr string) (
-	[]data.PolicyPermission, *sdkErrors.SDKError,
+		[]data.PolicyPermission, *sdkErrors.SDKError,
 ) {
 	var permissions []string
 	for _, p := range strings.Split(permsStr, ",") {
@@ -271,7 +271,7 @@ func ValidatePermissions(permsStr string) (
 	if len(perms) == 0 {
 		failErr := *sdkErrors.ErrAccessInvalidPermission.Clone()
 		failErr.Msg = "no valid permissions specified" +
-			". valid permissions are: " + ValidPermissionsList()
+				". valid permissions are: " + ValidPermissionsList()
 		return nil, &failErr
 	}
 
@@ -311,8 +311,8 @@ func NonNilContextOrDie(ctx context.Context, fName string) {
 //   - true if all required permissions are satisfied (or "super" is present)
 //   - false if any required permission is missing
 func ValidatePolicyPermissions(
-	haves []data.PolicyPermission,
-	wants []data.PolicyPermission,
+		haves []data.PolicyPermission,
+		wants []data.PolicyPermission,
 ) bool {
 	// The "Super" permission grants all permissions.
 	if slices.Contains(haves, data.PermissionSuper) {
@@ -349,6 +349,26 @@ func ValidRootKeyOrDie(rootKey *[32]byte) {
 	if mem.Zeroed32(rootKey) {
 		failErr := *sdkErrors.ErrRootKeyEmpty.Clone()
 		failErr.Msg = "root key cannot be empty"
+		log.FatalErr(fName, failErr)
+	}
+}
+
+// NilRootKeyOrDie validates that the provided root key is nil and terminates
+// the program if it is not.
+//
+// This function is used for memory store configurations where a root key
+// should not be provided. A non-nil root key in this context indicates a
+// configuration error that should never occur in production, so the function
+// terminates the program immediately via log.FatalErr.
+//
+// Parameters:
+//   - rootKey: Pointer to a 32-byte array that must be nil
+func NilRootKeyOrDie(rootKey *[32]byte) {
+	const fName = "NilRootKeyOrDie"
+
+	if rootKey != nil {
+		failErr := *sdkErrors.ErrRootKeyNotEmpty.Clone()
+		failErr.Msg = "root key should be nil for memory store type"
 		log.FatalErr(fName, failErr)
 	}
 }
