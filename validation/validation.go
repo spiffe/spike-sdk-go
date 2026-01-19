@@ -245,7 +245,7 @@ func ValidPermissionsList() string {
 //   - []data.PolicyPermission: Validated policy permissions
 //   - *sdkErrors.SDKError: An error if any permission is invalid
 func ValidatePermissions(permsStr string) (
-		[]data.PolicyPermission, *sdkErrors.SDKError,
+	[]data.PolicyPermission, *sdkErrors.SDKError,
 ) {
 	var permissions []string
 	for _, p := range strings.Split(permsStr, ",") {
@@ -271,7 +271,7 @@ func ValidatePermissions(permsStr string) (
 	if len(perms) == 0 {
 		failErr := *sdkErrors.ErrAccessInvalidPermission.Clone()
 		failErr.Msg = "no valid permissions specified" +
-				". valid permissions are: " + ValidPermissionsList()
+			". valid permissions are: " + ValidPermissionsList()
 		return nil, &failErr
 	}
 
@@ -311,8 +311,8 @@ func NonNilContextOrDie(ctx context.Context, fName string) {
 //   - true if all required permissions are satisfied (or "super" is present)
 //   - false if any required permission is missing
 func ValidatePolicyPermissions(
-		haves []data.PolicyPermission,
-		wants []data.PolicyPermission,
+	haves []data.PolicyPermission,
+	wants []data.PolicyPermission,
 ) bool {
 	// The "Super" permission grants all permissions.
 	if slices.Contains(haves, data.PermissionSuper) {
