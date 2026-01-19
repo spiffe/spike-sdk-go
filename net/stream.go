@@ -59,6 +59,16 @@ func StreamPostWithContentType(
 ) (io.ReadCloser, *sdkErrors.SDKError) {
 	const fName = "StreamPostWithContentType"
 
+	// Note: Checking for nil context is not idiomatic Go (the convention is to
+	// let http.NewRequestWithContext panic). However, this SDK runs in containers
+	// where a panic would crash the entire Pod. Returning an error allows the
+	// application to handle it gracefully and continue serving other requests.
+	if ctx == nil {
+		failErr := sdkErrors.ErrNilContext.Clone()
+		failErr.Msg = fName + ": nil context"
+		return nil, failErr
+	}
+
 	req, err := http.NewRequestWithContext(ctx, "POST", path, body)
 	if err != nil {
 		failErr := sdkErrors.ErrAPIPostFailed.Wrap(err)
