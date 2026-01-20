@@ -6,7 +6,6 @@ package secret
 
 import (
 	"context"
-	"encoding/json"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 
@@ -39,10 +38,6 @@ import (
 func Undelete(ctx context.Context, source *workloadapi.X509Source,
 	path string, versions []int,
 ) *sdkErrors.SDKError {
-	if source == nil {
-		return sdkErrors.ErrSPIFFENilX509Source.Clone()
-	}
-
 	var vv []int
 	if len(versions) == 0 {
 		vv = []int{}
@@ -52,14 +47,8 @@ func Undelete(ctx context.Context, source *workloadapi.X509Source,
 
 	r := reqres.SecretUndeleteRequest{Path: path, Versions: vv}
 
-	mr, marshalErr := json.Marshal(r)
-	if marshalErr != nil {
-		failErr := sdkErrors.ErrDataMarshalFailure.Wrap(marshalErr)
-		failErr.Msg = "problem generating the payload"
-		return failErr
-	}
-
-	_, postErr := net.PostAndUnmarshal[reqres.SecretUndeleteResponse](
-		ctx, source, url.SecretUndelete(), mr)
-	return postErr
+	_, err := net.DoPost[reqres.SecretUndeleteResponse](
+		ctx, source, url.SecretUndelete(), r,
+	)
+	return err
 }

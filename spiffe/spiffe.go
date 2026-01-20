@@ -14,6 +14,7 @@ import (
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 	"github.com/spiffe/spike-sdk-go/config/env"
 	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
+	"github.com/spiffe/spike-sdk-go/log"
 )
 
 // EndpointSocket returns the UNIX domain socket address for the SPIFFE
@@ -83,6 +84,41 @@ func Source(ctx context.Context, socketPath string) (
 	}
 
 	return source, sv.ID.String(), nil
+}
+
+// SourceOrDie creates and returns a new SPIFFE X509Source for workload API
+// communication, terminating the program if source creation fails.
+//
+// This function establishes a connection to the SPIFFE workload API using
+// the default endpoint socket. The provided context allows callers to control
+// timeout and cancellation to prevent indefinite blocking on socket issues.
+//
+// Parameters:
+//   - ctx: Context for cancellation and timeout control. Callers should
+//     typically use context.WithTimeout to prevent indefinite blocking.
+//
+// Returns:
+//   - *workloadapi.X509Source: A new X509Source for SPIFFE workload API
+//     communication
+//
+// The function will terminate the program with a fatal error if the source
+// creation fails or the context is canceled/times out.
+//
+// Example:
+//
+//	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+//	defer cancel()
+//	source := spiffe.SourceOrDie(ctx)
+//	defer spiffe.CloseSource(source)
+func SourceOrDie(ctx context.Context) *workloadapi.X509Source {
+	const fName = "SourceOrDie"
+
+	source, _, err := Source(ctx, EndpointSocket())
+	if err != nil {
+		failErr := sdkErrors.ErrSPIFFEUnableToFetchX509Source.Wrap(err)
+		log.FatalErr(fName, *failErr)
+	}
+	return source
 }
 
 // IDFromRequest extracts the SPIFFE ID from the TLS peer certificate of

@@ -6,7 +6,6 @@ package secret
 
 import (
 	"context"
-	"encoding/json"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 
@@ -39,25 +38,16 @@ func ListKeys(
 	ctx context.Context,
 	source *workloadapi.X509Source,
 ) (*[]string, *sdkErrors.SDKError) {
-	if source == nil {
-		return nil, sdkErrors.ErrSPIFFENilX509Source.Clone()
-	}
-
 	r := reqres.SecretListRequest{}
-	mr, marshalErr := json.Marshal(r)
-	if marshalErr != nil {
-		failErr := sdkErrors.ErrDataMarshalFailure.Wrap(marshalErr)
-		failErr.Msg = "problem generating the payload"
-		return nil, failErr
-	}
 
-	res, postErr := net.PostAndUnmarshal[reqres.SecretListResponse](
-		ctx, source, url.SecretList(), mr)
-	if postErr != nil {
-		if postErr.Is(sdkErrors.ErrAPINotFound) {
+	res, err := net.DoPost[reqres.SecretListResponse](
+		ctx, source, url.SecretList(), r,
+	)
+	if err != nil {
+		if err.Is(sdkErrors.ErrAPINotFound) {
 			return &[]string{}, nil
 		}
-		return nil, postErr
+		return nil, err
 	}
 
 	return &res.Keys, nil

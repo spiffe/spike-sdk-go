@@ -109,7 +109,7 @@ func Post(
 		return []byte{}, failErr
 	}
 
-	b, sdkErr := body(r)
+	b, sdkErr := Body(r)
 	if sdkErr != nil {
 		return nil, sdkErr
 	}

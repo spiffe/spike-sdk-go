@@ -6,7 +6,6 @@ package secret
 
 import (
 	"context"
-	"encoding/json"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 
@@ -42,23 +41,13 @@ func GetMetadata(
 	ctx context.Context,
 	source *workloadapi.X509Source, path string, version int,
 ) (*data.SecretMetadata, *sdkErrors.SDKError) {
-	if source == nil {
-		return nil, sdkErrors.ErrSPIFFENilX509Source.Clone()
-	}
-
 	r := reqres.SecretMetadataRequest{Path: path, Version: version}
 
-	mr, marshalErr := json.Marshal(r)
-	if marshalErr != nil {
-		failErr := sdkErrors.ErrDataMarshalFailure.Wrap(marshalErr)
-		failErr.Msg = "problem generating the payload"
-		return nil, failErr
-	}
-
-	res, postErr := net.PostAndUnmarshal[reqres.SecretMetadataResponse](
-		ctx, source, url.SecretMetadataGet(), mr)
-	if postErr != nil {
-		return nil, postErr
+	res, err := net.DoPost[reqres.SecretMetadataResponse](
+		ctx, source, url.SecretMetadataGet(), r,
+	)
+	if err != nil {
+		return nil, err
 	}
 
 	return &data.SecretMetadata{

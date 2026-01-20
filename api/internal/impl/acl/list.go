@@ -6,7 +6,6 @@ package acl
 
 import (
 	"context"
-	"encoding/json"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 
@@ -71,28 +70,19 @@ func ListPolicies(
 	source *workloadapi.X509Source,
 	SPIFFEIDPattern string, pathPattern string,
 ) (*[]data.PolicyListItem, *sdkErrors.SDKError) {
-	if source == nil {
-		return nil, sdkErrors.ErrSPIFFENilX509Source.Clone()
-	}
-
 	r := reqres.PolicyListRequest{
 		SPIFFEIDPattern: SPIFFEIDPattern,
 		PathPattern:     pathPattern,
 	}
-	mr, marshalErr := json.Marshal(r)
-	if marshalErr != nil {
-		failErr := sdkErrors.ErrDataMarshalFailure.Wrap(marshalErr)
-		failErr.Msg = "problem generating the payload"
-		return nil, failErr
-	}
 
-	res, postErr := net.PostAndUnmarshal[reqres.PolicyListResponse](
-		ctx, source, url.PolicyList(), mr)
-	if postErr != nil {
-		if postErr.Is(sdkErrors.ErrAPINotFound) {
+	res, err := net.DoPost[reqres.PolicyListResponse](
+		ctx, source, url.PolicyList(), r,
+	)
+	if err != nil {
+		if err.Is(sdkErrors.ErrAPINotFound) {
 			return &([]data.PolicyListItem{}), nil
 		}
-		return nil, postErr
+		return nil, err
 	}
 
 	return &res.Policies, nil
