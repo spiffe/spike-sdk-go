@@ -7,6 +7,7 @@ package net
 import (
 	"net/http"
 
+	"github.com/spiffe/spike-sdk-go/api/entity/v1/reqres"
 	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
 )
 
@@ -167,4 +168,96 @@ func SuccessWithResponseBody[T any](
 		return nil, respondErr
 	}
 	return responseBody, nil
+}
+
+// RespondFallbackWithStatus writes a fallback JSON response with the given HTTP
+// status code and error code. It sets appropriate headers to prevent caching.
+//
+// This function is used when the primary response handling fails or when a
+// generic error response needs to be sent.
+//
+// Parameters:
+//   - w: The HTTP response writer
+//   - status: The HTTP status code to return
+//   - code: The error code to include in the response body
+//
+// Returns:
+//   - *sdkErrors.SDKError: An error if marshaling or writing fails,
+//     nil on success
+func RespondFallbackWithStatus(
+	w http.ResponseWriter, status int, code sdkErrors.ErrorCode,
+) *sdkErrors.SDKError {
+	body, err := MarshalBodyAndRespondOnMarshalFail(
+		reqres.FallbackResponse{Err: code}, w,
+	)
+	if err != nil {
+		return err
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+
+	// Add cache invalidation headers
+	w.Header().Set(
+		"Cache-Control",
+		"no-store, no-cache, must-revalidate, private",
+	)
+	w.Header().Set("Pragma", "no-cache")
+	w.Header().Set("Expires", "0")
+
+	w.WriteHeader(status)
+
+	if _, err := w.Write(body); err != nil {
+		failErr := sdkErrors.ErrAPIInternal.Wrap(err)
+		return failErr
+	}
+
+	return nil
+}
+
+// RespondUnauthorizedAndWrapError sends an HTTP 401 Unauthorized response if no
+// response has been sent yet, and wraps the provided failure error with
+// ErrAccessUnauthorized.
+//
+// This function handles the common pattern of sending an unauthorized response
+// while preserving error context for logging. It checks if a response has
+// already been sent (indicated by err being non-nil) and only writes the
+// response if needed.
+//
+// Parameters:
+//   - err: An error from a previous operation (e.g., MarshalBodyAndRespondOnFail).
+//     If nil, indicates no response has been sent yet, and this function will
+//     send one.
+//   - failErr: The underlying failure error to wrap with ErrAccessUnauthorized
+//   - w: The HTTP response writer for sending the unauthorized response
+//   - responseBody: The pre-marshaled JSON response body to send
+//
+// Returns:
+//   - *sdkErrors.SDKError: ErrAccessUnauthorized wrapping failErr (and any
+//     response writing errors if they occurred)
+//
+// Example usage:
+//
+//	responseBody, marshalErr := net.MarshalBodyAndRespondOnMarshalFail(
+//	    errorResponse, w,
+//	)
+//	return net.RespondUnauthorizedAndWrapError(
+//	    marshalErr, sdkErrors.ErrSPIFFEInvalidSPIFFEID, w, responseBody,
+//	)
+func RespondUnauthorizedAndWrapError(
+	err *sdkErrors.SDKError,
+	failErr *sdkErrors.SDKError,
+	w http.ResponseWriter,
+	responseBody []byte,
+) *sdkErrors.SDKError {
+	if notRespondedYet := err == nil; notRespondedYet {
+		respondErr := Respond(http.StatusUnauthorized, responseBody, w)
+		if respondErr != nil {
+			notAuthorizedErr := sdkErrors.ErrAccessUnauthorized.Wrap(
+				failErr.Wrap(respondErr),
+			)
+			return notAuthorizedErr
+		}
+	}
+	notAuthorizedErr := sdkErrors.ErrAccessUnauthorized.Wrap(failErr)
+	return notAuthorizedErr
 }

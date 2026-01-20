@@ -6,7 +6,6 @@ package secret
 
 import (
 	"context"
-	"encoding/json"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 
@@ -41,20 +40,10 @@ func Put(
 	source *workloadapi.X509Source,
 	path string, values map[string]string,
 ) *sdkErrors.SDKError {
-	if source == nil {
-		return sdkErrors.ErrSPIFFENilX509Source.Clone()
-	}
-
 	r := reqres.SecretPutRequest{Path: path, Values: values}
 
-	mr, marshalErr := json.Marshal(r)
-	if marshalErr != nil {
-		failErr := sdkErrors.ErrDataMarshalFailure.Wrap(marshalErr)
-		failErr.Msg = "problem generating the payload"
-		return failErr
-	}
-
-	_, postErr := net.PostAndUnmarshal[reqres.SecretPutResponse](
-		ctx, source, url.SecretPut(), mr)
-	return postErr
+	_, err := net.DoPost[reqres.SecretPutResponse](
+		ctx, source, url.SecretPut(), r,
+	)
+	return err
 }

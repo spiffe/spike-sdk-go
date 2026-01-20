@@ -91,6 +91,55 @@ func PostAndUnmarshal[T ResponseWithError](
 	return &response, nil
 }
 
+// DoPost is a generic helper that marshals a request, sends it to the
+// specified endpoint via mTLS POST, and unmarshals the response.
+//
+// This function combines JSON marshaling with PostAndUnmarshal to provide
+// a complete request/response cycle with minimal boilerplate.
+//
+// Type Parameters:
+//   - T: Response type that implements ResponseWithError
+//   - R: Request type (any type that can be JSON marshaled)
+//
+// Parameters:
+//   - ctx: Context for cancellation and deadline control
+//   - source: X509Source for establishing mTLS connection to SPIKE Nexus
+//   - endpoint: The API endpoint URL to POST to
+//   - request: The request payload to marshal and send
+//
+// Returns:
+//   - *T: The unmarshaled response on success, nil on error
+//   - *sdkErrors.SDKError: nil on success, or one of the following errors:
+//   - ErrSPIFFENilX509Source: if source is nil
+//   - ErrDataMarshalFailure: if request serialization fails
+//   - Errors from PostAndUnmarshal(): if the HTTP request or response
+//     parsing fails
+//
+// Example:
+//
+//	res, err := net.DoPost[reqres.SecretGetResponse](
+//	    ctx, source, url.SecretGet(), reqres.SecretGetRequest{Path: path},
+//	)
+func DoPost[T ResponseWithError, R any](
+	ctx context.Context,
+	source *workloadapi.X509Source,
+	endpoint string,
+	request R,
+) (*T, *sdkErrors.SDKError) {
+	if source == nil {
+		return nil, sdkErrors.ErrSPIFFENilX509Source.Clone()
+	}
+
+	mr, marshalErr := json.Marshal(request)
+	if marshalErr != nil {
+		failErr := sdkErrors.ErrDataMarshalFailure.Wrap(marshalErr)
+		failErr.Msg = "problem generating the payload"
+		return nil, failErr
+	}
+
+	return PostAndUnmarshal[T](ctx, source, endpoint, mr)
+}
+
 // RequestBody reads and returns the entire request body as a byte slice.
 // It reads all data from r.Body and ensures the body is properly closed
 // after reading, even if an error occurs during the read operation.

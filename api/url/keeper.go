@@ -4,7 +4,7 @@ import (
 	"net/url"
 )
 
-// ShardFromKeperAPIRoot constructs the full URL for the keeper shard endpoint
+// ShardFromKeeperAPIRoot constructs the full URL for the keeper shard endpoint
 // by joining the SPIKE Keeper API root with the shard path.
 //
 // This function is used during recovery operations to build the endpoint URL
@@ -20,9 +20,9 @@ import (
 //
 // Example:
 //
-//	url := ShardFromKeperAPIRoot("https://keeper.example.com:8443")
+//	url := ShardFromKeeperAPIRoot("https://keeper.example.com:8443")
 //	// Returns: "https://keeper.example.com:8443/v1/shard"
-func ShardFromKeperAPIRoot(keeperAPIRoot string) string {
+func ShardFromKeeperAPIRoot(keeperAPIRoot string) string {
 	u, err := url.JoinPath(keeperAPIRoot, string(KeeperShard))
 	if err != nil {
 		return "parseError: Bad Keeper API Root"

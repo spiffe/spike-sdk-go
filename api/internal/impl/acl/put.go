@@ -6,7 +6,6 @@ package acl
 
 import (
 	"context"
-	"encoding/json"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 
@@ -67,10 +66,6 @@ func CreatePolicy(ctx context.Context, source *workloadapi.X509Source,
 	name string, SPIFFEIDPattern string, pathPattern string,
 	permissions []data.PolicyPermission,
 ) *sdkErrors.SDKError {
-	if source == nil {
-		return sdkErrors.ErrSPIFFENilX509Source.Clone()
-	}
-
 	r := reqres.PolicyPutRequest{
 		Name:            name,
 		SPIFFEIDPattern: SPIFFEIDPattern,
@@ -78,16 +73,8 @@ func CreatePolicy(ctx context.Context, source *workloadapi.X509Source,
 		Permissions:     permissions,
 	}
 
-	var mr []byte
-
-	mr, marshalErr := json.Marshal(r)
-	if marshalErr != nil {
-		failErr := sdkErrors.ErrDataMarshalFailure.Wrap(marshalErr)
-		failErr.Msg = "problem generating the payload"
-		return failErr
-	}
-
-	_, postErr := net.PostAndUnmarshal[reqres.PolicyPutResponse](
-		ctx, source, url.PolicyCreate(), mr)
-	return postErr
+	_, err := net.DoPost[reqres.PolicyPutResponse](
+		ctx, source, url.PolicyCreate(), r,
+	)
+	return err
 }

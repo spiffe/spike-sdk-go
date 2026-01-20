@@ -268,16 +268,16 @@ func TestRequestMarshaling(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			data, err := json.Marshal(tt.request)
+			dd, err := json.Marshal(tt.request)
 			if tt.wantErr {
 				assert.Error(t, err)
 			} else {
 				assert.NoError(t, err)
-				assert.NotEmpty(t, data)
+				assert.NotEmpty(t, dd)
 
 				// Verify it's valid JSON by unmarshaling back
 				var result map[string]interface{}
-				unmarshalErr := json.Unmarshal(data, &result)
+				unmarshalErr := json.Unmarshal(dd, &result)
 				assert.NoError(t, unmarshalErr)
 			}
 		})

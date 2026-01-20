@@ -6,7 +6,6 @@ package acl
 
 import (
 	"context"
-	"encoding/json"
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 
@@ -50,20 +49,10 @@ func DeletePolicy(
 	source *workloadapi.X509Source,
 	id string,
 ) *sdkErrors.SDKError {
-	if source == nil {
-		return sdkErrors.ErrSPIFFENilX509Source.Clone()
-	}
-
 	r := reqres.PolicyDeleteRequest{ID: id}
 
-	mr, marshalErr := json.Marshal(r)
-	if marshalErr != nil {
-		failErr := sdkErrors.ErrDataMarshalFailure.Wrap(marshalErr)
-		failErr.Msg = "problem generating the payload"
-		return failErr
-	}
-
-	_, postErr := net.PostAndUnmarshal[reqres.PolicyDeleteResponse](
-		ctx, source, url.PolicyDelete(), mr)
-	return postErr
+	_, err := net.DoPost[reqres.PolicyDeleteResponse](
+		ctx, source, url.PolicyDelete(), r,
+	)
+	return err
 }

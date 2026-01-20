@@ -1,3 +1,7 @@
+//    \\ SPIKE: Secure your secrets with SPIFFE. — https://spike.ist/
+//  \\\\\ Copyright 2024-present SPIKE contributors.
+// \\\\\\\ SPDX-License-Identifier: Apache-2.0
+
 package net
 
 import (
@@ -6,6 +10,16 @@ import (
 
 	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
 	"github.com/spiffe/spike-sdk-go/journal"
+)
+
+// ContentType represents HTTP Content-Type header values.
+type ContentType string
+
+// Common content type constants for HTTP requests and responses.
+var (
+	ContentTypeJSON        ContentType = "application/json"
+	ContentTypePlain       ContentType = "text/plain"
+	ContentTypeOctetStream ContentType = "application/octet-stream"
 )
 
 // Handler is a function type that processes HTTP requests with audit

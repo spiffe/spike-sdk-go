@@ -30,7 +30,7 @@ type GuardFunc[Req any] func(
 
 // ReadParseAndGuard reads the HTTP request body, parses it, and executes
 // a guard function in a single operation. This function combines
-// readAndParseRequest with guard execution to further reduce boilerplate.
+// ReadAndParseRequest with guard execution to further reduce boilerplate.
 //
 // This function performs the following steps:
 //  1. Reads the request body from the HTTP request
@@ -69,13 +69,70 @@ func ReadParseAndGuard[Req any, Res any](
 	w http.ResponseWriter, r *http.Request, errorResponse Res,
 	guard GuardFunc[Req],
 ) (*Req, *sdkErrors.SDKError) {
-	request, err := readAndParseRequest[Req, Res](w, r, errorResponse)
+	request, err := ReadAndParseRequest[Req, Res](w, r, errorResponse)
 	if err != nil {
 		return nil, err
 	}
 
 	if err = guard(*request, w, r); err != nil {
 		return nil, err
+	}
+
+	return request, nil
+}
+
+// ReadAndParseRequest reads the HTTP request body and parses it into a typed
+// request struct in a single operation. This function combines
+// ReadRequestBodyAndRespondOnFail and UnmarshalAndRespondOnFail to reduce
+// boilerplate in route handlers.
+//
+// This function performs the following steps:
+//  1. Reads the request body from the HTTP request
+//  2. Returns (nil, ErrDataReadFailure) if reading fails
+//  3. Unmarshals the body into the request type
+//  4. Returns (nil, ErrDataParseFailure) wrapping ErrDataUnmarshalFailure if
+//     unmarshaling fails
+//  5. Returns (*Req, nil) on success
+//
+// Type Parameters:
+//   - Req: The request type to unmarshal into
+//   - Res: The response type for error cases
+//
+// Parameters:
+//   - w: http.ResponseWriter - The response writer for error handling
+//   - r: *http.Request - The incoming HTTP request
+//   - errorResponse: Res - A response object to send if parsing fails
+//
+// Returns:
+//   - *Req - A pointer to the parsed request struct, or nil if parsing failed
+//   - *sdkErrors.SDKError - ErrDataReadFailure, ErrDataParseFailure, or nil
+//
+// Example usage:
+//
+//	request, err := net.ReadAndParseRequest[
+//	    reqres.SecretDeleteRequest,
+//	    reqres.SecretDeleteResponse](
+//	    w, r,
+//	    reqres.SecretDeleteResponse{Err: data.ErrBadInput},
+//	)
+//	if err != nil {
+//	    return err
+//	}
+func ReadAndParseRequest[Req any, Res any](
+	w http.ResponseWriter, r *http.Request, errorResponse Res,
+) (*Req, *sdkErrors.SDKError) {
+	requestBody, readErr := ReadRequestBodyAndRespondOnFail(w, r)
+	if readErr != nil {
+		return nil, readErr
+	}
+
+	request, unmarshalErr := UnmarshalAndRespondOnFail[Req, Res](
+		requestBody, w, errorResponse,
+	)
+	if unmarshalErr != nil {
+		failErr := sdkErrors.ErrDataParseFailure.Wrap(unmarshalErr)
+		failErr.Msg = "problem parsing request body"
+		return nil, failErr
 	}
 
 	return request, nil

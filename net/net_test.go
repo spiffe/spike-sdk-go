@@ -73,7 +73,7 @@ func TestBody_Success(t *testing.T) {
 		Body: io.NopCloser(strings.NewReader(testData)),
 	}
 
-	bodyBytes, err := body(resp)
+	bodyBytes, err := Body(resp)
 
 	assert.Nil(t, err)
 	assert.Equal(t, []byte(testData), bodyBytes)
@@ -85,7 +85,7 @@ func TestBody_EmptyResponse(t *testing.T) {
 		Body: io.NopCloser(strings.NewReader("")),
 	}
 
-	bodyBytes, err := body(resp)
+	bodyBytes, err := Body(resp)
 
 	assert.Nil(t, err)
 	assert.Equal(t, []byte{}, bodyBytes)
@@ -98,7 +98,7 @@ func TestBody_JSONResponse(t *testing.T) {
 		Body: io.NopCloser(strings.NewReader(jsonData)),
 	}
 
-	bodyBytes, err := body(resp)
+	bodyBytes, err := Body(resp)
 
 	assert.Nil(t, err)
 	assert.Equal(t, []byte(jsonData), bodyBytes)
