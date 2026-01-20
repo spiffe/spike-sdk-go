@@ -45,15 +45,45 @@ type API struct {
 //	}
 //	defer api.Close()
 func New() (*API, *sdkErrors.SDKError) {
-	defaultEndpointSocket := spiffe.EndpointSocket()
-
 	ctx, cancel := context.WithTimeout(
 		context.Background(),
 		env.SPIFFESourceTimeoutVal(),
 	)
 	defer cancel()
 
-	source, _, err := spiffe.Source(ctx, defaultEndpointSocket)
+	return NewWithContext(ctx)
+}
+
+// NewWithContext creates and returns a new instance of API configured with a
+// SPIFFE source, using the provided context for timeout and cancellation
+// control.
+//
+// Note: This function is provided for additional flexibility when programmatic
+// control over the context is required. For most use cases, prefer New() which
+// uses environment variable configuration consistent with SPIKE's design
+// philosophy.
+//
+// Parameters:
+//   - ctx: Context for cancellation and timeout control. Callers should
+//     typically use context.WithTimeout to prevent indefinite blocking.
+//
+// Returns:
+//   - *API: A configured API instance ready for use, nil on error
+//   - *sdkErrors.SDKError: nil on success, or one of the following errors:
+//   - ErrSPIFFEFailedToCreateX509Source: if X509Source creation fails
+//   - ErrSPIFFEUnableToFetchX509Source: if initial SVID fetch fails
+//
+// Example:
+//
+//	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+//	defer cancel()
+//	api, err := NewWithContext(ctx)
+//	if err != nil {
+//	    log.Fatalf("Failed to initialize SPIKE API: %v", err)
+//	}
+//	defer api.Close()
+func NewWithContext(ctx context.Context) (*API, *sdkErrors.SDKError) {
+	source, _, err := spiffe.Source(ctx, spiffe.EndpointSocket())
 	if err != nil {
 		return nil, err
 	}
