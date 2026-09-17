@@ -10,6 +10,7 @@ import (
 
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 
+	"github.com/spiffe/spike-sdk-go/api/entity/data"
 	"github.com/spiffe/spike-sdk-go/api/entity/v1/reqres"
 	"github.com/spiffe/spike-sdk-go/api/url"
 	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
@@ -127,9 +128,56 @@ func Encrypt(
 	return NewCipher().Encrypt(ctx, source, plaintext, algorithm)
 }
 
+// EncryptData encrypts data with structured parameters using the default
+// Cipher instance, and returns the ciphertext together with the version and
+// nonce required to decrypt it.
+//
+// It sends plaintext and algorithm and returns everything decryption needs.
+//
+// This is a convenience function that uses the default Cipher instance.
+// For testing or custom configuration, create a Cipher instance directly.
+//
+// Parameters:
+//   - source: X509Source for establishing mTLS connection to SPIKE Nexus
+//   - plaintext: The data to encrypt
+//   - algorithm: The encryption algorithm to use (e.g., "AES-GCM")
+//
+// Returns:
+//   - (*data.EncryptedData, nil) containing the ciphertext and the parameters
+//     needed to decrypt it if successful
+//   - (nil, *sdkErrors.SDKError) if an error occurs:
+//   - ErrSPIFFENilX509Source: if source is nil
+//   - ErrDataMarshalFailure: if request serialization fails
+//   - Errors from httpPost(): if the HTTP request fails
+//   - ErrDataUnmarshalFailure: if response parsing fails
+//   - Error from FromCode(): if the server returns an error
+//
+// Example:
+//
+//	source, err := workloadapi.NewX509Source(ctx)
+//	if err != nil {
+//	    log.Fatal(err)
+//	}
+//	defer source.Close()
+//
+//	data := []byte("secret message")
+//	encrypted, err := EncryptData(ctx, source, data, "AES-GCM")
+//	if err != nil {
+//	    log.Printf("Encryption failed: %v", err)
+//	}
+func EncryptData(
+	ctx context.Context, source *workloadapi.X509Source, plaintext []byte, algorithm string,
+) (*data.EncryptedData, *sdkErrors.SDKError) {
+	return NewCipher().EncryptData(ctx, source, plaintext, algorithm)
+}
+
 // Encrypt encrypts data with structured parameters.
 // It sends plaintext and algorithm and returns encrypted ciphertext
 // bytes.
+//
+// The ciphertext on its own cannot be decrypted later: decryption also needs
+// the version and nonce that SPIKE Nexus generated. Use EncryptData when the
+// result has to round-trip through Decrypt.
 //
 // Parameters:
 //   - source: X509Source for establishing mTLS connection to SPIKE Nexus
@@ -158,6 +206,52 @@ func Encrypt(
 func (c *Cipher) Encrypt(
 	ctx context.Context, source *workloadapi.X509Source, plaintext []byte, algorithm string,
 ) ([]byte, *sdkErrors.SDKError) {
+	encrypted, err := c.EncryptData(ctx, source, plaintext, algorithm)
+	if err != nil {
+		return nil, err
+	}
+
+	return encrypted.Ciphertext, nil
+}
+
+// EncryptData encrypts data with structured parameters and returns the
+// ciphertext together with the version and nonce required to decrypt it.
+//
+// It sends plaintext and algorithm to SPIKE Nexus. The version and the nonce
+// are chosen by SPIKE Nexus, so a caller cannot supply them, and the response
+// is the only place they are returned. That is why Encrypt, which discards
+// them, produces a value that cannot be decrypted again.
+//
+// Parameters:
+//   - source: X509Source for establishing mTLS connection to SPIKE Nexus
+//   - plaintext: The data to encrypt
+//   - algorithm: The encryption algorithm to use (e.g., "AES-GCM")
+//
+// Returns:
+//   - (*data.EncryptedData, nil) containing the ciphertext and the parameters
+//     needed to decrypt it if successful
+//   - (nil, *sdkErrors.SDKError) if an error occurs:
+//   - ErrSPIFFENilX509Source: if source is nil
+//   - ErrDataMarshalFailure: if request serialization fails
+//   - Errors from httpPost(): if the HTTP request fails (e.g., ErrAPINotFound,
+//     ErrAccessUnauthorized, ErrAPIBadRequest, ErrStateNotReady,
+//     ErrNetPeerConnection)
+//   - ErrDataUnmarshalFailure: if response parsing fails
+//   - Error from FromCode(): if the server returns an error
+//
+// Example:
+//
+//	cipher := NewCipher()
+//	data := []byte("secret message")
+//	encrypted, err := cipher.EncryptData(ctx, source, data, "AES-GCM")
+//	if err != nil {
+//	    log.Printf("Encryption failed: %v", err)
+//	}
+//	// encrypted.Version, encrypted.Nonce and encrypted.Ciphertext are all
+//	// needed to decrypt the payload later.
+func (c *Cipher) EncryptData(
+	ctx context.Context, source *workloadapi.X509Source, plaintext []byte, algorithm string,
+) (*data.EncryptedData, *sdkErrors.SDKError) {
 	payload := reqres.CipherEncryptRequest{
 		Plaintext: plaintext,
 		Algorithm: algorithm,
@@ -170,5 +264,9 @@ func (c *Cipher) Encrypt(
 		return nil, err
 	}
 
-	return res.Ciphertext, nil
+	return &data.EncryptedData{
+		Version:    res.Version,
+		Nonce:      res.Nonce,
+		Ciphertext: res.Ciphertext,
+	}, nil
 }
