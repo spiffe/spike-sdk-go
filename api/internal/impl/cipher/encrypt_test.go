@@ -81,7 +81,7 @@ func jsonCipher(
 	}
 }
 
-func TestEncryptDataReturnsVersionNonceAndCiphertext(t *testing.T) {
+func TestEncryptReturnsVersionNonceAndCiphertext(t *testing.T) {
 	body, marshalErr := json.Marshal(reqres.CipherEncryptResponse{
 		Version:    1,
 		Nonce:      testNonce,
@@ -100,14 +100,14 @@ func TestEncryptDataReturnsVersionNonceAndCiphertext(t *testing.T) {
 		return body, nil
 	})
 
-	encrypted, err := cipher.EncryptData(
+	encrypted, err := cipher.Encrypt(
 		context.Background(), &workloadapi.X509Source{}, []byte("plain"), "AES-GCM",
 	)
 	if err != nil {
-		t.Fatalf("EncryptData error: %v", err)
+		t.Fatalf("Encrypt error: %v", err)
 	}
 	if encrypted == nil {
-		t.Fatal("EncryptData returned no data")
+		t.Fatal("Encrypt returned no data")
 	}
 	if encrypted.Version != 1 {
 		t.Errorf("unexpected version: %d", encrypted.Version)
@@ -120,36 +120,9 @@ func TestEncryptDataReturnsVersionNonceAndCiphertext(t *testing.T) {
 	}
 }
 
-func TestEncryptStillReturnsOnlyCiphertext(t *testing.T) {
-	body, marshalErr := json.Marshal(reqres.CipherEncryptResponse{
-		Version:    1,
-		Nonce:      testNonce,
-		Ciphertext: []byte("a ciphertext"),
-	})
-	if marshalErr != nil {
-		t.Fatalf("marshal response: %v", marshalErr)
-	}
-
-	cipher := jsonCipher(func(
-		_ context.Context, _ *http.Client, _ string, _ []byte,
-	) ([]byte, *sdkErrors.SDKError) {
-		return body, nil
-	})
-
-	out, err := cipher.Encrypt(
-		context.Background(), &workloadapi.X509Source{}, []byte("plain"), "AES-GCM",
-	)
-	if err != nil {
-		t.Fatalf("Encrypt error: %v", err)
-	}
-	if string(out) != "a ciphertext" {
-		t.Fatalf("unexpected out: %q", string(out))
-	}
-}
-
-// The parameters EncryptData returns are the ones Decrypt needs, which is what
+// The parameters Encrypt returns are the ones Decrypt needs, which is what
 // makes a JSON-mode encrypted value possible to decrypt again.
-func TestEncryptDataRoundTripsThroughDecrypt(t *testing.T) {
+func TestEncryptRoundTripsThroughDecrypt(t *testing.T) {
 	plaintext := []byte("secret message")
 	nonce := testNonce
 	ciphertext := []byte("a ciphertext")
@@ -190,9 +163,9 @@ func TestEncryptDataRoundTripsThroughDecrypt(t *testing.T) {
 	ctx := context.Background()
 	source := &workloadapi.X509Source{}
 
-	encrypted, err := cipher.EncryptData(ctx, source, []byte("plain"), "AES-GCM")
+	encrypted, err := cipher.Encrypt(ctx, source, []byte("plain"), "AES-GCM")
 	if err != nil {
-		t.Fatalf("EncryptData error: %v", err)
+		t.Fatalf("Encrypt error: %v", err)
 	}
 
 	decrypted, err := cipher.Decrypt(

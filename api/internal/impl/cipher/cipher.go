@@ -46,7 +46,7 @@ type Cipher struct {
 // Example:
 //
 //	cipher := NewCipher()
-//	plaintext, err := cipher.Encrypt(source, data, "AES-GCM")
+//	encrypted, err := cipher.Encrypt(source, data, "AES-GCM")
 func NewCipher() *Cipher {
 	return &Cipher{
 		createMTLSHTTPClientFromSource: net.CreateMTLSClientForNexus,

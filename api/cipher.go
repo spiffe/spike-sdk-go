@@ -41,43 +41,8 @@ func (a *API) CipherEncryptStream(
 
 // CipherEncrypt encrypts data with structured parameters.
 //
-// It sends plaintext and algorithm to SPIKE Nexus and returns the
-// encrypted ciphertext bytes.
-//
-// The ciphertext on its own cannot be decrypted later: decryption also needs
-// the version and nonce that SPIKE Nexus generated, and this method discards
-// both. Use CipherEncryptData when the result has to round-trip through
-// CipherDecrypt.
-//
-// Parameters:
-//   - plaintext: The data to encrypt
-//   - algorithm: The encryption algorithm to use (e.g., "AES-GCM")
-//
-// Returns:
-//   - []byte: The encrypted ciphertext if successful, nil on error
-//   - *sdkErrors.SDKError: nil on success, or one of the following errors:
-//   - ErrSPIFFENilX509Source: if the X509 source is nil
-//   - ErrDataMarshalFailure: if request serialization fails
-//   - Errors from httpPost(): if the HTTP request fails
-//   - ErrDataUnmarshalFailure: if response parsing fails
-//   - Error from FromCode(): if the server returns an error
-//
-// Example:
-//
-//	data := []byte("secret message")
-//	encrypted, err := api.CipherEncrypt(ctx, data, "AES-GCM")
-func (a *API) CipherEncrypt(
-	ctx context.Context, plaintext []byte, algorithm string,
-) ([]byte, *sdkErrors.SDKError) {
-	return cipher.Encrypt(ctx, a.source, plaintext, algorithm)
-}
-
-// CipherEncryptData encrypts data with structured parameters and returns the
-// ciphertext together with the version and nonce required to decrypt it.
-//
-// It sends plaintext and algorithm to SPIKE Nexus. Use this instead of
-// CipherEncrypt when the result has to be decrypted later, because decryption
-// needs the version and nonce that only this method returns.
+// It sends plaintext and algorithm to SPIKE Nexus and returns the ciphertext
+// together with the version and nonce required to decrypt it later.
 //
 // Parameters:
 //   - plaintext: The data to encrypt
@@ -96,7 +61,7 @@ func (a *API) CipherEncrypt(
 // Example:
 //
 //	data := []byte("secret message")
-//	encrypted, err := api.CipherEncryptData(ctx, data, "AES-GCM")
+//	encrypted, err := api.CipherEncrypt(ctx, data, "AES-GCM")
 //	if err != nil {
 //	    log.Fatalf("Encryption failed: %v", err)
 //	}
@@ -105,10 +70,10 @@ func (a *API) CipherEncrypt(
 //	plaintext, err := api.CipherDecrypt(
 //	    ctx, encrypted.Version, encrypted.Nonce, encrypted.Ciphertext, "AES-GCM",
 //	)
-func (a *API) CipherEncryptData(
+func (a *API) CipherEncrypt(
 	ctx context.Context, plaintext []byte, algorithm string,
 ) (*data.EncryptedData, *sdkErrors.SDKError) {
-	return cipher.EncryptData(ctx, a.source, plaintext, algorithm)
+	return cipher.Encrypt(ctx, a.source, plaintext, algorithm)
 }
 
 // CipherDecryptStream decrypts data from a reader using streaming mode.
