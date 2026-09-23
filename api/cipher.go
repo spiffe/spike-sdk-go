@@ -8,6 +8,7 @@ import (
 	"context"
 	"io"
 
+	"github.com/spiffe/spike-sdk-go/api/entity/data"
 	"github.com/spiffe/spike-sdk-go/api/internal/impl/cipher"
 	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
 )
@@ -40,15 +41,16 @@ func (a *API) CipherEncryptStream(
 
 // CipherEncrypt encrypts data with structured parameters.
 //
-// It sends plaintext and algorithm to SPIKE Nexus and returns the
-// encrypted ciphertext bytes.
+// It sends plaintext and algorithm to SPIKE Nexus and returns the ciphertext
+// together with the version and nonce required to decrypt it later.
 //
 // Parameters:
 //   - plaintext: The data to encrypt
 //   - algorithm: The encryption algorithm to use (e.g., "AES-GCM")
 //
 // Returns:
-//   - []byte: The encrypted ciphertext if successful, nil on error
+//   - *data.EncryptedData: The ciphertext and the parameters needed to decrypt
+//     it if successful, nil on error
 //   - *sdkErrors.SDKError: nil on success, or one of the following errors:
 //   - ErrSPIFFENilX509Source: if the X509 source is nil
 //   - ErrDataMarshalFailure: if request serialization fails
@@ -60,9 +62,17 @@ func (a *API) CipherEncryptStream(
 //
 //	data := []byte("secret message")
 //	encrypted, err := api.CipherEncrypt(ctx, data, "AES-GCM")
+//	if err != nil {
+//	    log.Fatalf("Encryption failed: %v", err)
+//	}
+//	// Pass encrypted.Version, encrypted.Nonce and encrypted.Ciphertext to
+//	// api.CipherDecrypt to recover the plaintext.
+//	plaintext, err := api.CipherDecrypt(
+//	    ctx, encrypted.Version, encrypted.Nonce, encrypted.Ciphertext, "AES-GCM",
+//	)
 func (a *API) CipherEncrypt(
 	ctx context.Context, plaintext []byte, algorithm string,
-) ([]byte, *sdkErrors.SDKError) {
+) (*data.EncryptedData, *sdkErrors.SDKError) {
 	return cipher.Encrypt(ctx, a.source, plaintext, algorithm)
 }
 
