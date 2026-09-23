@@ -58,7 +58,18 @@ func tryCustomNexusDataDir(fName string) string {
 		return ""
 	}
 
-	if validateErr := validateDataDirectory(customDir); validateErr != nil {
+	// Resolve once, so the directory created is the one that was validated.
+	validDir, absErr := filepath.Abs(customDir)
+	if absErr != nil {
+		failErr := sdkErrors.ErrFSInvalidDirectory.Wrap(absErr)
+		failErr.Msg = fmt.Sprintf(
+			"invalid custom data directory: %s. using default", customDir,
+		)
+		log.WarnErr(fName, *failErr)
+		return ""
+	}
+
+	if validateErr := validateDataDirectory(validDir); validateErr != nil {
 		failErr := sdkErrors.ErrFSInvalidDirectory.Wrap(validateErr)
 		failErr.Msg = fmt.Sprintf(
 			"invalid custom data directory: %s. using default", customDir,
@@ -67,7 +78,7 @@ func tryCustomNexusDataDir(fName string) string {
 		return ""
 	}
 
-	dataPath := filepath.Join(customDir, spikeDataFolderName)
+	dataPath := filepath.Join(validDir, spikeDataFolderName)
 	if mkdirErr := os.MkdirAll(dataPath, 0700); mkdirErr != nil {
 		failErr := sdkErrors.ErrFSDirectoryCreationFailed.Wrap(mkdirErr)
 		failErr.Msg = fmt.Sprintf(
@@ -126,12 +137,7 @@ func tryHomeNexusDataDir(fName string) string {
 // Note: Calls log.FatalErr if directory creation fails, as this is the final
 // fallback option.
 func createTempNexusDataDir(fName string) string {
-	user := os.Getenv("USER")
-	if user == "" {
-		user = "spike"
-	}
-
-	tempDir := fmt.Sprintf("/tmp/.spike-%s", user)
+	tempDir := fmt.Sprintf("/tmp/.spike-%s", tempDirUser())
 	dataPath := filepath.Join(tempDir, spikeDataFolderName)
 
 	if mkdirErr := os.MkdirAll(dataPath, 0700); mkdirErr != nil {
@@ -189,14 +195,23 @@ func tryCustomPilotRecoveryDir(fName string) string {
 		return ""
 	}
 
-	if validateErr := validateDataDirectory(customDir); validateErr != nil {
+	// Resolve once, so the directory created is the one that was validated.
+	validDir, absErr := filepath.Abs(customDir)
+	if absErr != nil {
+		warnErr := sdkErrors.ErrFSInvalidDirectory.Wrap(absErr)
+		warnErr.Msg = "invalid custom recovery directory"
+		log.WarnErr(fName, *warnErr)
+		return ""
+	}
+
+	if validateErr := validateDataDirectory(validDir); validateErr != nil {
 		warnErr := sdkErrors.ErrFSInvalidDirectory.Wrap(validateErr)
 		warnErr.Msg = "invalid custom recovery directory"
 		log.WarnErr(fName, *warnErr)
 		return ""
 	}
 
-	recoverPath := filepath.Join(customDir, spikeRecoveryFolderName)
+	recoverPath := filepath.Join(validDir, spikeRecoveryFolderName)
 	if mkdirErr := os.MkdirAll(recoverPath, 0700); mkdirErr != nil {
 		warnErr := sdkErrors.ErrFSDirectoryCreationFailed.Wrap(mkdirErr)
 		warnErr.Msg = "failed to create custom recovery directory"
@@ -251,12 +266,7 @@ func tryHomePilotRecoveryDir(fName string) string {
 // Note: Calls log.FatalErr if directory creation fails, as this is the final
 // fallback option.
 func createTempPilotRecoveryDir(fName string) string {
-	user := os.Getenv("USER")
-	if user == "" {
-		user = "spike"
-	}
-
-	tempDir := fmt.Sprintf("/tmp/.spike-%s", user)
+	tempDir := fmt.Sprintf("/tmp/.spike-%s", tempDirUser())
 	recoverPath := filepath.Join(tempDir, spikeRecoveryFolderName)
 
 	if mkdirErr := os.MkdirAll(recoverPath, 0700); mkdirErr != nil {
@@ -266,4 +276,24 @@ func createTempPilotRecoveryDir(fName string) string {
 	}
 
 	return recoverPath
+}
+
+// tempDirUser returns the user name that isolates the /tmp fallback
+// directories, reduced to a single path element.
+//
+// USER comes from the environment, so it is not trusted: a value such as
+// "/../../etc" would otherwise move the fallback directory out of /tmp.
+// filepath.Base keeps the last element only, and values that do not name a
+// directory of their own (empty, ".", "..", or separators only) fall back to
+// "spike".
+//
+// Returns:
+//   - string: A user name that is safe to embed in a single path element.
+func tempDirUser() string {
+	user := filepath.Base(os.Getenv("USER"))
+	if user == "." || user == ".." || user == string(filepath.Separator) {
+		return "spike"
+	}
+
+	return user
 }

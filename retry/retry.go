@@ -464,7 +464,8 @@ func Forever[T any](
 	ctx context.Context, handler Handler[T], options ...RetrierOption,
 ) (T, *sdkErrors.SDKError) {
 	ro := WithBackOffOptions(WithMaxElapsedTime(forever))
-	ros := []RetrierOption{ro}
+	ros := make([]RetrierOption, 0, 1+len(options))
+	ros = append(ros, ro)
 	ros = append(ros, options...)
 
 	return NewTypedRetrier[T](
@@ -532,7 +533,8 @@ func WithMaxAttempts(
 	attempts := 0
 
 	// Prepend MaxElapsedTime(forever) so user options can override if needed
-	opts := []RetrierOption{WithBackOffOptions(WithMaxElapsedTime(forever))}
+	opts := make([]RetrierOption, 0, 1+len(options))
+	opts = append(opts, WithBackOffOptions(WithMaxElapsedTime(forever)))
 	opts = append(opts, options...)
 
 	return NewTypedRetrier[bool](

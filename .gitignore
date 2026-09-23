@@ -30,3 +30,14 @@ go.work.sum
 
 # for LLM feed.
 prompt.md
+
+# ctx managed entries
+.context/journal
+.context/journal-site
+.context/journal-obsidian
+.context/logs
+.context/.ctx.key
+.context/state/
+.context/handovers/*
+!.context/handovers/.gitkeep
+.claude/settings.local.json

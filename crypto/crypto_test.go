@@ -68,10 +68,12 @@ func TestAES256Seed_Uniqueness(t *testing.T) {
 	defer func() { reader = originalReader }()
 
 	// Use a counter to generate different values each time
-	counter := 0
+	var counter byte
 	reader = func(b []byte) (int, error) {
+		value := counter
 		for i := range b {
-			b[i] = byte(counter + i)
+			b[i] = value
+			value++
 		}
 		counter++
 		return len(b), nil
@@ -146,10 +148,10 @@ func TestRandomString_CharacterDistribution(t *testing.T) {
 	defer func() { reader = originalReader }()
 
 	// Create a reader that returns different values to cover all character ranges
-	position := 0
+	var position byte
 	reader = func(b []byte) (int, error) {
 		for i := range b {
-			b[i] = byte(position % 256)
+			b[i] = position
 			position++
 		}
 		return len(b), nil
@@ -204,10 +206,12 @@ func TestToken_Uniqueness(t *testing.T) {
 	originalReader := reader
 	defer func() { reader = originalReader }()
 
-	counter := 0
+	var counter byte
 	reader = func(b []byte) (int, error) {
+		value := counter
 		for i := range b {
-			b[i] = byte(counter + i)
+			b[i] = value
+			value++
 		}
 		counter++
 		return len(b), nil
@@ -252,10 +256,12 @@ func TestID_Uniqueness(t *testing.T) {
 	originalReader := reader
 	defer func() { reader = originalReader }()
 
-	counter := 0
+	var counter byte
 	reader = func(b []byte) (int, error) {
+		value := counter
 		for i := range b {
-			b[i] = byte(counter + i)
+			b[i] = value
+			value++
 		}
 		counter++
 		return len(b), nil
