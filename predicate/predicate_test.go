@@ -250,23 +250,23 @@ func TestPredicate_Composition(t *testing.T) {
 }
 
 // TestAllowAll_IsPredicateType tests that AllowAll is of type Predicate
-func TestAllowAll_IsPredicateType(_ *testing.T) {
-	var _ Predicate = AllowAll
+func TestAllowAll_IsPredicateType(t *testing.T) {
+	assert.IsType(t, Predicate(nil), AllowAll)
 }
 
 // TestDenyAll_IsPredicateType tests that DenyAll is of type Predicate
-func TestDenyAll_IsPredicateType(_ *testing.T) {
-	var _ Predicate = DenyAll
+func TestDenyAll_IsPredicateType(t *testing.T) {
+	assert.IsType(t, Predicate(nil), DenyAll)
 }
 
 // TestAllowNexus_IsPredicateType tests that AllowNexus is of type Predicate
-func TestAllowNexus_IsPredicateType(_ *testing.T) {
-	var _ Predicate = AllowNexus
+func TestAllowNexus_IsPredicateType(t *testing.T) {
+	assert.IsType(t, Predicate(nil), AllowNexus)
 }
 
 // TestAllowKeeper_IsPredicateType tests that AllowKeeper is of type Predicate
-func TestAllowKeeper_IsPredicateType(_ *testing.T) {
-	var _ Predicate = AllowKeeper
+func TestAllowKeeper_IsPredicateType(t *testing.T) {
+	assert.IsType(t, Predicate(nil), AllowKeeper)
 }
 
 // TestAllowKeeperPeer_MultipleTrustDomains tests AllowKeeperPeer with multiple trust domains

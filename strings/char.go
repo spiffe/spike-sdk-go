@@ -70,15 +70,29 @@ func secureRandomStringFromCharClass(
 		return "", failErr
 	}
 
-	result := make([]byte, length)
+	// Rejection sampling: only random bytes below the largest multiple of the
+	// set size that fits in a byte are used, so every character is equally
+	// likely. The set holds distinct bytes, so it never exceeds 256 entries.
+	setSize := len(chars)
+	limit := 256 - 256%setSize
+
+	result := make([]byte, 0, length)
 	randomBytes := make([]byte, length)
-	if _, randErr := rand.Read(randomBytes); randErr != nil {
-		failErr := sdkErrors.ErrCryptoRandomGenerationFailed.Wrap(randErr)
-		failErr.Msg = "cryptographic random number generator failed"
-		log.FatalErr(fName, *failErr)
-	}
-	for i := 0; i < length; i++ {
-		result[i] = chars[randomBytes[i]%byte(len(chars))]
+	for len(result) < length {
+		if _, randErr := rand.Read(randomBytes); randErr != nil {
+			failErr := sdkErrors.ErrCryptoRandomGenerationFailed.Wrap(randErr)
+			failErr.Msg = "cryptographic random number generator failed"
+			log.FatalErr(fName, *failErr)
+		}
+		for _, b := range randomBytes {
+			if int(b) >= limit {
+				continue
+			}
+			result = append(result, chars[int(b)%setSize])
+			if len(result) == length {
+				break
+			}
+		}
 	}
 
 	return string(result), nil
@@ -139,9 +153,9 @@ func expandCharacterClass(charClass string) (string, *sdkErrors.SDKError) {
 		// Symbols (printable ASCII excluding letters and digits)
 		for c := 32; c <= 126; c++ {
 			ch := byte(c)
-			if !((ch >= 'a' && ch <= 'z') ||
-				(ch >= 'A' && ch <= 'Z') ||
-				(ch >= '0' && ch <= '9')) {
+			if (ch < 'a' || ch > 'z') &&
+				(ch < 'A' || ch > 'Z') &&
+				(ch < '0' || ch > '9') {
 				charSet[ch] = true
 			}
 		}
@@ -161,9 +175,14 @@ func expandCharacterClass(charClass string) (string, *sdkErrors.SDKError) {
 					return "", failErr
 				}
 
-				// Add all characters in range
-				for c := start; c <= end; c++ {
+				// Add all characters in range. The loop stops on reaching end
+				// instead of testing c <= end, which is always true for a byte
+				// when end is 0xff and would never terminate.
+				for c := start; ; c++ {
 					charSet[c] = true
+					if c == end {
+						break
+					}
 				}
 				i += 3
 			} else {

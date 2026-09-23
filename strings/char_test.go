@@ -56,9 +56,9 @@ func TestExpandCharacterClass_PredefinedClasses(t *testing.T) {
 				m := make(map[byte]bool)
 				for c := 32; c <= 126; c++ {
 					ch := byte(c)
-					if !((ch >= 'a' && ch <= 'z') ||
-						(ch >= 'A' && ch <= 'Z') ||
-						(ch >= '0' && ch <= '9')) {
+					if (ch < 'a' || ch > 'z') &&
+						(ch < 'A' || ch > 'Z') &&
+						(ch < '0' || ch > '9') {
 						m[ch] = true
 					}
 				}
@@ -80,8 +80,8 @@ func TestExpandCharacterClass_PredefinedClasses(t *testing.T) {
 			}
 
 			// Verify no unexpected characters
-			for _, c := range result {
-				assert.True(t, tt.expectedChars[byte(c)],
+			for _, c := range []byte(result) {
+				assert.True(t, tt.expectedChars[c],
 					"Unexpected character %c (%d) in result", c, c)
 			}
 		})
@@ -308,6 +308,30 @@ func TestSecureRandomStringFromCharClass_InvalidRange(t *testing.T) {
 	assert.True(t, err.Is(sdkErrors.ErrStringInvalidRange))
 }
 
+// TestSecureRandomStringFromCharClass_FullByteRange tests a character class
+// that covers all 256 byte values. Expanding a range ending at 0xff used to
+// loop forever, and the set size, which does not fit in a byte, used to wrap
+// to zero and panic with a division by zero.
+func TestSecureRandomStringFromCharClass_FullByteRange(t *testing.T) {
+	charClass := "\x00-\xff"
+
+	expandedChars, expandErr := expandCharacterClass(charClass)
+	require.Nil(t, expandErr)
+	require.Equal(t, 256, len(expandedChars))
+
+	result, err := secureRandomStringFromCharClass(charClass, 64)
+	assert.Nil(t, err)
+	assert.Equal(t, 64, len(result))
+}
+
+// TestSecureRandomStringFromCharClass_ZeroLength tests that a zero length
+// yields an empty string without reading randomness forever.
+func TestSecureRandomStringFromCharClass_ZeroLength(t *testing.T) {
+	result, err := secureRandomStringFromCharClass("A-Z", 0)
+	assert.Nil(t, err)
+	assert.Empty(t, result)
+}
+
 // TestSecureRandomStringFromCharClass_Randomness tests that multiple calls produce different results
 func TestSecureRandomStringFromCharClass_Randomness(t *testing.T) {
 	charClass := "A-Za-z0-9"
@@ -361,12 +385,12 @@ func TestExpandCharacterClass_Consistency(t *testing.T) {
 
 	// Convert to maps for comparison (order doesn't matter)
 	map1 := make(map[byte]bool)
-	for _, c := range result1 {
-		map1[byte(c)] = true
+	for _, c := range []byte(result1) {
+		map1[c] = true
 	}
 	map2 := make(map[byte]bool)
-	for _, c := range result2 {
-		map2[byte(c)] = true
+	for _, c := range []byte(result2) {
+		map2[c] = true
 	}
 
 	assert.Equal(t, map1, map2, "Same input should produce same character set")

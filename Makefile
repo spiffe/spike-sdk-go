@@ -50,7 +50,7 @@ audit:
 	go vet ./...
 	go run honnef.co/go/tools/cmd/staticcheck@latest -checks=all,-ST1000,-U1000 ./...
 	go run golang.org/x/vuln/cmd/govulncheck@latest ./...
-	CGO_ENABLED=0 go run github.com/golangci/golangci-lint/cmd/golangci-lint@latest run
+	CGO_ENABLED=0 go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest run
 
 # Comprehensive set of checks to simulate a CI environment
 # Usage: make ci
@@ -93,3 +93,5 @@ upgradeable:
 tidy:
 	go mod tidy -v
 	go fmt ./...
+
+-include Makefile.ctx
