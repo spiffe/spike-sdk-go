@@ -7,6 +7,7 @@
 package mem
 
 import (
+	"github.com/spiffe/spike-sdk-go/config/env"
 	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
 )
 
@@ -29,6 +30,12 @@ import (
 //	    // Decide whether to continue without memory locking
 //	}
 func Lock() *sdkErrors.SDKError {
+	// Honor the operator's explicit opt-out. On Windows memory locking is not
+	// supported, so a disabled configuration should not surface a failure.
+	if env.MemLockDisabledVal() {
+		return nil
+	}
+
 	// mlock/mlockall is only available on Unix-like systems
 	return sdkErrors.ErrSystemMemLockFailed.Clone()
 }

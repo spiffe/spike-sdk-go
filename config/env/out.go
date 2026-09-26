@@ -52,6 +52,35 @@ func ShowMemoryWarningVal() bool {
 	return s == "true"
 }
 
+// MemLockDisabledVal returns whether memory locking is disabled based on the
+// SPIKE_MEM_LOCK_DISABLED environment variable.
+//
+// SPIKE components lock process memory to prevent sensitive material (keys,
+// secrets, credentials) from being swapped to disk. Locking disables swap for
+// the process, which can cause memory pressure in constrained environments.
+// Operators who understand the trade-off can opt out explicitly.
+//
+// The function reads the SPIKE_MEM_LOCK_DISABLED environment variable and
+// returns:
+//   - false if the variable is not set (default behavior - memory is locked)
+//   - true if the variable is set to "true" (case-insensitive)
+//   - false for any other value
+//
+// The environment variable value is trimmed of whitespace and converted to
+// lowercase before comparison.
+//
+// Disabling memory locking weakens protection against cold-boot and swap
+// disclosure attacks and is intended only for environments where the operator
+// has accepted that risk.
+func MemLockDisabledVal() bool {
+	s := os.Getenv(MemLockDisabled)
+	s = strings.ToLower(strings.TrimSpace(s))
+	if s == "" {
+		return false
+	}
+	return s == "true"
+}
+
 // StackTracesOnLogFatalVal returns whether to print stack traces when
 // `log.FatalLn` is called, based on the SPIKE_STACK_TRACES_ON_LOG_FATAL
 // environment variable.
