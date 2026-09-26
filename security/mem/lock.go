@@ -9,6 +9,7 @@ package mem
 import (
 	"syscall"
 
+	"github.com/spiffe/spike-sdk-go/config/env"
 	sdkErrors "github.com/spiffe/spike-sdk-go/errors"
 )
 
@@ -36,6 +37,12 @@ import (
 //	    // Decide whether to continue without memory locking
 //	}
 func Lock() *sdkErrors.SDKError {
+	// Honor the operator's explicit opt-out before attempting to lock.
+	// See SPIKE_MEM_LOCK_DISABLED / env.MemLockDisabledVal.
+	if env.MemLockDisabledVal() {
+		return nil
+	}
+
 	// Attempt to lock all current and future memory
 	if err := syscall.Mlockall(
 		syscall.MCL_CURRENT | syscall.MCL_FUTURE); err != nil {
